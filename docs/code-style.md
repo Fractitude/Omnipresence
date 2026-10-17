@@ -211,9 +211,11 @@ means the spaced style stops at casts and grouping parens.
   	<i>@( entry.Expanded ? "expand_less" : "expand_more" )</i>
   </div>
   ```
-- **A property bound with `Value:bind` needs a setter.** The generator assigns to it, so a get-only
-  property fails the build with a CS0200 that names the generated `.cs` and not the binding: `SearchText`
-  keeps both accessors even though they only forward to the view model.
+- **A field that reports edits calls a method, not a setter.** `Value:bind` needs a settable property on
+  the panel, and that setter is the one member someone will "simplify" into a build break (CS0200 names
+  the generated `.cs`, not the binding). Use one-way `Value=@( UiState.SearchText )` with the widget's
+  edit callback instead — `OnTextEdited=@SearchEdited`, a method group, since a lambda in that attribute
+  can't infer its delegate type. See `app-architecture.md`.
 - **A type the panel imports is written short.** Every panel starts with `@using Sandbox.UI`, so it's
   `ScrollBar`, not `Sandbox.UI.ScrollBar`.
 - `@code` is C#: all of the above applies inside it.
