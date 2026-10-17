@@ -31,7 +31,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 - **Always prefix a Navi app's package ident with `napp_`**, e.g. `fractitude.napp_counter`, `fractitude.napp_pacman`. This is the ident set when publishing the app's `.napp` asset, not the addon project's own ident.
 - Store apps are addons that target a game with Navi (`fractitude.omnipresence`). Their code must not use Navi types and the addon must not install the Navi library, or the published package bundles its own Navi. They talk to the computer through a copy of the `Navi` client (`Libraries/navi/Code/Navi/Client/Navi.cs`). See `Libraries/navi/README.md`.
-- Every app, built-in or Store, is a plain panel plus a `.napp` manifest, and uses the `Navi` client. Declare the permissions an app needs in its manifest. `IsSystem` asks for root (full system access): pre-packaged system apps have it, Store ones ask the player when installed. The window shield means root and nothing else.
+- Every app, built-in or Store, is a `.napp` manifest plus a panel that uses the `Navi` client, split into a `ViewModel` that holds the logic and a `UiState` the panel draws statelessly (`Libraries/navi/docs/app-architecture.md`). Declare the permissions an app needs in its manifest. `IsSystem` asks for root (full system access): pre-packaged system apps have it, Store ones ask the player when installed. The window shield means root and nothing else.
 - Publish apps under the `fractitude` org; the Store marks them as official.
 
 ## Security
