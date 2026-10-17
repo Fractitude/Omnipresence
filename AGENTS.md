@@ -21,11 +21,17 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 ## Layout
 
 - `Code/` — runtime game code (assembly `omnipresence`, root namespace `Sandbox`). `Assembly.cs` holds global usings (`Sandbox`, `System.Collections.Generic`, `System.Linq`). Razor (`.razor`) UI is supported.
-- `Addons/` — example addon projects that players would make (e.g. `navi_counter`, a Store app). Not compiled by this game; each is its own s&box project.
+- `Addons/` — Navi Store apps as addon projects (`navi_counter`, `navi_pacman`). Not compiled by this game; each is its own s&box project. See "Navi Store apps" below.
 - `Editor/` — editor-only tooling (global usings add `Editor`). Excluded from the runtime assembly. Never reference `Editor` types from `Code/`.
 - `Assets/` — scenes and other assets. `.scene` files are JSON; components are referenced by `__type` (custom components by class name, e.g. `CustomTopDownController`). Renaming a component class breaks scene references.
 - `ProjectSettings/` — `Input.config` defines input action names used by `Input.Down("Run")` etc.; `Collision.config` defines collision layers.
 - `Libraries/` — s&box library packages. `Libraries/navi/` is the Navi computer (`fractitude.navi`), a git submodule of `git@github.com:Fractitude/Navi.git` (clone with `--recurse-submodules`; commit library changes in that repo first): OS (`NaviComputer`), desktop UI (`NaviDesktop`), the app system and built-in apps. It is our own library, made to be installed in other games too; see `Libraries/navi/README.md`. Libraries can't reference game code.
+
+## Navi Store apps
+
+- **Always prefix a Navi app's package ident with `napp_`**, e.g. `fractitude.napp_counter`, `fractitude.napp_pacman`. This is the ident set when publishing the app's `.napp` asset, not the addon project's own ident.
+- Store apps are addons that target a game with Navi (`fractitude.omnipresence`). Their code must not use Navi types and the addon must not install the Navi library, or the published package bundles its own Navi. See `Libraries/navi/README.md`.
+- Publish apps under the `fractitude` org; the Store marks them as official.
 
 ## Architecture
 

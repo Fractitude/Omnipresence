@@ -1,0 +1,26 @@
+{
+  "guid": "278f4745-d84b-48c4-b492-36cf12b4bcd8",
+  "publish": {
+    "Enabled": true,
+    "ProjectConfig": {
+      "Title": "Pac-Man",
+      "Type": "napp",
+      "Org": "fractitude",
+      "Ident": "napp_pacman",
+      "Schema": 0,
+      "IncludeSourceFiles": false,
+      "Resources": null,
+      "PackageReferences": null,
+      "EditorReferences": null,
+      "Mounts": null,
+      "IsStandaloneOnly": false,
+      "AI": {
+        "EnableMcpCommunication": true
+      },
+      "Metadata": {
+        "SingleAssetSource": "pacman.napp",
+        "ParentPackage": "fractitude.omnipresence"
+      }
+    }
+  }
+}

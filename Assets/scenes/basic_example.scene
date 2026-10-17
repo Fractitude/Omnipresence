@@ -1677,7 +1677,9 @@
             "calculator",
             "pacman"
           ],
-          "InstalledPackages": [],
+          "InstalledPackages": [
+            "fractitude.napp_pacman"
+          ],
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
