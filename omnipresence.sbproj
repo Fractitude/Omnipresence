@@ -30,6 +30,14 @@
     "RecommendedMinPlayers": 1,
     "RecommendedMaxPlayers": 0,
     "Coop": false,
-    "Versus": false
+    "Versus": false,
+    "LaunchMode": "Normal",
+    "MapSettings": {
+      "UseCreateGameModal": false,
+      "NeedsMap": false,
+      "ShowChangeMap": false,
+      "DefaultMap": null,
+      "MapTarget": null
+    }
   }
 }

@@ -8,6 +8,7 @@
   "CanMaximize": false,
   "CanResize": false,
   "CapturesInput": true,
+  "Shared": true,
   "__references": [],
   "__version": 0
 }
