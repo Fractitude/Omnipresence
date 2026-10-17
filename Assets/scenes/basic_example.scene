@@ -887,7 +887,11 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "ReviewedApps": []
+          "ReviewedApps": [],
+          "RootApps": [],
+          "SystemAppFolders": [
+            "navi/system/"
+          ]
         },
         {
           "__type": "Sandbox.NaviInputCapture",
@@ -914,9 +918,9 @@
       "__version": 2,
       "Flags": 0,
       "Name": "Navi Phone",
-      "Position": "75,97.3770523,55",
+      "Position": "75,78.4293594,55",
       "Rotation": "-0,0,1,-4.37113883E-08",
-      "Scale": "1.5,1.5,1.5",
+      "Scale": "0.5,0.5,0.5",
       "Tags": "",
       "Enabled": true,
       "NetworkMode": 2,
@@ -983,7 +987,11 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "ReviewedApps": []
+          "ReviewedApps": [],
+          "RootApps": [],
+          "SystemAppFolders": [
+            "navi/system/"
+          ]
         },
         {
           "__type": "Sandbox.NaviInputCapture",
