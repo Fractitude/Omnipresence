@@ -1,7 +1,7 @@
 {
   "AppId": "pacman",
   "Title": "Pac-Man",
-  "Description": "Eat the dots, dodge the ghosts. WASD to move, hold Esc to quit.",
+  "Description": "Eat the dots, dodge the ghosts. WASD to move, press Esc 5 times to quit.",
   "Icon": "videogame_asset",
   "Color": "#f2d64a",
   "PanelType": "NaviPacMan.PacMan",
