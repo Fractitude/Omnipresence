@@ -34,7 +34,7 @@ and this page ever disagree, the formatter wins: run it, then fix this page.
   ```csharp
   (Package Package, bool Official)[] storePackages = [];
 
-  int storeTotal;
+  readonly HashSet<string> expanded = new();
 
   /// <summary>The computer's version when the lists were last fetched.</summary>
   int? knownVersion;
