@@ -180,14 +180,26 @@ means the spaced style stops at casts and grouping parens.
 - Attributes in the order we write them: `class`, then `tooltip`/data attributes, then event
   handlers last (`@onclick`, `@onmousedown`, `onsubmit`).
 - **An element is one line or fully broken.** One line while it fits and its content is a word or two
-  (`<div class="name">@entry.Title</div>`, `<div class="spacer"></div>`). Otherwise the opening tag ends
+  (`<div class="name">@entry.Title</div>`, `<div class="spacer"></div>`); otherwise the opening tag ends
   its line, every child and the closing tag sit on their own lines, and none of them trails a sibling.
-  A wrapped opening tag always leads to a broken element:
+- **An element that carries an event handler is always broken**, even when the whole thing would fit:
+  the handler is what gets added to and edited, so it never shares a line with the content it wraps.
 
   ```razor
-  <div class="tab @( UiState.ShowStore ? "" : "active" )"
-       @onclick=@( () => ViewModel.OpenApps() )>
+  <div class="tab @( UiState.ShowStore ? "" : "active" )" @onclick=@( () => ViewModel.OpenApps() )>
   	Apps
+  </div>
+  ```
+
+  A childless element has nothing to break, so a backdrop stays
+  `<div class="filter-backdrop" @onmousedown=@( () => ViewModel.CloseFilterMenu() )></div>`.
+- **A wrapped opening tag always leads to a broken element.** Attributes align under the first, and the
+  `>` ends the last attribute's line:
+
+  ```razor
+  <div class="expand" tooltip=@( entry.Expanded ? "Less" : "More" )
+       @onclick=@( () => ViewModel.ToggleDetails( entry.Ident ) )>
+  	<i>@( entry.Expanded ? "expand_less" : "expand_more" )</i>
   </div>
   ```
 - `@code` is C#: all of the above applies inside it.
