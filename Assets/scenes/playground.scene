@@ -857,8 +857,8 @@
           "Flags": 0,
           "GrantedPermissions": [],
           "InstalledApps": [
-            "calculator",
-            "pacman"
+            "navi/apps/calculator.napp",
+            "fractitude.napp_pacman"
           ],
           "InstalledPackages": [
             "fractitude.napp_pacman"
@@ -957,8 +957,8 @@
           "Flags": 0,
           "GrantedPermissions": [],
           "InstalledApps": [
-            "calculator",
-            "pacman"
+            "navi/apps/calculator.napp",
+            "fractitude.napp_pacman"
           ],
           "InstalledPackages": [
             "fractitude.napp_pacman"
