@@ -179,8 +179,17 @@ means the spaced style stops at casts and grouping parens.
 
 - Attributes in the order we write them: `class`, then `tooltip`/data attributes, then event
   handlers last (`@onclick`, `@onmousedown`, `onsubmit`).
-- One element per line. Small content stays inline with its tag
-  (`<div class="official" tooltip="Official"><i>verified</i></div>`) unless the line overflows.
+- **An element is one line or fully broken.** One line while it fits and its content is a word or two
+  (`<div class="name">@entry.Title</div>`, `<div class="spacer"></div>`). Otherwise the opening tag ends
+  its line, every child and the closing tag sit on their own lines, and none of them trails a sibling.
+  A wrapped opening tag always leads to a broken element:
+
+  ```razor
+  <div class="tab @( UiState.ShowStore ? "" : "active" )"
+       @onclick=@( () => ViewModel.OpenApps() )>
+  	Apps
+  </div>
+  ```
 - `@code` is C#: all of the above applies inside it.
 - Self-closing tags are `/>` with no space before it; `<root>` and friends get no space before `>`.
 
