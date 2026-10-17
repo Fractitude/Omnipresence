@@ -1,0 +1,3 @@
+[submodule "Libraries/navi"]
+	path = Libraries/navi
+	url = git@github.com:Fractitude/Navi.git

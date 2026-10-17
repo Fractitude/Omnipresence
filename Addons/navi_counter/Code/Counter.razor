@@ -1,0 +1,22 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace NaviCounter
+
+@* A Navi app is a plain panel. It uses no Navi types, so it works in any game that has the Navi library. *@
+@* counter.napp in Assets/ tells Navi about it. *@
+
+<root>
+	<div class="count">@Count</div>
+
+	<div class="buttons">
+		<div class="button" @onclick=@(() => Count--)>−</div>
+		<div class="button" @onclick=@(() => Count++)>+</div>
+	</div>
+</root>
+
+@code
+{
+	int Count;
+
+	protected override int BuildHash() => Count;
+}

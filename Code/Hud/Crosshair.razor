@@ -1,0 +1,29 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	<div class="dot"></div>
+</root>
+
+@code
+{
+	/// <summary>
+	/// Hide and lock the OS cursor. World panels are then hovered by the camera's
+	/// forward ray (see <see cref="WorldInput"/>), which is where this dot sits.
+	/// </summary>
+	[Property] public bool HideCursor { get; set; } = true;
+
+	protected override void OnUpdate()
+	{
+		if ( HideCursor )
+		{
+			Mouse.Visibility = MouseVisibility.Hidden;
+		}
+	}
+
+	protected override void OnDisabled()
+	{
+		Mouse.Visibility = MouseVisibility.Auto;
+	}
+}
