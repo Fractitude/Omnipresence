@@ -15,12 +15,13 @@
 	/// <summary>
 	/// Hide and lock the OS cursor. World panels are then hovered by the camera's
 	/// forward ray (see <see cref="WorldInput"/>), which is where this dot sits.
+	/// Not while a Navi app has the player's input: the cursor is free on the screen then.
 	/// </summary>
 	[Property] public bool HideCursor { get; set; } = true;
 
 	protected override void OnUpdate()
 	{
-		if ( HideCursor )
+		if ( HideCursor && NaviInputCapture.Current is null )
 		{
 			Mouse.Visibility = MouseVisibility.Hidden;
 		}
