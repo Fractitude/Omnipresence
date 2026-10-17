@@ -31,8 +31,24 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 - **Always prefix a Navi app's package ident with `napp_`**, e.g. `fractitude.napp_counter`, `fractitude.napp_pacman`. This is the ident set when publishing the app's `.napp` asset, not the addon project's own ident.
 - Store apps are addons that target a game with Navi (`fractitude.omnipresence`). Their code must not use Navi types and the addon must not install the Navi library, or the published package bundles its own Navi. They talk to the computer through a copy of the `Navi` client (`Libraries/navi/Code/Navi/Client/Navi.cs`). See `Libraries/navi/README.md`.
-- Every app, built-in or Store, is a plain panel plus a `.napp` manifest, and uses the `Navi` client. Declare the permissions an app needs in its manifest; only pre-packaged apps can be `IsSystem`.
+- Every app, built-in or Store, is a plain panel plus a `.napp` manifest, and uses the `Navi` client. Declare the permissions an app needs in its manifest. `IsSystem` asks for root (full system access): pre-packaged system apps have it, Store ones ask the player when installed. The window shield means root and nothing else.
 - Publish apps under the `fractitude` org; the Store marks them as official.
+
+## Security
+
+**Always think about privilege escalation attacks.** For every change to Navi, ask how an app could use it to get permissions or root it wasn't granted, to act as another app, or to act without the player's consent. Assume Store apps are written by a stranger who wants that.
+
+- **Consent prompts live only in the secure layer** (`NaviSecurePrompt`), like Windows' secure desktop:
+  - It is its own panel, in front of the screen, so it draws above everything and gets clicks first.
+  - While a prompt is open it covers the screen, so apps can't be clicked.
+  - Apps can't reach it through their panel's ancestors.
+  - Its controls react only to a real mouse press (`Input.Keyboard.Down( "MOUSE1" )`, which game code can't fake), made after the prompt has been up for `ArmTime`, and released on the same control.
+  - Never show a consent prompt in the desktop or in an app panel, and never add a way to answer one without real player input.
+- **App calls go through `NaviSystemCalls`**, which runs as the calling window. Check permissions there. Never trust what an app says about who it is, and don't give apps a reference to Navi objects.
+- **Store apps are untrusted.** Only pre-packaged apps are part of the OS. A Store app gets root only after the player accepts it in the secure layer.
+- **Known limit: s&box gives every package's code the same sandbox.** `TypeLibrary` exposes even private members of package (`package.*`) code, so a hostile Store app can find `NaviComputer` and change its state directly, skipping permissions and prompts.
+  - Navi's permissions stop honest-but-careless apps and UI tricks: fake clicks, overlays, pre-ticked boxes. They don't stop hostile code. Don't claim more than that in UI or docs.
+  - What helps against hostile code: the Store's official badge, published code being readable, and the root consent at install.
 
 ## Architecture
 
