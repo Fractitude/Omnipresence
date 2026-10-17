@@ -151,6 +151,15 @@ means the spaced style stops at casts and grouping parens.
 
 - **A field is state that outlives a method.** If only one method reads it, it's a local (that's how
   `storeTotal` became one); if nothing reassigns it, it's `readonly`.
+- **A lazily-made member writes `field`.** A property that makes its subject on first use doesn't need a
+  field declaration beside it:
+
+  ```csharp
+  PackagesViewModel ViewModel => field ??= new(this);
+  ```
+
+  `field` (C# 14) is the backing field, declared for you, and it works in a Razor `@code` block as well
+  as in a `.cs` file.
 - **`var` for locals, explicit types for fields.** Locals are `var` throughout; fields name their type
   (`Panel app`, `int? knownVersion`, `RealTimeSince sincePoll`), because a field's type is part of the
   class's shape and is often read far from where it's set.
@@ -202,6 +211,11 @@ means the spaced style stops at casts and grouping parens.
   	<i>@( entry.Expanded ? "expand_less" : "expand_more" )</i>
   </div>
   ```
+- **A property bound with `Value:bind` needs a setter.** The generator assigns to it, so a get-only
+  property fails the build with a CS0200 that names the generated `.cs` and not the binding: `SearchText`
+  keeps both accessors even though they only forward to the view model.
+- **A type the panel imports is written short.** Every panel starts with `@using Sandbox.UI`, so it's
+  `ScrollBar`, not `Sandbox.UI.ScrollBar`.
 - `@code` is C#: all of the above applies inside it.
 - Self-closing tags are `/>` with no space before it; `<root>` and friends get no space before `>`.
 
