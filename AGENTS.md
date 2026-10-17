@@ -23,7 +23,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `Code/` — runtime game code (assembly `omnipresence`, root namespace `Sandbox`). `Assembly.cs` holds global usings (`Sandbox`, `System.Collections.Generic`, `System.Linq`). Razor (`.razor`) UI is supported.
 - `Addons/` — Navi Store apps as addon projects (`navi_counter`, `navi_pacman`). Not compiled by this game; each is its own s&box project. See "Navi Store apps" below.
 - `Editor/` — editor-only tooling (global usings add `Editor`). Excluded from the runtime assembly. Never reference `Editor` types from `Code/`.
-- `Assets/` — scenes and other assets. `.scene` files are JSON; components are referenced by `__type` (custom components by class name, e.g. `CustomTopDownController`). Renaming a component class breaks scene references.
+- `Assets/` — scenes and other assets. `.scene` files are JSON; components are referenced by `__type` (custom components by class name, e.g. `Sandbox.NaviComputer`). Renaming a component class breaks scene references.
 - `ProjectSettings/` — `Input.config` defines input action names used by `Input.Down("Run")` etc.; `Collision.config` defines collision layers.
 - `Libraries/` — s&box library packages. `Libraries/navi/` is the Navi computer (`fractitude.navi`), a git submodule of `git@github.com:Fractitude/Navi.git` (clone with `--recurse-submodules`; commit library changes in that repo first): OS (`NaviComputer`), desktop UI (`NaviDesktop`), the app system and built-in apps. It is our own library, made to be installed in other games too; see `Libraries/navi/README.md`. Libraries can't reference game code.
 
@@ -52,7 +52,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 ## Architecture
 
-s&box uses a scene/GameObject/Component model. Gameplay is written as `Component` subclasses that override lifecycle hooks (`OnUpdate`, `OnFixedUpdate`, `OnPreRender`, …). Movement is handled by the engine's built-in `PlayerController` with `MoveMode*` components. Custom components such as `CustomTopDownController` drive it by setting `WishVelocity` / `EyeAngles` and pull it in with `[RequireComponent]`.
+s&box uses a scene/GameObject/Component model. Gameplay is written as `Component` subclasses that override lifecycle hooks (`OnUpdate`, `OnFixedUpdate`, `OnPreRender`, …). Movement is handled by the engine's built-in `PlayerController` with `MoveMode*` components. A custom component can drive it by setting `WishVelocity` / `EyeAngles` and pull it in with `[RequireComponent]`.
 
 ## Code style
 
