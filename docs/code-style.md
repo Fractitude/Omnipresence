@@ -136,6 +136,17 @@ The mixed rules are deliberate, not an oversight: `csharp_space_between_parenthe
 control_flow_statements` plus `csharp_space_between_method_call_parameter_list_parentheses = true`
 means the spaced style stops at casts and grouping parens.
 
+## Modifiers
+
+- **Class members are `private` unless stated, and we don't state it.** No `private` on fields,
+  methods or nested types — C# already makes them private and the whole codebase relies on that.
+  `public` and `internal` are written, because those aren't the default.
+- A panel's `@code` block is the same: `viewModel`, `ViewModel`, `UiState` and its helpers carry no
+  modifier.
+- `.editorconfig` sets `dotnet_style_require_accessibility_modifiers = omit_if_default` so the IDE
+  agrees with the code. If Rider still underlines a member for a missing `private`, its own
+  Code Style > C# > Modifiers setting is overriding the file — fix it there, don't add the modifier.
+
 ## Razor specifics
 
 - Attributes in the order we write them: `class`, then `tooltip`/data attributes, then event
