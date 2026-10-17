@@ -8,7 +8,7 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## What this is
 
-An s&box game project (project title "Omnipresence", package `fractitude.omnipresence`), created from the s&box player-controller template. Multiplayer game type (up to 64 players, tick rate 50). Startup scene: `Assets/scenes/basic_example.scene`. Gameplay code is still template-level.
+An s&box game project (project title "Omnipresence", package `fractitude.omnipresence`), created from the s&box player-controller template. Multiplayer game type (up to 64 players, tick rate 50). Startup scene: `Assets/scenes/playground.scene`. Gameplay code is still template-level.
 
 Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` enables MCP communication with the s&box editor (`"AI": { "EnableMcpCommunication": true }`).
 

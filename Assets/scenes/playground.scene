@@ -395,7 +395,7 @@
           ],
           "Children": [
             {
-              "__guid": "140b8ac7-c706-499d-8710-dab781e83d6b",
+              "__guid": "630d891c-0d94-4393-901c-6a78e782ba21",
               "__version": 2,
               "Flags": 0,
               "Name": "Clothing - y_front_pants_white",
@@ -412,7 +412,7 @@
               "Components": [
                 {
                   "__type": "Sandbox.SkinnedModelRenderer",
-                  "__guid": "232cc831-e856-496c-86fc-343bf9e0dfb1",
+                  "__guid": "075a24c9-b413-44f2-ad54-070a76a820a7",
                   "__enabled": true,
                   "Flags": 0,
                   "AnimationGraph": null,
@@ -541,7 +541,7 @@
       "__guid": "386a3ab3-8297-4d60-809b-5282411ef444",
       "__version": 2,
       "Flags": 0,
-      "Name": "Plane",
+      "Name": "Ground",
       "Position": "0,0,0",
       "Rotation": "0,0,0,1",
       "Scale": "4,6,1",
@@ -796,31 +796,13 @@
       ]
     },
     {
-      "__guid": "b3793723-3ad4-4680-92d1-c35848cff611",
-      "__version": 2,
-      "Flags": 0,
-      "Name": "Navi Computer",
-      "Position": "120,0,48",
-      "Rotation": "-0,0,1,-4.37113883E-08",
-      "Scale": "0.0500000007,0.0500000007,0.0500000007",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 2,
-      "NetworkFlags": 0,
-      "NetworkOrphaned": 0,
-      "NetworkTransmit": true,
-      "OwnerTransfer": 1,
-      "Components": [],
-      "Children": []
-    },
-    {
       "__guid": "0c521dc6-04b4-4c34-84eb-2f25f62c339f",
       "__version": 2,
       "Flags": 0,
       "Name": "Navi Computer",
       "Position": "75,-5.60479702E-06,55",
       "Rotation": "-0,0,1,-4.37113883E-08",
-      "Scale": "1.5,1.5,1.5",
+      "Scale": "1,1,1",
       "Tags": "",
       "Enabled": true,
       "NetworkMode": 2,
@@ -844,7 +826,7 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "PanelSize": "1280,720",
+          "PanelSize": "1920,1080",
           "RenderOptions": {
             "GameLayer": true,
             "OverlayLayer": false,

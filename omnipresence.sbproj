@@ -26,7 +26,7 @@
     "PerMapRanking": false,
     "LeaderboardType": "None",
     "CsProjName": "",
-    "StartupScene": "scenes/basic_example.scene",
+    "StartupScene": "scenes/playground.scene",
     "RecommendedMinPlayers": 1,
     "RecommendedMaxPlayers": 0,
     "Coop": false,
