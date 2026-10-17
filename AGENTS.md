@@ -54,11 +54,14 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 s&box uses a scene/GameObject/Component model. Gameplay is written as `Component` subclasses that override lifecycle hooks (`OnUpdate`, `OnFixedUpdate`, `OnPreRender`, …). Movement is handled by the engine's built-in `PlayerController` with `MoveMode*` components. Custom components such as `CustomTopDownController` drive it by setting `WishVelocity` / `EyeAngles` and pull it in with `[RequireComponent]`.
 
-## Code style (from `.editorconfig`)
+## Code style
 
-- Tabs, CRLF line endings, final newline.
-- Braces on new lines (Allman).
-- Spaces inside parentheses for calls and control flow, e.g. `Input.Down( "Run" )`, `if ( x > 0 )`. Match this in new code.
+`docs/code-style.md` is the contract: Rider's **default** code style settings over the repo's `.editorconfig`, which is what formats the files in `Code/`, `Editor/`, `Addons/` and `Libraries/navi/Code/`. Run Reformat Code (Ctrl+Alt+L) on the files you touch before committing.
+
+- Tabs, 4 wide, CRLF, final newline. Braces on new lines (Allman).
+- Spaces inside parentheses for calls and control flow, e.g. `Input.Down( "Run" )`, `if ( x > 0 )`; no spaces inside casts, grouping parens, `nameof(...)` or target-typed `new(...)`.
+- Razor inline expressions are spaced: `@( entry.Expanded ? "Less" : "More" )`.
+- 120 columns. The doc covers where a line breaks and how: Razor attributes wrap aligned under the first attribute, LINQ chains get one call per line, collection expressions open on the next line.
 
 ## Git ignores
 
