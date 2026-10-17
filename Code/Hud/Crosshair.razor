@@ -3,7 +3,11 @@
 @namespace Sandbox
 
 <root>
-	<div class="dot"></div>
+	@* Hidden while a Navi app has the player's input: the view is on the screen then, not aimed at the world. *@
+	@if ( NaviInputCapture.Current is null )
+	{
+		<div class="dot"></div>
+	}
 </root>
 
 @code
@@ -21,6 +25,8 @@
 			Mouse.Visibility = MouseVisibility.Hidden;
 		}
 	}
+
+	protected override int BuildHash() => System.HashCode.Combine( NaviInputCapture.Current );
 
 	protected override void OnDisabled()
 	{

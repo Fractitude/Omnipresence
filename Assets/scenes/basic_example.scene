@@ -395,7 +395,7 @@
           ],
           "Children": [
             {
-              "__guid": "da1f842e-75cf-46cd-acd6-90a07b857283",
+              "__guid": "a00ee810-3620-4caa-89ed-5a828ac3e51b",
               "__version": 2,
               "Flags": 0,
               "Name": "Clothing - y_front_pants_white",
@@ -412,7 +412,7 @@
               "Components": [
                 {
                   "__type": "Sandbox.SkinnedModelRenderer",
-                  "__guid": "b134ba1a-14d0-47d4-9f65-91d13b965aef",
+                  "__guid": "d5c05d48-7bcf-410b-bfb0-54bb7392b882",
                   "__enabled": true,
                   "Flags": 0,
                   "AnimationGraph": null,
@@ -956,7 +956,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/f12f200bf2fa61ef.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1136,7 +1136,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/3c1adbc6f9208da.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1316,7 +1316,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/5e5ffe5425fbdc5e.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1576,7 +1576,7 @@
                               "FlipHorizontal": false,
                               "FormatOverride": null
                             },
-                            "compiled": null
+                            "compiled": "textures/generated/svgsource/e24a8d94e8cc2e4.vtex"
                           },
                           "BroadcastMessages": []
                         }
@@ -1667,6 +1667,23 @@
           "OnComponentStart": null,
           "OnComponentUpdate": null,
           "TooltipEdgeMargin": 8
+        },
+        {
+          "__type": "Sandbox.NaviComputer",
+          "__guid": "a14e0b69-983e-4d82-9297-f3811e39d63e",
+          "__enabled": true,
+          "Flags": 0,
+          "InstalledApps": [
+            "calculator",
+            "pacman"
+          ],
+          "InstalledPackages": [],
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
         }
       ],
       "Children": []
