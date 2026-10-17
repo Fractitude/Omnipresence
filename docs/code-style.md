@@ -5,7 +5,7 @@ plus the repo's `.editorconfig` — that combination is what produced the files 
 `Addons/` and `Libraries/navi/Code/` today. Reformat Code (Ctrl+Alt+L) on the files you touched
 before committing, and don't argue about layout in review.
 
-This page records what that produces, so hand-written code arrives already formatted. If code here
+This page records what that produces, so hand-written code arrives already formatted. If the code
 and this page ever disagree, the formatter wins: run it, then fix this page.
 
 ## Indentation
@@ -147,12 +147,40 @@ means the spaced style stops at casts and grouping parens.
   agrees with the code. If Rider still underlines a member for a missing `private`, its own
   Code Style > C# > Modifiers setting is overriding the file — fix it there, don't add the modifier.
 
+## C# conventions the formatter can't check
+
+- **A field is state that outlives a method.** If only one method reads it, it's a local (that's how
+  `storeTotal` became one); if nothing reassigns it, it's `readonly`.
+- **`var` for locals, explicit types for fields.** Locals are `var` throughout; fields name their type
+  (`Panel app`, `int? knownVersion`, `RealTimeSince sincePoll`), because a field's type is part of the
+  class's shape and is often read far from where it's set.
+- **`System.*` is spelled out.** The global usings are `Sandbox`, `System.Collections.Generic` and
+  `System.Linq`; no file imports `System`, so it's `System.Exception`, `System.Math`, `System.Func`,
+  `System.StringComparer`. `System.Threading.Tasks` is the one exception, imported where something is
+  awaited. (`Client/Navi.cs` does import `System`, because Store apps copy it as a standalone file.)
+- **Fire-and-forget is `async void`, and it catches everything.** A click handler can't await, so a
+  permission-taking action is a `void` method calling an `async void Run( … )`, which turns a denial
+  into a notice and logs anything else. Anywhere a task is discarded with `_ =`, the method's own
+  `catch` is what keeps the failure visible — an unobserved task exception otherwise disappears.
+- **Helpers are named for what they build**, one per kind: `BuildStoreRows`/`BuildStoreRow` and
+  `BuildAppRows`/`BuildAppRow` rather than two overloads called `BuildRow`.
+
+## Comments and doc comments
+
+- `///` on anything whose purpose isn't obvious from its name, starting with `<summary>`; add
+  `<remarks>` when the *why* needs a paragraph — a deliberate `async void`, a rule that looks like a
+  bug, a public member that skips the client.
+- Inline `//` explains why, not what: "The filter belongs to the Apps tab: the button is gone now, and
+  a menu with no button to anchor it is a ghost." The code already says what it does.
+- No commented-out code, no restating the signature.
+- The formatter never reflows a comment, so wrap it yourself at 120.
+
 ## Razor specifics
 
 - Attributes in the order we write them: `class`, then `tooltip`/data attributes, then event
   handlers last (`@onclick`, `@onmousedown`, `onsubmit`).
-- One element per line. Small content stays inline with its tag (`<div class="official"
-  tooltip="Official"><i>verified</i></div>`) unless the line overflows.
+- One element per line. Small content stays inline with its tag
+  (`<div class="official" tooltip="Official"><i>verified</i></div>`) unless the line overflows.
 - `@code` is C#: all of the above applies inside it.
 - Self-closing tags are `/>` with no space before it; `<root>` and friends get no space before `>`.
 
@@ -177,5 +205,8 @@ Worth knowing, because these are the differences you'll see in a diff after a Re
   files makes the real change unreviewable.
 - Don't commit `.idea/` and don't add per-project style overrides there — `.editorconfig` is the
   only source of truth, because it travels with the repo.
+- **There are two `.editorconfig` files**, one at the repo root and one in `Libraries/navi` (each says
+  `root = true`, because the library is its own repo). Keep them identical: a rule added to one and
+  not the other leaves half the code with a different style.
 - If a file's only change is formatting, say so in the commit message ("Format X with the project's
   formatter") so it's skipped in review.
