@@ -1,10 +1,20 @@
+// Fits the frame when the window fits the app. A resized window stretches it, and the frame is scaled to fill it.
 PacMan
 {
-	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
 	background-color: #000;
+	font-family: Poppins;
+}
+
+// The game at its own size: 236 x 278, the AspectRatio in pacman.napp. Scaled around its center by PacMan.ScaleFrame.
+.frame
+{
+	flex-shrink: 0;
+	flex-direction: column;
 	padding: 4px;
 	gap: 4px;
-	font-family: Poppins;
 }
 
 .hud

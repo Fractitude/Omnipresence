@@ -6,7 +6,8 @@
   "PanelType": "NaviPacMan.PacMan",
   "CanMinimize": true,
   "CanMaximize": false,
-  "CanResize": false,
+  "CanResize": true,
+  "AspectRatio": "236,278",
   "Shared": true,
   "__references": [],
   "__version": 0

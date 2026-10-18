@@ -6,32 +6,38 @@
 @* While the player sits at the computer, Navi gives this window their keys when it's in front, *@
 @* and marks the panel with the "navi-input" class while it has them. It is also Shared: in multiplayer the host's *@
 @* copy runs the game with the keys of whoever uses the computer, and every client draws the frames it publishes. *@
+@* The window can be resized, and the .napp's AspectRatio has the desktop keep it the shape of the frame below. The *@
+@* frame is drawn at its own size and scaled to fill the window, centered if the window is another shape. *@
 
 <root>
-	<div class="hud">
-		<div class="score">@UiState.Score</div>
-		<div class="level">LEVEL @UiState.Level</div>
-		<div class="lives">
-			@for ( var i = 0; i < UiState.Lives - 1; i++ )
+	<div class="frame" @ref="Frame">
+		<div class="hud">
+			<div class="score">@UiState.Score</div>
+			<div class="level">LEVEL @UiState.Level</div>
+			<div class="lives">
+				@for ( var i = 0; i < UiState.Lives - 1; i++ )
+				{
+					<div class="life"></div>
+				}
+			</div>
+		</div>
+
+		<div class="stage">
+			<PacManBoard @ref="Board"></PacManBoard>
+
+			@if ( Message is { } message )
 			{
-				<div class="life"></div>
+				<div class="message">@message</div>
 			}
 		</div>
-	</div>
-
-	<div class="stage">
-		<PacManBoard @ref="Board"></PacManBoard>
-
-		@if ( Message is { } message )
-		{
-			<div class="message">@message</div>
-		}
 	</div>
 </root>
 
 @code
 {
+	Panel Frame;
 	PacManBoard Board;
+	float frameScale;
 
 	/// <summary>
 	/// The game, in the host's copy only.
@@ -65,6 +71,26 @@
 		}
 
 		Board?.Draw( UiState, smooth: viewer );
+		ScaleFrame();
+	}
+
+	/// <summary>
+	/// Scale the frame to the biggest size that fits the window. Layout boxes ignore transforms, so the frame keeps its
+	/// own size to measure, and the root centers it.
+	/// </summary>
+	void ScaleFrame()
+	{
+		if ( Frame is null || Frame.Box.Rect.Width <= 0f || Frame.Box.Rect.Height <= 0f )
+			return;
+
+		var scale = System.MathF.Min( Box.Rect.Width / Frame.Box.Rect.Width, Box.Rect.Height / Frame.Box.Rect.Height );
+		if ( !float.IsFinite( scale ) || scale <= 0f || System.MathF.Abs( scale - frameScale ) < 0.001f )
+			return;
+
+		frameScale = scale;
+		var transform = new PanelTransform();
+		transform.AddScale( scale );
+		Frame.Style.Transform = transform;
 	}
 
 	// Not the revision, which goes up every frame: the board draws those without a rebuild.
