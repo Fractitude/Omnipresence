@@ -19,7 +19,7 @@
       },
       "Metadata": {
         "SingleAssetSource": "pacman.napp",
-        "ParentPackage": "fractitude.navi"
+        "ParentPackage": "fractitude.navi_devkit"
       }
     }
   }

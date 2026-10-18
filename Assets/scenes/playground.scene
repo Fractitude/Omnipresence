@@ -318,7 +318,7 @@
           "__version": 2,
           "Flags": 0,
           "Name": "Title",
-          "Position": "192,7.91873317E-05,116.059303",
+          "Position": "192,7.91873317E-05,133.351929",
           "Rotation": "0,0,0,1",
           "Scale": "1,1,1",
           "Tags": "",
@@ -392,86 +392,6 @@
             }
           ],
           "Children": []
-        },
-        {
-          "__guid": "1710a55e-d309-44fc-ae4e-efa5c8f8e22d",
-          "__version": 2,
-          "Flags": 0,
-          "Name": "Subtitle",
-          "Position": "192,7.91873317E-05,85.2592468",
-          "Rotation": "0,0,0,1",
-          "Scale": "1,1,1",
-          "Tags": "",
-          "Enabled": true,
-          "NetworkMode": 2,
-          "NetworkFlags": 0,
-          "NetworkOrphaned": 0,
-          "NetworkTransmit": true,
-          "OwnerTransfer": 1,
-          "Components": [
-            {
-              "__type": "Sandbox.TextRenderer",
-              "__guid": "25aa13d8-2fbb-4128-94fa-e7dbbc0a1201",
-              "__enabled": true,
-              "Flags": 0,
-              "__version": 2,
-              "Billboard": "None",
-              "BlendMode": "Normal",
-              "FogStrength": 1,
-              "HorizontalAlignment": "Center",
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "RenderOptions": {
-                "GameLayer": true,
-                "OverlayLayer": false,
-                "BloomLayer": false,
-                "AfterUILayer": false
-              },
-              "Scale": 0.099378884,
-              "TextScope": {
-                "Text": "Press C to swap between first/third person\n",
-                "TextColor": "1,1,1,1",
-                "FontName": "Poppins",
-                "FontSize": 64,
-                "FontWeight": 800,
-                "FontItalic": false,
-                "FontVariantNumeric": "Normal",
-                "LineHeight": 0.7307693,
-                "LetterSpacing": 0,
-                "WordSpacing": 0,
-                "FilterMode": "Bilinear",
-                "FontSmooth": "Auto",
-                "Outline": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,1,1"
-                },
-                "Shadow": {
-                  "Enabled": true,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
-                },
-                "OutlineUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,1,0,1"
-                },
-                "ShadowUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
-                }
-              },
-              "VerticalAlignment": "Center"
-            }
-          ],
-          "Children": []
         }
       ]
     },
@@ -480,7 +400,7 @@
       "__version": 2,
       "Flags": 0,
       "Name": "Spawn point 1",
-      "Position": "-2.81548119,-2.5393219,3.87003994",
+      "Position": "-2.5,0,2",
       "Rotation": "0,0,0,1",
       "Scale": "1,1,1",
       "Tags": "",
@@ -498,7 +418,7 @@
       "__version": 2,
       "Flags": 0,
       "Name": "Spawn point 2",
-      "Position": "-29.2029152,-65.3490448,3.38124943",
+      "Position": "-100,0,2",
       "Rotation": "0,0,0,1",
       "Scale": "1,1,1",
       "Tags": "",
@@ -527,6 +447,14 @@
               "Type": "GameObject",
               "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
             },
+            "Property": "Name",
+            "Value": "Navi Desktop"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+            },
             "Property": "Position",
             "Value": "50,0,58"
           },
@@ -537,24 +465,16 @@
             },
             "Property": "Rotation",
             "Value": "0,0,1,-4.37113883E-08"
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-            },
-            "Property": "TaskbarOrder",
-            "Value": []
           }
         ],
         "MovedObjects": []
       },
       "__PrefabIdToInstanceId": {
         "eef86c41-1240-43d4-84ca-692854649d7f": "a1727c73-f221-4843-bfbc-dc7ee5a8fce4",
-        "126ea964-9559-4780-9b35-42a53d96448f": "b7efb608-6d30-49cd-9d70-8cf83202e9e5",
-        "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7": "d32ee71a-fd49-476d-b881-1596bd566d30",
         "22de298f-c53d-4c01-8706-b687e2dcc093": "081f19b6-419c-4849-9865-5e244894b252",
-        "6bbcbe3d-00e9-4609-80ab-5b2002d37b28": "bbe2df68-8f9a-48aa-8428-9dfd2021dda6"
+        "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7": "d32ee71a-fd49-476d-b881-1596bd566d30",
+        "6bbcbe3d-00e9-4609-80ab-5b2002d37b28": "bbe2df68-8f9a-48aa-8428-9dfd2021dda6",
+        "126ea964-9559-4780-9b35-42a53d96448f": "b7efb608-6d30-49cd-9d70-8cf83202e9e5"
       }
     }
   ],
