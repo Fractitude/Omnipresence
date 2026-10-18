@@ -33,6 +33,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - Store apps are addons that target a game with Navi (`fractitude.omnipresence`). Their code must not use Navi types and the addon must not install the Navi library, or the published package bundles its own Navi. They talk to the computer through a copy of the `Navi` client (`Libraries/navi/Code/Navi/Client/Navi.cs`). See `Libraries/navi/README.md`.
 - Every app, built-in or Store, is a `.napp` manifest plus a panel that uses the `Navi` client, split into a `ViewModel` that holds the logic and a `UiState` the panel draws statelessly (`Libraries/navi/docs/app-architecture.md`). Declare the permissions an app needs in its manifest. `IsSystem` asks for root (full system access): pre-packaged system apps have it, Store ones ask the player when installed. The window shield means root and nothing else.
 - Publish apps under the `fractitude` org; the Store marks them as official.
+- Publish in this order: the Navi library (open `Libraries/navi/navi.sbproj`, normal Publish), then `fractitude.omnipresence`, then the app (right-click the `.napp` in the addon's Asset Browser, **Publish**). An addon loads the Navi its target game was published with, so a stale game gives a `.napp` that can't be published with its code. Never use **Batch Publish**: it leaves the code out and the Store then can't find the app's panel. Restart the editor that runs the game after publishing. Each publish gets the next version number by itself. Details are in `Libraries/navi/README.md`.
 
 ## Security
 
