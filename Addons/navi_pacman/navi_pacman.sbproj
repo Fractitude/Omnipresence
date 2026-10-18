@@ -1,7 +1,7 @@
 {
   "Title": "Navi PacMan",
   "Type": "addon",
-  "Org": "local",
+  "Org": "fractitude",
   "Ident": "navi_pacman",
   "Schema": 1,
   "IncludeSourceFiles": false,
