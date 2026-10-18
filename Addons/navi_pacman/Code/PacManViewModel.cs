@@ -8,9 +8,10 @@ namespace NaviPacMan;
 /// <summary>
 /// The Pac-Man game. Runs a step every frame the window has the player's controls, and turns the result into
 /// <see cref="UiState"/>, which the board draws. Input comes from the Forward/Backward/Left/Right actions (WASD), read
-/// through Navi so that in multiplayer it is the input of whoever uses the computer.
+/// through Navi so that in multiplayer it is the input of whoever uses the computer. With Auto on, the autopilot (see
+/// PacManViewModel.AutoPilot.cs) steers instead.
 /// </summary>
-public sealed class PacManViewModel
+public sealed partial class PacManViewModel
 {
 	// # wall, . dot, o power pellet, - ghost door, P Pac-Man start, G ghost start (first outside the house, the rest inside).
 	public static readonly string[] Layout =
@@ -69,7 +70,36 @@ public sealed class PacManViewModel
 		public GhostMode Mode;
 		public float ReleaseTimer;
 		public bool Frightened;
+
+		public void CopyFrom( Ghost other )
+		{
+			Name = other.Name;
+			Corner = other.Corner;
+			Home = other.Home;
+			Mode = other.Mode;
+			ReleaseTimer = other.ReleaseTimer;
+			Frightened = other.Frightened;
+			Tile = other.Tile;
+			Dir = other.Dir;
+			Progress = other.Progress;
+		}
 	}
+
+	/// <summary>
+	/// The clocks that decide how the ghosts behave: scatter/chase, and how long the power pellet lasts.
+	/// </summary>
+	struct Timers
+	{
+		public float Mode; // seconds into the current scatter or chase
+		public int Index; // which entry of ModeTimes
+		public float Fright; // seconds of frightened ghosts left
+	}
+
+	/// <summary>
+	/// What the ghosts' targets depend on, besides the ghost itself. Both the game and the autopilot's look-ahead move
+	/// ghosts with the same code, so the autopilot knows the ghosts' rules exactly.
+	/// </summary>
+	readonly record struct GhostContext( Vector2Int PacTile, Vector2Int PacFacing, Vector2Int BlinkyTile, bool Chasing );
 
 	/// <summary>
 	/// The app's panel: input is read through it.
@@ -94,9 +124,7 @@ public sealed class PacManViewModel
 	bool restartPressed;
 
 	float stateTimer;
-	float modeTimer;
-	int modeIndex;
-	float frightTimer;
+	Timers timers;
 	int ghostsEatenThisFright;
 	float clock;
 
@@ -112,6 +140,15 @@ public sealed class PacManViewModel
 	/// What the board draws. Replaced whole on every frame the game runs.
 	/// </summary>
 	public PacManUiState UiState { get; private set; } = new();
+
+	/// <summary>
+	/// What the player did in the app, such as press the Auto button. Arguments are text and not to be trusted.
+	/// </summary>
+	public void Act( string action, string[] args )
+	{
+		if ( action == AutoAction )
+			ToggleAuto();
+	}
 
 	/// <summary>
 	/// Called every frame by the panel. <paramref name="running"/> is false while the window doesn't have the player's
@@ -144,15 +181,24 @@ public sealed class PacManViewModel
 				break;
 
 			case PacManGameState.Playing:
+				if ( auto ) Steer( dt );
 				Step( dt );
 				break;
 
 			case PacManGameState.Dying:
 				if ( (stateTimer -= dt) <= 0 )
 				{
-					if ( --lives <= 0 ) state = PacManGameState.GameOver;
-					else ResetActors();
+					if ( --lives <= 0 )
+					{
+						state = PacManGameState.GameOver;
+						stateTimer = AutoRestartTime;
+					}
+					else
+					{
+						ResetActors();
+					}
 				}
+
 				break;
 
 			case PacManGameState.LevelClear:
@@ -162,10 +208,12 @@ public sealed class PacManViewModel
 					ResetDots();
 					ResetActors();
 				}
+
 				break;
 
 			case PacManGameState.GameOver:
-				if ( restartPressed )
+				// The autopilot plays again by itself.
+				if ( restartPressed || (auto && (stateTimer -= dt) <= 0) )
 					NewGame();
 				break;
 		}
@@ -255,20 +303,23 @@ public sealed class PacManViewModel
 			g.ReleaseTimer = i * 3f;
 		}
 
-		modeTimer = 0;
-		modeIndex = 0;
-		frightTimer = 0;
+		timers = default;
 		state = PacManGameState.Ready;
 		stateTimer = 2f;
+		ResetPilot();
 		Publish();
 	}
 
 	void ReadInput()
 	{
-		if ( Navi.InputDown( app, "Forward" ) ) wanted = Up;
-		else if ( Navi.InputDown( app, "Backward" ) ) wanted = Down;
-		else if ( Navi.InputDown( app, "Left" ) ) wanted = Left;
-		else if ( Navi.InputDown( app, "Right" ) ) wanted = Right;
+		// The autopilot has the wheel: the keys do nothing but start the next game.
+		if ( !auto )
+		{
+			if ( Navi.InputDown( app, "Forward" ) ) wanted = Up;
+			else if ( Navi.InputDown( app, "Backward" ) ) wanted = Down;
+			else if ( Navi.InputDown( app, "Left" ) ) wanted = Left;
+			else if ( Navi.InputDown( app, "Right" ) ) wanted = Right;
+		}
 
 		// A fresh press, so a key still held from the last game doesn't restart straight away.
 		restartPressed = new[] { "Jump", "Forward", "Backward", "Left", "Right" }.Any( x => Navi.InputPressed( app, x ) );
@@ -276,11 +327,11 @@ public sealed class PacManViewModel
 
 	void Step( float dt )
 	{
-		UpdateGhostMode( dt );
+		StepTimers( ref timers, ghosts, dt );
 		MovePac( dt );
 
 		foreach ( var g in ghosts )
-			MoveGhost( g, dt );
+			AdvanceGhost( g, dt, Context() );
 
 		CheckCollisions();
 
@@ -343,14 +394,8 @@ public sealed class PacManViewModel
 		if ( pellets[tile.x, tile.y] )
 		{
 			score += 50;
-			frightTimer = FrightTime;
 			ghostsEatenThisFright = 0;
-
-			foreach ( var g in ghosts.Where( g => g.Mode == GhostMode.Active ) )
-			{
-				g.Frightened = true;
-				Reverse( g );
-			}
+			PowerUp( ref timers, ghosts );
 		}
 		else
 		{
@@ -358,33 +403,51 @@ public sealed class PacManViewModel
 		}
 	}
 
-	void UpdateGhostMode( float dt )
+	/// <summary>
+	/// A power pellet is eaten: the ghosts outside the house turn frightened and about face.
+	/// </summary>
+	void PowerUp( ref Timers t, IReadOnlyList<Ghost> all )
 	{
-		if ( frightTimer > 0 )
-		{
-			frightTimer -= dt;
+		t.Fright = FrightTime;
 
-			if ( frightTimer <= 0 )
-				foreach ( var g in ghosts ) g.Frightened = false;
+		foreach ( var g in all )
+		{
+			if ( g.Mode != GhostMode.Active ) continue;
+			g.Frightened = true;
+			Reverse( g );
+		}
+	}
+
+	/// <summary>
+	/// Run the clocks: frightened ghosts calm down, and scatter turns to chase and back, with every ghost about facing.
+	/// </summary>
+	static void StepTimers( ref Timers t, IReadOnlyList<Ghost> all, float dt )
+	{
+		if ( t.Fright > 0 )
+		{
+			t.Fright -= dt;
+
+			if ( t.Fright <= 0 )
+				foreach ( var g in all ) g.Frightened = false;
 
 			return; // the scatter/chase clock pauses while ghosts are frightened
 		}
 
-		if ( modeIndex >= ModeTimes.Length )
+		if ( t.Index >= ModeTimes.Length )
 			return;
 
-		modeTimer += dt;
-		if ( modeTimer < ModeTimes[modeIndex] )
+		t.Mode += dt;
+		if ( t.Mode < ModeTimes[t.Index] )
 			return;
 
-		modeTimer = 0;
-		modeIndex++;
+		t.Mode = 0;
+		t.Index++;
 
-		foreach ( var g in ghosts.Where( g => g.Mode == GhostMode.Active ) )
-			Reverse( g );
+		foreach ( var g in all )
+			if ( g.Mode == GhostMode.Active ) Reverse( g );
 	}
 
-	bool Chasing => modeIndex % 2 == 1 || modeIndex >= ModeTimes.Length;
+	static bool IsChasing( Timers t ) => t.Index % 2 == 1 || t.Index >= ModeTimes.Length;
 
 	static void Reverse( Actor a )
 	{
@@ -394,7 +457,12 @@ public sealed class PacManViewModel
 		a.Progress = 1 - a.Progress;
 	}
 
-	void MoveGhost( Ghost g, float dt )
+	/// <summary>
+	/// What the ghosts aim for, with Pac-Man where he is now.
+	/// </summary>
+	GhostContext Context() => new( pac.Tile, pac.Dir == Vector2Int.Zero ? wanted : pac.Dir, ghosts[0].Tile, IsChasing( timers ) );
+
+	void AdvanceGhost( Ghost g, float dt, in GhostContext context )
 	{
 		if ( g.Mode == GhostMode.InHouse )
 		{
@@ -411,7 +479,7 @@ public sealed class PacManViewModel
 		};
 
 		if ( g.Dir == Vector2Int.Zero )
-			g.Dir = ChooseDirection( g );
+			g.Dir = ChooseDirection( g, context );
 
 		g.Progress += speed * dt;
 
@@ -431,52 +499,72 @@ public sealed class PacManViewModel
 				g.Frightened = false;
 			}
 
-			g.Dir = ChooseDirection( g );
+			g.Dir = ChooseDirection( g, context );
 		}
 	}
 
-	Vector2Int ChooseDirection( Ghost g )
+	Vector2Int ChooseDirection( Ghost g, in GhostContext context )
 	{
 		var throughDoor = g.Mode is GhostMode.Leaving or GhostMode.Eaten;
-		var options = Directions
-			.Where( d => IsOpen( g.Tile + d, throughDoor ) )
-			.ToList();
+		var random = g.Mode == GhostMode.Active && g.Frightened;
+		var target = random ? default : Target( g, context );
 
 		// Ghosts never turn back, unless it's the only way.
-		var forward = options.Where( d => d != -g.Dir ).ToList();
-		if ( forward.Count > 0 ) options = forward;
-		if ( options.Count == 0 ) return Vector2Int.Zero;
+		for ( var allowBack = false; ; allowBack = true )
+		{
+			var count = 0;
+			var best = Vector2Int.Zero;
+			var bestDistance = float.MaxValue;
 
-		if ( g.Mode == GhostMode.Active && g.Frightened )
-			return options[Game.Random.Int( 0, options.Count - 1 )];
+			foreach ( var d in Directions )
+			{
+				if ( (!allowBack && d == -g.Dir) || !IsOpen( g.Tile + d, throughDoor ) )
+					continue;
 
-		var target = Target( g );
-		return options.OrderBy( d => DistanceSquared( Wrap( g.Tile + d ), target ) ).First();
+				count++;
+
+				if ( random )
+				{
+					// A fair pick among the open ways.
+					if ( Game.Random.Int( 1, count ) == 1 ) best = d;
+					continue;
+				}
+
+				// The way that ends nearest the target; the first of them in the arcade's order.
+				var distance = DistanceSquared( Wrap( g.Tile + d ), target );
+
+				if ( distance < bestDistance )
+				{
+					bestDistance = distance;
+					best = d;
+				}
+			}
+
+			if ( count > 0 || allowBack )
+				return best;
+		}
 	}
 
-	Vector2Int Target( Ghost g )
+	Vector2Int Target( Ghost g, in GhostContext context )
 	{
 		if ( g.Mode == GhostMode.Leaving ) return doorAbove;
 		if ( g.Mode == GhostMode.Eaten ) return g.Home;
-		if ( !Chasing ) return g.Corner;
-
-		var facing = pac.Dir == Vector2Int.Zero ? wanted : pac.Dir;
+		if ( !context.Chasing ) return g.Corner;
 
 		switch ( g.Name )
 		{
 			case "pinky":
-				return pac.Tile + facing * 4;
+				return context.PacTile + context.PacFacing * 4;
 
 			case "inky":
-				var blinky = ghosts[0].Tile;
-				var ahead = pac.Tile + facing * 2;
-				return ahead + (ahead - blinky);
+				var ahead = context.PacTile + context.PacFacing * 2;
+				return ahead + (ahead - context.BlinkyTile);
 
 			case "clyde":
-				return DistanceSquared( g.Tile, pac.Tile ) > 64 ? pac.Tile : g.Corner;
+				return DistanceSquared( g.Tile, context.PacTile ) > 64 ? context.PacTile : g.Corner;
 
 			default:
-				return pac.Tile;
+				return context.PacTile;
 		}
 	}
 
@@ -513,7 +601,7 @@ public sealed class PacManViewModel
 	{
 		var facing = pac.Dir == Vector2Int.Zero ? wanted : pac.Dir;
 		var facingName = facing == Up ? "up" : facing == Down ? "down" : facing == Right ? "right" : "left";
-		var blinking = frightTimer > 0 && frightTimer < 2f && (int)(clock * 6) % 2 == 0;
+		var blinking = timers.Fright > 0 && timers.Fright < 2f && (int)(clock * 6) % 2 == 0;
 		var hidden = state is PacManGameState.Dying or PacManGameState.LevelClear;
 
 		var cells = new char[Width * Height];
@@ -531,6 +619,7 @@ public sealed class PacManViewModel
 			Lives = lives,
 			Level = level,
 			Paused = paused,
+			Auto = auto,
 			Dots = new string( cells ),
 			Flash = state == PacManGameState.LevelClear && (int)(stateTimer * 4) % 2 == 0,
 			PelletsOn = (int)(clock * 3) % 2 == 0,

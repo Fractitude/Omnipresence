@@ -48,6 +48,30 @@ PacMan
 		gap: 3px;
 	}
 
+	// The autopilot's switch, at the right end of the row. Lit while it steers.
+	.auto
+	{
+		margin-left: 6px;
+		padding: 1px 4px;
+		border: 1px solid #f2d64a;
+		border-radius: 3px;
+		color: #f2d64a;
+		font-size: 8px;
+		cursor: pointer;
+		pointer-events: all;
+
+		&:hover
+		{
+			background-color: rgba( 242, 214, 74, 0.25 );
+		}
+
+		&.on
+		{
+			background-color: #f2d64a;
+			color: #000;
+		}
+	}
+
 	.life
 	{
 		width: 9px;

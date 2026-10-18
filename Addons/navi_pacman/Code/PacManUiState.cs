@@ -34,6 +34,9 @@ public sealed record PacManUiState
 	/// <summary>The game waits, because the window doesn't have the player's controls.</summary>
 	public bool Paused { get; init; } = true;
 
+	/// <summary>The autopilot is steering.</summary>
+	public bool Auto { get; init; }
+
 	/// <summary>
 	/// What is left to eat, row by row (<see cref="PacManViewModel.Width"/> per row): '.' a dot, 'o' a power pellet,
 	/// anything else nothing. Null before the game starts.

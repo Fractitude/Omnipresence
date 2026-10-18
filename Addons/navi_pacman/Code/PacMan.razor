@@ -20,6 +20,8 @@
 					<div class="life"></div>
 				}
 			</div>
+			<div class="auto @( UiState.Auto ? "on" : "" )"
+			     @onclick=@(() => Navi.Act( this, PacManViewModel.AutoAction ))>AUTO</div>
 		</div>
 
 		<div class="stage">
@@ -93,6 +95,21 @@
 		Frame.Style.Transform = transform;
 	}
 
+	protected override void OnEvent( PanelEvent e )
+	{
+		// The Auto button, from whoever uses the computer: only the host's copy has a game to hand to the autopilot.
+		if ( Navi.IsAction( e, out var action, out var args ) )
+		{
+			if ( !Navi.IsViewer( this ) )
+				ViewModel.Act( action, args );
+
+			e.StopPropagation();
+			return;
+		}
+
+		base.OnEvent( e );
+	}
+
 	// Not the revision, which goes up every frame: the board draws those without a rebuild.
-	protected override int BuildHash() => System.HashCode.Combine( UiState.Score, UiState.Lives, UiState.Level, Message );
+	protected override int BuildHash() => System.HashCode.Combine( UiState.Score, UiState.Lives, UiState.Level, Message, UiState.Auto );
 }
