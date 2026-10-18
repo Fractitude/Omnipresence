@@ -21,7 +21,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 ## Layout
 
 - `Code/` — runtime game code (assembly `omnipresence`, root namespace `Sandbox`). `Assembly.cs` holds global usings (`Sandbox`, `System.Collections.Generic`, `System.Linq`). Razor (`.razor`) UI is supported.
-- `Addons/` — Navi Store apps as addon projects (`navi_counter`, `navi_pacman`). Not compiled by this game; each is its own s&box project. See "Navi Store apps" below.
+- `Addons/` — Navi Store apps as addon projects (`navi_pacman`). Not compiled by this game; each is its own s&box project. See "Navi Store apps" below.
 - `Editor/` — editor-only tooling (global usings add `Editor`). Excluded from the runtime assembly. Never reference `Editor` types from `Code/`.
 - `Assets/` — scenes and other assets. `.scene` files are JSON; components are referenced by `__type` (custom components by class name, e.g. `Sandbox.NaviComputer`). Renaming a component class breaks scene references.
 - `ProjectSettings/` — `Input.config` defines input action names used by `Input.Down("Run")` etc.; `Collision.config` defines collision layers.
@@ -29,7 +29,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 ## Navi Store apps
 
-- **Always prefix a Navi app's package ident with `napp_`**, e.g. `fractitude.napp_counter`, `fractitude.napp_pacman`. This is the ident set when publishing the app's `.napp` asset, not the addon project's own ident.
+- **Always prefix a Navi app's package ident with `napp_`**, e.g. `fractitude.napp_pacman`. This is the ident set when publishing the app's `.napp` asset, not the addon project's own ident.
 - Store apps are addons that target a game with Navi (`fractitude.omnipresence`). Their code must not use Navi types and the addon must not install the Navi library, or the published package bundles its own Navi. They talk to the computer through a copy of the `Navi` client (`Libraries/navi/Code/Navi/Client/Navi.cs`). See `Libraries/navi/README.md`.
 - Every app, built-in or Store, is a `.napp` manifest plus a panel that uses the `Navi` client, split into a `ViewModel` that holds the logic and a `UiState` the panel draws statelessly (`Libraries/navi/docs/app-architecture.md`). Declare the permissions an app needs in its manifest. `IsSystem` asks for root (full system access): pre-packaged system apps have it, Store ones ask the player when installed. The window shield means root and nothing else.
 - Publish apps under the `fractitude` org; the Store marks them as official.

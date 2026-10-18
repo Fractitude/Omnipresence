@@ -488,7 +488,7 @@
       "NetworkMode": 1,
       "NetworkFlags": 0,
       "NetworkOrphaned": 0,
-      "NetworkTransmit": true,
+      "NetworkTransmit": false,
       "OwnerTransfer": 1,
       "Components": [
         {
@@ -545,12 +545,14 @@
           "InstalledPackages": [
             "fractitude.napp_pacman"
           ],
+          "NetworkRange": 1500,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
+          "OutOfRangeColor": "0,0,0,1",
           "ReviewedApps": [],
           "RootApps": [],
           "SaveId": "",
@@ -573,9 +575,7 @@
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "QuitPresses": 5,
-          "QuitWindow": 1
+          "OnComponentUpdate": null
         }
       ],
       "Children": []
@@ -650,12 +650,14 @@
           "InstalledPackages": [
             "fractitude.napp_pacman"
           ],
+          "NetworkRange": 1500,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
+          "OutOfRangeColor": "0,0,0,1",
           "ReviewedApps": [],
           "RootApps": [],
           "SaveId": "",
@@ -678,9 +680,7 @@
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "QuitPresses": 5,
-          "QuitWindow": 1
+          "OnComponentUpdate": null
         }
       ],
       "Children": []
