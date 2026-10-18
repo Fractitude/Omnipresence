@@ -102,9 +102,9 @@ public sealed partial class PacManViewModel
 	readonly record struct GhostContext( Vector2Int PacTile, Vector2Int PacFacing, Vector2Int BlinkyTile, bool Chasing );
 
 	/// <summary>
-	/// The app's panel: input is read through it.
+	/// The computer, as this app: input is read through it.
 	/// </summary>
-	readonly Panel app;
+	readonly Navi navi;
 
 	readonly bool[,] dots = new bool[Width, Height];
 	readonly bool[,] pellets = new bool[Width, Height];
@@ -128,9 +128,9 @@ public sealed partial class PacManViewModel
 	int ghostsEatenThisFright;
 	float clock;
 
-	public PacManViewModel( Panel app )
+	public PacManViewModel( Navi navi )
 	{
-		this.app = app ?? throw new System.ArgumentNullException( nameof(app) );
+		this.navi = navi ?? throw new System.ArgumentNullException( nameof(navi) );
 
 		FindStarts();
 		NewGame();
@@ -315,14 +315,14 @@ public sealed partial class PacManViewModel
 		// The autopilot has the wheel: the keys do nothing but start the next game.
 		if ( !auto )
 		{
-			if ( Navi.InputDown( app, "Forward" ) ) wanted = Up;
-			else if ( Navi.InputDown( app, "Backward" ) ) wanted = Down;
-			else if ( Navi.InputDown( app, "Left" ) ) wanted = Left;
-			else if ( Navi.InputDown( app, "Right" ) ) wanted = Right;
+			if ( navi.Input.Down( "Forward" ) ) wanted = Up;
+			else if ( navi.Input.Down( "Backward" ) ) wanted = Down;
+			else if ( navi.Input.Down( "Left" ) ) wanted = Left;
+			else if ( navi.Input.Down( "Right" ) ) wanted = Right;
 		}
 
 		// A fresh press, so a key still held from the last game doesn't restart straight away.
-		restartPressed = new[] { "Jump", "Forward", "Backward", "Left", "Right" }.Any( x => Navi.InputPressed( app, x ) );
+		restartPressed = new[] { "Jump", "Forward", "Backward", "Left", "Right" }.Any( x => navi.Input.Pressed( x ) );
 	}
 
 	void Step( float dt )

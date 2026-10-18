@@ -1,5 +1,5 @@
 @using Sandbox.UI
-@inherits Panel
+@inherits NaviApp
 @namespace NaviPacMan
 
 @* A Navi Store app: a plain panel that uses no Navi types, described by pacman.napp in Assets/. *@
@@ -21,7 +21,7 @@
 				}
 			</div>
 			<div class="auto @( UiState.Auto ? "on" : "" )"
-			     @onclick=@(() => Navi.Act( this, PacManViewModel.AutoAction ))>AUTO</div>
+			     @onclick=@(() => Navi.Act( PacManViewModel.AutoAction ))>AUTO</div>
 		</div>
 
 		<div class="stage">
@@ -44,12 +44,12 @@
 	/// <summary>
 	/// The game, in the host's copy only.
 	/// </summary>
-	PacManViewModel ViewModel => field ??= new(this);
+	PacManViewModel ViewModel => field ??= new(Navi);
 
 	/// <summary>
 	/// What is drawn: the game's latest frame, or on a viewer the latest one the host's copy published.
 	/// </summary>
-	PacManUiState UiState => Navi.IsViewer( this ) ? Navi.GetState<PacManUiState>( this ) ?? PacManUiState.Empty : ViewModel.UiState;
+	PacManUiState UiState => Navi.IsViewer ? Navi.GetState<PacManUiState>() ?? PacManUiState.Empty : ViewModel.UiState;
 
 	string Message => UiState switch
 	{
@@ -63,13 +63,13 @@
 	{
 		base.Tick();
 
-		var viewer = Navi.IsViewer( this );
+		var viewer = Navi.IsViewer;
 
 		// The game runs only while this window has the player's input.
 		if ( !viewer )
 		{
-			ViewModel.Tick( Navi.HasInput( this ) && IsVisible );
-			Navi.Publish( this, ViewModel.UiState );
+			ViewModel.Tick( Navi.HasInput && IsVisible );
+			Navi.Publish( ViewModel.UiState );
 		}
 
 		Board?.Draw( UiState, smooth: viewer );
@@ -95,19 +95,11 @@
 		Frame.Style.Transform = transform;
 	}
 
-	protected override void OnEvent( PanelEvent e )
+	// The Auto button, from whoever uses the computer: only the host's copy has a game to hand to the autopilot.
+	protected override void OnAction( string action, string[] args )
 	{
-		// The Auto button, from whoever uses the computer: only the host's copy has a game to hand to the autopilot.
-		if ( Navi.IsAction( e, out var action, out var args ) )
-		{
-			if ( !Navi.IsViewer( this ) )
-				ViewModel.Act( action, args );
-
-			e.StopPropagation();
-			return;
-		}
-
-		base.OnEvent( e );
+		if ( !Navi.IsViewer )
+			ViewModel.Act( action, args );
 	}
 
 	// Not the revision, which goes up every frame: the board draws those without a rebuild.
