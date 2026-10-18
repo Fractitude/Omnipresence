@@ -356,9 +356,7 @@
           "ColorScheme": "Dark",
           "DisplayScale": 0.75,
           "GrantedPermissions": [],
-          "InstalledApps": [
-            "navi/apps/calculator.napp"
-          ],
+          "InstalledApps": [],
           "InstalledPackages": [],
           "NetworkRange": 1500,
           "OnComponentDestroy": null,
@@ -376,10 +374,7 @@
           "SnapToScreenEdges": true,
           "SnapToWindows": true,
           "SolidObject": true,
-          "StartFavorites": [
-            "navi/apps/packages.napp",
-            "navi/apps/settings.napp"
-          ],
+          "StartFavorites": [],
           "SystemAppFolders": [
             "navi/system/"
           ],
@@ -387,49 +382,6 @@
           "Theme": "Glass",
           "TransparencyLevel": 2,
           "Wallpaper": "Glass"
-        },
-        {
-          "__type": "Sandbox.NaviComputer",
-          "__guid": "fda99973-9c98-4a39-8095-c37662225bc9",
-          "__enabled": true,
-          "Flags": 0,
-          "AutoSave": true,
-          "BlurLevel": 2,
-          "ColorScheme": "Light",
-          "DisplayScale": 1,
-          "GrantedPermissions": [],
-          "InstalledApps": [
-            "pacman.napp",
-            "assets/navi/apps/packages.napp"
-          ],
-          "InstalledPackages": [],
-          "NetworkRange": 1500,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "OutOfRangeColor": "0,0,0,1",
-          "ReviewedApps": [],
-          "RootApps": [],
-          "SaveId": "",
-          "SeatTimeout": 5,
-          "SnapDistance": 12,
-          "SnapToScreenEdges": true,
-          "SnapToWindows": true,
-          "SolidObject": false,
-          "StartFavorites": [
-            "navi/apps/packages.napp",
-            "navi/apps/settings.napp"
-          ],
-          "SystemAppFolders": [
-            "navi/system/"
-          ],
-          "TaskbarOrder": [],
-          "Theme": "Paper",
-          "TransparencyLevel": 2,
-          "Wallpaper": "Paper"
         },
         {
           "__type": "Sandbox.NaviInputCapture",
@@ -487,8 +439,6 @@
   "ResourceVersion": 3,
   "Title": null,
   "Description": null,
-  "__references": [
-    "fractitude.navi#426377"
-  ],
+  "__references": [],
   "__version": 3
 }
