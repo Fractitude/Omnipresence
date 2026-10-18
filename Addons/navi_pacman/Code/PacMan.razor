@@ -65,10 +65,10 @@
 
 		var viewer = Navi.IsViewer;
 
-		// The game runs only while this window has the player's input.
+		// The game runs only while this window has the player's input, unless the autopilot plays: it needs no input.
 		if ( !viewer )
 		{
-			ViewModel.Tick( Navi.HasInput && IsVisible );
+			ViewModel.Tick( (Navi.HasInput || ViewModel.UiState.Auto) && IsVisible );
 			Navi.Publish( ViewModel.UiState );
 		}
 

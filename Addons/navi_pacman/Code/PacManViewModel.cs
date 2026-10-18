@@ -151,8 +151,8 @@ public sealed partial class PacManViewModel
 	}
 
 	/// <summary>
-	/// Called every frame by the panel. <paramref name="running"/> is false while the window doesn't have the player's
-	/// controls or can't be seen, which pauses the game.
+	/// Called every frame by the panel. <paramref name="running"/> is false while the window can't be seen, or doesn't have
+	/// the player's controls and the autopilot isn't playing, which pauses the game.
 	/// </summary>
 	public void Tick( bool running )
 	{
