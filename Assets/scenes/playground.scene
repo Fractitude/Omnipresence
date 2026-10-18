@@ -476,216 +476,6 @@
       ]
     },
     {
-      "__guid": "0c521dc6-04b4-4c34-84eb-2f25f62c339f",
-      "__version": 2,
-      "Flags": 0,
-      "Name": "Navi Computer",
-      "Position": "30.3297939,-9.41949475E-06,58.4983749",
-      "Rotation": "-0,0,1,-4.37113883E-08",
-      "Scale": "0.5,0.5,0.5",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 1,
-      "NetworkFlags": 0,
-      "NetworkOrphaned": 0,
-      "NetworkTransmit": false,
-      "OwnerTransfer": 1,
-      "Components": [
-        {
-          "__type": "Sandbox.WorldPanel",
-          "__guid": "0b4f35df-357a-407f-bad0-4d702958b856",
-          "__enabled": true,
-          "Flags": 0,
-          "HorizontalAlign": "Center",
-          "InteractionRange": 1000,
-          "Lighting": false,
-          "LookAtCamera": false,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "PanelSize": "1920,1080",
-          "RenderOptions": {
-            "GameLayer": true,
-            "OverlayLayer": false,
-            "BloomLayer": false,
-            "AfterUILayer": false
-          },
-          "RenderScale": 1,
-          "VerticalAlign": "Center"
-        },
-        {
-          "__type": "Sandbox.NaviDesktop",
-          "__guid": "e307657c-5379-4093-9bee-591b15aac649",
-          "__enabled": true,
-          "Flags": 0,
-          "MinWindowSize": "120,60",
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "TooltipEdgeMargin": 8
-        },
-        {
-          "__type": "Sandbox.NaviComputer",
-          "__guid": "a14e0b69-983e-4d82-9297-f3811e39d63e",
-          "__enabled": true,
-          "Flags": 0,
-          "AutoSave": true,
-          "DisplayScale": 1,
-          "GrantedPermissions": [],
-          "InstalledApps": [
-            "calculator",
-            "pacman"
-          ],
-          "InstalledPackages": [
-            "fractitude.napp_pacman"
-          ],
-          "NetworkRange": 1500,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "OutOfRangeColor": "0,0,0,1",
-          "ReviewedApps": [],
-          "RootApps": [],
-          "SaveId": "",
-          "SeatTimeout": 5,
-          "SolidObject": true,
-          "SystemAppFolders": [
-            "navi/system/"
-          ]
-        },
-        {
-          "__type": "Sandbox.NaviInputCapture",
-          "__guid": "fd023ad2-df58-460c-b91d-e05fc580ac2d",
-          "__enabled": true,
-          "Flags": 0,
-          "Fill": 1,
-          "FlyTime": 0.45,
-          "FreeCursor": true,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null
-        }
-      ],
-      "Children": []
-    },
-    {
-      "__guid": "74c0f691-37bf-42b7-a2e5-2ecf3c85d74e",
-      "__version": 2,
-      "Flags": 0,
-      "Name": "Navi Phone",
-      "Position": "30.3298016,29.9999962,60",
-      "Rotation": "-0,0,1,-4.37113883E-08",
-      "Scale": "0.100000001,0.100000001,0.100000001",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 1,
-      "NetworkFlags": 0,
-      "NetworkOrphaned": 0,
-      "NetworkTransmit": true,
-      "OwnerTransfer": 1,
-      "Components": [
-        {
-          "__type": "Sandbox.WorldPanel",
-          "__guid": "9c4bcf31-a0f1-489d-9b1a-2abe195c42da",
-          "__enabled": true,
-          "Flags": 0,
-          "HorizontalAlign": "Center",
-          "InteractionRange": 1000,
-          "Lighting": false,
-          "LookAtCamera": false,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "PanelSize": "1280,2856",
-          "RenderOptions": {
-            "GameLayer": true,
-            "OverlayLayer": false,
-            "BloomLayer": false,
-            "AfterUILayer": false
-          },
-          "RenderScale": 1.5,
-          "VerticalAlign": "Center"
-        },
-        {
-          "__type": "Sandbox.NaviDesktop",
-          "__guid": "d1b8869b-f77b-43aa-b43a-cb74b510cd86",
-          "__enabled": true,
-          "Flags": 0,
-          "MinWindowSize": "120,60",
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "TooltipEdgeMargin": 8
-        },
-        {
-          "__type": "Sandbox.NaviComputer",
-          "__guid": "4f973b3a-b21d-4a21-9245-704c16285547",
-          "__enabled": true,
-          "Flags": 0,
-          "AutoSave": true,
-          "DisplayScale": 1,
-          "GrantedPermissions": [],
-          "InstalledApps": [
-            "calculator",
-            "pacman"
-          ],
-          "InstalledPackages": [
-            "fractitude.napp_pacman"
-          ],
-          "NetworkRange": 1500,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "OutOfRangeColor": "0,0,0,1",
-          "ReviewedApps": [],
-          "RootApps": [],
-          "SaveId": "",
-          "SeatTimeout": 5,
-          "SolidObject": true,
-          "SystemAppFolders": [
-            "navi/system/"
-          ]
-        },
-        {
-          "__type": "Sandbox.NaviInputCapture",
-          "__guid": "ab22663d-3cbb-4170-93a0-63422c2da0dd",
-          "__enabled": true,
-          "Flags": 0,
-          "Fill": 1,
-          "FlyTime": 0.45,
-          "FreeCursor": true,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null
-        }
-      ],
-      "Children": []
-    },
-    {
       "__guid": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc",
       "__version": 2,
       "Flags": 0,
@@ -720,6 +510,52 @@
       "OwnerTransfer": 1,
       "Components": [],
       "Children": []
+    },
+    {
+      "__guid": "a1727c73-f221-4843-bfbc-dc7ee5a8fce4",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "9856d7ce-67e6-4db2-ba31-a0770ac38fb8",
+        "Path": "navi computer.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+            },
+            "Property": "Position",
+            "Value": "50,0,58"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+            },
+            "Property": "Rotation",
+            "Value": "0,0,1,-4.37113883E-08"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+            },
+            "Property": "TaskbarOrder",
+            "Value": []
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "eef86c41-1240-43d4-84ca-692854649d7f": "a1727c73-f221-4843-bfbc-dc7ee5a8fce4",
+        "126ea964-9559-4780-9b35-42a53d96448f": "b7efb608-6d30-49cd-9d70-8cf83202e9e5",
+        "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7": "d32ee71a-fd49-476d-b881-1596bd566d30",
+        "22de298f-c53d-4c01-8706-b687e2dcc093": "081f19b6-419c-4849-9865-5e244894b252",
+        "6bbcbe3d-00e9-4609-80ab-5b2002d37b28": "bbe2df68-8f9a-48aa-8428-9dfd2021dda6"
+      }
     }
   ],
   "SceneProperties": {

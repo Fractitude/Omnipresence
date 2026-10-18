@@ -1,0 +1,114 @@
+{
+  "RootObject": {
+    "__guid": "eef86c41-1240-43d4-84ca-692854649d7f",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "Navi Computer",
+    "Position": "0,0,0",
+    "Rotation": "-0,0,1,-4.37113883E-08",
+    "Scale": "0.5,0.5,0.5",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": false,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "Sandbox.WorldPanel",
+        "__guid": "126ea964-9559-4780-9b35-42a53d96448f",
+        "__enabled": true,
+        "Flags": 0,
+        "HorizontalAlign": "Center",
+        "InteractionRange": 80,
+        "Lighting": false,
+        "LookAtCamera": false,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "PanelSize": "1920,1080",
+        "RenderOptions": {
+          "GameLayer": true,
+          "OverlayLayer": false,
+          "BloomLayer": false,
+          "AfterUILayer": false
+        },
+        "RenderScale": 1,
+        "VerticalAlign": "Center"
+      },
+      {
+        "__type": "Sandbox.NaviDesktop",
+        "__guid": "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7",
+        "__enabled": true,
+        "Flags": 0,
+        "MinWindowSize": "120,60",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "TooltipEdgeMargin": 8
+      },
+      {
+        "__type": "Sandbox.NaviComputer",
+        "__guid": "22de298f-c53d-4c01-8706-b687e2dcc093",
+        "__enabled": true,
+        "Flags": 0,
+        "AutoSave": true,
+        "DisplayScale": 1,
+        "GrantedPermissions": [],
+        "InstalledApps": [
+          "calculator",
+          "pacman"
+        ],
+        "InstalledPackages": [
+          "fractitude.napp_pacman"
+        ],
+        "NetworkRange": 1500,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OutOfRangeColor": "0,0,0,1",
+        "ReviewedApps": [],
+        "RootApps": [],
+        "SaveId": "",
+        "SeatTimeout": 5,
+        "SolidObject": true,
+        "SystemAppFolders": [
+          "navi/system/"
+        ]
+      },
+      {
+        "__type": "Sandbox.NaviInputCapture",
+        "__guid": "6bbcbe3d-00e9-4609-80ab-5b2002d37b28",
+        "__enabled": true,
+        "Flags": 0,
+        "Fill": 1,
+        "FlyTime": 0.45,
+        "FreeCursor": true,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
+      }
+    ],
+    "Children": []
+  },
+  "ResourceVersion": 2,
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "DontBreakAsTemplate": false,
+  "__references": [],
+  "__version": 2
+}
