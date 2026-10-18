@@ -25,7 +25,9 @@
         "ColorScheme": "Dark",
         "DisplayScale": 0.75,
         "GrantedPermissions": [],
-        "InstalledApps": [],
+        "InstalledApps": [
+          "navi/apps/webbrowser.napp"
+        ],
         "InstalledPackages": [],
         "NetworkRange": 1500,
         "OnComponentDestroy": null,
@@ -43,7 +45,9 @@
         "SnapToScreenEdges": true,
         "SnapToWindows": true,
         "SolidObject": true,
-        "StartFavorites": [],
+        "StartFavorites": [
+          "navi/apps/webbrowser.napp"
+        ],
         "SystemAppFolders": [
           "navi/system/"
         ],
