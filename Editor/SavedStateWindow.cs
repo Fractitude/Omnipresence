@@ -19,12 +19,15 @@ public sealed class SavedStateWindow : BaseWindow
 	/// </summary>
 	sealed record Entry( string Title, string Explanation, string[] Paths );
 
+	const string ClearText = "Move selected to Recycle Bin";
+
 	static SavedStateWindow instance;
 
 	readonly HashSet<string> selected = [];
 	ScrollArea list;
 	Label summary;
 	Button clearButton;
+	bool wasPlaying;
 	List<Entry> entries = [];
 
 	public static void Open()
@@ -55,7 +58,7 @@ public sealed class SavedStateWindow : BaseWindow
 		{
 			WordWrap = true,
 			Text = "Everything the game saves lives in its data folder. Tick the parts to clear, then press the button. "
-			       + "Cleared files go to the Recycle Bin. Stop the game first, or it will save its state back."
+			       + "Cleared files go to the Recycle Bin. The button is off while the game runs, since it would save its state back."
 		} );
 		intro.SetStyles( "color: #aaa;" );
 
@@ -71,9 +74,22 @@ public sealed class SavedStateWindow : BaseWindow
 		footer.Add( new Button( "Select none", "deselect", this ) { Clicked = () => SelectAll( false ) } );
 		footer.Add( new Button( "Refresh", "refresh", this ) { Clicked = Refresh } );
 		footer.AddStretchCell();
-		clearButton = footer.Add( new Button.Primary( "Move selected to Recycle Bin", "delete", this ) { Clicked = Ask } );
+		clearButton = footer.Add( new Button.Primary( ClearText, "delete", this ) { Clicked = Ask } );
 
 		Refresh();
+	}
+
+	/// <summary>
+	/// Follow the game starting and stopping, so the button can switch off while it runs.
+	/// </summary>
+	[EditorEvent.Frame]
+	void CheckPlaying()
+	{
+		if ( wasPlaying == Game.IsPlaying )
+			return;
+
+		wasPlaying = Game.IsPlaying;
+		UpdateSummary();
 	}
 
 	/// <summary>
@@ -139,7 +155,8 @@ public sealed class SavedStateWindow : BaseWindow
 		var bytes = chosen.Sum( x => Sizes( x ) );
 
 		summary.Text = chosen.Count == 0 ? "Nothing selected." : $"{chosen.Count} selected, {FormatSize( bytes )}.";
-		clearButton.Enabled = chosen.Count > 0;
+		clearButton.Enabled = chosen.Count > 0 && !Game.IsPlaying;
+		clearButton.Text = Game.IsPlaying ? ClearText + " (game must be stopped)" : ClearText;
 	}
 
 	/// <summary>
