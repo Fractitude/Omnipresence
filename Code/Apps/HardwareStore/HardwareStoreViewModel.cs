@@ -271,7 +271,7 @@ public sealed class HardwareStoreViewModel
 			HashCode.Combine(
 				StoreAccess.LockedOutFor( seat?.SteamId ?? default ),
 				// Countdowns redraw once a second, but only while something is on its way or the staff panel is open.
-				(progress?.Shipments.Count ?? 0) > 0 || StaffOpen ? DateTimeOffset.UtcNow.ToUnixTimeSeconds() : 0,
+				(progress?.Shipments.Count ?? 0) > 0 || StaffOpen ? WorldClock.Now : 0,
 				StaffOpen ) ).ToString();
 
 	HardwareStoreUiState Build()
@@ -299,7 +299,7 @@ public sealed class HardwareStoreViewModel
 			return state with { Message = "Loading your account..." };
 
 		var staffOpen = StaffOpen;
-		var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		var now = WorldClock.Now;
 
 		return state with
 		{

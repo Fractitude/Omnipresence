@@ -21,7 +21,7 @@ public static class StoreAccess
 	static Dictionary<ulong, long> unlockedUntil = new();
 	static Dictionary<ulong, long> lockedUntil = new();
 
-	static long Now => System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+	static long Now => WorldClock.Now;
 
 	public static void Unlock( ulong steamId )
 	{

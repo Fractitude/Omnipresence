@@ -269,7 +269,7 @@ public sealed class PlayerProgress : Component
 		if ( record.Money < amount || to.record.Money + amount > ProgressRecord.MaxMoney )
 			return false;
 
-		var at = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		var at = WorldClock.Now;
 		var from = Owner;
 		var target = to.Owner;
 
@@ -342,7 +342,7 @@ public sealed class PlayerProgress : Component
 
 	void AddShipment( string itemId, long deliverySeconds, string source )
 	{
-		var arrive = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds() + System.Math.Max( deliverySeconds, 0 );
+		var arrive = WorldClock.Now + System.Math.Max( deliverySeconds, 0 );
 
 		record.Shipments.Add( new() { ItemId = itemId, ArriveAt = arrive, Source = source } );
 		record.Shipments.Sort( ( x, y ) => x.ArriveAt.CompareTo( y.ArriveAt ) );
@@ -384,7 +384,7 @@ public sealed class PlayerProgress : Component
 	/// </summary>
 	void Deliver()
 	{
-		var now = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		var now = WorldClock.Now;
 		var arrived = record.Shipments.Where( x => x.ArriveAt <= now ).ToList();
 
 		if ( arrived.Count == 0 )
