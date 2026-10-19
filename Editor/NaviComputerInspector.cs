@@ -309,7 +309,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 			list.Add( ("State", state, stateColor) );
 			list.Add( ("User", computer.User?.DisplayName ?? (computer.HasUser ? "Local player" : "Nobody"), "#ddd") );
 			list.Add( ("Focused", computer.FocusedWindow is { } window ? string.IsNullOrWhiteSpace( window.Title ) ? window.App.Name : $"{window.App.Name}: {window.Title}" : "none", "#ddd") );
-			list.Add( ("Running", $"{computer.Running.Count} apps, {computer.Windows.Count()} windows", "#ddd") );
+			list.Add( ("Running", $"{computer.Running.Count} apps, {computer.Running.Sum( x => x.DrawnWindows.Count() )} windows", "#ddd") );
 
 			if ( computer.PermissionRequests.Count > 0 )
 				list.Add( ("Waiting", $"{computer.PermissionRequests.Count} permission prompt(s)", "#e8a33d") );
@@ -320,7 +320,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 					: process.Permissions.Count == 0 ? "no permissions"
 					: $"{process.Permissions.Count} permissions";
 
-				list.Add( ($"  {process.App.Name}", $"{process.Windows.Count} window(s), {access}", "#9a9aa2") );
+				list.Add( ($"  {process.App.Name}", $"{process.DrawnWindows.Count()} window(s), {access}", "#9a9aa2") );
 			}
 
 			return list;
