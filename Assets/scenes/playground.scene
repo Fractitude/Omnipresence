@@ -149,7 +149,13 @@
           "__type": "Sandbox.ProgressionHud",
           "__guid": "f0697fb2-4de4-49e9-aa01-b24a0fe75564",
           "__enabled": true,
-          "Flags": 0
+          "Flags": 0,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
         },
         {
           "__type": "Sandbox.Crosshair",
