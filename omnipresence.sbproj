@@ -38,6 +38,7 @@
       "ShowChangeMap": false,
       "DefaultMap": null,
       "MapTarget": null
-    }
+    },
+    "DedicatedServerStartupScene": "scenes/home.scene"
   }
 }
