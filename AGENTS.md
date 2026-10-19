@@ -63,7 +63,7 @@ s&box uses a scene/GameObject/Component model. Gameplay is written as `Component
 
 ### Static state and hot reload
 
-**Never make static state that changes at run time `readonly`, including get-only auto-properties (`{ get; } = new()`).** A hot reload resets a `static readonly` field to its initial value when its type holds only engine or BCL types (`string`, numbers, `HashSet<string>`, `Dictionary<string, long>`). Fields that aren't readonly keep their values, and so do readonly ones that hold the assembly's own types. Use `static Dictionary<…> x = new()` or `{ get; private set; } = new()`. Constants (lookup tables nobody changes) can stay readonly, since a reset only picks up edits.
+**Never make static state that changes at run time `readonly`, including get-only auto-properties (`{ get; } = new()`).** A hot reload resets a `static readonly` field to its initial value when its type holds only engine or BCL types (`string`, numbers, `HashSet<string>`, `Dictionary<string, long>`). Fields that aren't readonly keep their values, and so do readonly ones that hold the assembly's own types. Use `static Dictionary<…> x = new()` or `{ get; private set; } = new()`. Constants (lookup tables nobody changes) can stay readonly, since a reset only picks up edits. Instance fields aren't affected: a readonly instance field keeps its value.
 
 Losing such a field fails silently. Navi lost its map of downloaded Store apps this way, so installed Store apps vanished from the start menu, and it also lost the game's Store allowlist. To check a change, set the state, force a reload (edit a file in the same assembly), and read it back with `sbox-cli --call run_csharp`.
 
