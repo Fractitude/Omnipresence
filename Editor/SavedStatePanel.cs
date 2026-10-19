@@ -23,7 +23,7 @@ sealed class SavedStatePanel : Widget
 	static readonly Part[] Parts =
 	[
 		new( "Apps",
-			"Installed apps, pinned and favorite apps.",
+			"Installed apps and packages. The scene's apps will be installed again.",
 			( s, d ) =>
 			{
 				s.InstalledApps = d.InstalledApps;
@@ -59,7 +59,7 @@ sealed class SavedStatePanel : Widget
 				s.LockVerifier = d.LockVerifier;
 			} ),
 		new( "Appearance",
-			"Theme, wallpaper and display settings.",
+			"Theme, color scheme, wallpaper, etc.",
 			( s, d ) =>
 			{
 				s.Theme = d.Theme;
@@ -187,6 +187,7 @@ sealed class SavedStatePanel : Widget
 			if ( drive.Count > 0 )
 				AddRow( DriveTitle, "The files on the computer's drive." );
 
+			body.Layout.AddSpacingCell( 8 );
 			clearButton = body.Layout.Add( new Button.Primary( ClearText, "delete", this ) { Clicked = Ask } );
 		}
 
@@ -197,10 +198,10 @@ sealed class SavedStatePanel : Widget
 	{
 		var layout = body.Layout;
 
-		var check = new Checkbox( title ) { Value = selected.Contains( title ) };
-		check.Toggled = () =>
+		var check = new Tick( this, title, selected.Contains( title ) );
+		check.Toggled = on =>
 		{
-			if ( check.Value )
+			if ( on )
 				selected.Add( title );
 			else
 				selected.Remove( title );
@@ -307,6 +308,58 @@ sealed class SavedStatePanel : Widget
 		open = !open;
 		body.Visible = open;
 		header.Update();
+	}
+
+	/// <summary>
+	/// A rounded tick box with its title, drawn to match the inspector's sections.
+	/// </summary>
+	sealed class Tick : Widget
+	{
+		bool value;
+
+		public System.Action<bool> Toggled;
+
+		public Tick( Widget parent, string title, bool value ) : base( parent )
+		{
+			this.value = value;
+			Title = title;
+			FixedHeight = 24;
+			Cursor = CursorShape.Finger;
+		}
+
+		string Title { get; }
+
+		protected override void OnMouseClick( MouseEvent e )
+		{
+			value = !value;
+			Update();
+			Toggled?.Invoke( value );
+		}
+
+		protected override void OnPaint()
+		{
+			var box = new Rect( LocalRect.Left + 2, LocalRect.Top + 3, 18, 18 );
+
+			if ( value )
+			{
+				Paint.ClearPen();
+				Paint.SetBrush( Color.Parse( "#4a9eea" ) ?? Color.Magenta );
+				Paint.DrawRect( box, 4 );
+
+				Paint.SetPen( Color.White );
+				Paint.DrawIcon( box, "check", 14, TextFlag.Center );
+			}
+			else
+			{
+				Paint.SetPen( Color.Parse( Paint.HasMouseOver ? "#8a9aaa" : "#5a5a64" ) ?? Color.Magenta );
+				Paint.SetBrush( Color.Parse( "#1e1e22" ) ?? Color.Magenta );
+				Paint.DrawRect( box.Shrink( 0.5f ), 4 );
+			}
+
+			Paint.SetDefaultFont( 9, 600 );
+			Paint.SetPen( Color.Parse( "#e6eef7" ) ?? Color.Magenta );
+			Paint.DrawText( new Rect( box.Right + 8, LocalRect.Top, LocalRect.Width - 32, LocalRect.Height ), Title, TextFlag.LeftCenter );
+		}
 	}
 
 	/// <summary>
