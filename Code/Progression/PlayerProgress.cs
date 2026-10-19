@@ -441,4 +441,17 @@ public sealed class PlayerProgress : Component
 		AddMoney( money );
 		AddCredits( credits );
 	}
+
+	/// <summary>
+	/// Testing only: the player asks the host to set the world clock, or to move it by this many seconds. The host
+	/// refuses unless it is the editor, and unless the caller is this player.
+	/// </summary>
+	[Rpc.Host]
+	public void DebugSetTime( long seconds, bool relative )
+	{
+		if ( !Application.IsEditor || Rpc.Caller != (Network.Owner ?? Connection.Local) )
+			return;
+
+		WorldClock.Set( relative ? WorldClock.Now + seconds : seconds );
+	}
 }

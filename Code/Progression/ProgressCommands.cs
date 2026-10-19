@@ -1,7 +1,7 @@
 namespace Sandbox;
 
 /// <summary>
-/// Console commands for testing progression. They only ask: the host decides (see
+/// Console commands for testing progression and the world clock. They only ask: the host decides (see
 /// <see cref="PlayerProgress.DebugGrant"/>) and refuses outside the editor.
 /// </summary>
 public static class ProgressCommands
@@ -25,6 +25,50 @@ public static class ProgressCommands
 		}
 
 		Log.Info( $"Level {progress.Level}, {progress.Xp} XP, ${progress.Money}, {progress.Credits} credits" );
+	}
+
+	[ConCmd( "world_time_show" )]
+	public static void ShowTime() => Log.Info( $"{WorldClock.TimeOfDay}, {WorldClock.Day}" );
+
+	/// <summary>
+	/// <c>world_time_set 09:30</c> keeps the day; <c>world_time_set 09:30 3</c> goes to day 3.
+	/// </summary>
+	[ConCmd( "world_time_set" )]
+	public static void SetTime( string time, int day = 0 )
+	{
+		var parts = time.Split( ':' );
+		if ( parts.Length != 2 || !int.TryParse( parts[0], out var hours ) || !int.TryParse( parts[1], out var minutes )
+		     || hours is < 0 or > 23 || minutes is < 0 or > 59 )
+		{
+			Log.Info( "Use a 24 hour time, like world_time_set 09:30" );
+			return;
+		}
+
+		var days = day > 0 ? day - 1 : WorldClock.Now / 86400;
+		ShiftTime( days * 86400 + hours * 3600 + minutes * 60, false );
+	}
+
+	/// <summary>
+	/// Skip forward by days, <c>world_time_skip_day</c> for one. Negative goes back.
+	/// </summary>
+	[ConCmd( "world_time_skip_day" )]
+	public static void SkipDays( int days = 1 ) => ShiftTime( days * 86400L, true );
+
+	[ConCmd( "world_time_skip_hours" )]
+	public static void SkipHours( float hours ) => ShiftTime( (long)(hours * 3600), true );
+
+	[ConCmd( "world_time_skip_minutes" )]
+	public static void SkipMinutes( float minutes ) => ShiftTime( (long)(minutes * 60), true );
+
+	static void ShiftTime( long seconds, bool relative )
+	{
+		if ( PlayerProgress.Local is not { Loaded: true } progress )
+		{
+			Log.Info( "No player progress yet" );
+			return;
+		}
+
+		progress.DebugSetTime( seconds, relative );
 	}
 
 	static void Grant( long xp, long money, long credits )
