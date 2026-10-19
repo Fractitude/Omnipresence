@@ -6,7 +6,7 @@ namespace Sandbox;
 /// </summary>
 public sealed class ProgressRecord
 {
-	public const int CurrentVersion = 1;
+	public const int CurrentVersion = 2;
 	public const long MaxMoney = 1_000_000_000_000;
 	public const long MaxCredits = 1_000_000_000_000;
 
@@ -102,15 +102,20 @@ public sealed class ProgressRecord
 		if ( Shipments.Count > ShipmentRecord.MaxKept )
 			Shipments.RemoveRange( 0, Shipments.Count - ShipmentRecord.MaxKept );
 
-		// Shipments from before the game clock land now. Old payment times are no longer dates.
-		foreach ( var shipment in Shipments.Where( x => x.ArriveAt > WorldClock.LegacyLimit ) )
-			shipment.ArriveAt = 0;
-
 		Payments ??= new();
 		Payments.RemoveAll( x => x is null );
 
-		foreach ( var payment in Payments.Where( x => x.At > WorldClock.LegacyLimit ) )
+		// Shipments from before the game clock land now. Old payment times are no longer dates. Version 1 saves also
+		// hold times from when the clock still worked differently, so every saved time is reset once.
+		var resetTimes = Version < 2;
+
+		foreach ( var shipment in Shipments.Where( x => resetTimes || x.ArriveAt > WorldClock.LegacyLimit ) )
+			shipment.ArriveAt = 0;
+
+		foreach ( var payment in Payments.Where( x => resetTimes || x.At > WorldClock.LegacyLimit ) )
 			payment.At = 0;
+
+		Version = CurrentVersion;
 
 		if ( Payments.Count > PaymentRecord.MaxKept )
 			Payments.RemoveRange( 0, Payments.Count - PaymentRecord.MaxKept );
