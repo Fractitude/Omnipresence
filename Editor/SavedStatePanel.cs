@@ -81,7 +81,16 @@ sealed class SavedStatePanel : Widget
 	];
 
 	readonly NaviComputer computer;
+	/// <summary>
+	/// About how many characters of the explanation fit on a line, and how tall a line is, to size the wrapped text.
+	/// </summary>
+	const int CharsPerLine = 52;
+	const int LineHeight = 16;
+
 	readonly HashSet<string> selected = [];
+	SubHeader header;
+	Widget body;
+	bool open;
 	Button clearButton;
 	Label summary;
 	bool wasPlaying;
@@ -156,24 +165,32 @@ sealed class SavedStatePanel : Widget
 			none.SetStyles( "color: #aaa;" );
 		}
 
-		foreach ( var part in Parts.Where( _ => settings.Count > 0 ) )
-			AddRow( part.Title, part.Explanation );
-
-		if ( drive.Count > 0 )
-			AddRow( DriveTitle, "Everything in the computer's own drive. Removable drives keep their files separately and stay." );
-
 		if ( titles.Count > 0 )
 		{
-			var tools = Layout.AddRow();
+			header = Layout.Add( new SubHeader( this ) );
+
+			body = Layout.Add( new Widget( this ) );
+			body.Layout = Layout.Column();
+			body.Layout.Spacing = 6;
+			body.Layout.Margin = new Sandbox.UI.Margin( 4, 4, 0, 0 );
+			body.Visible = open;
+
+			var tools = body.Layout.AddRow();
 			tools.Spacing = 6;
 			tools.Add( new Button( "Select all", "select_all", this ) { Clicked = () => SelectAll( true ) } );
 			tools.Add( new Button( "Select none", "deselect", this ) { Clicked = () => SelectAll( false ) } );
 			tools.AddStretchCell();
 
-			summary = Layout.Add( new Label( this ) );
+			foreach ( var part in Parts.Where( _ => settings.Count > 0 ) )
+				AddRow( part.Title, part.Explanation );
+
+			if ( drive.Count > 0 )
+				AddRow( DriveTitle, "Everything in the computer's own drive. Removable drives keep their files separately and stay." );
+
+			summary = body.Layout.Add( new Label( this ) );
 			summary.SetStyles( "color: #aaa;" );
 
-			clearButton = Layout.Add( new Button.Primary( ClearText, "delete", this ) { Clicked = Ask } );
+			clearButton = body.Layout.Add( new Button.Primary( ClearText, "delete", this ) { Clicked = Ask } );
 		}
 
 		UpdateSummary();
@@ -181,6 +198,8 @@ sealed class SavedStatePanel : Widget
 
 	void AddRow( string title, string explanation )
 	{
+		var layout = body.Layout;
+
 		var check = new Checkbox( title ) { Value = selected.Contains( title ) };
 		check.Toggled = () =>
 		{
@@ -191,9 +210,12 @@ sealed class SavedStatePanel : Widget
 
 			UpdateSummary();
 		};
-		Layout.Add( check );
+		layout.Add( check );
 
-		var text = Layout.Add( new Label( explanation, this ) { WordWrap = true } );
+		// A wrapped label doesn't report the height of its wrapped text, so it would be cut off. Give it the lines it needs.
+		var lines = (explanation.Length + CharsPerLine - 1) / CharsPerLine;
+		var text = layout.Add( new Label( explanation, this ) { WordWrap = true } );
+		text.MinimumHeight = lines * LineHeight + 4;
 		text.SetStyles( "color: #aaa; margin-left: 24px;" );
 	}
 
@@ -209,6 +231,8 @@ sealed class SavedStatePanel : Widget
 
 	void UpdateSummary()
 	{
+		header?.Update();
+
 		if ( summary is null || clearButton is null )
 			return;
 
@@ -281,4 +305,46 @@ sealed class SavedStatePanel : Widget
 	}
 
 	static string Full( string path ) => System.IO.Path.GetFullPath( Sandbox.FileSystem.Data.GetFullPath( path ) );
+
+	void Toggle()
+	{
+		open = !open;
+		body.Visible = open;
+		header.Update();
+	}
+
+	/// <summary>
+	/// The clickable line that opens and closes the list of parts.
+	/// </summary>
+	sealed class SubHeader : Widget
+	{
+		readonly SavedStatePanel owner;
+
+		public SubHeader( SavedStatePanel owner ) : base( owner )
+		{
+			this.owner = owner;
+			FixedHeight = 26;
+			Cursor = CursorShape.Finger;
+		}
+
+		protected override void OnMouseClick( MouseEvent e ) => owner.Toggle();
+
+		protected override void OnPaint()
+		{
+			var rect = LocalRect;
+			var count = owner.selected.Count;
+
+			Paint.ClearPen();
+			Paint.SetBrush( Color.Parse( Paint.HasMouseOver ? "#34343a" : "#2e2e33" ) ?? Color.Magenta );
+			Paint.DrawRect( rect, 4 );
+
+			Paint.SetPen( Color.Parse( "#9ab0c4" ) ?? Color.Magenta );
+			Paint.DrawIcon( new Rect( rect.Left + 6, rect.Top, 20, rect.Height ), owner.open ? "expand_more" : "chevron_right", 16, TextFlag.Center );
+
+			Paint.SetDefaultFont( 9, 600 );
+			Paint.SetPen( Color.Parse( "#e6eef7" ) ?? Color.Magenta );
+			Paint.DrawText( new Rect( rect.Left + 30, rect.Top, rect.Width - 36, rect.Height ),
+				count == 0 ? "Clear saved state" : $"Clear saved state ({count} selected)", TextFlag.LeftCenter );
+		}
+	}
 }
