@@ -23,7 +23,7 @@ sealed class SavedStatePanel : Widget
 	static readonly Part[] Parts =
 	[
 		new( "Apps",
-			"Installed apps and packages, pinned and favorite apps, and when each was installed. The scene's apps install again.",
+			"Installed apps, pinned and favorite apps.",
 			( s, d ) =>
 			{
 				s.InstalledApps = d.InstalledApps;
@@ -34,7 +34,7 @@ sealed class SavedStatePanel : Widget
 				s.InstalledAt = d.InstalledAt;
 			} ),
 		new( "Permissions",
-			"Permissions the player granted, apps with root, and apps the player has already reviewed.",
+			"Granted permissions and root apps.",
 			( s, d ) =>
 			{
 				s.GrantedPermissions = d.GrantedPermissions;
@@ -42,7 +42,7 @@ sealed class SavedStatePanel : Widget
 				s.ReviewedApps = d.ReviewedApps;
 			} ),
 		new( "Notifications",
-			"The notification list, which apps are muted and what was read.",
+			"Notifications and muted apps.",
 			( s, d ) =>
 			{
 				s.Notifications = d.Notifications;
@@ -51,7 +51,7 @@ sealed class SavedStatePanel : Widget
 				s.NotificationsReadUpTo = d.NotificationsReadUpTo;
 			} ),
 		new( "Lock",
-			"The lock password or pattern. The computer is left without a lock.",
+			"The lock password or pattern.",
 			( s, d ) =>
 			{
 				s.LockKind = d.LockKind;
@@ -59,7 +59,7 @@ sealed class SavedStatePanel : Widget
 				s.LockVerifier = d.LockVerifier;
 			} ),
 		new( "Appearance",
-			"Theme, color scheme, wallpaper, blur, transparency and display scale.",
+			"Theme, wallpaper and display settings.",
 			( s, d ) =>
 			{
 				s.Theme = d.Theme;
@@ -70,7 +70,7 @@ sealed class SavedStatePanel : Widget
 				s.DisplayScale = d.DisplayScale;
 			} ),
 		new( "Window layout",
-			"Where each window opens, and the snapping settings.",
+			"Window positions and snapping.",
 			( s, d ) =>
 			{
 				s.WindowPlacements = d.WindowPlacements;
@@ -92,7 +92,6 @@ sealed class SavedStatePanel : Widget
 	Widget body;
 	bool open;
 	Button clearButton;
-	Label summary;
 	bool wasPlaying;
 	List<string> titles = [];
 
@@ -157,7 +156,7 @@ sealed class SavedStatePanel : Widget
 		selected.RemoveWhere( x => !titles.Contains( x ) );
 
 		var key = Layout.Add( new Label( $"Save key: {computer.SaveKey}", this ) );
-		key.SetStyles( "color: #7a7a84; padding: 4px 0 0 0;" );
+		key.SetStyles( "color: #7a7a84; padding: 4px 0 8px 0;" );
 
 		if ( titles.Count == 0 )
 		{
@@ -172,7 +171,7 @@ sealed class SavedStatePanel : Widget
 			body = Layout.Add( new Widget( this ) );
 			body.Layout = Layout.Column();
 			body.Layout.Spacing = 6;
-			body.Layout.Margin = new Sandbox.UI.Margin( 4, 4, 0, 0 );
+			body.Layout.Margin = new Sandbox.UI.Margin( 4, 4, 16, 0 );
 			body.Visible = open;
 
 			var tools = body.Layout.AddRow();
@@ -180,15 +179,13 @@ sealed class SavedStatePanel : Widget
 			tools.Add( new Button( "Select all", "select_all", this ) { Clicked = () => SelectAll( true ) } );
 			tools.Add( new Button( "Select none", "deselect", this ) { Clicked = () => SelectAll( false ) } );
 			tools.AddStretchCell();
+			body.Layout.AddSpacingCell( 6 );
 
 			foreach ( var part in Parts.Where( _ => settings.Count > 0 ) )
 				AddRow( part.Title, part.Explanation );
 
 			if ( drive.Count > 0 )
-				AddRow( DriveTitle, "Everything in the computer's own drive. Removable drives keep their files separately and stay." );
-
-			summary = body.Layout.Add( new Label( this ) );
-			summary.SetStyles( "color: #aaa;" );
+				AddRow( DriveTitle, "The files on the computer's drive." );
 
 			clearButton = body.Layout.Add( new Button.Primary( ClearText, "delete", this ) { Clicked = Ask } );
 		}
@@ -233,10 +230,9 @@ sealed class SavedStatePanel : Widget
 	{
 		header?.Update();
 
-		if ( summary is null || clearButton is null )
+		if ( clearButton is null )
 			return;
 
-		summary.Text = selected.Count == 0 ? "Nothing selected." : $"{selected.Count} selected.";
 		clearButton.Enabled = selected.Count > 0 && !Game.IsPlaying;
 		clearButton.Text = Game.IsPlaying ? ClearText + " (game must be stopped)" : ClearText;
 	}
