@@ -1,0 +1,366 @@
+HardwareStore
+{
+	width: 360px;
+	height: 460px;
+	flex-direction: column;
+	padding: 12px;
+	gap: 8px;
+	background-color: #0f1318;
+	color: #dfe6ee;
+	font-size: 12px;
+}
+
+.message, .empty
+{
+	color: #7d8794;
+	padding: 6px 2px;
+}
+
+.top
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.store-title
+	{
+		font-size: 14px;
+		font-weight: 700;
+	}
+
+	.store-balance
+	{
+		flex-shrink: 0;
+		white-space: nowrap;
+		color: #3dd68c;
+		font-weight: 700;
+	}
+}
+
+.tabs
+{
+	flex-direction: row;
+	gap: 6px;
+	flex-shrink: 0;
+
+	.tab
+	{
+		padding: 5px 12px;
+		border-radius: 6px;
+		background-color: #18202a;
+		color: #9aa5b3;
+		cursor: pointer;
+
+		&:hover
+		{
+			color: #dfe6ee;
+		}
+
+		&.active
+		{
+			background-color: #2b6cb0;
+			color: white;
+		}
+
+		&.staff
+		{
+			color: #ffd24a;
+		}
+
+		&.staff.active
+		{
+			background-color: #8a6d1a;
+			color: white;
+		}
+	}
+}
+
+.staff-banner
+{
+	flex-shrink: 0;
+	padding: 5px 8px;
+	border-radius: 6px;
+	background-color: #2a2410;
+	color: #ffd24a;
+}
+
+.notice
+{
+	flex-shrink: 0;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background-color: #18202a;
+	color: #7fd1ff;
+}
+
+.list
+{
+	flex-direction: column;
+	gap: 8px;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+}
+
+.item
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 10px;
+	border-radius: 8px;
+	background-color: #151b23;
+	border: 1px solid #222b37;
+
+	.item-top
+	{
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.item-name
+	{
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.item-slot, .eta
+	{
+		color: #7d8794;
+		font-size: 11px;
+	}
+
+	.item-description
+	{
+		color: #aab4c0;
+	}
+
+	.item-effect
+	{
+		color: #ffd24a;
+	}
+
+	.item-hint
+	{
+		color: #7d8794;
+	}
+
+	.buy-row
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.was-price
+	{
+		color: #7d8794;
+		text-decoration: line-through;
+	}
+
+	.button
+	{
+		align-self: flex-start;
+		margin-top: 4px;
+		padding: 6px 12px;
+		border-radius: 6px;
+		background-color: #2f8f5b;
+		color: white;
+		font-weight: 700;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #3aa86c;
+		}
+
+		&.reroute
+		{
+			background-color: #8a6d1a;
+
+			&:hover
+			{
+				background-color: #a68222;
+			}
+		}
+
+		&.disabled
+		{
+			background-color: #222b37;
+			color: #7d8794;
+			cursor: default;
+		}
+	}
+}
+
+.head
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.back
+	{
+		cursor: pointer;
+		color: #7d8794;
+
+		&:hover
+		{
+			color: #dfe6ee;
+		}
+	}
+
+	.host
+	{
+		color: #5dff9a;
+	}
+}
+
+.attempts
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+	color: #5dff9a;
+
+	.pip
+	{
+		width: 10px;
+		height: 10px;
+		border: 1px solid #1d4a31;
+
+		&.on
+		{
+			background-color: #5dff9a;
+			border-color: #5dff9a;
+		}
+	}
+}
+
+.body
+{
+	flex-direction: row;
+	gap: 10px;
+	flex-grow: 1;
+	min-height: 0;
+	padding: 6px;
+	background-color: #050a07;
+}
+
+.dump
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	overflow-y: scroll;
+
+	.line
+	{
+		flex-direction: row;
+		white-space: pre;
+		font-family: "Roboto Mono";
+		font-size: 11px;
+		height: 15px;
+		align-items: center;
+	}
+
+	.addr
+	{
+		color: #1f6b44;
+		margin-right: 8px;
+	}
+
+	.junk
+	{
+		color: #2f7a52;
+	}
+
+	.word
+	{
+		color: #5dff9a;
+		font-weight: 700;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #5dff9a;
+			color: #050a07;
+		}
+	}
+
+	.trick
+	{
+		color: #ffd24a;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #ffd24a;
+			color: #050a07;
+		}
+	}
+}
+
+.log
+{
+	flex-direction: column;
+	flex-grow: 1;
+	justify-content: flex-end;
+	gap: 2px;
+	font-family: "Roboto Mono";
+	font-size: 11px;
+	color: #8fd6aa;
+}
+
+.result
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 8px 10px;
+	border: 1px solid;
+
+	&.good
+	{
+		border-color: #5dff9a;
+		color: #5dff9a;
+	}
+
+	&.bad
+	{
+		border-color: #ff6b6b;
+		color: #ff6b6b;
+	}
+
+	.result-title
+	{
+		font-weight: 700;
+		letter-spacing: 2px;
+	}
+
+	.reward
+	{
+		color: #ffd24a;
+	}
+
+	.button
+	{
+		align-self: flex-start;
+		margin-top: 4px;
+		padding: 5px 10px;
+		border-radius: 0px;
+		background-color: transparent;
+		border: 1px solid currentColor;
+		color: inherit;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: rgba( 93, 255, 154, 0.15 );
+		}
+	}
+}

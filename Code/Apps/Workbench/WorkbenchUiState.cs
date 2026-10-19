@@ -1,17 +1,5 @@
 namespace OmnipresenceApps;
 
-public enum BenchStatus
-{
-	/// <summary>Found, not built, and the player has the dollars.</summary>
-	Buildable,
-
-	/// <summary>Found and not built, but the player can't pay yet.</summary>
-	TooExpensive,
-
-	/// <summary>Already built.</summary>
-	Built,
-}
-
 /// <summary>
 /// What the Workbench panel draws. Replaced whole by <see cref="WorkbenchViewModel"/> on every change.
 /// </summary>
@@ -29,12 +17,24 @@ public sealed record WorkbenchUiState
 	/// <summary>Shown instead of the bench when there is no access.</summary>
 	public string Message { get; init; } = "";
 
-	public string Balance { get; init; } = "";
+	/// <summary>Every slot of the rig, filled or empty.</summary>
+	public IReadOnlyList<RigSlotRow> Rig { get; init; } = [];
 
-	public IReadOnlyList<BenchRow> Rows { get; init; } = [];
+	/// <summary>What the installed hardware adds to a terminal, already formatted.</summary>
+	public string Summary { get; init; } = "";
 
-	/// <summary>What went wrong with the last attempt, or what was just built.</summary>
+	/// <summary>The hardware that arrived and isn't installed, one row per kind.</summary>
+	public IReadOnlyList<InventoryRow> Inventory { get; init; } = [];
+
+	/// <summary>How many packages are still on their way, already formatted. Empty when none.</summary>
+	public string Incoming { get; init; } = "";
+
+	/// <summary>What happened with the last click.</summary>
 	public string Notice { get; init; } = "";
 }
 
-public sealed record BenchRow( string Id, string Name, string Description, string Effect, string Cost, BenchStatus Status );
+/// <param name="Id">The installed piece, or empty for an empty slot.</param>
+public sealed record RigSlotRow( string Slot, string Id, string Name, string Effect );
+
+/// <param name="CanInstall">False when the rig has no room left for its kind.</param>
+public sealed record InventoryRow( string Id, string Name, string Slot, string Effect, int Count, bool CanInstall );

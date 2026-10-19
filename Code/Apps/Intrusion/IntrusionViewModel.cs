@@ -119,14 +119,10 @@ public sealed class IntrusionViewModel
 
 	void Start( IntrusionServer found )
 	{
-		server = found;
+		var hardware = HardwareCatalog.BonusOf( PlayerProgress.For( getSeat() )?.InstalledHardware ?? [] );
 
-		var built = PlayerProgress.For( getSeat() )?.Built ?? [];
-		puzzle = new IntrusionPuzzle(
-			found,
-			random,
-			bonusAttempts: built.Contains( "ram-stack" ) ? 1 : 0,
-			startingDuds: built.Contains( "signal-tuner" ) ? 1 : 0 );
+		server = found;
+		puzzle = new IntrusionPuzzle( found, random, hardware.Attempts, hardware.Duds );
 		rewards = [];
 		screen = IntrusionScreen.Terminal;
 	}
@@ -174,7 +170,8 @@ public sealed class IntrusionViewModel
 	}
 
 	/// <summary>
-	/// The reward of the server, paid to the player in the seat the first time. Returns the lines to show.
+	/// The reward of the target, paid to the player in the seat. XP, credits and the blueprint are paid the first time
+	/// only. Returns the lines to show.
 	/// </summary>
 	List<string> Pay()
 	{

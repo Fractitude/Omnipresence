@@ -1,7 +1,7 @@
 Workbench
 {
-	width: 320px;
-	height: 400px;
+	width: 340px;
+	height: 440px;
 	flex-direction: column;
 	padding: 12px;
 	gap: 10px;
@@ -16,24 +16,11 @@ Workbench
 	padding: 6px 2px;
 }
 
-.top
+.bench-title
 {
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
 	flex-shrink: 0;
-
-	.title
-	{
-		font-size: 14px;
-		font-weight: 700;
-	}
-
-	.balance
-	{
-		color: #3dd68c;
-		font-weight: 700;
-	}
+	font-size: 14px;
+	font-weight: 700;
 }
 
 .notice
@@ -45,10 +32,89 @@ Workbench
 	color: #ffd24a;
 }
 
+.section
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+
+	&.grow
+	{
+		flex-shrink: 1;
+		flex-grow: 1;
+		min-height: 0;
+	}
+}
+
+.heading
+{
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #8a7c60;
+}
+
+.rig
+{
+	flex-direction: column;
+	gap: 4px;
+}
+
+.slot
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background-color: #1e1912;
+	border: 1px solid #3d8a5c;
+
+	&.empty-slot
+	{
+		border-color: #3a3122;
+		border-style: dashed;
+		color: #8a7c60;
+	}
+
+	.slot-kind
+	{
+		width: 36px;
+		flex-shrink: 0;
+		font-size: 10px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		color: #8a7c60;
+	}
+
+	.slot-body
+	{
+		flex-direction: column;
+		flex-grow: 1;
+	}
+
+	.slot-name
+	{
+		font-weight: 700;
+	}
+
+	.slot-effect
+	{
+		color: #ffd24a;
+		font-size: 11px;
+	}
+}
+
+.summary
+{
+	color: #b3a687;
+}
+
 .list
 {
 	flex-direction: column;
-	gap: 8px;
+	gap: 6px;
 	flex-grow: 1;
 	min-height: 0;
 	overflow-y: scroll;
@@ -56,17 +122,20 @@ Workbench
 
 .item
 {
-	flex-direction: column;
+	flex-direction: row;
+	align-items: center;
 	flex-shrink: 0;
-	gap: 4px;
-	padding: 10px;
+	gap: 8px;
+	padding: 8px 10px;
 	border-radius: 8px;
 	background-color: #1e1912;
 	border: 1px solid #3a3122;
 
-	&.built
+	.item-body
 	{
-		border-color: #3dd68c;
+		flex-direction: column;
+		flex-grow: 1;
+		gap: 2px;
 	}
 
 	.item-name
@@ -75,43 +144,50 @@ Workbench
 		font-weight: 700;
 	}
 
-	.item-description
-	{
-		color: #b3a687;
-	}
-
 	.item-effect
 	{
-		color: #ffd24a;
+		color: #b3a687;
+		font-size: 11px;
+	}
+}
+
+.incoming
+{
+	flex-shrink: 0;
+	color: #7fd1ff;
+}
+
+.button, .small-button
+{
+	flex-shrink: 0;
+	padding: 6px 12px;
+	border-radius: 6px;
+	background-color: #3d8a5c;
+	color: white;
+	font-weight: 700;
+	cursor: pointer;
+
+	&:hover
+	{
+		background-color: #4aa371;
 	}
 
-	.built
+	&.disabled
 	{
-		color: #3dd68c;
-		font-weight: 700;
+		background-color: #3a3122;
+		color: #8a7c60;
+		cursor: default;
 	}
+}
 
-	.button
+.small-button
+{
+	padding: 3px 8px;
+	background-color: #5a4a2c;
+	font-size: 11px;
+
+	&:hover
 	{
-		align-self: flex-start;
-		margin-top: 4px;
-		padding: 6px 12px;
-		border-radius: 6px;
-		background-color: #3d8a5c;
-		color: white;
-		font-weight: 700;
-		cursor: pointer;
-
-		&:hover
-		{
-			background-color: #4aa371;
-		}
-
-		&.disabled
-		{
-			background-color: #3a3122;
-			color: #8a7c60;
-			cursor: default;
-		}
+		background-color: #7a6538;
 	}
 }

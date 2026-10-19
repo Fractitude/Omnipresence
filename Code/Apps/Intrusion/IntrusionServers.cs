@@ -28,13 +28,13 @@ public sealed record IntrusionServer(
 /// <summary>
 /// Something found on a dead server that can be built at home.
 /// </summary>
-/// <param name="Cost">The dollars it takes to build at the workbench at home.</param>
-/// <param name="Effect">What it does in the Wired once built.</param>
-public sealed record BlueprintInfo( string Id, string Name, string Description, long Cost, string Effect );
+public sealed record BlueprintInfo( string Id, string Name, string Description );
 
 public static class IntrusionCatalog
 {
-	public static readonly IReadOnlyList<IntrusionServer> Servers =
+	// Properties, not readonly fields: a hot reload keeps a readonly field's old objects when the type changes shape, so
+	// a new field on a record (like Cost) would read as 0 until the game restarted. These are built on every read.
+	public static IReadOnlyList<IntrusionServer> Servers =>
 	[
 		new( "hollow-pines", "Hollow Pines Radio", "13.4.77", "Layer 03", "Easy",
 			"A pirate radio site. Its last post asks whoever is still here not to let it copy the station.",
@@ -47,14 +47,12 @@ public static class IntrusionCatalog
 			7, 12, 4, 3, 500, 1000, "ram-stack" ),
 	];
 
-	public static readonly IReadOnlyList<BlueprintInfo> Blueprints =
+	public static IReadOnlyList<BlueprintInfo> Blueprints =>
 	[
 		new( "signal-tuner", "Signal Tuner",
-			"A hand-built receiver for your desk. Pulls faint broadcasts out of the static.",
-			200, "Every terminal starts with one wrong word already removed." ),
+			"A hand-built receiver for your desk. Pulls faint broadcasts out of the static." ),
 		new( "ram-stack", "RAM Stack",
-			"Four mismatched memory sticks wired in a row. More room for your rig.",
-			500, "One extra attempt on every terminal." ),
+			"Four mismatched memory sticks wired in a row. More room for your rig." ),
 	];
 
 	/// <summary>

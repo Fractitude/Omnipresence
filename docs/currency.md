@@ -24,4 +24,4 @@ The game has two currencies. Each belongs to one world, and the two never mix.
 
 ## Reward items
 
-Blueprints and other items are not currency. They are found in one world and used in the other (for example a blueprint from a dead server is built at home with dollars), which is how the two worlds connect without a conversion.
+Blueprints and hardware are not currency. They are found in one world and used in the other (a blueprint from a dead server lets you buy a special part at the Hardware Store with dollars; the part, installed at home, helps in the Wired), which is how the two worlds connect without a conversion. See [hardware.md](hardware.md).

@@ -1,0 +1,18 @@
+{
+  "Title": "Hardware Store",
+  "Description": "Order computer parts for pickup at home.",
+  "Icon": "storefront",
+  "Color": "#2b6cb0",
+  "PanelType": "OmnipresenceApps.HardwareStore",
+  "CanMinimize": true,
+  "CanMaximize": false,
+  "CanResize": false,
+  "Shared": true,
+  "Permissions": [],
+  "ComputerTags": [
+    "hardware-store"
+  ],
+  "IsSystem": false,
+  "__references": [],
+  "__version": 0
+}

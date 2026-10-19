@@ -57,14 +57,30 @@ public sealed class PlayerProgress : Component
 	public int IntrusionVersion { get; private set; }
 
 	/// <summary>
-	/// The ids of the blueprints this player has built at home. Host only: empty anywhere else.
+	/// Hardware the player owns and hasn't installed, one entry per piece. Host only: empty anywhere else.
 	/// </summary>
-	public IReadOnlyList<string> Built => record?.Built ?? [];
+	public IReadOnlyList<string> Inventory => record?.Inventory ?? [];
 
 	/// <summary>
-	/// Bumps whenever something is built, so a screen knows to redraw. Host only.
+	/// Hardware installed in the player's rig, one entry per piece. Host only: empty anywhere else.
 	/// </summary>
-	public int BuildVersion { get; private set; }
+	public IReadOnlyList<string> InstalledHardware => record?.Installed ?? [];
+
+	/// <summary>
+	/// Packages on their way, soonest first. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<ShipmentRecord> Shipments => record?.Shipments ?? [];
+
+	/// <summary>
+	/// Ids of the store orders this player has rerouted. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<string> ReroutedOrders => record?.Rerouted ?? [];
+
+	/// <summary>
+	/// Bumps whenever the inventory, the installed hardware or the shipments change, so a screen knows to redraw. Host
+	/// only.
+	/// </summary>
+	public int HardwareVersion { get; private set; }
 
 	/// <summary>
 	/// The progress of the player on this connection, or null if they have none yet.
@@ -85,6 +101,7 @@ public sealed class PlayerProgress : Component
 	bool dirty;
 	bool saving;
 	RealTimeSince sinceChange;
+	RealTimeSince sinceDeliveryCheck;
 
 	protected override void OnUpdate()
 	{
@@ -100,6 +117,12 @@ public sealed class PlayerProgress : Component
 			started = true;
 			steamId = owner.SteamId;
 			Load();
+		}
+
+		if ( Loaded && record is not null && sinceDeliveryCheck > 1 )
+		{
+			sinceDeliveryCheck = 0;
+			Deliver();
 		}
 
 		if ( dirty && sinceChange > SaveDelay )
@@ -284,22 +307,99 @@ public sealed class PlayerProgress : Component
 	}
 
 	/// <summary>
-	/// Build a blueprint the player has found, for dollars. Host only. Returns whether it was built: not without the
-	/// blueprint, not twice, not without the money.
+	/// Buy a piece of hardware: take the dollars and put a package on its way. Host only. Returns whether it was
+	/// ordered: not without the money, not with too many packages already on the way.
 	/// </summary>
-	public bool TryBuild( string blueprint, long cost )
+	public bool TryOrder( string itemId, long price, long deliverySeconds )
 	{
-		if ( !CanChange || string.IsNullOrWhiteSpace( blueprint ) || cost <= 0 )
+		if ( !CanChange || string.IsNullOrWhiteSpace( itemId ) || price <= 0 || record.Money < price )
 			return false;
 
-		if ( !record.Blueprints.Contains( blueprint ) || record.Built.Contains( blueprint ) || record.Money < cost )
+		if ( record.Shipments.Count >= ShipmentRecord.MaxKept )
 			return false;
 
-		record.Money -= cost;
-		record.Built.Add( blueprint );
-		BuildVersion++;
+		record.Money -= price;
+		AddShipment( itemId, deliverySeconds, "order" );
+		return true;
+	}
+
+	/// <summary>
+	/// Take another customer's order for free: a package goes on its way to this player. Each order can be rerouted once
+	/// per player. Host only. Returns whether it was rerouted.
+	/// </summary>
+	public bool TryReroute( string orderId, string itemId, long deliverySeconds )
+	{
+		if ( !CanChange || string.IsNullOrWhiteSpace( orderId ) || string.IsNullOrWhiteSpace( itemId ) )
+			return false;
+
+		if ( record.Rerouted.Contains( orderId ) || record.Shipments.Count >= ShipmentRecord.MaxKept )
+			return false;
+
+		record.Rerouted.Add( orderId );
+		AddShipment( itemId, deliverySeconds, "reroute" );
+		return true;
+	}
+
+	void AddShipment( string itemId, long deliverySeconds, string source )
+	{
+		var arrive = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds() + System.Math.Max( deliverySeconds, 0 );
+
+		record.Shipments.Add( new() { ItemId = itemId, ArriveAt = arrive, Source = source } );
+		record.Shipments.Sort( ( x, y ) => x.ArriveAt.CompareTo( y.ArriveAt ) );
+		HardwareVersion++;
+		Changed();
+	}
+
+	/// <summary>
+	/// Put a piece from the inventory into the rig, if <paramref name="allowed"/> says the rig has room for it. Host only.
+	/// </summary>
+	public bool TryInstall( string itemId, System.Func<IReadOnlyList<string>, bool> allowed )
+	{
+		if ( !CanChange || !record.Inventory.Contains( itemId ) || allowed is null || !allowed( record.Installed ) )
+			return false;
+
+		record.Inventory.Remove( itemId );
+		record.Installed.Add( itemId );
+		HardwareVersion++;
 		Changed();
 		return true;
+	}
+
+	/// <summary>
+	/// Take a piece out of the rig and back into the inventory. Host only.
+	/// </summary>
+	public bool TryUninstall( string itemId )
+	{
+		if ( !CanChange || !record.Installed.Remove( itemId ) )
+			return false;
+
+		record.Inventory.Add( itemId );
+		HardwareVersion++;
+		Changed();
+		return true;
+	}
+
+	/// <summary>
+	/// Move the packages that have arrived into the inventory. Host only.
+	/// </summary>
+	void Deliver()
+	{
+		var now = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		var arrived = record.Shipments.Where( x => x.ArriveAt <= now ).ToList();
+
+		if ( arrived.Count == 0 )
+			return;
+
+		foreach ( var shipment in arrived )
+		{
+			record.Shipments.Remove( shipment );
+
+			if ( record.Inventory.Count < ProgressRecord.MaxPieces )
+				record.Inventory.Add( shipment.ItemId );
+		}
+
+		HardwareVersion++;
+		Changed();
 	}
 
 	void AddPayment( PaymentRecord payment )
