@@ -24,12 +24,17 @@
         "BlurLevel": 2,
         "ColorScheme": "Dark",
         "DisplayScale": 0.75,
+        "DriveName": "Navi HD",
+        "DriveSizeMegabytes": 32,
         "GrantedPermissions": [],
         "InstalledApps": [
-          "navi/apps/webbrowser.napp"
+          "navi/apps/webbrowser.napp",
+          "navi/apps/textedit.napp"
         ],
         "InstalledPackages": [],
+        "MutedNotificationApps": [],
         "NetworkRange": 1500,
+        "NotificationSound": null,
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
@@ -46,7 +51,8 @@
         "SnapToWindows": true,
         "SolidObject": true,
         "StartFavorites": [
-          "navi/apps/webbrowser.napp"
+          "navi/apps/webbrowser.napp",
+          "navi/apps/textedit.napp"
         ],
         "SystemAppFolders": [
           "navi/system/"
