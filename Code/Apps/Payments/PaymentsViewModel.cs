@@ -214,7 +214,7 @@ public sealed class PaymentsViewModel
 	static PaymentRow ToRow( PaymentRecord payment )
 	{
 		var incoming = payment.Amount > 0;
-		var when = DateTimeOffset.FromUnixTimeSeconds( payment.At ).ToLocalTime().ToString( "d MMM HH:mm" );
+		var when = WorldClock.Format( payment.At );
 		var amount = $"{(incoming ? "+" : "-")}${Math.Abs( payment.Amount ):N0}";
 
 		return new PaymentRow( payment.PeerName, amount, when, incoming );

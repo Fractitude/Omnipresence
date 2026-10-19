@@ -3,7 +3,7 @@
 @namespace Sandbox
 
 <root>
-	<div class="clock">@WorldClock.TimeOfDay <span class="date">@WorldClock.Date</span></div>
+	<div class="clock">@WorldClock.TimeOfDay <span class="date">@WorldClock.Day</span></div>
 	@if ( PlayerProgress.Local is { Loaded: true } progress )
 	{
 		<div class="level">Lv @progress.Level</div>
@@ -20,7 +20,7 @@
 	protected override int BuildHash()
 	{
 		var progress = PlayerProgress.Local;
-		var clock = WorldClock.TimeOfDay;
+		var clock = (WorldClock.TimeOfDay, WorldClock.Day);
 
 		return progress is { Loaded: true }
 			? System.HashCode.Combine( progress.Xp, progress.Money, progress.Credits, clock )
