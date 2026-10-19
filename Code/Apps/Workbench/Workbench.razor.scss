@@ -1,0 +1,117 @@
+Workbench
+{
+	width: 320px;
+	height: 400px;
+	flex-direction: column;
+	padding: 12px;
+	gap: 10px;
+	background-color: #14110d;
+	color: #e8dcc4;
+	font-size: 12px;
+}
+
+.message, .empty
+{
+	color: #8a7c60;
+	padding: 6px 2px;
+}
+
+.top
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.title
+	{
+		font-size: 14px;
+		font-weight: 700;
+	}
+
+	.balance
+	{
+		color: #3dd68c;
+		font-weight: 700;
+	}
+}
+
+.notice
+{
+	flex-shrink: 0;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background-color: #241e15;
+	color: #ffd24a;
+}
+
+.list
+{
+	flex-direction: column;
+	gap: 8px;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+}
+
+.item
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 10px;
+	border-radius: 8px;
+	background-color: #1e1912;
+	border: 1px solid #3a3122;
+
+	&.built
+	{
+		border-color: #3dd68c;
+	}
+
+	.item-name
+	{
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.item-description
+	{
+		color: #b3a687;
+	}
+
+	.item-effect
+	{
+		color: #ffd24a;
+	}
+
+	.built
+	{
+		color: #3dd68c;
+		font-weight: 700;
+	}
+
+	.button
+	{
+		align-self: flex-start;
+		margin-top: 4px;
+		padding: 6px 12px;
+		border-radius: 6px;
+		background-color: #3d8a5c;
+		color: white;
+		font-weight: 700;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #4aa371;
+		}
+
+		&.disabled
+		{
+			background-color: #3a3122;
+			color: #8a7c60;
+			cursor: default;
+		}
+	}
+}

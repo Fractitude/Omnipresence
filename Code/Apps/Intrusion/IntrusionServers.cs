@@ -28,7 +28,9 @@ public sealed record IntrusionServer(
 /// <summary>
 /// Something found on a dead server that can be built at home.
 /// </summary>
-public sealed record BlueprintInfo( string Id, string Name, string Description );
+/// <param name="Cost">The dollars it takes to build at the workbench at home.</param>
+/// <param name="Effect">What it does in the Wired once built.</param>
+public sealed record BlueprintInfo( string Id, string Name, string Description, long Cost, string Effect );
 
 public static class IntrusionCatalog
 {
@@ -48,9 +50,11 @@ public static class IntrusionCatalog
 	public static readonly IReadOnlyList<BlueprintInfo> Blueprints =
 	[
 		new( "signal-tuner", "Signal Tuner",
-			"A hand-built receiver for your desk. Pulls faint broadcasts out of the static." ),
+			"A hand-built receiver for your desk. Pulls faint broadcasts out of the static.",
+			200, "Every terminal starts with one wrong word already removed." ),
 		new( "ram-stack", "RAM Stack",
-			"Four mismatched memory sticks wired in a row. More room for your rig." ),
+			"Four mismatched memory sticks wired in a row. More room for your rig.",
+			500, "One extra attempt on every terminal." ),
 	];
 
 	/// <summary>

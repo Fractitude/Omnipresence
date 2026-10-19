@@ -43,6 +43,11 @@ public sealed class ProgressRecord
 	public List<string> Blueprints { get; set; } = new();
 
 	/// <summary>
+	/// Ids of the blueprints the player has built at home. Each one is built once and then works for good.
+	/// </summary>
+	public List<string> Built { get; set; } = new();
+
+	/// <summary>
 	/// The newest payments with other players, oldest first. See <see cref="PaymentRecord"/>.
 	/// </summary>
 	public List<PaymentRecord> Payments { get; set; } = new();
@@ -59,6 +64,7 @@ public sealed class ProgressRecord
 
 		Cleared = CleanIds( Cleared );
 		Blueprints = CleanIds( Blueprints );
+		Built = CleanIds( Built );
 
 		Payments ??= new();
 		Payments.RemoveAll( x => x is null );

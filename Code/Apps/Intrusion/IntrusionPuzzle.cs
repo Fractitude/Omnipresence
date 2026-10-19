@@ -65,11 +65,13 @@ public sealed class IntrusionPuzzle
 	int[] owners;
 	int lineCount;
 
-	public IntrusionPuzzle( IntrusionServer server, Random random )
+	/// <param name="bonusAttempts">Extra wrong guesses allowed, from built blueprints.</param>
+	/// <param name="startingDuds">Wrong words removed before the first guess, from built blueprints.</param>
+	public IntrusionPuzzle( IntrusionServer server, Random random, int bonusAttempts = 0, int startingDuds = 0 )
 	{
 		this.random = random;
 		WordLength = server.WordLength;
-		MaxAttempts = Attempts = server.Attempts;
+		MaxAttempts = Attempts = server.Attempts + Math.Max( bonusAttempts, 0 );
 
 		words = IntrusionCatalog.Words[WordLength].OrderBy( _ => random.Next() ).Take( server.WordCount ).ToArray();
 		removed = new bool[words.Length];
@@ -93,6 +95,9 @@ public sealed class IntrusionPuzzle
 			lineCount++;
 
 		Log( $"Connected. {words.Length} entries in memory." );
+
+		for ( var i = 0; i < startingDuds; i++ )
+			RemoveDud();
 	}
 
 	public int WordLength { get; }

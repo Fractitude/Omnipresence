@@ -1,0 +1,88 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/workbench.napp, so it is always *@
+@* installed and has root. *@
+@* It is shared: the host's copy builds and spends the dollars, and every player sees the same window. Only works *@
+@* at home: blueprints are found in the Wired and built in the real world. *@
+
+<root>
+	@if ( !UiState.HasAccess )
+	{
+		<div class="message">@UiState.Message</div>
+	}
+	else
+	{
+		<div class="top">
+			<div class="title">Workbench</div>
+			<div class="balance">@UiState.Balance</div>
+		</div>
+
+		@if ( UiState.Notice != "" )
+		{
+			<div class="notice">@UiState.Notice</div>
+		}
+
+		<div class="list">
+			@if ( UiState.Rows.Count == 0 )
+			{
+				<div class="empty">No blueprints yet. Dead servers in the Wired hold them.</div>
+			}
+
+			@foreach ( var row in UiState.Rows )
+			{
+				<div class="item @row.Status.ToString().ToLowerInvariant()">
+					<div class="item-name">@row.Name</div>
+					<div class="item-description">@row.Description</div>
+					<div class="item-effect">@row.Effect</div>
+
+					@if ( row.Status == BenchStatus.Built )
+					{
+						<div class="built">Built</div>
+					}
+					else
+					{
+						<div class="button @( row.Status == BenchStatus.Buildable ? "" : "disabled" )"
+						     @onclick=@( () => Navi.Act( WorkbenchViewModel.BuildAction, row.Id ) )>Build for @row.Cost</div>
+					}
+				</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	WorkbenchViewModel ViewModel => field ??= new( GetSeat );
+
+	WorkbenchUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<WorkbenchUiState>() ?? WorkbenchUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat()
+	{
+		if ( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer is not { HasUser: true } computer )
+			return null;
+
+		return Networking.IsActive ? computer.User : Connection.Local;
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}

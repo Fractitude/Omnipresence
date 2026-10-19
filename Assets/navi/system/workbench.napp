@@ -1,0 +1,15 @@
+{
+  "Title": "Workbench",
+  "Description": "Build blueprints found in the Wired.",
+  "Icon": "build",
+  "Color": "#7a5a2f",
+  "PanelType": "OmnipresenceApps.Workbench",
+  "CanMinimize": true,
+  "CanMaximize": false,
+  "CanResize": false,
+  "Shared": true,
+  "Permissions": [],
+  "IsSystem": true,
+  "__references": [],
+  "__version": 0
+}

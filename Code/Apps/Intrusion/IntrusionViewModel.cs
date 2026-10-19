@@ -120,7 +120,13 @@ public sealed class IntrusionViewModel
 	void Start( IntrusionServer found )
 	{
 		server = found;
-		puzzle = new IntrusionPuzzle( found, random );
+
+		var built = PlayerProgress.For( getSeat() )?.Built ?? [];
+		puzzle = new IntrusionPuzzle(
+			found,
+			random,
+			bonusAttempts: built.Contains( "ram-stack" ) ? 1 : 0,
+			startingDuds: built.Contains( "signal-tuner" ) ? 1 : 0 );
 		rewards = [];
 		screen = IntrusionScreen.Terminal;
 	}

@@ -57,6 +57,16 @@ public sealed class PlayerProgress : Component
 	public int IntrusionVersion { get; private set; }
 
 	/// <summary>
+	/// The ids of the blueprints this player has built at home. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<string> Built => record?.Built ?? [];
+
+	/// <summary>
+	/// Bumps whenever something is built, so a screen knows to redraw. Host only.
+	/// </summary>
+	public int BuildVersion { get; private set; }
+
+	/// <summary>
 	/// The progress of the player on this connection, or null if they have none yet.
 	/// </summary>
 	public static PlayerProgress For( Connection connection ) =>
@@ -269,6 +279,25 @@ public sealed class PlayerProgress : Component
 			record.Credits = System.Math.Min( record.Credits + credits, ProgressRecord.MaxCredits );
 
 		IntrusionVersion++;
+		Changed();
+		return true;
+	}
+
+	/// <summary>
+	/// Build a blueprint the player has found, for dollars. Host only. Returns whether it was built: not without the
+	/// blueprint, not twice, not without the money.
+	/// </summary>
+	public bool TryBuild( string blueprint, long cost )
+	{
+		if ( !CanChange || string.IsNullOrWhiteSpace( blueprint ) || cost <= 0 )
+			return false;
+
+		if ( !record.Blueprints.Contains( blueprint ) || record.Built.Contains( blueprint ) || record.Money < cost )
+			return false;
+
+		record.Money -= cost;
+		record.Built.Add( blueprint );
+		BuildVersion++;
 		Changed();
 		return true;
 	}
