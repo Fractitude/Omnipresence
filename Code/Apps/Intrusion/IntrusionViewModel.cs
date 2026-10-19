@@ -17,6 +17,7 @@ public sealed class IntrusionViewModel
 	public const string TabAction = "tab";
 	public const string GuessAction = "guess";
 	public const string TrickAction = "trick";
+	public const string WordAction = "word";
 	public const string RetryAction = "retry";
 
 	public const string ServersTab = "servers";
@@ -28,6 +29,7 @@ public sealed class IntrusionViewModel
 	IntrusionScreen screen;
 	IntrusionServer server;
 	IntrusionPuzzle puzzle;
+	WordGuessPuzzle wordPuzzle;
 	List<string> rewards = [];
 	Guid lastSeatId;
 	string signature;
@@ -40,6 +42,11 @@ public sealed class IntrusionViewModel
 	}
 
 	public IntrusionUiState UiState { get; private set; }
+
+	/// <summary>
+	/// The puzzle being played, whichever level the server is, or null.
+	/// </summary>
+	IIntrusionPuzzle Active => wordPuzzle ?? (IIntrusionPuzzle)puzzle;
 
 	/// <summary>
 	/// Once a frame: start over when the seat changed, and draw again if anything drawn changed.
@@ -84,6 +91,10 @@ public sealed class IntrusionViewModel
 					UseTrick( trick );
 					break;
 
+				case WordAction when args.Length > 0:
+					GuessWord( args[0] );
+					break;
+
 				case RetryAction:
 					Retry();
 					break;
@@ -98,6 +109,7 @@ public sealed class IntrusionViewModel
 		screen = IntrusionScreen.Servers;
 		server = null;
 		puzzle = null;
+		wordPuzzle = null;
 		rewards = [];
 	}
 
@@ -122,7 +134,14 @@ public sealed class IntrusionViewModel
 		var hardware = HardwareCatalog.BonusOf( PlayerProgress.For( getSeat() )?.InstalledHardware ?? [] );
 
 		server = found;
-		puzzle = new IntrusionPuzzle( found, random, hardware.Attempts, hardware.Duds );
+		puzzle = null;
+		wordPuzzle = null;
+
+		if ( found.Level <= 1 )
+			wordPuzzle = new WordGuessPuzzle( found, random, hardware.Attempts, hardware.Duds );
+		else
+			puzzle = new IntrusionPuzzle( found, random, hardware.Attempts, hardware.Duds );
+
 		rewards = [];
 		screen = IntrusionScreen.Terminal;
 	}
@@ -135,7 +154,7 @@ public sealed class IntrusionViewModel
 
 	void Guess( int word )
 	{
-		if ( screen != IntrusionScreen.Terminal )
+		if ( screen != IntrusionScreen.Terminal || puzzle is null )
 			return;
 
 		puzzle.Guess( word );
@@ -144,10 +163,19 @@ public sealed class IntrusionViewModel
 
 	void UseTrick( int trick )
 	{
-		if ( screen != IntrusionScreen.Terminal )
+		if ( screen != IntrusionScreen.Terminal || puzzle is null )
 			return;
 
 		puzzle.UseTrick( trick );
+		Finish();
+	}
+
+	void GuessWord( string word )
+	{
+		if ( screen != IntrusionScreen.Terminal || wordPuzzle is null )
+			return;
+
+		wordPuzzle.Guess( word );
 		Finish();
 	}
 
@@ -156,13 +184,13 @@ public sealed class IntrusionViewModel
 	/// </summary>
 	void Finish()
 	{
-		if ( puzzle.Status == IntrusionStatus.Locked )
+		if ( Active.Status == IntrusionStatus.Locked )
 		{
 			screen = IntrusionScreen.Locked;
 			return;
 		}
 
-		if ( puzzle.Status != IntrusionStatus.Breached )
+		if ( Active.Status != IntrusionStatus.Breached )
 			return;
 
 		screen = IntrusionScreen.Breached;
@@ -224,17 +252,18 @@ public sealed class IntrusionViewModel
 			Blueprints = progress.Blueprints.Select( ToBlueprintRow ).Where( x => x is not null ).ToList(),
 		};
 
-		if ( puzzle is null )
+		if ( Active is not { } active )
 			return state;
 
 		return state with
 		{
 			ServerName = server.Name,
 			ServerAddress = server.Address,
-			Attempts = puzzle.Attempts,
-			MaxAttempts = puzzle.MaxAttempts,
-			Dump = puzzle.BuildLines(),
-			Log = puzzle.LogLines.ToList(),
+			Attempts = active.Attempts,
+			MaxAttempts = active.MaxAttempts,
+			Dump = puzzle?.BuildLines() ?? [],
+			Log = puzzle?.LogLines.ToList() ?? [],
+			Board = wordPuzzle?.BuildBoard(),
 			Rewards = rewards,
 		};
 	}
@@ -254,7 +283,8 @@ public sealed class IntrusionViewModel
 			server.Difficulty,
 			server.Blurb,
 			reward,
-			progress.ClearedServers.Contains( server.Id ) );
+			progress.ClearedServers.Contains( server.Id ),
+			server.Level );
 	}
 
 	static BlueprintRow ToBlueprintRow( string id )

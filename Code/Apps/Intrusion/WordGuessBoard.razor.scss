@@ -1,0 +1,119 @@
+WordGuessBoard
+{
+	flex-direction: column;
+	flex-grow: 1;
+	min-height: 0;
+	gap: 6px;
+	color: #5dff9a;
+	font-family: "Roboto Mono";
+
+	.hint
+	{
+		flex-shrink: 0;
+		padding: 6px 8px;
+		border: 1px solid #1d4a31;
+		background-color: #08140d;
+		color: #8fd6aa;
+		font-size: 12px;
+	}
+
+	.known
+	{
+		flex-shrink: 0;
+		white-space: pre;
+		letter-spacing: 2px;
+		color: #ffd24a;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.rows
+	{
+		flex-direction: column;
+		flex-grow: 1;
+		min-height: 0;
+		gap: 4px;
+		overflow-y: scroll;
+	}
+
+	.row
+	{
+		flex-direction: row;
+		flex-shrink: 0;
+		gap: 4px;
+	}
+
+	.cell
+	{
+		width: 28px;
+		height: 28px;
+		justify-content: center;
+		align-items: center;
+		border: 1px solid #1d4a31;
+		font-size: 15px;
+		font-weight: 700;
+
+		&.empty
+		{
+			background-color: transparent;
+		}
+
+		&.absent
+		{
+			background-color: #0c1a12;
+			color: #3d8a5c;
+		}
+
+		&.misplaced
+		{
+			background-color: #ffd24a;
+			border-color: #ffd24a;
+			color: #050a07;
+		}
+
+		&.correct
+		{
+			background-color: #5dff9a;
+			border-color: #5dff9a;
+			color: #050a07;
+		}
+	}
+
+	.notice
+	{
+		flex-shrink: 0;
+		min-height: 14px;
+		color: #8fd6aa;
+		font-size: 11px;
+	}
+
+	.entry
+	{
+		flex-direction: row;
+		flex-shrink: 0;
+		gap: 6px;
+		align-items: center;
+
+		TextEntry
+		{
+			flex-grow: 1;
+			padding: 4px 6px;
+			border: 1px solid #1d4a31;
+			background-color: #08140d;
+			color: #5dff9a;
+			font-size: 13px;
+		}
+
+		.enter
+		{
+			padding: 5px 10px;
+			border: 1px solid #5dff9a;
+			cursor: pointer;
+
+			&:hover
+			{
+				background-color: rgba( 93, 255, 154, 0.15 );
+			}
+		}
+	}
+}

@@ -85,7 +85,12 @@ Old data: parts the workbench "built" before it became an installer are moved in
 
 ## Intrusion (the Wired side)
 
-Dead servers are word puzzles in the style of a memory dump. Click a word to try it as the password; the terminal says how many letters are in the right place. Yellow brackets are tricks that remove a wrong word or give the attempts back. Wrong guesses use up attempts, and at zero the terminal locks (try again for a new dump).
+Every terminal has a **security level**, which decides the puzzle (`IntrusionServer.Level`, default 2). Both are password puzzles: wrong guesses use up attempts, and at zero the terminal locks (try again for a new puzzle).
+
+- **Level 1: word guess** (`WordGuessPuzzle`, drawn by `WordGuessBoard`). Wordle-style. The terminal gives a clue to the password and shows its length. Type a word of that length: each letter turns green (right place), yellow (in the word, another place) or dark (not in it). Any letters count, there is no dictionary check; a wrong-length or repeated word costs nothing. The clues are in `IntrusionCatalog.Hints`. Installed hardware's "wrong words removed" shows that many letters up front instead.
+- **Level 2: memory dump** (`IntrusionPuzzle`). Click a word to try it as the password; the terminal says how many letters are in the right place. Yellow brackets are tricks that remove a wrong word or give the attempts back.
+
+The dead servers below are all Level 2. The Hardware Store's staff login is Level 1 (6 letters, 6 attempts).
 
 | Server | Difficulty | Reward (first clear only) |
 | --- | --- | --- |
@@ -93,7 +98,7 @@ Dead servers are word puzzles in the style of a memory dump. Click a word to try
 | Cyberia Basement | Medium | 200 XP, 400 credits |
 | The Copy Shop | Hard | 500 XP, 1,000 credits, RAM Stack blueprint |
 
-Only works in the Wired ("No signal" at home). Pays credits, never dollars. The puzzle logic (`IntrusionPuzzle`) has no engine objects, and the store reuses it.
+Only works in the Wired ("No signal" at home). Pays credits, never dollars. The puzzle logic (`IntrusionPuzzle`, `WordGuessPuzzle`, both an `IIntrusionPuzzle`) has no engine objects, and the store reuses it.
 
 ## What is saved
 

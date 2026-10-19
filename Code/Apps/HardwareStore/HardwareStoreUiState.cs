@@ -79,6 +79,9 @@ public sealed record HardwareStoreUiState
 	public IReadOnlyList<DumpLine> Dump { get; init; } = [];
 	public IReadOnlyList<string> Log { get; init; } = [];
 
+	/// <summary>The word board of a Level 1 terminal. Null on a Level 2 one.</summary>
+	public GuessBoard Board { get; init; }
+
 	/// <summary>What the break-in gave, on the Breached screen. One line each.</summary>
 	public IReadOnlyList<string> Rewards { get; init; } = [];
 }

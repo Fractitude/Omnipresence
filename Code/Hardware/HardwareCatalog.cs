@@ -19,7 +19,9 @@ public enum HardwareSlot
 /// <param name="Blueprint">The blueprint, found on a dead server, that unlocks buying it. Empty when it is in stock.</param>
 /// <param name="Restricted">Not for sale to anyone. It only comes from rerouting a customer's order.</param>
 /// <param name="Attempts">Extra wrong guesses a terminal allows.</param>
-/// <param name="Duds">Wrong words already removed when a terminal opens.</param>
+/// <param name="Duds">
+/// Wrong words already removed when a Level 2 terminal opens. A Level 1 terminal shows that many letters instead.
+/// </param>
 public sealed record HardwareItem(
 	string Id,
 	string Name,

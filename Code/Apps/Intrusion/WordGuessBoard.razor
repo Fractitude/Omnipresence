@@ -1,0 +1,74 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace OmnipresenceApps
+
+@* The Level 1 terminal: a clue, the guesses so far with each letter marked, and a box to type the next word in. Used by *@
+@* Intrusion and by the Hardware Store's staff login. It draws what it is given and reports the typed word through *@
+@* OnSubmit; the app sends that to the host, which does the marking. It never holds the password. *@
+
+<root>
+	<div class="hint">@Board.Hint</div>
+
+	@if ( Board.Known.Any( char.IsLetter ) )
+	{
+		<div class="known">@Board.Known</div>
+	}
+
+	<div class="rows">
+		@foreach ( var row in Board.Rows )
+		{
+			<div class="row">
+				@foreach ( var cell in row.Cells )
+				{
+					<div class="cell @cell.Mark.ToString().ToLowerInvariant()">@cell.Letter</div>
+				}
+			</div>
+		}
+
+		@for ( var i = Board.Rows.Count; i < Board.Slots; i++ )
+		{
+			<div class="row">
+				@for ( var j = 0; j < Board.WordLength; j++ )
+				{
+					<div class="cell empty"></div>
+				}
+			</div>
+		}
+	</div>
+
+	<div class="notice">@Board.Notice</div>
+
+	@if ( Enabled )
+	{
+		<div class="entry">
+			<TextEntry @ref="Entry" Placeholder=@( $"{Board.WordLength} letters" ) MaxLength=@( Board.WordLength )
+			           onsubmit=@Submit/>
+			<div class="enter" @onclick=@Submit>Enter</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	public GuessBoard Board { get; set; }
+
+	/// <summary>False once the terminal is breached or locked: the board stays, the box goes.</summary>
+	public bool Enabled { get; set; }
+
+	/// <summary>The player entered a word.</summary>
+	public System.Action<string> OnSubmit { get; set; }
+
+	TextEntry Entry;
+
+	void Submit()
+	{
+		var text = Entry?.Text ?? "";
+
+		if ( Entry is not null )
+			Entry.Text = "";
+
+		OnSubmit?.Invoke( text );
+	}
+
+	protected override int BuildHash() => System.HashCode.Combine( Board, Enabled );
+}

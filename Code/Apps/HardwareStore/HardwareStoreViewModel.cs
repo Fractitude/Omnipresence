@@ -5,7 +5,8 @@ namespace OmnipresenceApps;
 /// <summary>
 /// Everything the Hardware Store does: sells hardware for dollars, tracks the player's packages, and, while the player
 /// has broken into the staff panel, cuts prices and lets them reroute other customers' orders to their own home. The
-/// break-in is the same word puzzle as the dead servers in Intrusion, played here because this computer has no other app.
+/// break-in is the Level 1 word puzzle of Intrusion (the shop's security is low), played here because this computer has
+/// no other app.
 /// Only works on the store's computer. Runs in the host's copy only (the app is shared), because the money is the host's.
 /// </summary>
 /// <remarks>
@@ -20,6 +21,7 @@ public sealed class HardwareStoreViewModel
 	public const string LoginAction = "login";
 	public const string GuessAction = "guess";
 	public const string TrickAction = "trick";
+	public const string WordAction = "word";
 
 	public const string ShopTab = "shop";
 	public const string OrdersTab = "orders";
@@ -32,6 +34,7 @@ public sealed class HardwareStoreViewModel
 
 	StoreScreen screen;
 	IntrusionPuzzle puzzle;
+	WordGuessPuzzle wordPuzzle;
 	List<string> rewards = [];
 	string notice = "";
 	Guid lastSeatId;
@@ -46,6 +49,11 @@ public sealed class HardwareStoreViewModel
 	}
 
 	public HardwareStoreUiState UiState { get; private set; }
+
+	/// <summary>
+	/// The puzzle being played, whichever level the staff panel is, or null.
+	/// </summary>
+	IIntrusionPuzzle Active => wordPuzzle ?? (IIntrusionPuzzle)puzzle;
 
 	/// <summary>
 	/// Once a frame: start over when the seat changed, and draw again if anything drawn changed.
@@ -80,6 +88,10 @@ public sealed class HardwareStoreViewModel
 					UseTrick( trick );
 					break;
 
+				case WordAction:
+					GuessWord( args[0] );
+					break;
+
 				case TabAction:
 					ChooseTab( args[0] );
 					break;
@@ -101,6 +113,7 @@ public sealed class HardwareStoreViewModel
 	{
 		screen = StoreScreen.Shop;
 		puzzle = null;
+		wordPuzzle = null;
 		rewards = [];
 		notice = "";
 	}
@@ -109,6 +122,7 @@ public sealed class HardwareStoreViewModel
 	{
 		notice = "";
 		puzzle = null;
+		wordPuzzle = null;
 
 		screen = tab switch
 		{
@@ -121,11 +135,12 @@ public sealed class HardwareStoreViewModel
 	bool StaffOpen => getSeat() is { } seat && StoreAccess.IsUnlocked( seat.SteamId );
 
 	/// <summary>
-	/// The staff login as a dead-server-like target. Its XP is paid the first time only; the access is every time.
+	/// The staff login as a dead-server-like target, at security Level 1: a clue and a word to guess, no memory dump. Its
+	/// XP is paid the first time only; the access is every time.
 	/// </summary>
 	static IntrusionServer StaffPanel =>
-		new( "store-admin", "Hardware Store Staff Panel", "13.0.55", "Local", "Medium",
-			"The shop's back office.", 6, 10, 4, 2, 50, 0, "" );
+		new( "store-admin", "Hardware Store Staff Panel", "13.0.55", "Local", "Easy",
+			"The shop's back office.", 6, 0, 6, 0, 50, 0, "", 1 );
 
 	void Login()
 	{
@@ -137,7 +152,14 @@ public sealed class HardwareStoreViewModel
 		// Parts the player installed help here too.
 		var hardware = HardwareCatalog.BonusOf( PlayerProgress.For( seat )?.InstalledHardware ?? [] );
 
-		puzzle = new IntrusionPuzzle( StaffPanel, random, hardware.Attempts, hardware.Duds );
+		puzzle = null;
+		wordPuzzle = null;
+
+		if ( StaffPanel.Level <= 1 )
+			wordPuzzle = new WordGuessPuzzle( StaffPanel, random, hardware.Attempts, hardware.Duds );
+		else
+			puzzle = new IntrusionPuzzle( StaffPanel, random, hardware.Attempts, hardware.Duds );
+
 		screen = StoreScreen.Terminal;
 	}
 
@@ -159,6 +181,15 @@ public sealed class HardwareStoreViewModel
 		Finish();
 	}
 
+	void GuessWord( string word )
+	{
+		if ( screen != StoreScreen.Terminal || wordPuzzle is null )
+			return;
+
+		wordPuzzle.Guess( word );
+		Finish();
+	}
+
 	/// <summary>
 	/// Move on when the puzzle is over: open the staff panel, or lock the player out for a while.
 	/// </summary>
@@ -166,10 +197,10 @@ public sealed class HardwareStoreViewModel
 	{
 		var seat = getSeat();
 
-		if ( seat is null || puzzle.Status == IntrusionStatus.Running )
+		if ( seat is null || Active is not { Status: not IntrusionStatus.Running } active )
 			return;
 
-		if ( puzzle.Status == IntrusionStatus.Locked )
+		if ( active.Status == IntrusionStatus.Locked )
 		{
 			StoreAccess.Lock( seat.SteamId );
 			screen = StoreScreen.Locked;
@@ -285,10 +316,11 @@ public sealed class HardwareStoreViewModel
 				.Where( x => x is not null )
 				.ToList(),
 			Lockout = lockout > 0 ? Duration( lockout ) : "",
-			Attempts = puzzle?.Attempts ?? 0,
-			MaxAttempts = puzzle?.MaxAttempts ?? 0,
+			Attempts = Active?.Attempts ?? 0,
+			MaxAttempts = Active?.MaxAttempts ?? 0,
 			Dump = puzzle?.BuildLines() ?? [],
 			Log = puzzle?.LogLines.ToList() ?? [],
+			Board = wordPuzzle?.BuildBoard(),
 			Rewards = rewards,
 			StaffOrders = staffOpen
 				? HardwareCatalog.Orders.Select( x => ToStaffRow( x, progress ) ).Where( x => x is not null ).ToList()

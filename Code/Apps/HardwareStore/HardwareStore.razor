@@ -5,7 +5,8 @@
 @* The game's own app for the store's computer. Not a system app: the computer has a StoreTerminal, which makes it a *@
 @* kiosk with only this app, and the app refuses to work on any other computer. Described by *@
 @* Assets/navi/shop/hardwarestore.napp. *@
-@* It is shared: the host's copy takes the money, places the orders and runs the staff login puzzle, and everyone *@
+@* It is shared: the host's copy takes the money, places the orders and runs the staff login puzzle (Level 1: a word *@
+@* to guess from a clue), and everyone *@
 @* near the screen watches. The password never reaches the state. *@
 
 <root>
@@ -28,38 +29,45 @@
 			}
 		</div>
 
-		<div class="body">
-			<div class="dump">
-				@foreach ( var line in UiState.Dump )
-				{
-					<div class="line">
-						<span class="addr">@line.Address</span>
-						@foreach ( var segment in line.Segments )
-						{
-							@if ( segment.Kind == DumpKind.Word && UiState.Screen == StoreScreen.Terminal )
+		@if ( UiState.Board is { } board )
+		{
+			<WordGuessBoard Board=@board Enabled=@( UiState.Screen == StoreScreen.Terminal ) OnSubmit=@WordEntered/>
+		}
+		else
+		{
+			<div class="body">
+				<div class="dump">
+					@foreach ( var line in UiState.Dump )
+					{
+						<div class="line">
+							<span class="addr">@line.Address</span>
+							@foreach ( var segment in line.Segments )
 							{
-								<span class="word" @onclick=@( () => Navi.Act( HardwareStoreViewModel.GuessAction, segment.Index.ToString() ) )>@segment.Text</span>
+								@if ( segment.Kind == DumpKind.Word && UiState.Screen == StoreScreen.Terminal )
+								{
+									<span class="word" @onclick=@( () => Navi.Act( HardwareStoreViewModel.GuessAction, segment.Index.ToString() ) )>@segment.Text</span>
+								}
+								else if ( segment.Kind == DumpKind.Trick && UiState.Screen == StoreScreen.Terminal )
+								{
+									<span class="trick" @onclick=@( () => Navi.Act( HardwareStoreViewModel.TrickAction, segment.Index.ToString() ) )>@segment.Text</span>
+								}
+								else
+								{
+									<span class="junk">@segment.Text</span>
+								}
 							}
-							else if ( segment.Kind == DumpKind.Trick && UiState.Screen == StoreScreen.Terminal )
-							{
-								<span class="trick" @onclick=@( () => Navi.Act( HardwareStoreViewModel.TrickAction, segment.Index.ToString() ) )>@segment.Text</span>
-							}
-							else
-							{
-								<span class="junk">@segment.Text</span>
-							}
-						}
-					</div>
-				}
-			</div>
+						</div>
+					}
+				</div>
 
-			<div class="log">
-				@foreach ( var entry in UiState.Log )
-				{
-					<div class="entry">@entry</div>
-				}
+				<div class="log">
+					@foreach ( var entry in UiState.Log )
+					{
+						<div class="entry">@entry</div>
+					}
+				</div>
 			</div>
-		</div>
+		}
 
 		@if ( UiState.Screen == StoreScreen.Breached )
 		{
@@ -160,7 +168,7 @@
 			{
 				<div class="item">
 					<div class="item-name">Staff login</div>
-					<div class="item-description">The shop's back office. Staff see other customers' orders and pay less. The password is somewhere in the memory dump.</div>
+					<div class="item-description">The shop's back office. Staff see other customers' orders and pay less. Security level 1: the password is a word, and the terminal gives a clue.</div>
 
 					@if ( UiState.Lockout != "" )
 					{
@@ -209,6 +217,8 @@
 
 	HardwareStoreUiState UiState =>
 		Navi.IsViewer ? Navi.GetState<HardwareStoreUiState>() ?? HardwareStoreUiState.Empty : ViewModel.UiState;
+
+	void WordEntered( string word ) => Navi.Act( HardwareStoreViewModel.WordAction, word );
 
 	bool AtStoreTerminal() =>
 		StoreTerminal.IsStore( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer );

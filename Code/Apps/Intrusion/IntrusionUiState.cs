@@ -48,14 +48,18 @@ public sealed record IntrusionUiState
 	public int Attempts { get; init; }
 	public int MaxAttempts { get; init; }
 
+	/// <summary>The memory dump and its log, on a Level 2 terminal.</summary>
 	public IReadOnlyList<DumpLine> Dump { get; init; } = [];
 	public IReadOnlyList<string> Log { get; init; } = [];
+
+	/// <summary>The word board of a Level 1 terminal. Null on a Level 2 one.</summary>
+	public GuessBoard Board { get; init; }
 
 	/// <summary>What was won, on the Breached screen. One line each.</summary>
 	public IReadOnlyList<string> Rewards { get; init; } = [];
 }
 
 public sealed record ServerRow( string Id, string Name, string Address, string Layer, string Difficulty, string Blurb,
-	string Reward, bool Cleared );
+	string Reward, bool Cleared, int Level );
 
 public sealed record BlueprintRow( string Name, string Description, string From );

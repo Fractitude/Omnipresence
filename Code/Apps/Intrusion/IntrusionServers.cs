@@ -5,11 +5,14 @@ namespace OmnipresenceApps;
 /// </summary>
 /// <param name="Id">Saved in the player's progress, so never rename one.</param>
 /// <param name="Layer">The layer of the Wired it sits in, for the list.</param>
-/// <param name="WordLength">How long each word in the memory dump is.</param>
-/// <param name="WordCount">How many words are in the dump, one of which is the password.</param>
+/// <param name="WordLength">How long the password is (and each word in the memory dump).</param>
+/// <param name="WordCount">Level 2: how many words are in the dump, one of which is the password.</param>
 /// <param name="Attempts">How many wrong guesses lock the terminal.</param>
-/// <param name="Tricks">How many bracket tricks are hidden in the dump.</param>
+/// <param name="Tricks">Level 2: how many bracket tricks are hidden in the dump.</param>
 /// <param name="Blueprint">The id of the blueprint it holds, or empty.</param>
+/// <param name="Level">
+/// The security level, which decides the puzzle: 1 is a Wordle-style guess from a clue, 2 is the memory dump.
+/// </param>
 public sealed record IntrusionServer(
 	string Id,
 	string Name,
@@ -23,7 +26,8 @@ public sealed record IntrusionServer(
 	int Tricks,
 	long Xp,
 	long Credits,
-	string Blueprint );
+	string Blueprint,
+	int Level = 2 );
 
 /// <summary>
 /// Something found on a dead server that can be built at home.
@@ -76,6 +80,57 @@ public static class IntrusionCatalog
 			"SERVERS", "LAYERED", "SIGNALS",
 		],
 	};
+
+	/// <summary>
+	/// The clue a Level 1 terminal gives for each word. Never says the word itself.
+	/// </summary>
+	static readonly IReadOnlyDictionary<string, string> Hints = new Dictionary<string, string>
+	{
+		["WIRED"] = "Where everyone is connected.",
+		["ALONE"] = "How you feel when nobody answers.",
+		["NIGHT"] = "When the lights go out.",
+		["GHOST"] = "Something that lingers after it is gone.",
+		["DREAM"] = "What you see when you sleep.",
+		["RADIO"] = "Pirate stations broadcast over it.",
+		["PINES"] = "Trees around a quiet town.",
+		["TAPES"] = "Old recordings on spools.",
+		["NOISE"] = "Unwanted signal.",
+		["LAYER"] = "One floor of the Wired.",
+		["CABLE"] = "A wire that carries the signal.",
+		["ERASE"] = "Delete for good.",
+		["VOICE"] = "What a speaker lends to a message.",
+		["FADED"] = "No longer bright.",
+
+		["SIGNAL"] = "What a receiver tunes for.",
+		["HOLLOW"] = "Empty on the inside.",
+		["MEMORY"] = "What a dump holds, and a mind.",
+		["SHADOW"] = "It follows you in the light.",
+		["SILENT"] = "Without a sound.",
+		["CIRCLE"] = "A ring with no end.",
+		["MIRROR"] = "It shows you yourself.",
+		["STATIC"] = "Hiss between stations.",
+		["BROKEN"] = "No longer works.",
+		["ECHOES"] = "Sounds that come back.",
+		["PACKET"] = "A small parcel of data.",
+		["ORPHAN"] = "A process whose parent is gone.",
+		["WINTER"] = "The coldest season.",
+
+		["PRESENT"] = "Right now. Also a gift.",
+		["NETWORK"] = "Many machines linked together.",
+		["CONNECT"] = "Join one thing to another.",
+		["DISCARD"] = "Throw away.",
+		["MESSAGE"] = "What you send to someone.",
+		["ABANDON"] = "Leave behind for good.",
+		["ARCHIVE"] = "Where old files are kept.",
+		["COPYING"] = "Making a second one of everything.",
+		["DROPOUT"] = "A signal that cuts off.",
+		["PHANTOM"] = "Something seen that is not there.",
+		["SERVERS"] = "Machines that answer requests.",
+		["LAYERED"] = "Stacked one on another.",
+		["SIGNALS"] = "More than one of what a receiver tunes for.",
+	};
+
+	public static string HintFor( string word ) => Hints.GetValueOrDefault( word, "No clue on file." );
 
 	public static IntrusionServer FindServer( string id ) => Servers.FirstOrDefault( x => x.Id == id );
 

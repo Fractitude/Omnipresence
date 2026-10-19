@@ -25,20 +25,30 @@ public enum IntrusionStatus
 	Locked,
 }
 
+/// <summary>
+/// What every terminal puzzle has in common, whatever its security level: the attempts left and how it stands.
+/// </summary>
+public interface IIntrusionPuzzle
+{
+	int Attempts { get; }
+	int MaxAttempts { get; }
+	IntrusionStatus Status { get; }
+}
+
 /// <param name="Index">The word or trick this is, for the click. -1 for junk and removed ones.</param>
 public sealed record DumpSegment( DumpKind Kind, string Text, int Index = -1 );
 
 public sealed record DumpLine( string Address, IReadOnlyList<DumpSegment> Segments );
 
 /// <summary>
-/// One run at a terminal: a memory dump with words in it, one of which is the password. Pick a word and the terminal says
-/// how many letters are in the right place; wrong picks use up attempts. Brackets with junk inside are tricks that remove
-/// a wrong word or give the attempts back. No engine objects, so the rules run without a panel.
+/// One run at a Level 2 terminal: a memory dump with words in it, one of which is the password. Pick a word and the
+/// terminal says how many letters are in the right place; wrong picks use up attempts. Brackets with junk inside are
+/// tricks that remove a wrong word or give the attempts back. No engine objects, so the rules run without a panel.
 /// </summary>
 /// <remarks>
 /// The password lives only here. Never copy it into the UI state: a shared app's state goes to every player.
 /// </remarks>
-public sealed class IntrusionPuzzle
+public sealed class IntrusionPuzzle : IIntrusionPuzzle
 {
 	const int LineWidth = 16;
 	const int MaxLog = 8;
