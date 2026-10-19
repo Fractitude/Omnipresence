@@ -33,6 +33,16 @@ public sealed class ProgressRecord
 	public long Credits { get; set; }
 
 	/// <summary>
+	/// Ids of the dead servers the player has breached. The reward of a server is paid once.
+	/// </summary>
+	public List<string> Cleared { get; set; } = new();
+
+	/// <summary>
+	/// Ids of the blueprints the player has found, for building at home.
+	/// </summary>
+	public List<string> Blueprints { get; set; } = new();
+
+	/// <summary>
 	/// The newest payments with other players, oldest first. See <see cref="PaymentRecord"/>.
 	/// </summary>
 	public List<PaymentRecord> Payments { get; set; } = new();
@@ -47,12 +57,25 @@ public sealed class ProgressRecord
 		Credits = System.Math.Clamp( Credits, 0, MaxCredits );
 		Revision = System.Math.Max( Revision, 0 );
 
+		Cleared = CleanIds( Cleared );
+		Blueprints = CleanIds( Blueprints );
+
 		Payments ??= new();
 		Payments.RemoveAll( x => x is null );
 
 		if ( Payments.Count > PaymentRecord.MaxKept )
 			Payments.RemoveRange( 0, Payments.Count - PaymentRecord.MaxKept );
 	}
+
+	const int MaxIds = 500;
+	const int MaxIdLength = 64;
+
+	static List<string> CleanIds( List<string> ids ) =>
+		(ids ?? [])
+			.Where( x => !string.IsNullOrWhiteSpace( x ) && x.Length <= MaxIdLength )
+			.Distinct()
+			.Take( MaxIds )
+			.ToList();
 }
 
 /// <summary>

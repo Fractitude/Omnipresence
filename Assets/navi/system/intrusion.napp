@@ -1,0 +1,15 @@
+{
+  "Title": "Intrusion",
+  "Description": "Break into dead servers in the Wired.",
+  "Icon": "terminal",
+  "Color": "#1f5f3f",
+  "PanelType": "OmnipresenceApps.Intrusion",
+  "CanMinimize": true,
+  "CanMaximize": false,
+  "CanResize": false,
+  "Shared": true,
+  "Permissions": [],
+  "IsSystem": true,
+  "__references": [],
+  "__version": 0
+}

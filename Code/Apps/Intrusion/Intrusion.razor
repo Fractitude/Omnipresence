@@ -1,0 +1,164 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/intrusion.napp, so it is always *@
+@* installed and has root. *@
+@* It is shared: the host's copy runs the puzzle and pays the rewards, and everyone near the screen watches the *@
+@* same terminal. The password never reaches the state. *@
+
+<root>
+	@if ( !UiState.HasAccess )
+	{
+		<div class="message">@UiState.Message</div>
+	}
+	else if ( UiState.Screen is IntrusionScreen.Servers or IntrusionScreen.Blueprints )
+	{
+		<div class="tabs">
+			<div class="tab @( UiState.Screen == IntrusionScreen.Servers ? "active" : "" )"
+			     @onclick=@( () => Navi.Act( IntrusionViewModel.TabAction, IntrusionViewModel.ServersTab ) )>Servers</div>
+			<div class="tab @( UiState.Screen == IntrusionScreen.Blueprints ? "active" : "" )"
+			     @onclick=@( () => Navi.Act( IntrusionViewModel.TabAction, IntrusionViewModel.BlueprintsTab ) )>Blueprints</div>
+		</div>
+
+		@if ( UiState.Screen == IntrusionScreen.Servers )
+		{
+			<div class="list">
+				@foreach ( var row in UiState.Servers )
+				{
+					<div class="server @( row.Cleared ? "cleared" : "" )"
+					     @onclick=@( () => Navi.Act( IntrusionViewModel.OpenAction, row.Id ) )>
+						<div class="server-top">
+							<div class="server-name">@row.Name</div>
+							<div class="difficulty @row.Difficulty.ToLowerInvariant()">@row.Difficulty</div>
+						</div>
+						<div class="server-meta">@row.Address - @row.Layer</div>
+						<div class="server-blurb">@row.Blurb</div>
+						<div class="server-reward">@( row.Cleared ? "Breached" : row.Reward )</div>
+					</div>
+				}
+			</div>
+		}
+		else
+		{
+			<div class="list">
+				@if ( UiState.Blueprints.Count == 0 )
+				{
+					<div class="empty">No blueprints yet. Some dead servers hold them.</div>
+				}
+
+				@foreach ( var row in UiState.Blueprints )
+				{
+					<div class="server">
+						<div class="server-name">@row.Name</div>
+						<div class="server-blurb">@row.Description</div>
+						<div class="server-meta">Found on @row.From. Build it at home.</div>
+					</div>
+				}
+			</div>
+		}
+	}
+	else
+	{
+		<div class="head">
+			<div class="back" @onclick=@( () => Navi.Act( IntrusionViewModel.BackAction ) )>&lt; Disconnect</div>
+			<div class="host">@UiState.ServerName @UiState.ServerAddress</div>
+		</div>
+
+		<div class="attempts">
+			Attempts:
+			@for ( var i = 0; i < UiState.MaxAttempts; i++ )
+			{
+				<span class="pip @( i < UiState.Attempts ? "on" : "" )"></span>
+			}
+		</div>
+
+		<div class="body">
+			<div class="dump">
+				@foreach ( var line in UiState.Dump )
+				{
+					<div class="line">
+						<span class="addr">@line.Address</span>
+						@foreach ( var segment in line.Segments )
+						{
+							@if ( segment.Kind == DumpKind.Word && UiState.Screen == IntrusionScreen.Terminal )
+							{
+								<span class="word" @onclick=@( () => Navi.Act( IntrusionViewModel.GuessAction, segment.Index.ToString() ) )>@segment.Text</span>
+							}
+							else if ( segment.Kind == DumpKind.Trick && UiState.Screen == IntrusionScreen.Terminal )
+							{
+								<span class="trick" @onclick=@( () => Navi.Act( IntrusionViewModel.TrickAction, segment.Index.ToString() ) )>@segment.Text</span>
+							}
+							else
+							{
+								<span class="junk">@segment.Text</span>
+							}
+						}
+					</div>
+				}
+			</div>
+
+			<div class="log">
+				@foreach ( var entry in UiState.Log )
+				{
+					<div class="entry">@entry</div>
+				}
+			</div>
+		</div>
+
+		@if ( UiState.Screen == IntrusionScreen.Breached )
+		{
+			<div class="result good">
+				<div class="result-title">ACCESS GRANTED</div>
+				@foreach ( var reward in UiState.Rewards )
+				{
+					<div class="reward">@reward</div>
+				}
+				<div class="button" @onclick=@( () => Navi.Act( IntrusionViewModel.BackAction ) )>Disconnect</div>
+			</div>
+		}
+		else if ( UiState.Screen == IntrusionScreen.Locked )
+		{
+			<div class="result bad">
+				<div class="result-title">TERMINAL LOCKED</div>
+				<div class="button" @onclick=@( () => Navi.Act( IntrusionViewModel.RetryAction ) )>Try again</div>
+				<div class="button" @onclick=@( () => Navi.Act( IntrusionViewModel.BackAction ) )>Disconnect</div>
+			</div>
+		}
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	IntrusionViewModel ViewModel => field ??= new( GetSeat );
+
+	IntrusionUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<IntrusionUiState>() ?? IntrusionUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat()
+	{
+		if ( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer is not { HasUser: true } computer )
+			return null;
+
+		return Networking.IsActive ? computer.User : Connection.Local;
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}

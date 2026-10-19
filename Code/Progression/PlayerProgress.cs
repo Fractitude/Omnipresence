@@ -42,6 +42,21 @@ public sealed class PlayerProgress : Component
 	public int PaymentVersion { get; private set; }
 
 	/// <summary>
+	/// The ids of the dead servers this player has breached. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<string> ClearedServers => record?.Cleared ?? [];
+
+	/// <summary>
+	/// The ids of the blueprints this player has found, oldest first. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<string> Blueprints => record?.Blueprints ?? [];
+
+	/// <summary>
+	/// Bumps whenever a server is breached, so a screen knows to redraw. Host only.
+	/// </summary>
+	public int IntrusionVersion { get; private set; }
+
+	/// <summary>
 	/// The progress of the player on this connection, or null if they have none yet.
 	/// </summary>
 	public static PlayerProgress For( Connection connection ) =>
@@ -230,6 +245,31 @@ public sealed class PlayerProgress : Component
 
 		AddPayment( new() { At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount } );
 		to.AddPayment( new() { At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount } );
+		return true;
+	}
+
+	/// <summary>
+	/// Pay out the reward of a dead server the first time it is breached: XP, credits and a blueprint. Host only.
+	/// Returns whether it was paid, which is false when the player already breached that server.
+	/// </summary>
+	public bool CompleteIntrusion( string serverId, long xp, long credits, string blueprint )
+	{
+		if ( !CanChange || string.IsNullOrWhiteSpace( serverId ) || record.Cleared.Contains( serverId ) )
+			return false;
+
+		record.Cleared.Add( serverId );
+
+		if ( !string.IsNullOrEmpty( blueprint ) && !record.Blueprints.Contains( blueprint ) )
+			record.Blueprints.Add( blueprint );
+
+		if ( xp > 0 )
+			record.Xp = System.Math.Min( record.Xp + xp, ProgressCurve.MaxXp );
+
+		if ( credits > 0 )
+			record.Credits = System.Math.Min( record.Credits + credits, ProgressRecord.MaxCredits );
+
+		IntrusionVersion++;
+		Changed();
 		return true;
 	}
 

@@ -1,0 +1,290 @@
+Intrusion
+{
+	width: 360px;
+	height: 460px;
+	flex-direction: column;
+	padding: 10px;
+	gap: 8px;
+	background-color: #050a07;
+	color: #5dff9a;
+	font-size: 12px;
+}
+
+.message, .empty
+{
+	color: #3d8a5c;
+	padding: 6px 2px;
+}
+
+.tabs
+{
+	flex-direction: row;
+	gap: 6px;
+	flex-shrink: 0;
+
+	.tab
+	{
+		padding: 5px 12px;
+		border: 1px solid #1d4a31;
+		color: #3d8a5c;
+		cursor: pointer;
+
+		&.active
+		{
+			background-color: #0f2a1b;
+			color: #5dff9a;
+			border-color: #5dff9a;
+		}
+
+		&:hover
+		{
+			color: #5dff9a;
+		}
+	}
+}
+
+.list
+{
+	flex-direction: column;
+	gap: 6px;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+}
+
+.server
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 3px;
+	padding: 8px 10px;
+	border: 1px solid #1d4a31;
+	background-color: #08140d;
+	cursor: pointer;
+
+	&:hover
+	{
+		border-color: #5dff9a;
+		background-color: #0c2015;
+	}
+
+	&.cleared
+	{
+		opacity: 0.55;
+	}
+
+	.server-top
+	{
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.server-name
+	{
+		font-weight: 700;
+		font-size: 13px;
+	}
+
+	.server-meta
+	{
+		color: #3d8a5c;
+		font-size: 11px;
+	}
+
+	.server-blurb
+	{
+		color: #8fd6aa;
+		font-size: 11px;
+	}
+
+	.server-reward
+	{
+		color: #ffd24a;
+		font-size: 11px;
+	}
+}
+
+.difficulty
+{
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+
+	&.easy
+	{
+		color: #5dff9a;
+	}
+
+	&.medium
+	{
+		color: #ffd24a;
+	}
+
+	&.hard
+	{
+		color: #ff6b6b;
+	}
+}
+
+.head
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.back
+	{
+		cursor: pointer;
+		color: #3d8a5c;
+
+		&:hover
+		{
+			color: #5dff9a;
+		}
+	}
+
+	.host
+	{
+		color: #8fd6aa;
+	}
+}
+
+.attempts
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+
+	.pip
+	{
+		width: 10px;
+		height: 10px;
+		border: 1px solid #1d4a31;
+		background-color: transparent;
+
+		&.on
+		{
+			background-color: #5dff9a;
+			border-color: #5dff9a;
+		}
+	}
+}
+
+.body
+{
+	flex-direction: row;
+	gap: 10px;
+	flex-grow: 1;
+	min-height: 0;
+}
+
+.dump
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	overflow-y: scroll;
+
+	.line
+	{
+		flex-direction: row;
+		white-space: pre;
+		font-family: "Roboto Mono";
+		font-size: 11px;
+		height: 15px;
+		align-items: center;
+	}
+
+	.addr
+	{
+		color: #1f6b44;
+		margin-right: 8px;
+	}
+
+	.junk
+	{
+		color: #2f7a52;
+	}
+
+	.word
+	{
+		color: #5dff9a;
+		font-weight: 700;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #5dff9a;
+			color: #050a07;
+		}
+	}
+
+	.trick
+	{
+		color: #ffd24a;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #ffd24a;
+			color: #050a07;
+		}
+	}
+}
+
+.log
+{
+	flex-direction: column;
+	flex-grow: 1;
+	justify-content: flex-end;
+	gap: 2px;
+	font-family: "Roboto Mono";
+	font-size: 11px;
+	color: #8fd6aa;
+}
+
+.result
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 8px 10px;
+	border: 1px solid;
+
+	&.good
+	{
+		border-color: #5dff9a;
+	}
+
+	&.bad
+	{
+		border-color: #ff6b6b;
+		color: #ff6b6b;
+	}
+
+	.result-title
+	{
+		font-weight: 700;
+		letter-spacing: 2px;
+	}
+
+	.reward
+	{
+		color: #ffd24a;
+	}
+
+	.button
+	{
+		padding: 5px 10px;
+		border: 1px solid currentColor;
+		cursor: pointer;
+		align-self: flex-start;
+
+		&:hover
+		{
+			background-color: rgba( 93, 255, 154, 0.15 );
+		}
+	}
+}
