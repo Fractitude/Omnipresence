@@ -51,6 +51,16 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 			nameof( NaviComputer.PinnedApps ), nameof( NaviComputer.StartFavorites ), nameof( NaviComputer.Tags ),
 			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.SystemAppFolders ) ) );
 
+		Add( "Permissions", "shield", false, () => Sheet( computerObject,
+			nameof( NaviComputer.GrantedPermissions ), nameof( NaviComputer.RootApps ),
+			nameof( NaviComputer.ReviewedApps ) ) );
+
+		Add( "Files", "folder", false, () => Sheet( computerObject,
+			nameof( NaviComputer.DriveName ), nameof( NaviComputer.DriveSizeMegabytes ) ) );
+
+		Add( "Notifications", "notifications", false, () => Sheet( computerObject,
+			nameof( NaviComputer.NotificationSound ), nameof( NaviComputer.MutedNotificationApps ) ) );
+
 		Add( "Appearance", "palette", false, () => Sheet( computerObject,
 			nameof( NaviComputer.Theme ), nameof( NaviComputer.ColorScheme ), nameof( NaviComputer.Wallpaper ),
 			nameof( NaviComputer.BlurLevel ), nameof( NaviComputer.TransparencyLevel ),
@@ -79,16 +89,6 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 				nameof( NaviInputCapture.FlyTime ), nameof( NaviInputCapture.Fill ),
 				nameof( NaviInputCapture.FreeCursor ) ) );
 		}
-
-		Add( "Files", "folder", false, () => Sheet( computerObject,
-			nameof( NaviComputer.DriveName ), nameof( NaviComputer.DriveSizeMegabytes ) ) );
-
-		Add( "Notifications", "notifications", false, () => Sheet( computerObject,
-			nameof( NaviComputer.NotificationSound ), nameof( NaviComputer.MutedNotificationApps ) ) );
-
-		Add( "Permissions", "shield", false, () => Sheet( computerObject,
-			nameof( NaviComputer.GrantedPermissions ), nameof( NaviComputer.RootApps ),
-			nameof( NaviComputer.ReviewedApps ) ) );
 
 		Add( "Saving", "save", false, () =>
 		{
