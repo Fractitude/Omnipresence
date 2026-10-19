@@ -33,7 +33,7 @@ public static class OmnipresenceMenu
 	/// </summary>
 	static List<string> SavedEntries()
 	{
-		var data = FileSystem.Data;
+		var data = Sandbox.FileSystem.Data;
 
 		return data.FindDirectory( "/" )
 			.Select( x => x + "/" )
@@ -43,7 +43,7 @@ public static class OmnipresenceMenu
 
 	static void Clear( List<string> entries )
 	{
-		var data = FileSystem.Data;
+		var data = Sandbox.FileSystem.Data;
 
 		foreach ( var entry in entries )
 		{
