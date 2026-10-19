@@ -1,0 +1,179 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/payments.napp, so it is always *@
+@* installed and has root. *@
+@* It is shared: the host's copy moves the money, and every player sees the same window. Whoever pays is the player *@
+@* in the seat, worked out on the host, never from what the panel sends. *@
+
+<root>
+	@if ( !UiState.HasAccount )
+	{
+		<div class="message">@UiState.Message</div>
+	}
+	else if ( UiState.Screen == PaymentsScreen.Success && UiState.Target is { } paid )
+	{
+		<div class="success">
+			<div class="burst">
+				<div class="ring"></div>
+				<div class="ring late"></div>
+				<div class="badge"><i>check</i></div>
+			</div>
+			<div class="sent-amount">@UiState.SentAmount</div>
+			<div class="sent-to">sent to @paid.Name</div>
+			<div class="button done" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )>Done</div>
+		</div>
+	}
+	else if ( UiState.Screen == PaymentsScreen.Send && UiState.Target is { } target )
+	{
+		<div class="topbar">
+			<div class="back" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )><i>arrow_back</i></div>
+			<div class="title">Send money</div>
+		</div>
+
+		<div class="recipient">
+			<div class="avatar big">@target.Initial</div>
+			<div class="recipient-name">@target.Name</div>
+			<div class="recipient-hint">Available: @UiState.Balance</div>
+		</div>
+
+		<div class="send">
+			<div class="currency">$</div>
+			<TextEntry @ref=AmountEntry class="amount" Value=@( UiState.Amount ) Placeholder="0" MaxLength=@( 12 )
+			           OnTextEdited=@AmountEdited/>
+		</div>
+
+		<div class="quick">
+			@foreach ( var value in QuickAmounts )
+			{
+				<div class="chip" @onclick=@( () => SetAmount( value ) )>$@value</div>
+			}
+		</div>
+
+		@if ( UiState.Notice != "" )
+		{
+			<div class="notice">@UiState.Notice</div>
+		}
+
+		<div class="button confirm" @onclick=@( () => Navi.Act( PaymentsViewModel.SendAction ) )>Confirm and send</div>
+	}
+	else
+	{
+		<div class="card">
+			<div class="card-top">
+				<div class="card-label">Available balance</div>
+				<div class="card-owner">@UiState.Owner</div>
+			</div>
+			<div class="balance">@UiState.Balance</div>
+		</div>
+
+		<div class="section">
+			<div class="heading">Send to</div>
+			<div class="payees">
+				@if ( UiState.Payees.Count == 0 )
+				{
+					<div class="empty">No other players online.</div>
+				}
+
+				@foreach ( var payee in UiState.Payees )
+				{
+					<div class="payee" @onclick=@( () => Navi.Act( PaymentsViewModel.ChooseAction, payee.Id ) )>
+						<div class="avatar">@payee.Initial</div>
+						<div class="name">@payee.Name</div>
+						<i class="go">chevron_right</i>
+					</div>
+				}
+			</div>
+			@if ( UiState.Notice != "" )
+			{
+				<div class="notice">@UiState.Notice</div>
+			}
+		</div>
+
+		<div class="section grow">
+			<div class="heading">Activity</div>
+			<div class="history">
+				@if ( UiState.History.Count == 0 )
+				{
+					<div class="empty">No payments yet.</div>
+				}
+
+				@foreach ( var row in UiState.History )
+				{
+					<div class="row">
+						<div class="avatar @( row.Incoming ? "in" : "out" )">@row.Initial</div>
+						<div class="details">
+							<div class="peer">@row.Peer</div>
+							<div class="when">@row.When</div>
+						</div>
+						<div class="amount-text @( row.Incoming ? "in" : "out" )">@row.Amount</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	static readonly string[] QuickAmounts = ["10", "50", "100", "500"];
+
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	PaymentsViewModel ViewModel => field ??= new( GetSeat );
+
+	PaymentsUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<PaymentsUiState>() ?? PaymentsUiState.Empty : ViewModel.UiState;
+
+	/// <summary>
+	/// The amount field. Plain view plumbing: what is typed goes to the host as it changes, and comes back in the state.
+	/// </summary>
+	TextEntry AmountEntry { get; set; }
+
+	Connection GetSeat()
+	{
+		if ( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer is not { HasUser: true } computer )
+			return null;
+
+		return Networking.IsActive ? computer.User : Connection.Local;
+	}
+
+	/// <summary>
+	/// Whole numbers only: anything else typed or pasted is dropped before the host hears of it.
+	/// </summary>
+	void AmountEdited( string text )
+	{
+		var digits = new string( text.Where( char.IsAsciiDigit ).ToArray() );
+
+		if ( digits != text )
+			AmountEntry.Text = digits;
+
+		Navi.Act( PaymentsViewModel.AmountAction, digits );
+	}
+
+	void SetAmount( string digits )
+	{
+		if ( AmountEntry is not null )
+			AmountEntry.Text = digits;
+
+		Navi.Act( PaymentsViewModel.AmountAction, digits );
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}

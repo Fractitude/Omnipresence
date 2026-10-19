@@ -23,6 +23,11 @@ public sealed class ProgressRecord
 	public long Money { get; set; }
 
 	/// <summary>
+	/// The newest payments with other players, oldest first. See <see cref="PaymentRecord"/>.
+	/// </summary>
+	public List<PaymentRecord> Payments { get; set; } = new();
+
+	/// <summary>
 	/// Make a loaded record safe: a file or a backend is outside input, and can hold anything.
 	/// </summary>
 	public void Sanitize()
@@ -30,5 +35,38 @@ public sealed class ProgressRecord
 		Xp = System.Math.Clamp( Xp, 0, ProgressCurve.MaxXp );
 		Money = System.Math.Clamp( Money, 0, MaxMoney );
 		Revision = System.Math.Max( Revision, 0 );
+
+		Payments ??= new();
+		Payments.RemoveAll( x => x is null );
+
+		if ( Payments.Count > PaymentRecord.MaxKept )
+			Payments.RemoveRange( 0, Payments.Count - PaymentRecord.MaxKept );
 	}
+}
+
+/// <summary>
+/// One payment, as the player it was for sees it. Plain data, saved in the <see cref="ProgressRecord"/>.
+/// </summary>
+public sealed class PaymentRecord
+{
+	/// <summary>
+	/// The most a player keeps. Older ones make room.
+	/// </summary>
+	public const int MaxKept = 100;
+
+	/// <summary>
+	/// Unix seconds.
+	/// </summary>
+	public long At { get; set; }
+
+	/// <summary>
+	/// The other player's Steam id and their name when it happened.
+	/// </summary>
+	public string PeerId { get; set; } = "";
+	public string PeerName { get; set; } = "";
+
+	/// <summary>
+	/// Positive when the player received it, negative when they sent it.
+	/// </summary>
+	public long Amount { get; set; }
 }

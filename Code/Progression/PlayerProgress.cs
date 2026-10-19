@@ -18,6 +18,27 @@ public sealed class PlayerProgress : Component
 	public int Level => ProgressCurve.LevelFor( Xp );
 
 	/// <summary>
+	/// The connection this player is, or null before the host has set it.
+	/// </summary>
+	public Connection Owner => Network.Owner ?? Connection.Local;
+
+	/// <summary>
+	/// The newest payments, oldest first. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<PaymentRecord> Payments => record?.Payments ?? [];
+
+	/// <summary>
+	/// Bumps whenever a payment is added, so a screen knows to redraw. Host only.
+	/// </summary>
+	public int PaymentVersion { get; private set; }
+
+	/// <summary>
+	/// The progress of the player on this connection, or null if they have none yet.
+	/// </summary>
+	public static PlayerProgress For( Connection connection ) =>
+		connection is null ? null : Game.ActiveScene?.GetAll<PlayerProgress>().FirstOrDefault( x => x.Owner == connection );
+
+	/// <summary>
 	/// The progress of the player at this computer, or null before their player has spawned.
 	/// </summary>
 	public static PlayerProgress Local => Game.ActiveScene?.GetAll<PlayerProgress>().FirstOrDefault( x => !x.IsProxy );
@@ -151,6 +172,41 @@ public sealed class PlayerProgress : Component
 		record.Money -= amount;
 		Changed();
 		return true;
+	}
+
+	/// <summary>
+	/// Move money from this player to another, and write it in both histories. Host only. Returns whether it was moved:
+	/// not to oneself, not more than there is, not past the most the other can hold.
+	/// </summary>
+	public bool TryPay( PlayerProgress to, long amount )
+	{
+		if ( !CanChange || to is null || to == this || !to.CanChange || amount <= 0 )
+			return false;
+
+		if ( record.Money < amount || to.record.Money + amount > ProgressRecord.MaxMoney )
+			return false;
+
+		var at = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		var from = Owner;
+		var target = to.Owner;
+
+		record.Money -= amount;
+		to.record.Money += amount;
+
+		AddPayment( new() { At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount } );
+		to.AddPayment( new() { At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount } );
+		return true;
+	}
+
+	void AddPayment( PaymentRecord payment )
+	{
+		record.Payments.Add( payment );
+
+		if ( record.Payments.Count > PaymentRecord.MaxKept )
+			record.Payments.RemoveAt( 0 );
+
+		PaymentVersion++;
+		Changed();
 	}
 
 	void Changed()
