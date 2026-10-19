@@ -198,7 +198,9 @@ sealed class SavedStatePanel : Widget
 
 	void AddRow( string title, string explanation )
 	{
-		var layout = body.Layout;
+		// Title and description sit close together; the spacing between options comes from the body.
+		var layout = body.Layout.AddColumn();
+		layout.Spacing = 0;
 
 		var check = new Tick( this, title, selected.Contains( title ) );
 		check.Toggled = on =>
