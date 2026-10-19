@@ -78,6 +78,10 @@ Losing such a field fails silently. Navi lost its map of downloaded Store apps t
 - Razor inline expressions are spaced: `@( entry.Expanded ? "Less" : "More" )`.
 - 120 columns. The doc covers where a line breaks and how: Razor attributes wrap aligned under the first attribute, LINQ chains get one call per line, collection expressions open on the next line.
 
+## Git commits
+
+When you finish a piece of work, commit it, without waiting to be asked. Stage only the files you changed for that work, never unrelated changes already in the working tree. Format the files you touched first (see Code style).
+
 ## Git ignores
 
 Generated files are ignored: `*.csproj`, `*.slnx`, `.sbox/`, compiled assets (`*_c`, except `*.shader_c`), `launchSettings.json`, `Exports/`.

@@ -7,10 +7,13 @@ namespace Sandbox;
 public static class ProgressCommands
 {
 	[ConCmd( "progress_give_xp" )]
-	public static void GiveXp( long amount ) => Grant( amount, 0 );
+	public static void GiveXp( long amount ) => Grant( amount, 0, 0 );
 
 	[ConCmd( "progress_give_money" )]
-	public static void GiveMoney( long amount ) => Grant( 0, amount );
+	public static void GiveMoney( long amount ) => Grant( 0, amount, 0 );
+
+	[ConCmd( "progress_give_credits" )]
+	public static void GiveCredits( long amount ) => Grant( 0, 0, amount );
 
 	[ConCmd( "progress_show" )]
 	public static void Show()
@@ -21,10 +24,10 @@ public static class ProgressCommands
 			return;
 		}
 
-		Log.Info( $"Level {progress.Level}, {progress.Xp} XP, ${progress.Money}" );
+		Log.Info( $"Level {progress.Level}, {progress.Xp} XP, ${progress.Money}, {progress.Credits} credits" );
 	}
 
-	static void Grant( long xp, long money )
+	static void Grant( long xp, long money, long credits )
 	{
 		if ( PlayerProgress.Local is not { Loaded: true } progress )
 		{
@@ -32,6 +35,6 @@ public static class ProgressCommands
 			return;
 		}
 
-		progress.DebugGrant( xp, money );
+		progress.DebugGrant( xp, money, credits );
 	}
 }

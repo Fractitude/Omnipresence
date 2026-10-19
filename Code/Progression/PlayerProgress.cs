@@ -1,7 +1,7 @@
 namespace Sandbox;
 
 /// <summary>
-/// A player's level, XP and money, on the player object. The host's <see cref="PlayerProgression"/> holds the real
+/// A player's level, XP, dollars and credits, on the player object. The host's <see cref="PlayerProgression"/> holds the real
 /// record; this shows it to everyone through <c>[Sync]</c> and is the only way to change it. Clients can't: every
 /// method that changes a value does nothing off the host.
 /// </summary>
@@ -13,7 +13,16 @@ public sealed class PlayerProgress : Component
 	[Sync( SyncFlags.FromHost )] public bool Loaded { get; private set; }
 
 	[Sync( SyncFlags.FromHost )] public long Xp { get; private set; }
+
+	/// <summary>
+	/// Dollars, for the real world.
+	/// </summary>
 	[Sync( SyncFlags.FromHost )] public long Money { get; private set; }
+
+	/// <summary>
+	/// Credits, for the Wired.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )] public long Credits { get; private set; }
 
 	public int Level => ProgressCurve.LevelFor( Xp );
 
@@ -85,6 +94,7 @@ public sealed class PlayerProgress : Component
 			record = await PlayerProgression.LoadAsync( steamId );
 			Xp = record.Xp;
 			Money = record.Money;
+			Credits = record.Credits;
 			Loaded = true;
 		}
 		catch ( System.Exception e )
@@ -150,7 +160,7 @@ public sealed class PlayerProgress : Component
 	}
 
 	/// <summary>
-	/// Give money. Host only.
+	/// Give dollars. Host only.
 	/// </summary>
 	public void AddMoney( long amount )
 	{
@@ -162,14 +172,39 @@ public sealed class PlayerProgress : Component
 	}
 
 	/// <summary>
-	/// Take money if there is enough. Host only. Returns whether it was taken.
+	/// Take dollars if there are enough. Host only. Returns whether they were taken.
 	/// </summary>
-	public bool TrySpend( long amount )
+	public bool TrySpendMoney( long amount )
 	{
 		if ( !CanChange || amount <= 0 || record.Money < amount )
 			return false;
 
 		record.Money -= amount;
+		Changed();
+		return true;
+	}
+
+	/// <summary>
+	/// Give credits. Host only.
+	/// </summary>
+	public void AddCredits( long amount )
+	{
+		if ( !CanChange || amount <= 0 )
+			return;
+
+		record.Credits = System.Math.Min( record.Credits + amount, ProgressRecord.MaxCredits );
+		Changed();
+	}
+
+	/// <summary>
+	/// Take credits if there are enough. Host only. Returns whether they were taken.
+	/// </summary>
+	public bool TrySpendCredits( long amount )
+	{
+		if ( !CanChange || amount <= 0 || record.Credits < amount )
+			return false;
+
+		record.Credits -= amount;
 		Changed();
 		return true;
 	}
@@ -213,21 +248,23 @@ public sealed class PlayerProgress : Component
 	{
 		Xp = record.Xp;
 		Money = record.Money;
+		Credits = record.Credits;
 		dirty = true;
 		sinceChange = 0;
 	}
 
 	/// <summary>
-	/// Testing only: the player asks the host for XP and money. The host refuses unless it is the editor, and unless
-	/// the caller is this player.
+	/// Testing only: the player asks the host for XP, dollars and credits. The host refuses unless it is the editor, and
+	/// unless the caller is this player.
 	/// </summary>
 	[Rpc.Host]
-	public void DebugGrant( long xp, long money )
+	public void DebugGrant( long xp, long money, long credits )
 	{
 		if ( !Application.IsEditor || Rpc.Caller != (Network.Owner ?? Connection.Local) )
 			return;
 
 		AddXp( xp );
 		AddMoney( money );
+		AddCredits( credits );
 	}
 }

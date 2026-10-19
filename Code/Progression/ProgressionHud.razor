@@ -10,6 +10,7 @@
 			<div class="fill" style="width: @( ProgressCurve.Fraction( progress.Xp ) * 100f )%"></div>
 		</div>
 		<div class="money">$@progress.Money.ToString( "N0" )</div>
+		<div class="credits">@progress.Credits.ToString( "N0" ) cr</div>
 	}
 </root>
 
@@ -18,6 +19,6 @@
 	protected override int BuildHash()
 	{
 		var progress = PlayerProgress.Local;
-		return progress is { Loaded: true } ? System.HashCode.Combine( progress.Xp, progress.Money ) : 0;
+		return progress is { Loaded: true } ? System.HashCode.Combine( progress.Xp, progress.Money, progress.Credits ) : 0;
 	}
 }

@@ -8,6 +8,7 @@ public sealed class ProgressRecord
 {
 	public const int CurrentVersion = 1;
 	public const long MaxMoney = 1_000_000_000_000;
+	public const long MaxCredits = 1_000_000_000_000;
 
 	/// <summary>
 	/// The shape of this record, for migrating old saves.
@@ -20,7 +21,16 @@ public sealed class ProgressRecord
 	public long Revision { get; set; }
 
 	public long Xp { get; set; }
+
+	/// <summary>
+	/// Dollars: what the player spends in the real world.
+	/// </summary>
 	public long Money { get; set; }
+
+	/// <summary>
+	/// What the player spends in the Wired. Not convertible to <see cref="Money"/>.
+	/// </summary>
+	public long Credits { get; set; }
 
 	/// <summary>
 	/// The newest payments with other players, oldest first. See <see cref="PaymentRecord"/>.
@@ -34,6 +44,7 @@ public sealed class ProgressRecord
 	{
 		Xp = System.Math.Clamp( Xp, 0, ProgressCurve.MaxXp );
 		Money = System.Math.Clamp( Money, 0, MaxMoney );
+		Credits = System.Math.Clamp( Credits, 0, MaxCredits );
 		Revision = System.Math.Max( Revision, 0 );
 
 		Payments ??= new();

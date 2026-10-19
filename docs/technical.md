@@ -4,7 +4,9 @@ How the game's systems are built, and why. Navi has its own docs under `Librarie
 
 ## Player progression
 
-Each player has a level, experience (XP) and money. Later: inventory and other progress. The game runs on dedicated
+Each player has a level, experience (XP) and two currencies: dollars (`$`, saved as `Money`) for the real world, and
+credits (`cr`, `Credits`) for the Wired. They are separate balances with separate add and spend methods, and there is no
+conversion between them. Payments between players (the Payments app) move dollars only. Later: inventory and other progress. The game runs on dedicated
 servers, and the server is the only place this data is kept and changed.
 
 ### The rules
@@ -25,7 +27,7 @@ All in `Code/Progression/`:
 
 | Type | Job |
 |---|---|
-| `ProgressRecord` | What is saved for one player: `Version`, `Revision`, `Xp`, `Money`. Plain JSON. |
+| `ProgressRecord` | What is saved for one player: `Version`, `Revision`, `Xp`, `Money`, `Credits`. Plain JSON. |
 | `IProgressStore` | `LoadAsync( steamId )` and `SaveAsync( steamId, record )`. The only thing that knows where data lives. |
 | `FileProgressStore` | The store for now: one JSON file per player in `FileSystem.Data`, `progress/{steamId}.json`. |
 | `PlayerProgression` | Static, host only. Holds the store and a cache of loaded records. Load, change, save, evict. |
