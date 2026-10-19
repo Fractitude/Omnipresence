@@ -26,6 +26,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `Assets/` — scenes and other assets. `.scene` files are JSON; components are referenced by `__type` (custom components by class name, e.g. `Sandbox.NaviComputer`). Renaming a component class breaks scene references.
 - `ProjectSettings/` — `Input.config` defines input action names used by `Input.Down("Run")` etc.; `Collision.config` defines collision layers.
 - `Libraries/` — s&box library packages. `Libraries/navi/` is the Navi computer (`fractitude.navi`), a git submodule of `git@github.com:Fractitude/Navi.git` (clone with `--recurse-submodules`; commit library changes in that repo first): OS (`NaviComputer`), desktop UI (`NaviDesktop`), the app system and built-in apps. It is our own library, made to be installed in other games too; see `Libraries/navi/README.md`. Libraries can't reference game code.
+- `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 
 ## Navi Store apps
 
