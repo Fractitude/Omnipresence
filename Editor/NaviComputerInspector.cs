@@ -320,7 +320,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 					: process.Permissions.Count == 0 ? "no permissions"
 					: $"{process.Permissions.Count} permissions";
 
-				list.Add( ($"  {process.App.Name}", $"{process.DrawnWindows.Count()} window(s), {access}", "#9a9aa2") );
+				list.Add( ($"  {process.App.Name}", $"{process.DrawnWindows.Count()} window(s){(process.Tray is not null ? ", in tray" : "")}, {access}", "#9a9aa2") );
 			}
 
 			return list;
