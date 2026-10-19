@@ -2403,6 +2403,14 @@
               "Type": "Component",
               "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
             },
+            "Property": "ColorScheme",
+            "Value": "Light"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+            },
             "Property": "InstalledApps",
             "Value": [
               "navi/apps/textedit.napp"

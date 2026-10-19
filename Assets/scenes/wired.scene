@@ -1249,22 +1249,6 @@
                       {
                         "Target": {
                           "Type": "Component",
-                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-                        },
-                        "Property": "Theme",
-                        "Value": "Paper"
-                      },
-                      {
-                        "Target": {
-                          "Type": "Component",
-                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-                        },
-                        "Property": "Wallpaper",
-                        "Value": "Paper"
-                      },
-                      {
-                        "Target": {
-                          "Type": "Component",
                           "IdValue": "126ea964-9559-4780-9b35-42a53d96448f"
                         },
                         "Property": "RenderScale",
@@ -2055,7 +2039,7 @@
           {
             "Id": {
               "Type": "GameObject",
-              "IdValue": "ea3ac1c5-ec04-48f4-b0aa-0e2d0bb97ee1"
+              "IdValue": "6a20627a-2075-404a-80d6-4843efabfe65"
             },
             "Parent": {
               "Type": "GameObject",
@@ -2065,7 +2049,7 @@
             "ContainerProperty": "Children",
             "IsContainerArray": true,
             "Data": {
-              "__guid": "ea3ac1c5-ec04-48f4-b0aa-0e2d0bb97ee1",
+              "__guid": "6a20627a-2075-404a-80d6-4843efabfe65",
               "__version": 2,
               "Flags": 0,
               "Name": "Clothing - y_front_pants_white",
@@ -2086,18 +2070,18 @@
           {
             "Id": {
               "Type": "Component",
-              "IdValue": "dc6d8a53-ee9e-4524-9b9d-1a83aecc082a"
+              "IdValue": "05e2e7cd-edfc-4768-ad21-46b0f3fc143e"
             },
             "Parent": {
               "Type": "GameObject",
-              "IdValue": "ea3ac1c5-ec04-48f4-b0aa-0e2d0bb97ee1"
+              "IdValue": "6a20627a-2075-404a-80d6-4843efabfe65"
             },
             "PreviousElement": null,
             "ContainerProperty": "Components",
             "IsContainerArray": true,
             "Data": {
               "__type": "Sandbox.SkinnedModelRenderer",
-              "__guid": "dc6d8a53-ee9e-4524-9b9d-1a83aecc082a",
+              "__guid": "05e2e7cd-edfc-4768-ad21-46b0f3fc143e",
               "__enabled": true,
               "Flags": 0,
               "AnimationGraph": null,
