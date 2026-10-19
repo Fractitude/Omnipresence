@@ -49,7 +49,8 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 		Add( "Apps", "apps", true, () => Sheet( computerObject,
 			nameof( NaviComputer.InstalledApps ), nameof( NaviComputer.PinnedApps ),
 			nameof( NaviComputer.StartFavorites ), nameof( NaviComputer.Tags ),
-			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.SystemAppFolders ) ) );
+			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.SystemAppFolders ),
+			nameof( NaviComputer.InstalledPackages ) ) );
 
 		Add( "Appearance", "palette", true, () => Sheet( computerObject,
 			nameof( NaviComputer.Theme ), nameof( NaviComputer.ColorScheme ), nameof( NaviComputer.Wallpaper ),
@@ -86,9 +87,9 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 		Add( "Notifications", "notifications", false, () => Sheet( computerObject,
 			nameof( NaviComputer.NotificationSound ), nameof( NaviComputer.MutedNotificationApps ) ) );
 
-		Add( "Permissions and packages", "shield", false, () => Sheet( computerObject,
+		Add( "Permissions", "shield", false, () => Sheet( computerObject,
 			nameof( NaviComputer.GrantedPermissions ), nameof( NaviComputer.RootApps ),
-			nameof( NaviComputer.ReviewedApps ), nameof( NaviComputer.InstalledPackages ) ) );
+			nameof( NaviComputer.ReviewedApps ) ) );
 
 		Add( "Saving", "save", false, () =>
 		{
