@@ -191,14 +191,11 @@ public sealed class SavedStateWindow : BaseWindow
 		var data = Sandbox.FileSystem.Data;
 		var all = new List<Entry>();
 
-		foreach ( var file in data.FindFile( "progress", "*.json" ) )
-		{
-			all.Add( new Entry(
-				$"Player {Path.GetFileNameWithoutExtension( file )}",
-				"This player's XP and level, money, credits, hardware inventory and installed hardware, blueprints, "
-				+ "breached servers, packages on their way and payment history. They start over as a new player.",
-				[$"progress/{file}"] ) );
-		}
+		all.Add( new Entry(
+			"Player progression",
+			"Every player's XP and level, money, credits, hardware inventory and installed hardware, blueprints, breached "
+			+ "servers, packages on their way and payment history. Players start over as new.",
+			data.FindFile( "progress", "*.json" ).Select( x => $"progress/{x}" ).ToArray() ) );
 
 		all.Add( new Entry(
 			"World clock",
