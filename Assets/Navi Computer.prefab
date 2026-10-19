@@ -57,7 +57,7 @@
         "SystemAppFolders": [
           "navi/system/"
         ],
-        "TaskbarOrder": [],
+        "PinnedApps": [],
         "Theme": "Glass",
         "TransparencyLevel": 2,
         "Wallpaper": "Glass"
