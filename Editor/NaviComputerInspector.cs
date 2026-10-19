@@ -90,7 +90,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 				nameof( NaviInputCapture.FreeCursor ) ) );
 		}
 
-		Add( "Saving", "save", false, () =>
+		Add( "Saved state", "save", false, () =>
 		{
 			var panel = new Widget( this ) { Layout = Layout.Column() };
 			panel.Layout.Add( Sheet( computerObject, nameof( NaviComputer.SaveId ), nameof( NaviComputer.AutoSave ) ) );
