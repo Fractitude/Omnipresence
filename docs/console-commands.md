@@ -11,9 +11,10 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | Command | What it does |
 |---|---|
 | `progress_give_xp <amount>` | Give yourself XP. |
+| `progress_give_hack_xp <amount>` | Give yourself hacking XP. |
 | `progress_give_money <amount>` | Give yourself dollars. |
 | `progress_give_credits <amount>` | Give yourself credits. |
-| `progress_show` | Log your level, XP, dollars and credits. |
+| `progress_show` | Log your level, XP, hacking level and XP, dollars and credits. |
 
 ## World clock
 

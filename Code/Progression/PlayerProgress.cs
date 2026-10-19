@@ -1,7 +1,13 @@
 namespace Sandbox;
 
 /// <summary>
-/// A player's level, XP, dollars and credits, on the player object. The host's <see cref="PlayerProgression"/> holds the real
+/// What an operation paid: <see cref="First"/> is true when it was the first finished run, so the credits are the full
+/// reward.
+/// </summary>
+public sealed record OperationPayout( long HackXp, long Credits, long GhostBonus, bool First );
+
+/// <summary>
+/// A player's level, XP, hacking level, dollars and credits, on the player object. The host's <see cref="PlayerProgression"/> holds the real
 /// record; this shows it to everyone through <c>[Sync]</c> and is the only way to change it. Clients can't: every
 /// method that changes a value does nothing off the host.
 /// </summary>
@@ -29,7 +35,14 @@ public sealed class PlayerProgress : Component
 	/// </summary>
 	[Sync( SyncFlags.FromHost )] public long HostNow { get; private set; }
 
+	/// <summary>
+	/// Hacking XP, from hacking puzzles only. It never adds to <see cref="Xp"/>.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )] public long HackXp { get; private set; }
+
 	public int Level => ProgressCurve.LevelFor( Xp );
+
+	public int HackLevel => HackingCurve.LevelFor( HackXp );
 
 	/// <summary>
 	/// The connection this player is, or null before the host has set it.
@@ -60,6 +73,16 @@ public sealed class PlayerProgress : Component
 	/// Bumps whenever a server is breached, so a screen knows to redraw. Host only.
 	/// </summary>
 	public int IntrusionVersion { get; private set; }
+
+	/// <summary>
+	/// What the player has done in each operation. Host only: empty anywhere else.
+	/// </summary>
+	public IReadOnlyList<OperationRecord> Operations => record?.Operations ?? [];
+
+	/// <summary>
+	/// Bumps whenever an operation is finished, so a screen knows to redraw. Host only.
+	/// </summary>
+	public int OperationVersion { get; private set; }
 
 	/// <summary>
 	/// Hardware the player owns and hasn't installed, one entry per piece. Host only: empty anywhere else.
@@ -146,6 +169,7 @@ public sealed class PlayerProgress : Component
 		{
 			record = await PlayerProgression.LoadAsync( steamId );
 			Xp = record.Xp;
+			HackXp = record.HackXp;
 			Money = record.Money;
 			Credits = record.Credits;
 			Loaded = true;
@@ -209,6 +233,18 @@ public sealed class PlayerProgress : Component
 			return;
 
 		record.Xp = System.Math.Min( record.Xp + amount, ProgressCurve.MaxXp );
+		Changed();
+	}
+
+	/// <summary>
+	/// Give hacking XP. Host only. Zero and negative amounts are ignored.
+	/// </summary>
+	public void AddHackXp( long amount )
+	{
+		if ( !CanChange || amount <= 0 )
+			return;
+
+		record.HackXp = System.Math.Min( record.HackXp + amount, HackingCurve.MaxXp );
 		Changed();
 	}
 
@@ -287,10 +323,10 @@ public sealed class PlayerProgress : Component
 	}
 
 	/// <summary>
-	/// Pay out the reward of a dead server the first time it is breached: XP, credits and a blueprint. Host only.
+	/// Pay out the reward of a dead server the first time it is breached: hacking XP, credits and a blueprint. Host only.
 	/// Returns whether it was paid, which is false when the player already breached that server.
 	/// </summary>
-	public bool CompleteIntrusion( string serverId, long xp, long credits, string blueprint )
+	public bool CompleteIntrusion( string serverId, long hackXp, long credits, string blueprint )
 	{
 		if ( !CanChange || string.IsNullOrWhiteSpace( serverId ) || record.Cleared.Contains( serverId ) )
 			return false;
@@ -300,8 +336,8 @@ public sealed class PlayerProgress : Component
 		if ( !string.IsNullOrEmpty( blueprint ) && !record.Blueprints.Contains( blueprint ) )
 			record.Blueprints.Add( blueprint );
 
-		if ( xp > 0 )
-			record.Xp = System.Math.Min( record.Xp + xp, ProgressCurve.MaxXp );
+		if ( hackXp > 0 )
+			record.HackXp = System.Math.Min( record.HackXp + hackXp, HackingCurve.MaxXp );
 
 		if ( credits > 0 )
 			record.Credits = System.Math.Min( record.Credits + credits, ProgressRecord.MaxCredits );
@@ -309,6 +345,41 @@ public sealed class PlayerProgress : Component
 		IntrusionVersion++;
 		Changed();
 		return true;
+	}
+
+	/// <summary>
+	/// Pay out an operation that ended: hacking XP every time, credits in full the first time and a quarter after, and a
+	/// one-time bonus for the first ghost run. Host only. Returns what was paid, or null if nothing could be.
+	/// </summary>
+	/// <param name="grade">0 for none, up to 4 for a ghost run. A burned run has none.</param>
+	/// <param name="ghostBonus">Paid once, the first time <paramref name="grade"/> is a ghost run.</param>
+	public OperationPayout FinishOperation( string operationId, int grade, long hackXp, long credits, long ghostBonus )
+	{
+		if ( !CanChange || string.IsNullOrWhiteSpace( operationId ) )
+			return null;
+
+		var entry = record.Operations.FirstOrDefault( x => x.Id == operationId );
+		var first = grade > 0 && (entry is null || entry.Best == 0);
+		var ghosted = grade >= 4 && (entry is null || entry.Best < 4);
+
+		if ( entry is null )
+		{
+			entry = new() { Id = operationId };
+			record.Operations.Add( entry );
+		}
+
+		entry.Runs++;
+		entry.Best = System.Math.Max( entry.Best, grade );
+
+		var paidCredits = grade > 0 ? (first ? credits : credits / 4) : 0;
+		var paidBonus = ghosted ? ghostBonus : 0;
+
+		record.HackXp = System.Math.Min( record.HackXp + System.Math.Max( hackXp, 0 ), HackingCurve.MaxXp );
+		record.Credits = System.Math.Min( record.Credits + paidCredits + paidBonus, ProgressRecord.MaxCredits );
+
+		OperationVersion++;
+		Changed();
+		return new OperationPayout( hackXp, paidCredits, paidBonus, first );
 	}
 
 	/// <summary>
@@ -421,6 +492,7 @@ public sealed class PlayerProgress : Component
 	void Changed()
 	{
 		Xp = record.Xp;
+		HackXp = record.HackXp;
 		Money = record.Money;
 		Credits = record.Credits;
 		dirty = true;
@@ -428,16 +500,17 @@ public sealed class PlayerProgress : Component
 	}
 
 	/// <summary>
-	/// Testing only: the player asks the host for XP, dollars and credits. The host refuses unless it is the editor, and
-	/// unless the caller is this player.
+	/// Testing only: the player asks the host for XP, hacking XP, dollars and credits. The host refuses unless it is the
+	/// editor, and unless the caller is this player.
 	/// </summary>
 	[Rpc.Host]
-	public void DebugGrant( long xp, long money, long credits )
+	public void DebugGrant( long xp, long hackXp, long money, long credits )
 	{
 		if ( !Application.IsEditor || Rpc.Caller != (Network.Owner ?? Connection.Local) )
 			return;
 
 		AddXp( xp );
+		AddHackXp( hackXp );
 		AddMoney( money );
 		AddCredits( credits );
 	}

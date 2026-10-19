@@ -16,6 +16,29 @@ Intrusion
 	padding: 6px 2px;
 }
 
+.skill
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	color: #ffd24a;
+	font-size: 11px;
+
+	.skill-bar
+	{
+		flex-grow: 1;
+		height: 5px;
+		border: 1px solid #1d4a31;
+	}
+
+	.skill-fill
+	{
+		height: 100%;
+		background-color: #ffd24a;
+	}
+}
+
 .tabs
 {
 	flex-direction: row;

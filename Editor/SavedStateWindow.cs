@@ -207,8 +207,8 @@ public sealed class SavedStateWindow : BaseWindow
 
 		all.Add( new Entry(
 			"Player progression",
-			"Every player's XP and level, money, credits, hardware inventory and installed hardware, blueprints, breached "
-			+ "servers, packages on their way and payment history. Players start over as new.",
+			"Every player's XP, level, hacking XP and operation grades, money, credits, hardware inventory and installed "
+			+ "hardware, blueprints, breached servers, packages on their way and payment history. Players start over as new.",
 			data.FindFile( "progress", "*.json" ).Select( x => $"progress/{x}" ).ToArray() ) );
 
 		all.Add( new Entry(

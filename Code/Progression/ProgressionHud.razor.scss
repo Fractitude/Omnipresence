@@ -39,6 +39,18 @@ ProgressionHud
 	background-color: #f2eee2;
 }
 
+.hack-level
+{
+	font-size: 14px;
+	font-weight: 700;
+	color: #7dffb0;
+}
+
+.bar.hack .fill
+{
+	background-color: #7dffb0;
+}
+
 .money, .credits
 {
 	font-size: 16px;

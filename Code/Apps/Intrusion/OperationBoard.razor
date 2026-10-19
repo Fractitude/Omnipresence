@@ -1,0 +1,210 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace OmnipresenceApps
+
+@* An operation being run: the alert, the stage, and the way to do it (quick, or a puzzle). It draws what it is given and *@
+@* reports every click through OnAct, which the app sends to the host. It never holds a secret: the code, the watched *@
+@* relays and which log lines are the player's stay in the host's puzzle. *@
+
+<root>
+	<div class="meters">
+		<div class="meter">
+			<div class="meter-top">
+				<span>ALERT</span>
+				<span class="alert-label @View.AlertLabel.ToLowerInvariant()">@View.AlertLabel @View.Alert</span>
+			</div>
+			<div class="alert-bar">
+				<div class="alert-fill @View.AlertLabel.ToLowerInvariant()" style="width: @( View.Alert )%"></div>
+			</div>
+		</div>
+		<div class="counts">
+			<span class="count @( View.Traces > 0 ? "warn" : "" )">Traces @View.Traces</span>
+			<span class="count">Data @View.DataPercent%</span>
+		</div>
+	</div>
+
+	@if ( View.Phase == OperationPhase.Complete )
+	{
+		<div class="result good">
+			<div class="result-title">@View.Grade RUN</div>
+			<div class="note">@View.GradeNote</div>
+			<div class="note">Highest alert: @View.Peak</div>
+			@foreach ( var reward in Rewards )
+			{
+				<div class="reward">@reward</div>
+			}
+			<div class="buttons">
+				<div class="button" @onclick=@( () => Act( "again" ) )>Run again</div>
+				<div class="button" @onclick=@( () => OnDisconnect?.Invoke() )>Disconnect</div>
+			</div>
+		</div>
+	}
+	else if ( View.Phase == OperationPhase.Burned )
+	{
+		<div class="result bad">
+			<div class="result-title">BURNED</div>
+			<div class="note">The alert hit 100. They traced you and the connection is gone. Nothing was taken.</div>
+			@foreach ( var reward in Rewards )
+			{
+				<div class="reward">@reward</div>
+			}
+			<div class="buttons">
+				<div class="button" @onclick=@( () => Act( "again" ) )>Try again</div>
+				<div class="button" @onclick=@( () => OnDisconnect?.Invoke() )>Disconnect</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<div class="stage">
+			<div class="stage-title">@View.StageTitle</div>
+			<div class="stage-text">@View.StageText</div>
+		</div>
+
+		@if ( View.Phase == OperationPhase.Choose )
+		{
+			@foreach ( var choice in View.Choices )
+			{
+				<div class="choice @( choice.Loud ? "loud" : "quiet" ) @( choice.Enabled ? "" : "disabled" )"
+				     @onclick=@( () => ChoiceClicked( choice ) )>
+					<div class="choice-title">@( choice.Loud ? "[quick] " : choice.Id == "leave" ? "" : "[puzzle] " )@choice.Title</div>
+					<div class="choice-detail">@choice.Detail</div>
+				</div>
+			}
+		}
+		else if ( View.Code is { } code )
+		{
+			<div class="puzzle">
+				<div class="puzzle-line">Tries left: @code.TriesLeft / @code.MaxTries. Each wrong code adds alert.</div>
+
+				<div class="history">
+					@foreach ( var row in code.History )
+					{
+						<div class="history-row">
+							<span class="guess">@row.Guess</span>
+							<span class="clue">@row.Exact in place, @row.Near elsewhere</span>
+						</div>
+					}
+				</div>
+
+				<div class="slots">
+					@for ( var i = 0; i < code.Length; i++ )
+					{
+						<div class="slot">@( i < code.Pending.Length ? code.Pending[i].ToString() : "" )</div>
+					}
+				</div>
+
+				<div class="keys">
+					@for ( var d = 1; d <= code.Digits; d++ )
+					{
+						var digit = d.ToString();
+						<div class="key" @onclick=@( () => Act( "digit", digit ) )>@digit</div>
+					}
+					<div class="key wide" @onclick=@( () => Act( "back" ) )>Del</div>
+					<div class="key wide go" @onclick=@( () => Act( "enter" ) )>Enter</div>
+				</div>
+			</div>
+		}
+		else if ( View.Sweep is { } sweep )
+		{
+			<div class="puzzle">
+				<div class="puzzle-line">Reach the vault. Each move is a tick. # is a daemon. Moves left: @sweep.TicksLeft</div>
+
+				<div class="sweep">
+					<div class="sweep-labels">
+						<span>DOOR</span>
+						<span>VAULT</span>
+					</div>
+					@for ( var k = 0; k < sweep.Forecast.Count; k++ )
+					{
+						<div class="sweep-row @( k == 0 ? "now" : "" )">
+							<span class="sweep-when">@( k == 0 ? "now" : $"+{k}" )</span>
+							@foreach ( var mark in sweep.Forecast[k] )
+							{
+								<span class="sweep-cell @( mark == '#' ? "danger" : mark == 'P' ? "player" : "" )">@( mark == '.' ? "" : mark.ToString() )</span>
+							}
+						</div>
+					}
+				</div>
+
+				<div class="buttons">
+					<div class="button" @onclick=@( () => Act( "advance" ) )>Advance</div>
+					<div class="button" @onclick=@( () => Act( "wait" ) )>Wait (+alert)</div>
+					<div class="button" @onclick=@( () => Act( "back" ) )>Back (+alert)</div>
+				</div>
+			</div>
+		}
+		else if ( View.Route is { } route )
+		{
+			<div class="puzzle">
+				<div class="puzzle-line">Hop @( System.Math.Min( route.NextColumn + 1, route.Columns ) ) of @route.Columns. Audit and sensor software is watched. Unknown banners cost a ping.</div>
+
+				<div class="route">
+					@for ( var c = 0; c < route.Columns; c++ )
+					{
+						var column = c;
+						<div class="route-column">
+							@foreach ( var cell in route.Cells.Where( x => x.Column == column ) )
+							{
+								<div class="relay @( cell.Picked ? "picked" : "" ) @( cell.Reachable ? "reachable" : "" ) @( cell.Known ? "" : "unknown" )">
+									<div class="relay-pick" @onclick=@( () => Act( "relay", cell.Column.ToString(), cell.Row.ToString() ) )>@cell.Banner</div>
+									@if ( !cell.Known )
+									{
+										<div class="relay-ping" @onclick=@( () => Act( "ping", cell.Column.ToString(), cell.Row.ToString() ) )>ping</div>
+									}
+								</div>
+							}
+						</div>
+					}
+				</div>
+			</div>
+		}
+		else if ( View.Scrub is { } scrub )
+		{
+			<div class="puzzle">
+				<div class="puzzle-line">Your session is <span class="tag">@scrub.Tag</span>. Remove the @scrub.Mine of your lines, only yours. Selected: @scrub.Selected</div>
+
+				<div class="scrub">
+					@foreach ( var line in scrub.Lines )
+					{
+						<div class="scrub-line @( line.Selected ? "selected" : "" )" @onclick=@( () => Act( "toggle", line.Index.ToString() ) )>@line.Text</div>
+					}
+				</div>
+
+				<div class="buttons">
+					<div class="button" @onclick=@( () => Act( "commit" ) )>Delete selected</div>
+				</div>
+			</div>
+		}
+	}
+
+	<div class="log">
+		@foreach ( var entry in View.Log )
+		{
+			<div class="entry">@entry</div>
+		}
+	</div>
+</root>
+
+@code
+{
+	public OperationView View { get; set; }
+
+	/// <summary>What was won, once the run is over.</summary>
+	public IReadOnlyList<string> Rewards { get; set; } = [];
+
+	/// <summary>The player did something. The first word is what, the rest says which.</summary>
+	public System.Action<string[]> OnAct { get; set; }
+
+	public System.Action OnDisconnect { get; set; }
+
+	void Act( params string[] args ) => OnAct?.Invoke( args );
+
+	void ChoiceClicked( OperationChoice choice )
+	{
+		if ( choice.Enabled )
+			Act( "choose", choice.Id );
+	}
+
+	protected override int BuildHash() => System.HashCode.Combine( View, Rewards.Count );
+}

@@ -12,11 +12,30 @@
 	{
 		<div class="message">@UiState.Message</div>
 	}
-	else if ( UiState.Screen is IntrusionScreen.Servers or IntrusionScreen.Blueprints )
+	else if ( UiState.Screen == IntrusionScreen.Operation && UiState.Operation is { } operation )
 	{
+		<div class="head">
+			<div class="back" @onclick=@( () => Navi.Act( IntrusionViewModel.BackAction ) )>&lt; Disconnect</div>
+			<div class="host">@operation.Name @operation.Address</div>
+		</div>
+
+		<OperationBoard View=@operation Rewards=@UiState.Rewards OnAct=@OperationActed
+		                OnDisconnect=@( () => Navi.Act( IntrusionViewModel.BackAction ) )/>
+	}
+	else if ( UiState.Screen is IntrusionScreen.Servers or IntrusionScreen.Operations or IntrusionScreen.Blueprints )
+	{
+		<div class="skill">
+			<span>Hacking Lv @UiState.HackLevel</span>
+			<div class="skill-bar">
+				<div class="skill-fill" style="width: @( UiState.HackProgress * 100f )%"></div>
+			</div>
+		</div>
+
 		<div class="tabs">
 			<div class="tab @( UiState.Screen == IntrusionScreen.Servers ? "active" : "" )"
 			     @onclick=@( () => Navi.Act( IntrusionViewModel.TabAction, IntrusionViewModel.ServersTab ) )>Servers</div>
+			<div class="tab @( UiState.Screen == IntrusionScreen.Operations ? "active" : "" )"
+			     @onclick=@( () => Navi.Act( IntrusionViewModel.TabAction, IntrusionViewModel.OperationsTab ) )>Operations</div>
 			<div class="tab @( UiState.Screen == IntrusionScreen.Blueprints ? "active" : "" )"
 			     @onclick=@( () => Navi.Act( IntrusionViewModel.TabAction, IntrusionViewModel.BlueprintsTab ) )>Blueprints</div>
 		</div>
@@ -35,6 +54,28 @@
 						<div class="server-meta">@row.Address - @row.Layer - Security level @row.Level</div>
 						<div class="server-blurb">@row.Blurb</div>
 						<div class="server-reward">@( row.Cleared ? "Breached" : row.Reward )</div>
+					</div>
+				}
+			</div>
+		}
+		else if ( UiState.Screen == IntrusionScreen.Operations )
+		{
+			<div class="list">
+				@foreach ( var row in UiState.Operations )
+				{
+					<div class="server @( row.Locked ? "cleared" : "" )"
+					     @onclick=@( () => Navi.Act( IntrusionViewModel.OperationOpenAction, row.Id ) )>
+						<div class="server-top">
+							<div class="server-name">@row.Name</div>
+							<div class="difficulty @row.Difficulty.ToLowerInvariant()">@row.Difficulty</div>
+						</div>
+						<div class="server-meta">@row.Address - @row.Layer - Hacking Lv @row.MinLevel</div>
+						<div class="server-blurb">@row.Blurb</div>
+						<div class="server-reward">@( row.Locked ? $"Needs hacking level {row.MinLevel}" : row.Reward )</div>
+						@if ( row.Best != "" )
+						{
+							<div class="server-meta">Best run: @row.Best</div>
+						}
 					</div>
 				}
 			</div>
@@ -145,6 +186,8 @@
 
 	IntrusionUiState UiState =>
 		Navi.IsViewer ? Navi.GetState<IntrusionUiState>() ?? IntrusionUiState.Empty : ViewModel.UiState;
+
+	void OperationActed( string[] args ) => Navi.Act( IntrusionViewModel.OperationAction, args );
 
 	void WordEntered( string word ) => Navi.Act( IntrusionViewModel.WordAction, word );
 

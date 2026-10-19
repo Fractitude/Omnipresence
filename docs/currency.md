@@ -13,7 +13,7 @@ The game has two currencies. Each belongs to one world, and the two never mix.
 2. **Activity in the real world only earns dollars.** Jobs, selling things and anything else done at home pay in dollars, never credits.
 3. **Each currency is spent in its own world.** Dollars buy real-world things (hardware, mail, posters). Credits buy Wired things.
 4. **No conversion.** There is no exchange between the two. Code must not add a way to turn one into the other.
-5. **XP is separate.** XP and level come from either world and are not a currency.
+5. **XP is separate.** XP and level come from either world and are not a currency. Hacking XP and hacking level are a second skill that only hacking puzzles feed.
 
 ## In code
 

@@ -10,8 +10,12 @@
 		<div class="bar">
 			<div class="fill" style="width: @( ProgressCurve.Fraction( progress.Xp ) * 100f )%"></div>
 		</div>
+		<div class="hack-level">Hacking Lv @progress.HackLevel</div>
+		<div class="bar hack">
+			<div class="fill" style="width: @( HackingCurve.Fraction( progress.HackXp ) * 100f )%"></div>
+		</div>
 		<div class="money">$@progress.Money.ToString( "N0" )</div>
-		<div class="credits">@progress.Credits.ToString( "N0" ) cr</div>
+		<div class="credits">@progress.Credits.ToString( "N0" ) credits</div>
 	}
 </root>
 
@@ -23,7 +27,7 @@
 		var clock = (WorldClock.TimeOfDay, WorldClock.Day);
 
 		return progress is { Loaded: true }
-			? System.HashCode.Combine( progress.Xp, progress.Money, progress.Credits, clock )
+			? System.HashCode.Combine( progress.Xp, progress.HackXp, progress.Money, progress.Credits, clock )
 			: System.HashCode.Combine( clock );
 	}
 }

@@ -215,7 +215,7 @@ public sealed class HardwareStoreViewModel
 
 		if ( PlayerProgress.For( seat ) is { Loaded: true } progress
 		     && progress.CompleteIntrusion( server.Id, server.Xp, server.Credits, server.Blueprint ) )
-			rewards = [.. rewards, $"+{server.Xp:N0} XP"];
+			rewards = [.. rewards, $"+{server.Xp:N0} hacking XP"];
 	}
 
 	void Buy( string id )

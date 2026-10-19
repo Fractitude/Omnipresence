@@ -3,7 +3,7 @@
 How the real world and the Wired feed each other. Dollars (real world) buy hardware. Hardware, installed at home, makes the Wired easier. The Wired gives blueprints and XP. The two currencies never mix, see [currency.md](currency.md).
 
 ```
-Wired: crack dead servers (Intrusion) ──► blueprints, XP, credits
+Wired: crack dead servers (Intrusion) ──► blueprints, hacking XP, credits
                                               │ blueprint unlocks special orders
 Real world: Hardware Store ◄──────────────────┘
    buy with $  ─or─  hack the staff panel for a discount and free rerouted orders
@@ -19,7 +19,7 @@ Wired: every terminal gives more attempts and removes wrong words
 
 | App | Where | Kind | What it does |
 | --- | --- | --- | --- |
-| **Intrusion** | Home computer, the Wired | System app | Cracks dead servers: a word puzzle that pays XP, credits and blueprints. |
+| **Intrusion** | Home computer, the Wired | System app | Cracks dead servers: a word puzzle that pays hacking XP, credits and blueprints. Its Operations tab holds the heists, see [hacking.md](hacking.md). |
 | **Hardware Store** | The store's computer only | Normal app | Sells parts for dollars. Has the staff login hack. |
 | **Workbench** | Home computer | System app | Installs and removes parts. Sells nothing. |
 
@@ -66,7 +66,7 @@ On the store's Staff tab, **Break in** plays the same word puzzle as the dead se
   - every price is cut to 60% (`DiscountPercent`);
   - the Staff tab lists three orders from other customers (`HardwareCatalog.Orders`), each holding a restricted part. **Reroute to my home** sends that package to you for free, arriving after `RerouteDeliverySeconds` (120 s). Each order can be rerouted once per player.
 - **Failure:** the terminal locks and you can't try again for 2 minutes (`LockoutSeconds`). Leaving the puzzle is not a failure.
-- You can break in again as often as you like once the panel closes. XP (50) is paid on the first success only.
+- You can break in again as often as you like once the panel closes. Hacking XP (50) is paid on the first success only.
 
 The unlock and the lockout are in memory on the host (`StoreAccess`), so a host restart clears them. Everyone watching the screen sees the puzzle, but the password never reaches the shared state.
 
@@ -94,9 +94,9 @@ The dead servers below are all Level 2. The Hardware Store's staff login is Leve
 
 | Server | Difficulty | Reward (first clear only) |
 | --- | --- | --- |
-| Hollow Pines Radio | Easy | 80 XP, 120 credits, Signal Tuner blueprint |
-| Cyberia Basement | Medium | 200 XP, 400 credits |
-| The Copy Shop | Hard | 500 XP, 1,000 credits, RAM Stack blueprint |
+| Hollow Pines Radio | Easy | 80 hacking XP, 120 credits, Signal Tuner blueprint |
+| Cyberia Basement | Medium | 200 hacking XP, 400 credits |
+| The Copy Shop | Hard | 500 hacking XP, 1,000 credits, RAM Stack blueprint |
 
 Only works in the Wired ("No signal" at home). Pays credits, never dollars. The puzzle logic (`IntrusionPuzzle`, `WordGuessPuzzle`, both an `IIntrusionPuzzle`) has no engine objects, and the store reuses it.
 
