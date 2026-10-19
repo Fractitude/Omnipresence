@@ -214,7 +214,7 @@ sealed class SavedStatePanel : Widget
 		var lines = (explanation.Length + CharsPerLine - 1) / CharsPerLine;
 		var text = layout.Add( new Label( explanation, this ) { WordWrap = true } );
 		text.MinimumHeight = lines * LineHeight + 4;
-		text.SetStyles( "color: #aaa; margin-left: 24px;" );
+		text.SetStyles( "color: #aaa; margin-left: 28px;" );
 	}
 
 	void SelectAll( bool on )
