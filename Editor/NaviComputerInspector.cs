@@ -1,16 +1,16 @@
 namespace Omnipresence.Editor;
 
 /// <summary>
-/// The Inspector for <see cref="NaviDesktop"/>: one panel for the whole computer. A live status card on top, then
-/// collapsible sections that edit the <see cref="NaviComputer"/>, <see cref="NaviInputCapture"/> and the desktop itself,
+/// The Inspector for <see cref="NaviComputer"/>: one panel for the whole computer. A live status card on top, then
+/// collapsible sections that edit the computer, its <see cref="NaviInputCapture"/> and its <see cref="NaviDesktop"/>,
 /// so none of the three components has to be opened. Whether a section is open is remembered between sessions.
 /// </summary>
-[CustomEditor( typeof( NaviDesktop ) )]
-public sealed class NaviDesktopInspector : ComponentEditorWidget
+[CustomEditor( typeof( NaviComputer ) )]
+public sealed class NaviComputerInspector : ComponentEditorWidget
 {
 	readonly List<Section> sections = [];
 
-	public NaviDesktopInspector( SerializedObject obj ) : base( obj )
+	public NaviComputerInspector( SerializedObject obj ) : base( obj )
 	{
 		SetSizeMode( SizeMode.Default, SizeMode.Default );
 
@@ -26,21 +26,16 @@ public sealed class NaviDesktopInspector : ComponentEditorWidget
 		Layout.Clear( true );
 		sections.Clear();
 
-		var desktop = SerializedObject.Targets.FirstOrDefault() as NaviDesktop;
-
-		if ( !desktop.IsValid() )
-			return;
-
-		var computer = desktop.Components.Get<NaviComputer>();
-		var capture = desktop.Components.Get<NaviInputCapture>();
+		var computer = SerializedObject.Targets.FirstOrDefault() as NaviComputer;
 
 		if ( !computer.IsValid() )
-		{
-			Layout.Add( new Label( "This GameObject has no NaviComputer.", this ) );
 			return;
-		}
 
-		var computerObject = computer.GetSerialized();
+		var desktop = computer.Components.Get<NaviDesktop>();
+		var capture = computer.Components.Get<NaviInputCapture>();
+
+		var computerObject = SerializedObject;
+		var desktopObject = desktop.IsValid() ? desktop.GetSerialized() : null;
 		var captureObject = capture.IsValid() ? capture.GetSerialized() : null;
 
 		Layout.Add( new StatusCard( this, computer ) );
@@ -67,7 +62,9 @@ public sealed class NaviDesktopInspector : ComponentEditorWidget
 			Rows( sheet, computerObject,
 				nameof( NaviComputer.SnapToScreenEdges ), nameof( NaviComputer.SnapToWindows ),
 				nameof( NaviComputer.SnapDistance ) );
-			Rows( sheet, SerializedObject, nameof( NaviDesktop.MinWindowSize ), nameof( NaviDesktop.TooltipEdgeMargin ) );
+
+			if ( desktopObject is not null )
+				Rows( sheet, desktopObject, nameof( NaviDesktop.MinWindowSize ), nameof( NaviDesktop.TooltipEdgeMargin ) );
 
 			return Host( sheet );
 		} );
@@ -274,7 +271,7 @@ public sealed class NaviDesktopInspector : ComponentEditorWidget
 		[EditorEvent.Frame]
 		public void Frame()
 		{
-			if ( Visible )
+			if ( this.IsValid() && Visible )
 				Refresh();
 		}
 
