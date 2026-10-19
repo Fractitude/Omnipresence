@@ -5,7 +5,7 @@ namespace Omnipresence.Editor;
 /// </summary>
 public static class OmnipresenceMenu
 {
-	[Menu( "Editor", "Omnipresence/Apps..." )]
+	[Menu( "Editor", "Omnipresence/Navi apps..." )]
 	public static void OpenApps() => AppsWindow.Open();
 
 	[Menu( "Editor", "Omnipresence/Saved State..." )]
