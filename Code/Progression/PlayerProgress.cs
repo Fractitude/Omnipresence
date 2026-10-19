@@ -24,6 +24,16 @@ public sealed class PlayerProgress : Component
 	/// </summary>
 	[Sync( SyncFlags.FromHost )] public long Credits { get; private set; }
 
+	/// <summary>
+	/// The host's <see cref="WorldClock.Now"/>, refreshed every second, for clients to follow.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )] public long HostNow { get; private set; }
+
+	/// <summary>
+	/// The host's time zone, in minutes from UTC.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )] public int HostUtcOffset { get; private set; }
+
 	public int Level => ProgressCurve.LevelFor( Xp );
 
 	/// <summary>
