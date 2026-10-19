@@ -1228,14 +1228,6 @@
                           "Type": "Component",
                           "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
                         },
-                        "Property": "OnlyApps",
-                        "Value": []
-                      },
-                      {
-                        "Target": {
-                          "Type": "Component",
-                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-                        },
                         "Property": "ReviewedApps",
                         "Value": [
                           "navi/apps/textedit.napp",
@@ -1259,15 +1251,7 @@
                           "Type": "Component",
                           "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
                         },
-                        "Property": "Tags",
-                        "Value": []
-                      },
-                      {
-                        "Target": {
-                          "Type": "Component",
-                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-                        },
-                        "Property": "TaskbarOrder",
+                        "Property": "PinnedApps",
                         "Value": [
                           "navi/system/thewired.napp",
                           "navi/apps/files.napp",
@@ -1278,6 +1262,22 @@
                           "navi/system/intrusion.napp",
                           "navi/system/workbench.napp"
                         ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Theme",
+                        "Value": "Paper"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Wallpaper",
+                        "Value": "Paper"
                       },
                       {
                         "Target": {
@@ -2072,7 +2072,7 @@
           {
             "Id": {
               "Type": "GameObject",
-              "IdValue": "2d273e7c-b694-4464-9628-10355e28f35d"
+              "IdValue": "ea3ac1c5-ec04-48f4-b0aa-0e2d0bb97ee1"
             },
             "Parent": {
               "Type": "GameObject",
@@ -2082,7 +2082,7 @@
             "ContainerProperty": "Children",
             "IsContainerArray": true,
             "Data": {
-              "__guid": "2d273e7c-b694-4464-9628-10355e28f35d",
+              "__guid": "ea3ac1c5-ec04-48f4-b0aa-0e2d0bb97ee1",
               "__version": 2,
               "Flags": 0,
               "Name": "Clothing - y_front_pants_white",
@@ -2103,18 +2103,18 @@
           {
             "Id": {
               "Type": "Component",
-              "IdValue": "44cb51f0-563d-427e-ac85-5c23aa1dca1b"
+              "IdValue": "dc6d8a53-ee9e-4524-9b9d-1a83aecc082a"
             },
             "Parent": {
               "Type": "GameObject",
-              "IdValue": "2d273e7c-b694-4464-9628-10355e28f35d"
+              "IdValue": "ea3ac1c5-ec04-48f4-b0aa-0e2d0bb97ee1"
             },
             "PreviousElement": null,
             "ContainerProperty": "Components",
             "IsContainerArray": true,
             "Data": {
               "__type": "Sandbox.SkinnedModelRenderer",
-              "__guid": "44cb51f0-563d-427e-ac85-5c23aa1dca1b",
+              "__guid": "dc6d8a53-ee9e-4524-9b9d-1a83aecc082a",
               "__enabled": true,
               "Flags": 0,
               "AnimationGraph": null,
@@ -2204,30 +2204,6 @@
           {
             "Target": {
               "Type": "Component",
-              "IdValue": "a612a8e6-e08f-4cdc-95a0-4500925af144"
-            },
-            "Property": "Gravity",
-            "Value": false
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "a612a8e6-e08f-4cdc-95a0-4500925af144"
-            },
-            "Property": "LinearDamping",
-            "Value": 0
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "a612a8e6-e08f-4cdc-95a0-4500925af144"
-            },
-            "Property": "MassCenterOverride",
-            "Value": "0,0,0"
-          },
-          {
-            "Target": {
-              "Type": "Component",
               "IdValue": "09912fea-98b6-48d0-9ea6-6bb04cae3bff"
             },
             "Property": "UseCameraControls",
@@ -2272,6 +2248,14 @@
             },
             "Property": "Parameters",
             "Value": {
+              "bools": {
+                "b_swim": false,
+                "b_climb": false,
+                "b_grounded": true
+              },
+              "ints": {
+                "sit": 0
+              },
               "floats": {
                 "scale_height": 1,
                 "scale_heel": 0,
@@ -2291,36 +2275,12 @@
                 "aim_body_weight": 1,
                 "move_rotationspeed": 0
               },
-              "ints": {
-                "sit": 0
-              },
-              "bools": {
-                "b_swim": false,
-                "b_climb": false,
-                "b_grounded": true
-              },
               "vectors": {
                 "aim_eyes": "0.992092729,0.022824768,-0.12341401",
                 "aim_head": "0.992092729,0.022824768,-0.12341401",
                 "aim_body": "0.992092729,0.022824768,-0.12341401"
               }
             }
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "91e4945f-da03-4de7-ba09-7b3e783e7f5f"
-            },
-            "Property": "Center",
-            "Value": "0,0,18.25"
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "91e4945f-da03-4de7-ba09-7b3e783e7f5f"
-            },
-            "Property": "Scale",
-            "Value": "16,16,35.5"
           }
         ],
         "MovedObjects": []
