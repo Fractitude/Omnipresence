@@ -21,57 +21,59 @@
 			<div class="notice">@UiState.Notice</div>
 		}
 
-		<div class="section">
-			<div class="heading">Your rig</div>
-			<div class="rig">
-				@foreach ( var slot in UiState.Rig )
-				{
-					<div class="slot @( slot.Id == "" ? "empty-slot" : "" )">
-						<div class="slot-kind">@slot.Slot</div>
+		<div class="panels">
+			<div class="section">
+				<div class="heading">Your rig</div>
+				<div class="rig">
+					@foreach ( var slot in UiState.Rig )
+					{
+						<div class="slot @( slot.Id == "" ? "empty-slot" : "" )">
+							<div class="slot-kind">@slot.Slot</div>
 
-						@if ( slot.Id == "" )
-						{
-							<div class="slot-name">Empty</div>
-						}
-						else
-						{
-							<div class="slot-body">
-								<div class="slot-name">@slot.Name</div>
-								<div class="slot-effect">@slot.Effect</div>
-							</div>
-							<div class="small-button" @onclick=@( () => Navi.Act( WorkbenchViewModel.RemoveAction, slot.Id ) )>Remove</div>
-						}
-					</div>
-				}
-			</div>
-			<div class="summary">@UiState.Summary</div>
-		</div>
-
-		<div class="section grow">
-			<div class="heading">Parts</div>
-			<div class="list">
-				@if ( UiState.Inventory.Count == 0 )
-				{
-					<div class="empty">No spare parts. Order some at the Hardware Store.</div>
-				}
-
-				@foreach ( var row in UiState.Inventory )
-				{
-					<div class="item">
-						<div class="item-body">
-							<div class="item-name">@row.Name @( row.Count > 1 ? $"x{row.Count}" : "" )</div>
-							<div class="item-effect">@row.Slot: @row.Effect</div>
+							@if ( slot.Id == "" )
+							{
+								<div class="slot-name">Empty</div>
+							}
+							else
+							{
+								<div class="slot-body">
+									<div class="slot-name">@slot.Name</div>
+									<div class="slot-effect">@slot.Effect</div>
+								</div>
+								<div class="small-button" @onclick=@( () => Navi.Act( WorkbenchViewModel.RemoveAction, slot.Id ) )>Remove</div>
+							}
 						</div>
-						<div class="button @( row.CanInstall ? "" : "disabled" )"
-						     @onclick=@( () => Navi.Act( WorkbenchViewModel.InstallAction, row.Id ) )>Install</div>
-					</div>
-				}
+					}
+				</div>
+				<div class="summary">@UiState.Summary</div>
 			</div>
 
-			@if ( UiState.Incoming != "" )
-			{
-				<div class="incoming">@UiState.Incoming</div>
-			}
+			<div class="section">
+				<div class="heading">Parts</div>
+				<div class="list">
+					@if ( UiState.Inventory.Count == 0 )
+					{
+						<div class="empty">No spare parts. Order some at the Hardware Store.</div>
+					}
+
+					@foreach ( var row in UiState.Inventory )
+					{
+						<div class="item">
+							<div class="item-body">
+								<div class="item-name">@row.Name @( row.Count > 1 ? $"x{row.Count}" : "" )</div>
+								<div class="item-effect">@row.Slot: @row.Effect</div>
+							</div>
+							<div class="button @( row.CanInstall ? "" : "disabled" )"
+							     @onclick=@( () => Navi.Act( WorkbenchViewModel.InstallAction, row.Id ) )>Install</div>
+						</div>
+					}
+				</div>
+
+				@if ( UiState.Incoming != "" )
+				{
+					<div class="incoming">@UiState.Incoming</div>
+				}
+			</div>
 		</div>
 	}
 </root>
