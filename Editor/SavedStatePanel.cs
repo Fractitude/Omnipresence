@@ -89,6 +89,7 @@ sealed class SavedStatePanel : Widget
 
 	readonly HashSet<string> selected = [];
 	SubHeader header;
+	readonly List<Tick> ticks = [];
 	Widget body;
 	bool open;
 	Button clearButton;
@@ -145,6 +146,7 @@ sealed class SavedStatePanel : Widget
 	void Rebuild()
 	{
 		Layout.Clear( true );
+		ticks.Clear();
 
 		var (settings, drive) = Find();
 
@@ -208,6 +210,7 @@ sealed class SavedStatePanel : Widget
 
 			UpdateSummary();
 		};
+		ticks.Add( check );
 		layout.Add( check );
 
 		// A wrapped label doesn't report the height of its wrapped text, so it would be cut off. Give it the lines it needs.
@@ -224,7 +227,11 @@ sealed class SavedStatePanel : Widget
 		if ( on )
 			selected.UnionWith( titles );
 
-		Rebuild();
+		// Set the boxes in place; rebuilding the panel would scroll the inspector back to the top.
+		foreach ( var tick in ticks )
+			tick.Value = on;
+
+		UpdateSummary();
 	}
 
 	void UpdateSummary()
@@ -319,6 +326,19 @@ sealed class SavedStatePanel : Widget
 
 		public System.Action<bool> Toggled;
 
+		/// <summary>
+		/// Set from code. Doesn't call <see cref="Toggled"/>.
+		/// </summary>
+		public bool Value
+		{
+			get => value;
+			set
+			{
+				this.value = value;
+				Update();
+			}
+		}
+
 		public Tick( Widget parent, string title, bool value ) : base( parent )
 		{
 			this.value = value;
@@ -381,8 +401,6 @@ sealed class SavedStatePanel : Widget
 		protected override void OnPaint()
 		{
 			var rect = LocalRect;
-			var count = owner.selected.Count;
-
 			Paint.ClearPen();
 			Paint.SetBrush( Color.Parse( Paint.HasMouseOver ? "#34343a" : "#2e2e33" ) ?? Color.Magenta );
 			Paint.DrawRect( rect, 4 );
@@ -393,7 +411,7 @@ sealed class SavedStatePanel : Widget
 			Paint.SetDefaultFont( 9, 600 );
 			Paint.SetPen( Color.Parse( "#e6eef7" ) ?? Color.Magenta );
 			Paint.DrawText( new Rect( rect.Left + 30, rect.Top, rect.Width - 36, rect.Height ),
-				count == 0 ? "Clear saved state" : $"Clear saved state ({count} selected)", TextFlag.LeftCenter );
+				"Clear saved state", TextFlag.LeftCenter );
 		}
 	}
 }
