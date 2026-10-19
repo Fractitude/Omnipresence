@@ -64,6 +64,10 @@ public static class IntrusionCatalog
 	/// </summary>
 	public static readonly IReadOnlyDictionary<int, string[]> Words = new Dictionary<int, string[]>
 	{
+		[4] =
+		[
+			"WIRE", "DEAD", "LOST", "VOID", "FADE", "LINK", "DUST", "COLD", "DATA", "HUSH", "NODE", "LOOP",
+		],
 		[5] =
 		[
 			"WIRED", "ALONE", "NIGHT", "GHOST", "DREAM", "RADIO", "PINES", "TAPES", "NOISE", "LAYER", "CABLE", "ERASE",
@@ -86,6 +90,19 @@ public static class IntrusionCatalog
 	/// </summary>
 	static readonly IReadOnlyDictionary<string, string> Hints = new Dictionary<string, string>
 	{
+		["WIRE"] = "A thin metal thread that carries a signal.",
+		["DEAD"] = "No longer running.",
+		["LOST"] = "Cannot be found.",
+		["VOID"] = "Empty space with nothing in it.",
+		["FADE"] = "To grow dim.",
+		["LINK"] = "One piece of a chain, or a connection.",
+		["DUST"] = "What settles on old machines.",
+		["COLD"] = "The opposite of warm.",
+		["DATA"] = "Facts a computer stores.",
+		["HUSH"] = "Be quiet.",
+		["NODE"] = "One point in a network.",
+		["LOOP"] = "Something that repeats forever.",
+
 		["WIRED"] = "Where everyone is connected.",
 		["ALONE"] = "How you feel when nobody answers.",
 		["NIGHT"] = "When the lights go out.",

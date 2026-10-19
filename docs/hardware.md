@@ -87,7 +87,7 @@ Old data: parts the workbench "built" before it became an installer are moved in
 
 Every terminal has a **security level**, which decides the puzzle (`IntrusionServer.Level`, default 2). Both are password puzzles: wrong guesses use up attempts, and at zero the terminal locks (try again for a new puzzle).
 
-- **Level 1: word guess** (`WordGuessPuzzle`, drawn by `WordGuessBoard`). Wordle-style. The terminal gives a clue to the password and shows its length. Type a word of that length: each letter turns green (right place), yellow (in the word, another place) or dark (not in it). Any letters count, there is no dictionary check; a wrong-length or repeated word costs nothing. The clues are in `IntrusionCatalog.Hints`. Installed hardware's "wrong words removed" shows that many letters up front instead.
+- **Level 1: word guess** (`WordGuessPuzzle`, drawn by `WordGuessBoard`). Wordle-style. The terminal gives a clue to the password and shows its length. Type a word of that length: each letter turns green (right place), yellow (in the word, another place) or dark (not in it). Any letters count, there is no dictionary check; a wrong-length or repeated word costs nothing. The length is the server's `WordLength`, 4 to 6 (clamped); the clues are in `IntrusionCatalog.Hints`, the words in `IntrusionCatalog.Words`. Installed hardware's "wrong words removed" shows that many letters up front instead.
 - **Level 2: memory dump** (`IntrusionPuzzle`). Click a word to try it as the password; the terminal says how many letters are in the right place. Yellow brackets are tricks that remove a wrong word or give the attempts back.
 
 The dead servers below are all Level 2. The Hardware Store's staff login is Level 1 (6 letters, 6 attempts).

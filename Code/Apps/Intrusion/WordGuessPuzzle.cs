@@ -37,6 +37,11 @@ public sealed record GuessBoard( string Hint, int WordLength, string Known, stri
 /// </remarks>
 public sealed class WordGuessPuzzle : IIntrusionPuzzle
 {
+	/// <summary>The word lengths a Level 1 terminal can have, set by <see cref="IntrusionServer.WordLength"/>.</summary>
+	public const int MinLength = 4;
+
+	public const int MaxLength = 6;
+
 	readonly string secret;
 	readonly bool[] revealed;
 	readonly List<GuessRow> rows = new();
@@ -48,7 +53,7 @@ public sealed class WordGuessPuzzle : IIntrusionPuzzle
 	/// <param name="startingDuds">Letters given away before the first guess, from installed hardware.</param>
 	public WordGuessPuzzle( IntrusionServer server, Random random, int bonusAttempts = 0, int startingDuds = 0 )
 	{
-		WordLength = server.WordLength;
+		WordLength = Math.Clamp( server.WordLength, MinLength, MaxLength );
 		MaxAttempts = Attempts = server.Attempts + Math.Max( bonusAttempts, 0 );
 
 		var words = IntrusionCatalog.Words[WordLength];
