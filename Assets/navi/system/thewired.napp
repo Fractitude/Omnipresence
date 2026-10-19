@@ -1,0 +1,15 @@
+{
+  "Title": "The Wired",
+  "Description": "Connect to the Wired.",
+  "Icon": "lan",
+  "Color": "#5c4a7a",
+  "PanelType": "OmnipresenceApps.TheWired",
+  "CanMinimize": true,
+  "CanMaximize": false,
+  "CanResize": false,
+  "Shared": true,
+  "Permissions": [],
+  "IsSystem": true,
+  "__references": [],
+  "__version": 0
+}

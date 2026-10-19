@@ -2,38 +2,6 @@
   "__guid": "aa0d578d-c729-40fe-a8f3-788c71a3e2ef",
   "GameObjects": [
     {
-      "__guid": "5c1f7a52-3b1e-4c9a-9d2e-7a6b0e4f1c11",
-      "__version": 2,
-      "Flags": 0,
-      "Name": "Wired Stranger",
-      "Position": "0,0,0",
-      "Rotation": "0,0,0,1",
-      "Scale": "1,1,1",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 2,
-      "NetworkFlags": 0,
-      "NetworkOrphaned": 0,
-      "OwnerTransfer": 1,
-      "Components": [
-        {
-          "__type": "Sandbox.WiredStranger",
-          "__guid": "8e2b4d60-6a0c-4f55-b3a1-2d9c7e5f0a22",
-          "__enabled": true,
-          "Flags": 0,
-          "GreetingDelay": 6,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "ReplyDelay": 1.5
-        }
-      ],
-      "Children": []
-    },
-    {
       "__guid": "ab97ae8a-0f85-409f-9778-2485ef27b0f1",
       "__version": 2,
       "Flags": 0,

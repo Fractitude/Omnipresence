@@ -53,10 +53,6 @@
                 {
                   "_type": "gameobject",
                   "go": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc"
-                },
-                {
-                  "_type": "gameobject",
-                  "go": "ebb69307-1d45-4c1e-ba17-ece072649b6b"
                 }
               ],
               "StartServer": true
@@ -257,24 +253,6 @@
               "Flags": 0,
               "Name": "Spawn point 1",
               "Position": "0,0,0",
-              "Rotation": "0,0,0,1",
-              "Scale": "1,1,1",
-              "Tags": "",
-              "Enabled": true,
-              "NetworkMode": 2,
-              "NetworkFlags": 0,
-              "NetworkOrphaned": 0,
-              "NetworkTransmit": true,
-              "OwnerTransfer": 1,
-              "Components": [],
-              "Children": []
-            },
-            {
-              "__guid": "ebb69307-1d45-4c1e-ba17-ece072649b6b",
-              "__version": 2,
-              "Flags": 0,
-              "Name": "Spawn point 2",
-              "Position": "2.49972534,-32.2873993,0",
               "Rotation": "0,0,0,1",
               "Scale": "1,1,1",
               "Tags": "",

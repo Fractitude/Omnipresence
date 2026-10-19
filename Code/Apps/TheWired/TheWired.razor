@@ -1,0 +1,39 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/thewired.napp, so it is always *@
+@* installed and has root. *@
+@* It is shared: the host's copy changes the scene, and every player sees the same window. *@
+
+<root>
+	<div class="status">@UiState.Status</div>
+
+	@if ( UiState.ButtonText is not null )
+	{
+		<div class="button" @onclick=@( () => Navi.Act( TheWiredViewModel.CrossAction ) )>@UiState.ButtonText</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only.
+	/// </summary>
+	TheWiredViewModel ViewModel => field ??= new();
+
+	TheWiredUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<TheWiredUiState>() ?? TheWiredUiState.Empty : ViewModel.UiState;
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( !Navi.IsViewer )
+			Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}
