@@ -3,8 +3,13 @@ ProgressionHud
 	position: absolute;
 	left: 24px;
 	top: 24px;
-	width: 180px;
+	width: 204px;
+	padding: 12px 14px;
 	flex-direction: column;
+	background-color: rgba(18, 17, 30, 0.55);
+	backdrop-filter-blur: 12px;
+	border: 1px solid rgba(242, 238, 226, 0.12);
+	border-radius: 10px;
 	pointer-events: none;
 	font-family: Poppins;
 	color: #f2eee2;
