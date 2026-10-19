@@ -98,15 +98,9 @@ public sealed class AppsWindow : BaseWindow
 	{
 		var open = !collapsedSections.Contains( source );
 
-		var header = list.Canvas.Layout.AddRow();
-		header.Margin = new Sandbox.UI.Margin( 0, 8, 0, 0 );
-
-		var toggle = header.Add( new Button( $"{source.ToUpperInvariant()}  -  {apps.Count}", open ? "expand_more" : "chevron_right", this )
-		{
-			Clicked = () => ToggleSection( source )
-		}, 1 );
-		toggle.SetStyles( "background-color: transparent; border: none; border-bottom: 1px solid #444; border-radius: 0; "
-		                  + "color: #9ab0c4; font-weight: 700; text-align: left; padding: 6px 4px;" );
+		list.Canvas.Layout.AddSpacingCell( 6 );
+		list.Canvas.Layout.Add( new Bar( list.Canvas, source.ToUpperInvariant(), apps.Count.ToString(),
+			open ? "expand_more" : "chevron_right", true, () => ToggleSection( source ) ) );
 
 		if ( !open )
 			return;
@@ -127,39 +121,34 @@ public sealed class AppsWindow : BaseWindow
 	{
 		var open = expanded.Contains( entry.Id );
 
-		var card = list.Canvas.Layout.Add( new Widget( list.Canvas ) );
-		card.SetStyles( "background-color: #2a2a2e; border: 1px solid #3a3a40; border-radius: 6px;" );
+		var card = list.Canvas.Layout.Add( new Card( list.Canvas ) );
 		card.Layout = Layout.Column();
-		card.Layout.Margin = new Sandbox.UI.Margin( 8, 4, 8, 8 );
+		card.Layout.Margin = new Sandbox.UI.Margin( 6, 4, 8, 8 );
 		card.Layout.Spacing = 2;
 
-		var toggle = card.Layout.Add( new Button( entry.Title, open ? "expand_more" : "chevron_right", card )
-		{
-			Clicked = () => Toggle( entry.Id )
-		} );
-		toggle.SetStyles( "background-color: transparent; border: none; color: #eee; font-weight: 700; text-align: left; padding: 4px 2px;" );
+		card.Layout.Add( new Bar( card, entry.Title, null, open ? "expand_more" : "chevron_right", false, () => Toggle( entry.Id ) ) );
 
 		if ( entry.Description.Length > 0 )
 		{
 			var description = card.Layout.Add( new Label( entry.Description, card ) { WordWrap = true } );
-			description.SetStyles( "color: #9a9aa2; background-color: transparent; margin: 0 0 4px 8px;" );
+			description.SetStyles( "color: #9a9aa2; margin: 0 0 4px 30px;" );
 		}
 
 		if ( !open )
 			return;
 
 		var divider = card.Layout.Add( new Widget( card ) { FixedHeight = 1 } );
-		divider.SetStyles( "background-color: #3a3a40;" );
+		divider.SetStyles( "background-color: #3a3a40; border: none;" );
 		card.Layout.AddSpacingCell( 4 );
 
 		foreach ( var (name, value) in entry.Details )
 		{
 			var row = card.Layout.AddRow();
-			row.Margin = new Sandbox.UI.Margin( 8, 1, 0, 1 );
+			row.Margin = new Sandbox.UI.Margin( 30, 1, 0, 1 );
 			row.Spacing = 8;
 
 			var caption = row.Add( new Label( name, card ) { MinimumWidth = 110, MaximumWidth = 110 } );
-			caption.SetStyles( "color: #7a7a84; background-color: transparent;" );
+			caption.SetStyles( "color: #7a7a84;" );
 
 			var field = row.Add( new LineEdit( card ) { Text = value, ReadOnly = true }, 1 );
 			field.SetStyles( "background-color: #202024; border: 1px solid #333338; border-radius: 4px; color: #ddd; padding: 2px 6px;" );
@@ -261,6 +250,93 @@ public sealed class AppsWindow : BaseWindow
 		catch ( System.Exception )
 		{
 			return "(not on disk)";
+		}
+	}
+
+	static Color Hex( string hex ) => Color.Parse( hex ) ?? Color.Magenta;
+
+	/// <summary>
+	/// The card an app sits in. It paints its own background, so the style doesn't spread to the widgets inside it.
+	/// </summary>
+	sealed class Card : Widget
+	{
+		public Card( Widget parent ) : base( parent )
+		{
+		}
+
+		protected override void OnPaint()
+		{
+			Paint.ClearPen();
+			Paint.SetBrush( Hex( "#2a2a2e" ) );
+			Paint.DrawRect( LocalRect, 6 );
+
+			Paint.SetPen( Hex( "#3a3a40" ) );
+			Paint.ClearBrush();
+			Paint.DrawRect( LocalRect.Shrink( 0.5f ), 6 );
+		}
+	}
+
+	/// <summary>
+	/// A clickable bar with an arrow: a section header (centered text on an accent band) or an app's title (left aligned).
+	/// </summary>
+	sealed class Bar : Widget
+	{
+		readonly string text;
+		readonly string count;
+		readonly string icon;
+		readonly bool section;
+		readonly System.Action clicked;
+
+		public Bar( Widget parent, string text, string count, string icon, bool section, System.Action clicked ) : base( parent )
+		{
+			this.text = text;
+			this.count = count;
+			this.icon = icon;
+			this.section = section;
+			this.clicked = clicked;
+
+			FixedHeight = section ? 34 : 28;
+			Cursor = CursorShape.Finger;
+		}
+
+		protected override void OnMouseClick( MouseEvent e ) => clicked?.Invoke();
+
+		protected override void OnPaint()
+		{
+			var rect = LocalRect;
+			var hover = Paint.HasMouseOver;
+
+			if ( section )
+			{
+				Paint.ClearPen();
+				Paint.SetBrush( Hex( hover ? "#26384a" : "#1e2c3a" ) );
+				Paint.DrawRect( rect, 4 );
+
+				Paint.SetBrush( Hex( "#4a9eea" ) );
+				Paint.DrawRect( new Rect( rect.Left, rect.Top, 4, rect.Height ), 2 );
+
+				Paint.SetPen( Hex( "#9ab0c4" ) );
+				Paint.DrawIcon( new Rect( rect.Left + 10, rect.Top, 24, rect.Height ), icon, 20, TextFlag.Center );
+
+				Paint.SetDefaultFont( 10, 800 );
+				Paint.SetPen( Hex( "#e6eef7" ) );
+				Paint.DrawText( rect, count is null ? text : $"{text}   {count}", TextFlag.Center );
+				return;
+			}
+
+			if ( hover )
+			{
+				Paint.ClearPen();
+				Paint.SetBrush( Hex( "#35353b" ) );
+				Paint.DrawRect( rect, 4 );
+			}
+
+			Paint.SetPen( Hex( "#9a9aa2" ) );
+			Paint.DrawIcon( new Rect( rect.Left + 2, rect.Top, 24, rect.Height ), icon, 18, TextFlag.Center );
+
+			Paint.SetDefaultFont( 10, 700 );
+			Paint.SetPen( Hex( "#f0f0f2" ) );
+			Paint.DrawText( new Rect( rect.Left + 30, rect.Top, rect.Width - 30, rect.Height ), text, TextFlag.LeftCenter );
 		}
 	}
 }
