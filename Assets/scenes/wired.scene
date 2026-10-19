@@ -99,7 +99,13 @@
               "__type": "Sandbox.ProgressionHud",
               "__guid": "e4408bd1-d02e-4a35-899f-f0c3ea594f41",
               "__enabled": true,
-              "Flags": 0
+              "Flags": 0,
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null
             },
             {
               "__type": "Sandbox.Crosshair",
@@ -122,8 +128,8 @@
           "__version": 2,
           "Flags": 0,
           "Name": "Main Camera",
-          "Position": "-319.299072,106.250122,81.0430984",
-          "Rotation": "0,0,0,1",
+          "Position": "3.37914467,106.250122,35.5771408",
+          "Rotation": "0,0,4.37113883E-08,1",
           "Scale": "1,1,1",
           "Tags": "",
           "Enabled": true,
@@ -141,7 +147,7 @@
               "BackgroundColor": "0.33333,0.46275,0.52157,1",
               "ClearFlags": "All",
               "EnablePostProcessing": true,
-              "FieldOfView": 60,
+              "FieldOfView": 90,
               "FovAxis": "Horizontal",
               "IsMainCamera": true,
               "OnComponentDestroy": null,
@@ -154,7 +160,7 @@
               "OrthographicHeight": 1204,
               "PostProcessAnchor": null,
               "Priority": 1,
-              "RenderExcludeTags": "",
+              "RenderExcludeTags": "viewer",
               "RenderTags": "",
               "RenderTexture": null,
               "TargetEye": "None",
@@ -1181,6 +1187,105 @@
                         },
                         "Property": "Scale",
                         "Value": "1.05197418,8.61023521,0.849277198"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "GrantedPermissions",
+                        "Value": [
+                          "navi/apps/textedit.napp navi.files.access",
+                          "navi/apps/messages.napp navi.messages.access"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "InstalledApps",
+                        "Value": [
+                          "navi/apps/webbrowser.napp",
+                          "navi/apps/textedit.napp",
+                          "navi/apps/turntable.napp",
+                          "navi/apps/messages.napp",
+                          "fractitude.napp_pacman"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "InstalledPackages",
+                        "Value": [
+                          "fractitude.napp_pacman"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OnlyApps",
+                        "Value": []
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ReviewedApps",
+                        "Value": [
+                          "navi/apps/textedit.napp",
+                          "navi/apps/messages.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "StartFavorites",
+                        "Value": [
+                          "navi/apps/files.napp",
+                          "navi/apps/webbrowser.napp",
+                          "navi/apps/messages.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Tags",
+                        "Value": []
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "TaskbarOrder",
+                        "Value": [
+                          "navi/system/thewired.napp",
+                          "navi/apps/files.napp",
+                          "navi/apps/webbrowser.napp",
+                          "navi/apps/textedit.napp",
+                          "navi/apps/messages.napp",
+                          "navi/system/payments.napp",
+                          "navi/system/intrusion.napp",
+                          "navi/system/workbench.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "126ea964-9559-4780-9b35-42a53d96448f"
+                        },
+                        "Property": "RenderScale",
+                        "Value": 0.75
                       }
                     ],
                     "MovedObjects": []
@@ -1874,6 +1979,369 @@
           ]
         }
       ]
+    },
+    {
+      "__guid": "c5ff87a7-e7c5-44a9-8f7b-9b24d25e5bb3",
+      "__version": 2,
+      "Flags": 0,
+      "Name": "Title",
+      "Position": "270,0,140",
+      "Rotation": "0,0,0,1",
+      "Scale": "1,1,1",
+      "Tags": "",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "NetworkFlags": 0,
+      "NetworkOrphaned": 0,
+      "NetworkTransmit": true,
+      "OwnerTransfer": 1,
+      "Components": [
+        {
+          "__type": "Sandbox.TextRenderer",
+          "__guid": "7e5c7ee0-45d6-47e8-97a0-1f800dab1f13",
+          "__enabled": true,
+          "Flags": 0,
+          "__version": 2,
+          "Billboard": "None",
+          "BlendMode": "Normal",
+          "FogStrength": 1,
+          "HorizontalAlignment": "Center",
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null,
+          "RenderOptions": {
+            "GameLayer": true,
+            "OverlayLayer": false,
+            "BloomLayer": false,
+            "AfterUILayer": false
+          },
+          "Scale": 0.3,
+          "TextScope": {
+            "Text": "The Wired",
+            "TextColor": "1,1,1,1",
+            "FontName": "Poppins",
+            "FontSize": 64,
+            "FontWeight": 800,
+            "FontItalic": false,
+            "FontVariantNumeric": "Normal",
+            "LineHeight": 1,
+            "LetterSpacing": 0,
+            "WordSpacing": 0,
+            "FilterMode": "Bilinear",
+            "FontSmooth": "Auto",
+            "Outline": {
+              "Enabled": false,
+              "Size": 4,
+              "Color": "0,0,1,1"
+            },
+            "Shadow": {
+              "Enabled": false,
+              "Size": 4,
+              "Color": "0,0,0,1",
+              "Offset": "4,4"
+            },
+            "OutlineUnder": {
+              "Enabled": false,
+              "Size": 4,
+              "Color": "0,1,0,1"
+            },
+            "ShadowUnder": {
+              "Enabled": false,
+              "Size": 4,
+              "Color": "0,0,0,1",
+              "Offset": "4,4"
+            }
+          },
+          "VerticalAlignment": "Center"
+        }
+      ],
+      "Children": []
+    },
+    {
+      "__guid": "dfbe0178-9554-4a13-a909-287b18e28c86",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "9762350c-5d5d-4b0f-8450-3bf95edcd71b",
+        "Path": "player controller.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [
+          {
+            "Id": {
+              "Type": "GameObject",
+              "IdValue": "2d273e7c-b694-4464-9628-10355e28f35d"
+            },
+            "Parent": {
+              "Type": "GameObject",
+              "IdValue": "d0754ffd-edf8-4eb8-8501-e73b0d98598e"
+            },
+            "PreviousElement": null,
+            "ContainerProperty": "Children",
+            "IsContainerArray": true,
+            "Data": {
+              "__guid": "2d273e7c-b694-4464-9628-10355e28f35d",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Clothing - y_front_pants_white",
+              "Position": "0,0,0",
+              "Rotation": "0,0,0,1",
+              "Scale": "1,1,1",
+              "Tags": "clothing",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": []
+            }
+          },
+          {
+            "Id": {
+              "Type": "Component",
+              "IdValue": "44cb51f0-563d-427e-ac85-5c23aa1dca1b"
+            },
+            "Parent": {
+              "Type": "GameObject",
+              "IdValue": "2d273e7c-b694-4464-9628-10355e28f35d"
+            },
+            "PreviousElement": null,
+            "ContainerProperty": "Components",
+            "IsContainerArray": true,
+            "Data": {
+              "__type": "Sandbox.SkinnedModelRenderer",
+              "__guid": "44cb51f0-563d-427e-ac85-5c23aa1dca1b",
+              "__enabled": true,
+              "Flags": 0,
+              "AnimationGraph": null,
+              "BodyGroups": 18446744073709551615,
+              "BoneMergeTarget": {
+                "_type": "component",
+                "component_id": "02962279-8939-46f9-b3e2-6577cce57ad2",
+                "go": "d0754ffd-edf8-4eb8-8501-e73b0d98598e",
+                "component_type": "SkinnedModelRenderer"
+              },
+              "CreateAttachments": false,
+              "CreateBoneObjects": false,
+              "DeformationMode": "Normal",
+              "LodOverride": null,
+              "MaterialGroup": null,
+              "MaterialOverride": null,
+              "Materials": null,
+              "Model": {
+                "Id": "a66a2113-828a-4612-958b-ac0e726233f6",
+                "Path": "models/citizen_clothes/underwear/y_front_pants/models/y_front_pants_m_human.vmdl"
+              },
+              "Morphs": {},
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null,
+              "Parameters": {},
+              "PlaybackRate": 1,
+              "RenderOptions": {
+                "GameLayer": true,
+                "OverlayLayer": false,
+                "BloomLayer": false,
+                "AfterUILayer": false
+              },
+              "RenderType": "On",
+              "Sequence": {
+                "Name": null,
+                "Looping": true,
+                "Blending": false
+              },
+              "Tint": "1,1,1,1",
+              "UseAnimGraph": true
+            }
+          }
+        ],
+        "RemovedObjects": [
+          {
+            "Id": {
+              "Type": "GameObject",
+              "IdValue": "c958cb48-5700-4352-87d7-298b3e6d4253"
+            }
+          },
+          {
+            "Id": {
+              "Type": "Component",
+              "IdValue": "2bf95423-b9c6-472e-b64b-9248ebacac40"
+            }
+          }
+        ],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "42a9cbac-b7da-4d24-bb21-bdabe09173c1"
+            },
+            "Property": "Name",
+            "Value": "Player - Yodeling Cat"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "42a9cbac-b7da-4d24-bb21-bdabe09173c1"
+            },
+            "Property": "Position",
+            "Value": "2.93784046,0.153341204,0.0412483215"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "42a9cbac-b7da-4d24-bb21-bdabe09173c1"
+            },
+            "Property": "NetworkMode",
+            "Value": 1
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "a612a8e6-e08f-4cdc-95a0-4500925af144"
+            },
+            "Property": "Gravity",
+            "Value": false
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "a612a8e6-e08f-4cdc-95a0-4500925af144"
+            },
+            "Property": "LinearDamping",
+            "Value": 0
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "a612a8e6-e08f-4cdc-95a0-4500925af144"
+            },
+            "Property": "MassCenterOverride",
+            "Value": "0,0,0"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "09912fea-98b6-48d0-9ea6-6bb04cae3bff"
+            },
+            "Property": "UseCameraControls",
+            "Value": false
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "09912fea-98b6-48d0-9ea6-6bb04cae3bff"
+            },
+            "Property": "UseInputControls",
+            "Value": false
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "09912fea-98b6-48d0-9ea6-6bb04cae3bff"
+            },
+            "Property": "UseLookControls",
+            "Value": false
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "d0754ffd-edf8-4eb8-8501-e73b0d98598e"
+            },
+            "Property": "Rotation",
+            "Value": "0,0,0.00259440416,0.999996603"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "d0754ffd-edf8-4eb8-8501-e73b0d98598e"
+            },
+            "Property": "Tags",
+            "Value": "viewer"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "02962279-8939-46f9-b3e2-6577cce57ad2"
+            },
+            "Property": "Parameters",
+            "Value": {
+              "floats": {
+                "scale_height": 1,
+                "scale_heel": 0,
+                "skid_x": 0,
+                "skid_y": 0,
+                "move_groundspeed": 0,
+                "move_x": 0,
+                "move_y": 0,
+                "move_z": 0,
+                "wish_groundspeed": 0,
+                "wish_x": 0,
+                "wish_y": 0,
+                "wish_z": 0,
+                "duck": 0,
+                "aim_eyes_weight": 1,
+                "aim_head_weight": 1,
+                "aim_body_weight": 1,
+                "move_rotationspeed": 0
+              },
+              "ints": {
+                "sit": 0
+              },
+              "bools": {
+                "b_swim": false,
+                "b_climb": false,
+                "b_grounded": true
+              },
+              "vectors": {
+                "aim_eyes": "0.992092729,0.022824768,-0.12341401",
+                "aim_head": "0.992092729,0.022824768,-0.12341401",
+                "aim_body": "0.992092729,0.022824768,-0.12341401"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "91e4945f-da03-4de7-ba09-7b3e783e7f5f"
+            },
+            "Property": "Center",
+            "Value": "0,0,18.25"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "91e4945f-da03-4de7-ba09-7b3e783e7f5f"
+            },
+            "Property": "Scale",
+            "Value": "16,16,35.5"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "42a9cbac-b7da-4d24-bb21-bdabe09173c1": "dfbe0178-9554-4a13-a909-287b18e28c86",
+        "d0754ffd-edf8-4eb8-8501-e73b0d98598e": "833f0f56-db52-4709-89ec-864778c3a0fd",
+        "c958cb48-5700-4352-87d7-298b3e6d4253": "d0f8a870-01b1-4561-a660-67c1cc469e78",
+        "f302936f-1bd2-4024-a6aa-3e28be6ecbd5": "d8180528-6b2b-432c-9566-d745c14d03c8",
+        "c96150c0-e5fc-4214-a8c5-0d7d70b4de2b": "3f745140-badc-448a-92e9-482ba910a767",
+        "a612a8e6-e08f-4cdc-95a0-4500925af144": "883de745-5d71-4474-9c23-293e785461dd",
+        "847c7436-b1ca-4ec3-9e8d-141501ce1150": "a855a26e-8254-4661-b800-1c1b008a71b2",
+        "394ccca1-556b-4356-ae20-8863a84f100c": "82290b4b-2be4-45f0-97ec-ac328589a94a",
+        "b12cce1e-3e81-4fb5-89b9-43b3b081a5eb": "8b76fcff-80f1-43f6-8556-79a82f6fc901",
+        "4ebfd0fa-1b40-4866-868e-0150a0338fc4": "d66fc89c-1831-476e-998f-33686e22daa9",
+        "09912fea-98b6-48d0-9ea6-6bb04cae3bff": "e72c15d1-d513-48bc-bedc-fcbe145a43a7",
+        "02962279-8939-46f9-b3e2-6577cce57ad2": "4f1f418e-7205-4332-885d-237152b747eb",
+        "2bf95423-b9c6-472e-b64b-9248ebacac40": "efd797f5-9afe-45bb-b764-d7ce8d4c6757",
+        "3b2d1441-b849-4c57-a3fa-ba896d71d03b": "fae445d3-837b-4d29-ae5b-683f97227257",
+        "91e4945f-da03-4de7-ba09-7b3e783e7f5f": "d6b73d5d-3887-4488-858b-0007d93cc1ea"
+      }
     }
   ],
   "SceneProperties": {
