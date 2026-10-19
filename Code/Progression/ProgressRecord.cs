@@ -23,6 +23,16 @@ public sealed class ProgressRecord
 	public long Xp { get; set; }
 
 	/// <summary>
+	/// Hacking XP, from every hacking puzzle. Hacking level is worked out from it by <see cref="HackingCurve"/>.
+	/// </summary>
+	public long HackXp { get; set; }
+
+	/// <summary>
+	/// What the player has done in each operation (the multi-stage break-ins).
+	/// </summary>
+	public List<OperationRecord> Operations { get; set; } = new();
+
+	/// <summary>
 	/// Dollars: what the player spends in the real world.
 	/// </summary>
 	public long Money { get; set; }
@@ -78,6 +88,7 @@ public sealed class ProgressRecord
 	public void Sanitize()
 	{
 		Xp = System.Math.Clamp( Xp, 0, ProgressCurve.MaxXp );
+		HackXp = System.Math.Clamp( HackXp, 0, HackingCurve.MaxXp );
 		Money = System.Math.Clamp( Money, 0, MaxMoney );
 		Credits = System.Math.Clamp( Credits, 0, MaxCredits );
 		Revision = System.Math.Max( Revision, 0 );
@@ -104,6 +115,16 @@ public sealed class ProgressRecord
 
 		Payments ??= new();
 		Payments.RemoveAll( x => x is null );
+
+		Operations ??= new();
+		Operations.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || x.Id.Length > MaxIdLength );
+		Operations = Operations.GroupBy( x => x.Id ).Select( x => x.First() ).Take( MaxIds ).ToList();
+
+		foreach ( var operation in Operations )
+		{
+			operation.Runs = System.Math.Max( operation.Runs, 0 );
+			operation.Best = System.Math.Clamp( operation.Best, 0, 4 );
+		}
 
 		// Shipments from before the game clock land now. Old payment times are no longer dates. Version 1 saves also
 		// hold times from when the clock still worked differently, so every saved time is reset once.
@@ -140,6 +161,24 @@ public sealed class ProgressRecord
 			.Distinct()
 			.Take( MaxIds )
 			.ToList();
+}
+
+/// <summary>
+/// What a player has done in one operation. Plain data, saved in the <see cref="ProgressRecord"/>.
+/// </summary>
+public sealed class OperationRecord
+{
+	public string Id { get; set; } = "";
+
+	/// <summary>
+	/// How many times it was finished, burned or not.
+	/// </summary>
+	public int Runs { get; set; }
+
+	/// <summary>
+	/// The best grade, 0 for none yet, up to 4 for a ghost run.
+	/// </summary>
+	public int Best { get; set; }
 }
 
 /// <summary>

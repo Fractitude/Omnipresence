@@ -174,9 +174,6 @@ public sealed class SavedStateWindow : BaseWindow
 		foreach ( var entry in chosen )
 			text.Append( "  " ).Append( entry.Title ).Append( ": " ).Append( string.Join( ", ", entry.Paths ) ).Append( '\n' );
 
-		if ( Game.IsPlaying )
-			text.Append( "\nThe game is running. Stop it first, or it will write its state back.\n" );
-
 		Dialog.AskConfirm( () => Clear( chosen ), text.ToString(), "Clear saved state", "Move to Recycle Bin" );
 	}
 
