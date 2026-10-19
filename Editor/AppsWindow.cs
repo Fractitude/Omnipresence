@@ -15,6 +15,7 @@ public sealed class AppsWindow : BaseWindow
 	static AppsWindow instance;
 
 	readonly HashSet<string> expanded = [];
+	readonly HashSet<string> collapsedSections = [];
 	ScrollArea list;
 	LineEdit search;
 	Label summary;
@@ -84,13 +85,42 @@ public sealed class AppsWindow : BaseWindow
 		list.Canvas.Layout.Spacing = 6;
 
 		if ( shown.Count == 0 )
-			list.Canvas.Layout.Add( new Label( "No apps." ) );
+			list.Canvas.Layout.Add( new Label( filter.Length > 0 ? "No apps matching query." : "No apps." ) );
 
-		foreach ( var entry in shown )
-			AddRow( entry );
+		foreach ( var section in shown.GroupBy( x => x.Source ) )
+			AddSection( section.Key, section.ToList() );
 
 		list.Canvas.Layout.AddStretchCell();
 		summary.Text = $"{shown.Count} of {entries.Count} apps.";
+	}
+
+	void AddSection( string source, List<Entry> apps )
+	{
+		var open = !collapsedSections.Contains( source );
+
+		var header = list.Canvas.Layout.AddRow();
+		header.Spacing = 8;
+
+		var toggle = new Button( $"{source} ({apps.Count})", open ? "expand_more" : "chevron_right", this )
+		{
+			Clicked = () => ToggleSection( source )
+		};
+		header.Add( toggle );
+		header.AddStretchCell();
+
+		if ( !open )
+			return;
+
+		foreach ( var entry in apps )
+			AddRow( entry );
+	}
+
+	void ToggleSection( string source )
+	{
+		if ( !collapsedSections.Remove( source ) )
+			collapsedSections.Add( source );
+
+		Rebuild();
 	}
 
 	void AddRow( Entry entry )
@@ -98,6 +128,7 @@ public sealed class AppsWindow : BaseWindow
 		var open = expanded.Contains( entry.Id );
 
 		var column = list.Canvas.Layout.AddColumn();
+		column.Margin = new Sandbox.UI.Margin( 16, 0, 0, 0 );
 		column.Spacing = 2;
 
 		var header = column.AddRow();
@@ -108,21 +139,16 @@ public sealed class AppsWindow : BaseWindow
 			Clicked = () => Toggle( entry.Id )
 		};
 		header.Add( toggle );
-
-		var source = header.Add( new Label( entry.Source ) );
-		source.SetStyles( "color: #8aa;" );
 		header.AddStretchCell();
 
-		if ( !open )
+		if ( entry.Description.Length > 0 )
 		{
-			if ( entry.Description.Length > 0 )
-			{
-				var description = column.Add( new Label( entry.Description ) { WordWrap = true } );
-				description.SetStyles( "color: #aaa; margin-left: 4px;" );
-			}
-
-			return;
+			var description = column.Add( new Label( entry.Description ) { WordWrap = true } );
+			description.SetStyles( "color: #aaa; margin-left: 4px;" );
 		}
+
+		if ( !open )
+			return;
 
 		foreach ( var (name, value) in entry.Details )
 		{
@@ -177,7 +203,7 @@ public sealed class AppsWindow : BaseWindow
 	static int SourceOrder( string source ) => source switch
 	{
 		"Game" => 0,
-		"Navi library" => 1,
+		"Library" => 1,
 		_ => 2
 	};
 
@@ -189,7 +215,7 @@ public sealed class AppsWindow : BaseWindow
 		var panel = app.FindPanelType();
 
 		var source = package is not null ? "Store"
-			: path.Replace( '\\', '/' ).StartsWith( NaviAppRegistry.BuiltInFolder, System.StringComparison.OrdinalIgnoreCase ) ? "Navi library"
+			: path.Replace( '\\', '/' ).StartsWith( NaviAppRegistry.BuiltInFolder, System.StringComparison.OrdinalIgnoreCase ) ? "Library"
 			: "Game";
 
 		var details = new List<(string, string)>
