@@ -22,6 +22,9 @@ public static class WorldClock
 	public const long LegacyLimit = 1_000_000_000;
 
 	const long DaySeconds = 24 * 3600;
+
+	/// <summary>Day 1 is a Monday.</summary>
+	static string[] weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 	const double SaveInterval = 10;
 	const double FollowTolerance = 1.5;
 
@@ -39,14 +42,25 @@ public static class WorldClock
 	/// <summary>The current time of day, like "12:00".</summary>
 	public static string TimeOfDay => TimeOfDayOf( Now );
 
-	/// <summary>The current day, like "Day 1".</summary>
-	public static string Day => $"Day {Now / DaySeconds + 1}";
+	/// <summary>The current day, like "Monday, Day 1".</summary>
+	public static string Day => DayOf( Now );
+
+	/// <summary>The current week, counted from 1.</summary>
+	public static long Week => Now / DaySeconds / 7 + 1;
+
+	static string DayOf( long seconds, bool shortName = false )
+	{
+		var day = seconds / DaySeconds;
+		var name = weekdays[day % 7];
+
+		return $"{(shortName ? name[..3] : name)}, Day {day + 1}";
+	}
 
 	public static string TimeOfDayOf( long seconds ) => $"{seconds % DaySeconds / 3600:00}:{seconds % 3600 / 60:00}";
 
-	/// <summary>A time as a player reads it, like "Day 2 09:30". Anything saved before the game clock is "Earlier".</summary>
+	/// <summary>A time as a player reads it, like "Tue, Day 2 09:30". Anything saved before the game clock is "Earlier".</summary>
 	public static string Format( long seconds ) =>
-		seconds <= 0 ? "Earlier" : $"Day {seconds / DaySeconds + 1} {TimeOfDayOf( seconds )}";
+		seconds <= 0 ? "Earlier" : $"{DayOf( seconds, shortName: true )} {TimeOfDayOf( seconds )}";
 
 	/// <summary>Set the world time. Host only. Clients follow on their next sync.</summary>
 	public static void Set( long seconds )
