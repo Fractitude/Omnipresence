@@ -94,9 +94,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 		{
 			var panel = new Widget( this ) { Layout = Layout.Column() };
 			panel.Layout.Add( Sheet( computerObject, nameof( NaviComputer.SaveId ), nameof( NaviComputer.AutoSave ) ) );
-
-			var key = panel.Layout.Add( new Label( $"Save key: {computer.SaveKey}", panel ) );
-			key.SetStyles( "color: #7a7a84; padding: 4px 0 0 0;" );
+			panel.Layout.Add( new SavedStatePanel( panel, computer ) );
 
 			return panel;
 		} );

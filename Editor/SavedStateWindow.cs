@@ -295,7 +295,7 @@ public sealed class SavedStateWindow : BaseWindow
 	/// <summary>
 	/// Windows: PowerShell asks the shell to move each path to the Recycle Bin. Only an existing path is touched.
 	/// </summary>
-	static bool MoveToRecycleBin( List<string> fullPaths, out string error )
+	internal static bool MoveToRecycleBin( List<string> fullPaths, out string error )
 	{
 		var script = new StringBuilder( "$ErrorActionPreference = 'Stop'; Add-Type -AssemblyName Microsoft.VisualBasic;" );
 

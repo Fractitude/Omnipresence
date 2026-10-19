@@ -1,0 +1,284 @@
+namespace Omnipresence.Editor;
+
+/// <summary>
+/// The body of the inspector's "Saved state" section: the parts of one computer's save that can be cleared on their own.
+/// Same mechanism as <see cref="SavedStateWindow"/>: the old file goes to the Recycle Bin, so a wrong click can be
+/// undone. A part that is only some of the computer's settings is reset by moving the whole file to the Recycle Bin and
+/// writing it again without those settings.
+/// </summary>
+/// <remarks>
+/// A computer is saved in every save slot (<c>navi/saves/{slot}/{key}.json</c>); the parts are cleared in each slot that
+/// has them. Off while the game runs, since the computer would save its state back.
+/// </remarks>
+sealed class SavedStatePanel : Widget
+{
+	/// <summary>
+	/// One part of the computer's save: what it is in plain words, and how to put it back to a new computer's value.
+	/// </summary>
+	sealed record Part( string Title, string Explanation, System.Action<NaviComputerSave, NaviComputerSave> Reset );
+
+	const string DriveTitle = "Files";
+	const string ClearText = "Move selected to Recycle Bin";
+
+	static readonly Part[] Parts =
+	[
+		new( "Apps",
+			"Installed apps and packages, pinned and favorite apps, and when each was installed. The scene's apps install again.",
+			( s, d ) =>
+			{
+				s.InstalledApps = d.InstalledApps;
+				s.ConfiguredApps = d.ConfiguredApps;
+				s.InstalledPackages = d.InstalledPackages;
+				s.TaskbarOrder = d.TaskbarOrder;
+				s.StartFavorites = d.StartFavorites;
+				s.InstalledAt = d.InstalledAt;
+			} ),
+		new( "Permissions",
+			"Permissions the player granted, apps with root, and apps the player has already reviewed.",
+			( s, d ) =>
+			{
+				s.GrantedPermissions = d.GrantedPermissions;
+				s.RootApps = d.RootApps;
+				s.ReviewedApps = d.ReviewedApps;
+			} ),
+		new( "Notifications",
+			"The notification list, which apps are muted and what was read.",
+			( s, d ) =>
+			{
+				s.Notifications = d.Notifications;
+				s.MutedNotificationApps = d.MutedNotificationApps;
+				s.LastNotificationId = d.LastNotificationId;
+				s.NotificationsReadUpTo = d.NotificationsReadUpTo;
+			} ),
+		new( "Lock",
+			"The lock password or pattern. The computer is left without a lock.",
+			( s, d ) =>
+			{
+				s.LockKind = d.LockKind;
+				s.LockSalt = d.LockSalt;
+				s.LockVerifier = d.LockVerifier;
+			} ),
+		new( "Appearance",
+			"Theme, color scheme, wallpaper, blur, transparency and display scale.",
+			( s, d ) =>
+			{
+				s.Theme = d.Theme;
+				s.ColorScheme = d.ColorScheme;
+				s.Wallpaper = d.Wallpaper;
+				s.BlurLevel = d.BlurLevel;
+				s.TransparencyLevel = d.TransparencyLevel;
+				s.DisplayScale = d.DisplayScale;
+			} ),
+		new( "Window layout",
+			"Where each window opens, and the snapping settings.",
+			( s, d ) =>
+			{
+				s.WindowPlacements = d.WindowPlacements;
+				s.SnapToScreenEdges = d.SnapToScreenEdges;
+				s.SnapToWindows = d.SnapToWindows;
+				s.SnapDistance = d.SnapDistance;
+			} ),
+	];
+
+	readonly NaviComputer computer;
+	readonly HashSet<string> selected = [];
+	Button clearButton;
+	Label summary;
+	bool wasPlaying;
+	List<string> titles = [];
+
+	public SavedStatePanel( Widget parent, NaviComputer computer ) : base( parent )
+	{
+		this.computer = computer;
+
+		Layout = Layout.Column();
+		Layout.Spacing = 6;
+
+		Rebuild();
+	}
+
+	[EditorEvent.Frame]
+	void CheckPlaying()
+	{
+		if ( !this.IsValid() || wasPlaying == Game.IsPlaying )
+			return;
+
+		wasPlaying = Game.IsPlaying;
+		UpdateSummary();
+	}
+
+	/// <summary>
+	/// The save files this computer has, one per slot: its settings, and the files on its drive.
+	/// </summary>
+	(List<string> Settings, List<string> Drive) Find()
+	{
+		var data = Sandbox.FileSystem.Data;
+		var settings = new List<string>();
+		var drive = new List<string>();
+
+		if ( !data.DirectoryExists( "navi/saves" ) )
+			return (settings, drive);
+
+		foreach ( var slot in data.FindDirectory( "navi/saves" ) )
+		{
+			var path = $"navi/saves/{slot}/{computer.SaveKey}.json";
+			var drivePath = $"navi/saves/{slot}/drives/{computer.SaveKey}.json";
+
+			if ( data.FileExists( path ) )
+				settings.Add( path );
+
+			if ( data.FileExists( drivePath ) )
+				drive.Add( drivePath );
+		}
+
+		return (settings, drive);
+	}
+
+	void Rebuild()
+	{
+		Layout.Clear( true );
+
+		var (settings, drive) = Find();
+
+		titles = Parts.Where( _ => settings.Count > 0 ).Select( x => x.Title ).ToList();
+
+		if ( drive.Count > 0 )
+			titles.Add( DriveTitle );
+
+		selected.RemoveWhere( x => !titles.Contains( x ) );
+
+		var key = Layout.Add( new Label( $"Save key: {computer.SaveKey}", this ) );
+		key.SetStyles( "color: #7a7a84; padding: 4px 0 0 0;" );
+
+		if ( titles.Count == 0 )
+		{
+			var none = Layout.Add( new Label( "This computer has no saved state.", this ) );
+			none.SetStyles( "color: #aaa;" );
+		}
+
+		foreach ( var part in Parts.Where( _ => settings.Count > 0 ) )
+			AddRow( part.Title, part.Explanation );
+
+		if ( drive.Count > 0 )
+			AddRow( DriveTitle, "Everything in the computer's own drive. Removable drives keep their files separately and stay." );
+
+		if ( titles.Count > 0 )
+		{
+			var tools = Layout.AddRow();
+			tools.Spacing = 6;
+			tools.Add( new Button( "Select all", "select_all", this ) { Clicked = () => SelectAll( true ) } );
+			tools.Add( new Button( "Select none", "deselect", this ) { Clicked = () => SelectAll( false ) } );
+			tools.AddStretchCell();
+
+			summary = Layout.Add( new Label( this ) );
+			summary.SetStyles( "color: #aaa;" );
+
+			clearButton = Layout.Add( new Button.Primary( ClearText, "delete", this ) { Clicked = Ask } );
+		}
+
+		UpdateSummary();
+	}
+
+	void AddRow( string title, string explanation )
+	{
+		var check = new Checkbox( title ) { Value = selected.Contains( title ) };
+		check.Toggled = () =>
+		{
+			if ( check.Value )
+				selected.Add( title );
+			else
+				selected.Remove( title );
+
+			UpdateSummary();
+		};
+		Layout.Add( check );
+
+		var text = Layout.Add( new Label( explanation, this ) { WordWrap = true } );
+		text.SetStyles( "color: #aaa; margin-left: 24px;" );
+	}
+
+	void SelectAll( bool on )
+	{
+		selected.Clear();
+
+		if ( on )
+			selected.UnionWith( titles );
+
+		Rebuild();
+	}
+
+	void UpdateSummary()
+	{
+		if ( summary is null || clearButton is null )
+			return;
+
+		summary.Text = selected.Count == 0 ? "Nothing selected." : $"{selected.Count} selected.";
+		clearButton.Enabled = selected.Count > 0 && !Game.IsPlaying;
+		clearButton.Text = Game.IsPlaying ? ClearText + " (game must be stopped)" : ClearText;
+	}
+
+	void Ask()
+	{
+		if ( selected.Count == 0 )
+			return;
+
+		var text = $"These parts of computer '{computer.SaveKey}' are cleared. The old save goes to the Recycle Bin:\n\n  "
+		           + string.Join( "\n  ", titles.Where( selected.Contains ) );
+
+		Dialog.AskConfirm( Clear, text, "Clear saved state", "Move to Recycle Bin" );
+	}
+
+	void Clear()
+	{
+		var data = Sandbox.FileSystem.Data;
+		var (settings, drive) = Find();
+		var chosen = Parts.Where( x => selected.Contains( x.Title ) ).ToList();
+		var toTrash = new List<string>();
+		var rewrites = new List<(string Path, NaviComputerSave Save)>();
+
+		try
+		{
+			foreach ( var path in settings.Where( _ => chosen.Count > 0 ) )
+			{
+				toTrash.Add( Full( path ) );
+
+				// Every part chosen: nothing is left to write back.
+				if ( chosen.Count == Parts.Length )
+					continue;
+
+				var save = data.ReadJson<NaviComputerSave>( path );
+				var fresh = new NaviComputerSave();
+
+				foreach ( var part in chosen )
+					part.Reset( save, fresh );
+
+				rewrites.Add( (path, save) );
+			}
+
+			if ( selected.Contains( DriveTitle ) )
+				toTrash.AddRange( drive.Select( Full ) );
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( $"Couldn't read the saved state, nothing was deleted: {e.Message}" );
+			EditorUtility.DisplayDialog( "Clear saved state", $"Couldn't read the saved state, so nothing was deleted.\n\n{e.Message}" );
+			return;
+		}
+
+		if ( toTrash.Count > 0 && !SavedStateWindow.MoveToRecycleBin( toTrash, out var error ) )
+		{
+			Log.Warning( $"Couldn't clear saved state, nothing was deleted: {error}" );
+			EditorUtility.DisplayDialog( "Clear saved state", $"Couldn't use the Recycle Bin, so nothing was deleted.\n\n{error}" );
+			return;
+		}
+
+		foreach ( var (path, save) in rewrites )
+			data.WriteJson( path, save );
+
+		Log.Info( $"Cleared saved state of computer '{computer.SaveKey}': {string.Join( ", ", titles.Where( selected.Contains ) )}." );
+		selected.Clear();
+		Rebuild();
+	}
+
+	static string Full( string path ) => System.IO.Path.GetFullPath( Sandbox.FileSystem.Data.GetFullPath( path ) );
+}
