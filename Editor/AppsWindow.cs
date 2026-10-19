@@ -227,7 +227,7 @@ public sealed class AppsWindow : BaseWindow
 	{
 		try
 		{
-			return string.IsNullOrEmpty( path ) ? "" : System.IO.Path.GetFullPath( Editor.FileSystem.Content.GetFullPath( path ) );
+			return string.IsNullOrEmpty( path ) ? "" : System.IO.Path.GetFullPath( global::Editor.FileSystem.Content.GetFullPath( path ) );
 		}
 		catch ( System.Exception )
 		{
