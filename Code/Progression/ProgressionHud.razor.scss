@@ -1,0 +1,40 @@
+ProgressionHud
+{
+	position: absolute;
+	left: 24px;
+	top: 24px;
+	width: 180px;
+	flex-direction: column;
+	pointer-events: none;
+	font-family: Poppins;
+	color: #f2eee2;
+	text-shadow: 1px 1px 2px #1b1a2e;
+}
+
+.level
+{
+	font-size: 22px;
+	font-weight: 700;
+}
+
+.bar
+{
+	width: 100%;
+	height: 6px;
+	margin: 4px 0;
+	background-color: rgba(27, 26, 46, 0.6);
+	border: 1px solid #1b1a2e;
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.fill
+{
+	height: 100%;
+	background-color: #f2eee2;
+}
+
+.money
+{
+	font-size: 16px;
+}

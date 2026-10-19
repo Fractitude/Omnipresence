@@ -16,6 +16,12 @@
     "OwnerTransfer": 1,
     "Components": [
       {
+        "__type": "Sandbox.PlayerProgress",
+        "__guid": "c96150c0-e5fc-4214-a8c5-0d7d70b4de2b",
+        "__enabled": true,
+        "Flags": 0
+      },
+      {
         "__type": "Sandbox.Rigidbody",
         "__guid": "a612a8e6-e08f-4cdc-95a0-4500925af144",
         "__enabled": true,

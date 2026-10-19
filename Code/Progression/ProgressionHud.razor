@@ -1,0 +1,23 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	@if ( PlayerProgress.Local is { Loaded: true } progress )
+	{
+		<div class="level">Lv @progress.Level</div>
+		<div class="bar">
+			<div class="fill" style="width: @( ProgressCurve.Fraction( progress.Xp ) * 100f )%"></div>
+		</div>
+		<div class="money">$@progress.Money.ToString( "N0" )</div>
+	}
+</root>
+
+@code
+{
+	protected override int BuildHash()
+	{
+		var progress = PlayerProgress.Local;
+		return progress is { Loaded: true } ? System.HashCode.Combine( progress.Xp, progress.Money ) : 0;
+	}
+}

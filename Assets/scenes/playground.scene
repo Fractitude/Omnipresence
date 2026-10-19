@@ -146,6 +146,12 @@
           "ZIndex": 100
         },
         {
+          "__type": "Sandbox.ProgressionHud",
+          "__guid": "f0697fb2-4de4-49e9-aa01-b24a0fe75564",
+          "__enabled": true,
+          "Flags": 0
+        },
+        {
           "__type": "Sandbox.Crosshair",
           "__guid": "71dacec3-87fb-47aa-85d6-29c61b83fc61",
           "__enabled": true,
