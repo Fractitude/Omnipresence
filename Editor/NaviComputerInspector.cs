@@ -46,10 +46,10 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 		tools.Add( new Button( "Collapse all", "unfold_less", this ) { Clicked = () => SetAll( false ) } );
 		tools.AddStretchCell();
 
+		Add( "Apps", "apps", true, () => Sheet( computerObject,
 			nameof( NaviComputer.InstalledApps ), nameof( NaviComputer.InstalledPackages ),
 			nameof( NaviComputer.PinnedApps ), nameof( NaviComputer.StartFavorites ), nameof( NaviComputer.Tags ),
 			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.SystemAppFolders ) ) );
-			nameof( NaviComputer.InstalledPackages ) ) );
 
 		Add( "Appearance", "palette", true, () => Sheet( computerObject,
 			nameof( NaviComputer.Theme ), nameof( NaviComputer.ColorScheme ), nameof( NaviComputer.Wallpaper ),
