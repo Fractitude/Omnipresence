@@ -60,14 +60,31 @@
 
 	TextEntry Entry;
 
+	/// <summary>The box takes focus once, when it first shows, so the player can type straight away.</summary>
+	bool needsFocus = true;
+
 	void Submit()
 	{
 		var text = Entry?.Text ?? "";
 
 		if ( Entry is not null )
+		{
 			Entry.Text = "";
+			Entry.Focus();
+		}
 
 		OnSubmit?.Invoke( text );
+	}
+
+	protected override void OnAfterTreeRender( bool firstTime )
+	{
+		base.OnAfterTreeRender( firstTime );
+
+		if ( !needsFocus || Entry is null )
+			return;
+
+		Entry.Focus();
+		needsFocus = false;
 	}
 
 	protected override int BuildHash() => System.HashCode.Combine( Board, Enabled );
