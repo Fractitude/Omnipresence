@@ -2,7 +2,7 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root>
+<root class="@( NaviInputCapture.Current is not null ? "seated" : "" )">
 	<div class="clock">@WorldClock.TimeOfDay <span class="date">@WorldClock.Day</span></div>
 	@if ( PlayerProgress.Local is { Loaded: true } progress )
 	{
@@ -24,7 +24,7 @@
 	protected override int BuildHash()
 	{
 		var progress = PlayerProgress.Local;
-		var clock = (WorldClock.TimeOfDay, WorldClock.Day);
+		var clock = (WorldClock.TimeOfDay, WorldClock.Day, NaviInputCapture.Current is not null);
 
 		return progress is { Loaded: true }
 			? System.HashCode.Combine( progress.Xp, progress.HackXp, progress.Money, progress.Credits, clock )
