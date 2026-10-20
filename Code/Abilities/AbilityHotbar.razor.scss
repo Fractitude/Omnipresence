@@ -34,6 +34,21 @@ AbilityHotbar
 		opacity: 0.6;
 	}
 
+	&.power .icon
+	{
+		color: #7dffb0;
+	}
+
+	&.spell .icon
+	{
+		color: #b69cff;
+	}
+
+	&.item .icon
+	{
+		color: #ffd37d;
+	}
+
 	&.target
 	{
 		border: 1px solid #7dffb0;

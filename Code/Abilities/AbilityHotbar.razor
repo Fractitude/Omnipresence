@@ -8,7 +8,7 @@
 		var slot = i;
 		var ability = AbilityLoadout.At( slot );
 		var drop = AbilityMenu.IsOpen && AbilityLoadout.Dragging is not null;
-		<div class="slot @( ability is null ? "empty" : "" ) @( drop ? "target" : "" )"
+		<div class="slot @( ability is null ? "empty" : ability.Kind.ToString().ToLowerInvariant() ) @( drop ? "target" : "" )"
 		     @onmouseup=@( () => Drop( slot ) )
 		     @onrightclick=@( () => Empty( slot ) )>
 			<div class="key">@AbilityLoadout.KeyLabel( slot )</div>
