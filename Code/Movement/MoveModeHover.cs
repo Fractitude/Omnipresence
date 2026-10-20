@@ -20,6 +20,9 @@ public sealed class MoveModeHover : MoveMode
 	/// <summary>How quickly velocity follows the wanted velocity. Higher is snappier.</summary>
 	[Property] public float Responsiveness { get; set; } = 6f;
 
+	/// <summary>Score while hovering; above walking, swimming and ladders so hovering wins.</summary>
+	[Property] public int Priority { get; set; } = 20;
+
 	[Sync] public bool IsHovering { get; private set; }
 
 	public override bool AllowGrounding => false;
@@ -59,7 +62,7 @@ public sealed class MoveModeHover : MoveMode
 		var wish = look.Forward * move.x + look.Left * move.y;
 		wish = wish.ClampLength( 1f ) * speed;
 
-		body.Velocity = Vector3.Lerp( body.Velocity, wish, 1f - MathF.Exp( -Responsiveness * Time.Delta ) );
+		body.Velocity = Vector3.Lerp( body.Velocity, wish, ( Responsiveness * Time.Delta ).Clamp( 0f, 1f ) );
 	}
 
 	public override void UpdateRigidBody( Rigidbody body )
