@@ -16,6 +16,7 @@ public sealed class AppsWindow : BaseWindow
 
 	readonly HashSet<string> expanded = [];
 	readonly HashSet<string> collapsedSections = [];
+	readonly Dictionary<string, RowView> rows = [];
 	ScrollArea list;
 	LineEdit search;
 	Label summary;
@@ -79,6 +80,7 @@ public sealed class AppsWindow : BaseWindow
 			.Where( x => filter.Length == 0 || Matches( x, filter ) )
 			.ToList();
 
+		rows.Clear();
 		list.Canvas = new Widget( list );
 		list.Canvas.Layout = Layout.Column();
 		list.Canvas.Layout.Margin = new Sandbox.UI.Margin( 8, 8, 16, 8 );
@@ -126,7 +128,8 @@ public sealed class AppsWindow : BaseWindow
 		card.Layout.Margin = new Sandbox.UI.Margin( 6, 4, 8, 8 );
 		card.Layout.Spacing = 2;
 
-		card.Layout.Add( new Bar( card, entry.Title, null, open ? "expand_more" : "chevron_right", false, () => Toggle( entry.Id ) ) );
+		var bar = card.Layout.Add( new Bar( card, entry.Title, null, open ? "expand_more" : "chevron_right", false,
+			() => Toggle( entry.Id ) ) );
 
 		if ( entry.Description.Length > 0 )
 		{
@@ -134,34 +137,26 @@ public sealed class AppsWindow : BaseWindow
 			description.SetStyles( "color: #9a9aa2; margin: 0 0 4px 30px;" );
 		}
 
-		if ( !open )
-			return;
+		var row = new RowView( entry, card, bar );
+		rows[entry.Id] = row;
+		card.Layout.Add( row.Details );
 
-		var divider = card.Layout.Add( new Widget( card ) { FixedHeight = 1 } );
-		divider.SetStyles( "background-color: #3a3a40; border: none;" );
-		card.Layout.AddSpacingCell( 4 );
-
-		foreach ( var (name, value) in entry.Details )
-		{
-			var row = card.Layout.AddRow();
-			row.Margin = new Sandbox.UI.Margin( 30, 1, 0, 1 );
-			row.Spacing = 8;
-
-			var caption = row.Add( new Label( name, card ) { MinimumWidth = 110, MaximumWidth = 110 } );
-			caption.SetStyles( "color: #7a7a84;" );
-
-			var field = row.Add( new LineEdit( card ) { Text = value, ReadOnly = true }, 1 );
-			field.SetStyles( "background-color: #202024; border: 1px solid #333338; border-radius: 4px; color: #ddd; padding: 2px 6px;" );
-			field.CursorPosition = 0;
-		}
+		if ( open )
+			row.SetOpen( true );
 	}
 
+	/// <summary>
+	/// Open or close one row in place. The rows aren't rebuilt, so the scroll position and the other rows stay put.
+	/// </summary>
 	void Toggle( string id )
 	{
-		if ( !expanded.Remove( id ) )
-			expanded.Add( id );
+		var open = expanded.Add( id );
 
-		Rebuild();
+		if ( !open )
+			expanded.Remove( id );
+
+		if ( rows.TryGetValue( id, out var row ) )
+			row.SetOpen( open );
 	}
 
 	void SetAll( bool on )
@@ -171,7 +166,62 @@ public sealed class AppsWindow : BaseWindow
 		if ( on )
 			expanded.UnionWith( entries.Select( x => x.Id ) );
 
-		Rebuild();
+		foreach ( var row in rows.Values )
+			row.SetOpen( on );
+	}
+
+	/// <summary>
+	/// The widgets of one app's row. The details are built the first time the row opens, then only shown and hidden.
+	/// </summary>
+	sealed class RowView
+	{
+		readonly Entry entry;
+		readonly Bar bar;
+		bool built;
+
+		public Widget Details { get; }
+
+		public RowView( Entry entry, Widget card, Bar bar )
+		{
+			this.entry = entry;
+			this.bar = bar;
+
+			Details = new Widget( card ) { Visible = false };
+			Details.Layout = Layout.Column();
+			Details.Layout.Spacing = 2;
+		}
+
+		public void SetOpen( bool open )
+		{
+			if ( open && !built )
+				Build();
+
+			Details.Visible = open;
+			bar.Icon = open ? "expand_more" : "chevron_right";
+		}
+
+		void Build()
+		{
+			built = true;
+
+			var divider = Details.Layout.Add( new Widget( Details ) { FixedHeight = 1 } );
+			divider.SetStyles( "background-color: #3a3a40; border: none;" );
+			Details.Layout.AddSpacingCell( 4 );
+
+			foreach ( var (name, value) in entry.Details )
+			{
+				var row = Details.Layout.AddRow();
+				row.Margin = new Sandbox.UI.Margin( 30, 1, 0, 1 );
+				row.Spacing = 8;
+
+				var caption = row.Add( new Label( name, Details ) { MinimumWidth = 110, MaximumWidth = 110 } );
+				caption.SetStyles( "color: #7a7a84;" );
+
+				var field = row.Add( new LineEdit( Details ) { Text = value, ReadOnly = true }, 1 );
+				field.SetStyles( "background-color: #202024; border: 1px solid #333338; border-radius: 4px; color: #ddd; padding: 2px 6px;" );
+				field.CursorPosition = 0;
+			}
+		}
 	}
 
 	static bool Matches( Entry entry, string filter ) =>
@@ -283,9 +333,19 @@ public sealed class AppsWindow : BaseWindow
 	{
 		readonly string text;
 		readonly string count;
-		readonly string icon;
 		readonly bool section;
 		readonly System.Action clicked;
+		string icon;
+
+		public string Icon
+		{
+			get => icon;
+			set
+			{
+				icon = value;
+				Update();
+			}
+		}
 
 		public Bar( Widget parent, string text, string count, string icon, bool section, System.Action clicked ) : base( parent )
 		{
