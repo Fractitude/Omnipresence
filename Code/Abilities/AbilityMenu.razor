@@ -68,7 +68,7 @@
 
 		// A drop is handled by the slot under the mouse when the button comes up. Forget the drag a frame later, so a
 		// release over nothing cancels it.
-		if ( AbilityLoadout.Dragging is not null && !Input.Down( "Attack1" ) )
+		if ( AbilityLoadout.Dragging is not null && !Input.Keyboard.Down( "MOUSE1" ) )
 		{
 			if ( releaseSeen )
 			{
