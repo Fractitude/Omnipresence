@@ -23,6 +23,34 @@
 
 @code
 {
+	static AbilityHotbar current;
+
+	/// <summary>
+	/// The slot under a screen position, or -1.
+	/// </summary>
+	public static int SlotAt( Vector2 screenPosition )
+	{
+		if ( current?.Panel is not { } root )
+			return -1;
+
+		var index = 0;
+
+		foreach ( var child in root.Children )
+		{
+			if ( child.Box.Rect.IsInside( screenPosition ) )
+				return index;
+
+			index++;
+		}
+
+		return -1;
+	}
+
+	protected override void OnEnabled()
+	{
+		current = this;
+	}
+
 	protected override void OnUpdate()
 	{
 		if ( AbilityMenu.IsOpen || NaviInputCapture.Current is not null )

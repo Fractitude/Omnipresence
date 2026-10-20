@@ -2,7 +2,7 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( IsOpen ? "open" : "" )">
+<root class="@( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
 	@if ( IsOpen )
 	{
 		<div class="window">
@@ -43,8 +43,6 @@
 	/// </summary>
 	public static bool IsOpen { get; private set; }
 
-	bool releaseSeen;
-
 	protected override void OnUpdate()
 	{
 		if ( IsOpen )
@@ -65,31 +63,29 @@
 
 		Mouse.Visibility = MouseVisibility.Visible;
 		FreeControls( false );
-
-		// A drop is handled by the slot under the mouse when the button comes up. Forget the drag a frame later, so a
-		// release over nothing cancels it.
-		if ( AbilityLoadout.Dragging is not null && !Input.Keyboard.Down( "MOUSE1" ) )
-		{
-			if ( releaseSeen )
-			{
-				AbilityLoadout.Dragging = null;
-				releaseSeen = false;
-			}
-			else
-			{
-				releaseSeen = true;
-			}
-		}
-		else
-		{
-			releaseSeen = false;
-		}
 	}
 
 	protected override void OnDisabled()
 	{
 		if ( IsOpen )
 			Close();
+	}
+
+	/// <summary>
+	/// The button came up somewhere in the menu: drop on the hotbar slot under the mouse, if any, and end the drag.
+	/// Needed because the release can go to the panel the press started on rather than the slot.
+	/// </summary>
+	void EndDrag()
+	{
+		if ( AbilityCatalog.Find( AbilityLoadout.Dragging ) is { } ability )
+		{
+			var slot = AbilityHotbar.SlotAt( Mouse.Position );
+
+			if ( slot >= 0 )
+				AbilityLoadout.Set( slot, ability );
+		}
+
+		AbilityLoadout.Dragging = null;
 	}
 
 	void Open()
