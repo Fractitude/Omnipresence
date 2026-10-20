@@ -1,0 +1,128 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( IsOpen ? "open" : "" )">
+	@if ( IsOpen )
+	{
+		<div class="window">
+			<div class="title">Abilities</div>
+			<div class="hint">Drag an ability onto the hotbar. Right-click a slot to empty it.</div>
+			<div class="list">
+				@foreach ( var ability in AbilityCatalog.All )
+				{
+					var current = ability;
+					<div class="card @ability.Kind.ToString().ToLowerInvariant() @( AbilityLoadout.IsSlotted( ability ) ? "slotted" : "" )"
+					     @onmousedown=@( () => AbilityLoadout.Dragging = current.Id )>
+						<div class="icon"><i>@ability.Icon</i></div>
+						<div class="info">
+							<div class="name">@ability.Name <span class="kind">@ability.Kind</span></div>
+							<div class="description">@ability.Description</div>
+						</div>
+						@if ( ability.Cooldown > 0f )
+						{
+							<div class="cooldown">@ability.Cooldown.ToString( "0.#" )s</div>
+						}
+					</div>
+				}
+			</div>
+		</div>
+
+		@if ( AbilityLoadout.Dragging is not null && AbilityCatalog.Find( AbilityLoadout.Dragging ) is { } dragged )
+		{
+			var position = Mouse.Position * Panel.ScaleFromScreen;
+			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px"><i>@dragged.Icon</i></div>
+		}
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the menu is open on this computer. The crosshair and the hotbar read it.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	bool releaseSeen;
+
+	protected override void OnUpdate()
+	{
+		if ( IsOpen )
+		{
+			if ( Input.EscapePressed || Input.Pressed( "Abilities" ) || NaviInputCapture.Current is not null )
+			{
+				Input.EscapePressed = false;
+				Close();
+			}
+		}
+		else if ( Input.Pressed( "Abilities" ) && NaviInputCapture.Current is null )
+		{
+			Open();
+		}
+
+		if ( !IsOpen )
+			return;
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		FreeControls( false );
+
+		// A drop is handled by the slot under the mouse when the button comes up. Forget the drag a frame later, so a
+		// release over nothing cancels it.
+		if ( AbilityLoadout.Dragging is not null && !Input.Down( "Attack1" ) )
+		{
+			if ( releaseSeen )
+			{
+				AbilityLoadout.Dragging = null;
+				releaseSeen = false;
+			}
+			else
+			{
+				releaseSeen = true;
+			}
+		}
+		else
+		{
+			releaseSeen = false;
+		}
+	}
+
+	protected override void OnDisabled()
+	{
+		if ( IsOpen )
+			Close();
+	}
+
+	void Open()
+	{
+		IsOpen = true;
+		AbilityLoadout.Dragging = null;
+	}
+
+	void Close()
+	{
+		IsOpen = false;
+		AbilityLoadout.Dragging = null;
+		FreeControls( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Take the look and move controls from the player while the menu is open, or give them back.
+	/// </summary>
+	void FreeControls( bool allowed )
+	{
+		var controller = Scene.GetAll<PlayerController>().FirstOrDefault( x => !x.IsProxy );
+
+		if ( controller is null )
+			return;
+
+		controller.UseLookControls = allowed;
+		controller.UseInputControls = allowed;
+	}
+
+	protected override int BuildHash()
+	{
+		var dragging = AbilityLoadout.Dragging;
+		return System.HashCode.Combine( IsOpen, AbilityLoadout.Version, dragging, dragging is null ? default : Mouse.Position );
+	}
+}

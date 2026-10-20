@@ -1,0 +1,63 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( AbilityMenu.IsOpen ? "editing" : "" )">
+	@for ( var i = 0; i < AbilityLoadout.SlotCount; i++ )
+	{
+		var slot = i;
+		var ability = AbilityLoadout.At( slot );
+		var drop = AbilityMenu.IsOpen && AbilityLoadout.Dragging is not null;
+		<div class="slot @( ability is null ? "empty" : "" ) @( drop ? "target" : "" )"
+		     @onmouseup=@( () => Drop( slot ) )
+		     @onrightclick=@( () => Empty( slot ) )>
+			<div class="key">@AbilityLoadout.KeyLabel( slot )</div>
+			@if ( ability is not null )
+			{
+				<div class="icon"><i>@ability.Icon</i></div>
+				<div class="cooldown" style="height: @( AbilityLoadout.CooldownFraction( ability ) * 100f )%"></div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	protected override void OnUpdate()
+	{
+		if ( AbilityMenu.IsOpen || NaviInputCapture.Current is not null )
+			return;
+
+		for ( var i = 0; i < AbilityLoadout.SlotCount; i++ )
+		{
+			if ( Input.Pressed( AbilityLoadout.ActionName( i ) ) )
+				AbilityLoadout.TryActivate( i );
+		}
+	}
+
+	void Drop( int slot )
+	{
+		if ( !AbilityMenu.IsOpen || AbilityCatalog.Find( AbilityLoadout.Dragging ) is not { } ability )
+			return;
+
+		AbilityLoadout.Set( slot, ability );
+		AbilityLoadout.Dragging = null;
+	}
+
+	void Empty( int slot )
+	{
+		if ( AbilityMenu.IsOpen )
+			AbilityLoadout.Clear( slot );
+	}
+
+	protected override int BuildHash()
+	{
+		// Redraw every few frames while something cools down, so the sweep moves.
+		var cooling = 0;
+
+		for ( var i = 0; i < AbilityLoadout.SlotCount; i++ )
+			cooling = cooling * 31 + (int)(AbilityLoadout.CooldownFraction( AbilityLoadout.At( i ) ) * 100f);
+
+		return System.HashCode.Combine( AbilityMenu.IsOpen, AbilityLoadout.Version, AbilityLoadout.Dragging is not null, cooling );
+	}
+}
