@@ -1,10 +1,10 @@
 namespace Sandbox;
 
 /// <summary>
-/// Aims the player's world panel clicks from their first person eye, whatever the camera does. A <see cref="WorldInput"/>
-/// on the camera ray-casts from the camera, so in third person the camera's distance to a screen decided whether it could
-/// be used. This moves the input onto a stand-in at the eye, so the range is measured from where a first person camera
-/// would be. With the mouse free (seated at a computer) the input still uses the cursor ray from the camera.
+/// Aims the player's world panel clicks from their first person eye, whatever the camera does. A
+/// <see cref="WorldInput"/> on the camera casts from the camera, so in third person the camera's distance to a screen
+/// decided whether it could be used. This moves the input onto a stand-in at the eye, so range is measured from where a first person camera would
+/// be. With the mouse free (seated at a computer) the input still uses the cursor ray from the camera.
 /// </summary>
 public sealed class FirstPersonWorldInput : GameObjectSystem<FirstPersonWorldInput>
 {
@@ -32,7 +32,8 @@ public sealed class FirstPersonWorldInput : GameObjectSystem<FirstPersonWorldInp
 	}
 
 	/// <summary>
-	/// Make the stand-in with the camera's input settings, and turn the camera's own input off so only one routes clicks.
+	/// Make the stand-in with the camera's input settings, and turn the camera's own input off so only one routes
+	/// clicks.
 	/// </summary>
 	void Create()
 	{
