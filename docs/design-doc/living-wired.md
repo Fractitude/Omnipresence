@@ -4,7 +4,7 @@
 
 Shorthand: **Neocities, Second Life and a slow mystery game, inside Lain's Wired.**
 
-**Status:** the story and the mystery are on hold until the game is proven fun. The concrete toys, tests and first prototype are in [living-wired-toys.md](living-wired-toys.md).
+**Status:** the story and the mystery are on hold until the game is proven fun. The concrete toys, tests and first prototype are in [living-wired-toys.md](living-wired-toys.md). The gameplay loop (exploits, rounds, protocols, how the two worlds feed each other) is in [living-wired-loop.md](living-wired-loop.md).
 
 ## One sentence
 
