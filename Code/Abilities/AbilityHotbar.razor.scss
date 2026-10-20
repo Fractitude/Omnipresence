@@ -13,6 +13,11 @@ AbilityHotbar
 	{
 		pointer-events: all;
 	}
+
+	&.seated
+	{
+		display: none;
+	}
 }
 
 .slot
