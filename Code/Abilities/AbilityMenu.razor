@@ -7,13 +7,13 @@
 	{
 		<div class="window">
 			<div class="title">Abilities</div>
-			<div class="hint">Drag an ability onto the hotbar. Right-click a slot to empty it.</div>
+			<div class="hint">Drag an ability onto the hotbar. Drag slots to swap them, or off the bar to empty one.</div>
 			<div class="list">
 				@foreach ( var ability in AbilityCatalog.All )
 				{
 					var current = ability;
 					<div class="card @ability.Kind.ToString().ToLowerInvariant() @( AbilityLoadout.IsSlotted( ability ) ? "slotted" : "" )"
-					     @onmousedown=@( () => AbilityLoadout.Dragging = current.Id )>
+					     @onmousedown=@( () => AbilityLoadout.BeginDrag( current, -1 ) )>
 						<div class="icon"><i>@ability.Icon</i></div>
 						<div class="info">
 							<div class="name">@ability.Name <span class="kind">@ability.Kind</span></div>
@@ -77,27 +77,19 @@
 	/// </summary>
 	void EndDrag()
 	{
-		if ( AbilityCatalog.Find( AbilityLoadout.Dragging ) is { } ability )
-		{
-			var slot = AbilityHotbar.SlotAt( Mouse.Position );
-
-			if ( slot >= 0 )
-				AbilityLoadout.Set( slot, ability );
-		}
-
-		AbilityLoadout.Dragging = null;
+		AbilityLoadout.Drop( AbilityHotbar.SlotAt( Mouse.Position ) );
 	}
 
 	void Open()
 	{
 		IsOpen = true;
-		AbilityLoadout.Dragging = null;
+		AbilityLoadout.BeginDrag( null, -1 );
 	}
 
 	void Close()
 	{
 		IsOpen = false;
-		AbilityLoadout.Dragging = null;
+		AbilityLoadout.BeginDrag( null, -1 );
 		FreeControls( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}

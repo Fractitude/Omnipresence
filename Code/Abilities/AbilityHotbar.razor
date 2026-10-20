@@ -2,15 +2,14 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( AbilityMenu.IsOpen ? "editing" : "" )">
+<root class="@( AbilityMenu.IsOpen ? "editing" : "" )" @onmouseup=@EndDrag>
 	@for ( var i = 0; i < AbilityLoadout.SlotCount; i++ )
 	{
 		var slot = i;
 		var ability = AbilityLoadout.At( slot );
 		var drop = AbilityMenu.IsOpen && AbilityLoadout.Dragging is not null;
 		<div class="slot @( ability is null ? "empty" : ability.Kind.ToString().ToLowerInvariant() ) @( drop ? "target" : "" )"
-		     @onmouseup=@( () => Drop( slot ) )
-		     @onrightclick=@( () => Empty( slot ) )>
+		     @onmousedown=@( () => BeginDrag( slot ) )>
 			<div class="key">@AbilityLoadout.KeyLabel( slot )</div>
 			@if ( ability is not null )
 			{
@@ -63,19 +62,15 @@
 		}
 	}
 
-	void Drop( int slot )
-	{
-		if ( !AbilityMenu.IsOpen || AbilityCatalog.Find( AbilityLoadout.Dragging ) is not { } ability )
-			return;
-
-		AbilityLoadout.Set( slot, ability );
-		AbilityLoadout.Dragging = null;
-	}
-
-	void Empty( int slot )
+	void BeginDrag( int slot )
 	{
 		if ( AbilityMenu.IsOpen )
-			AbilityLoadout.Clear( slot );
+			AbilityLoadout.BeginDrag( AbilityLoadout.At( slot ), slot );
+	}
+
+	void EndDrag()
+	{
+		AbilityLoadout.Drop( SlotAt( Mouse.Position ) );
 	}
 
 	protected override int BuildHash()

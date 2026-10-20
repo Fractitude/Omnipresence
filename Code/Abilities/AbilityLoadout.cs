@@ -23,6 +23,57 @@ public static class AbilityLoadout
 	public static string Dragging { get; set; }
 
 	/// <summary>
+	/// The slot the dragged ability came from, or -1 when it comes from the menu.
+	/// </summary>
+	public static int DragFrom { get; set; } = -1;
+
+	/// <summary>
+	/// Start dragging an ability, from a hotbar slot or, with -1, from the menu.
+	/// </summary>
+	public static void BeginDrag( Ability ability, int from )
+	{
+		Dragging = ability?.Id;
+		DragFrom = from;
+	}
+
+	/// <summary>
+	/// End the drag over a slot, or over none (-1). From the menu it fills the slot; from the bar it swaps with the
+	/// slot, or empties the one it came from when dropped outside the bar.
+	/// </summary>
+	public static void Drop( int slot )
+	{
+		var ability = AbilityCatalog.Find( Dragging );
+		var from = DragFrom;
+
+		Dragging = null;
+		DragFrom = -1;
+
+		if ( ability is null )
+			return;
+
+		if ( from < 0 )
+		{
+			if ( slot >= 0 )
+				Set( slot, ability );
+		}
+		else if ( slot < 0 )
+		{
+			Clear( from );
+		}
+		else if ( slot != from )
+		{
+			Swap( from, slot );
+		}
+	}
+
+	static void Swap( int a, int b )
+	{
+		Load();
+		(slots[a], slots[b]) = (slots[b], slots[a]);
+		Changed();
+	}
+
+	/// <summary>
 	/// Bumps whenever a slot changes, so a panel knows to redraw.
 	/// </summary>
 	public static int Version { get; private set; }
