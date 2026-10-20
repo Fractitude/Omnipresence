@@ -28,8 +28,15 @@
         "DriveSizeMegabytes": 32,
         "GrantedPermissions": [],
         "InstalledApps": [
+          "navi/apps/files.napp",
           "navi/apps/webbrowser.napp",
-          "navi/apps/textedit.napp"
+          "navi/apps/filepicker.napp",
+          "navi/apps/imageviewer.napp",
+          "navi/apps/camera.napp",
+          "navi/apps/textedit.napp",
+          "navi/apps/codeedit.napp",
+          "navi/apps/messages.napp",
+          "navi/apps/calculator.napp"
         ],
         "InstalledPackages": [],
         "MutedNotificationApps": [],
@@ -41,7 +48,12 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
+        "OnlyApps": [],
         "OutOfRangeColor": "0,0,0,1",
+        "PinnedApps": [
+          "navi/apps/files.napp",
+          "navi/apps/messages.napp"
+        ],
         "ReviewedApps": [],
         "RootApps": [],
         "SaveId": "",
@@ -57,7 +69,7 @@
         "SystemAppFolders": [
           "navi/system/"
         ],
-        "PinnedApps": [],
+        "Tags": [],
         "Theme": "Glass",
         "TransparencyLevel": 2,
         "Wallpaper": "Glass"
