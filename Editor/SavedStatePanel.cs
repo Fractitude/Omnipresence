@@ -148,6 +148,11 @@ sealed class SavedStatePanel : Widget
 		Layout.Clear( true );
 		ticks.Clear();
 
+		// The old widgets are gone; a stale reference would throw on the next frame when nothing is left to rebuild.
+		header = null;
+		body = null;
+		clearButton = null;
+
 		var (settings, drive) = Find();
 
 		titles = Parts.Where( _ => settings.Count > 0 ).Select( x => x.Title ).ToList();
