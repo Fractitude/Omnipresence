@@ -132,7 +132,7 @@ public static class AbilityLoadout
 		if ( ability is null || !readyAt.TryGetValue( ability.Id, out var at ) )
 			return 0f;
 
-		return System.MathF.Max( at - Time.Now, 0f );
+		return System.MathF.Max( at - RealTime.Now, 0f );
 	}
 
 	/// <summary>
@@ -154,7 +154,7 @@ public static class AbilityLoadout
 			return false;
 
 		if ( ability.Cooldown > 0f )
-			readyAt[ability.Id] = Time.Now + ability.Cooldown;
+			readyAt[ability.Id] = RealTime.Now + ability.Cooldown;
 
 		ability.Use?.Invoke( PlayerProgress.Local?.GameObject );
 		return true;
