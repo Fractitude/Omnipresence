@@ -74,6 +74,11 @@ public sealed class MoveModeHover : MoveMode
 		// Forward follows the full look direction, so looking up and pressing forward climbs.
 		var look = Controller.EyeAngles.ToRotation();
 		var wish = look.Forward * move.x + look.Left * move.y;
+
+		// Jump and Duck change altitude directly, whichever way the player faces.
+		if ( Controller.UseInputControls )
+			wish += Vector3.Up * ( ( Input.Down( "Jump" ) ? 1f : 0f ) - ( Input.Down( "Duck" ) ? 1f : 0f ) );
+
 		wish = wish.ClampLength( 1f ) * speed;
 
 		body.Velocity = Vector3.Lerp( body.Velocity, wish, ( Responsiveness * Time.Delta ).Clamp( 0f, 1f ) );
