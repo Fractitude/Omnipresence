@@ -5,8 +5,8 @@ AbilityMenu
 	top: 0;
 	right: 0;
 	bottom: 0;
-	align-items: center;
-	justify-content: flex-end;
+	align-items: flex-end;
+	justify-content: center;
 	// Sits just above the hotbar: its 56px slots, the 24px under them and a gap.
 	padding-bottom: 92px;
 	pointer-events: none;
