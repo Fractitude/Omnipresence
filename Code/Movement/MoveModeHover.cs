@@ -26,13 +26,21 @@ public sealed class MoveModeHover : MoveMode
 	[Sync] public bool IsHovering { get; private set; }
 
 	public override bool AllowGrounding => false;
-	public override bool AllowFalling => true;
+	public override bool AllowFalling => false;
 
 	TimeSince sinceJump = 999f;
 
 	protected override void OnUpdate()
 	{
-		if ( IsProxy || !Controller.IsValid() || !Input.Pressed( "Jump" ) )
+		if ( IsProxy || !Controller.IsValid() )
+			return;
+
+		// Water and ladders take over from hovering.
+		if ( IsHovering && IsOtherModeWanted() )
+			IsHovering = false;
+
+		// Menus and the Navi screen turn the controller's input off; Jump must not count then.
+		if ( !Controller.UseInputControls || !Input.Pressed( "Jump" ) )
 			return;
 
 		if ( sinceJump < DoubleTapTime )
@@ -46,6 +54,12 @@ public sealed class MoveModeHover : MoveMode
 		}
 	}
 
+	bool IsOtherModeWanted()
+	{
+		return Components.GetAll<MoveMode>()
+			.Any( mode => mode != this && ( mode is MoveModeSwim or MoveModeLadder ) && mode.Score( Controller ) > 0 );
+	}
+
 	public override int Score( PlayerController controller )
 	{
 		return IsHovering ? Priority : -100;
@@ -54,7 +68,7 @@ public sealed class MoveModeHover : MoveMode
 	public override void AddVelocity()
 	{
 		var body = Controller.Body;
-		var move = Input.AnalogMove;
+		var move = Controller.UseInputControls ? Input.AnalogMove : Vector3.Zero;
 		var speed = Input.Down( "Run" ) ? FastHoverSpeed : HoverSpeed;
 
 		// Forward follows the full look direction, so looking up and pressing forward climbs.
