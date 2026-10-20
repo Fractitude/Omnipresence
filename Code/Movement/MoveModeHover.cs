@@ -84,6 +84,20 @@ public sealed class MoveModeHover : MoveMode
 		body.Velocity = Vector3.Lerp( body.Velocity, wish, ( Responsiveness * Time.Delta ).Clamp( 0f, 1f ) );
 	}
 
+	float normalDuckedHeight;
+
+	// Duck is the descend key here, so it must not also crouch the player.
+	public override void OnModeBegin()
+	{
+		normalDuckedHeight = Controller.DuckedHeight;
+		Controller.DuckedHeight = Controller.BodyHeight;
+	}
+
+	public override void OnModeEnd( MoveMode next )
+	{
+		Controller.DuckedHeight = normalDuckedHeight;
+	}
+
 	public override void UpdateRigidBody( Rigidbody body )
 	{
 		body.Gravity = false;
