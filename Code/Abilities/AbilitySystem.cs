@@ -19,7 +19,9 @@ public sealed class AbilitySystem : GameObjectSystem<AbilitySystem>
 
 		hud = new GameObject( true, "Abilities" ) { NetworkMode = NetworkMode.Never };
 		hud.Components.Create<ScreenPanel>().ZIndex = 90;
-		hud.Components.Create<AbilityHotbar>();
+		// The menu first: it covers the screen, so the hotbar has to be drawn, and clicked, above it, and the dragged icon above both.
 		hud.Components.Create<AbilityMenu>();
+		hud.Components.Create<AbilityHotbar>();
+		hud.Components.Create<AbilityDragGhost>();
 	}
 }

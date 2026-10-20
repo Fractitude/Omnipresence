@@ -1,0 +1,20 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	@if ( AbilityCatalog.Find( AbilityLoadout.Dragging ) is { } dragged )
+	{
+		var position = Mouse.Position * Panel.ScaleFromScreen;
+		<div class="ghost" style="left: @( position.x )px; top: @( position.y )px"><i>@dragged.Icon</i></div>
+	}
+</root>
+
+@code
+{
+	protected override int BuildHash()
+	{
+		var dragging = AbilityLoadout.Dragging;
+		return System.HashCode.Combine( dragging, dragging is null ? default : Mouse.Position );
+	}
+}

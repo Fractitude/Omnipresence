@@ -27,12 +27,6 @@
 				}
 			</div>
 		</div>
-
-		@if ( AbilityLoadout.Dragging is not null && AbilityCatalog.Find( AbilityLoadout.Dragging ) is { } dragged )
-		{
-			var position = Mouse.Position * Panel.ScaleFromScreen;
-			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px"><i>@dragged.Icon</i></div>
-		}
 	}
 </root>
 
@@ -111,6 +105,6 @@
 	protected override int BuildHash()
 	{
 		var dragging = AbilityLoadout.Dragging;
-		return System.HashCode.Combine( IsOpen, AbilityLoadout.Version, dragging, dragging is null ? default : Mouse.Position );
+		return System.HashCode.Combine( IsOpen, AbilityLoadout.Version, dragging );
 	}
 }
