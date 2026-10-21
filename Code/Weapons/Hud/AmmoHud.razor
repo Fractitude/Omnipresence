@@ -1,0 +1,61 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+@if ( Weapon is { } weapon )
+{
+	<root>
+		<div class="box @( low ? "low" : "" ) @( weapon.IsReloading ? "reloading" : "" )">
+			<div class="name">@weapon.DisplayName</div>
+			<div class="counts">
+				@if ( weapon.UsesClips )
+				{
+					<label class="clip">@Math.Max( weapon.Clip1, 0 )</label>
+					<label class="reserve">/ @weapon.Ammo1</label>
+				}
+				else
+				{
+					<label class="clip">@weapon.Ammo1</label>
+				}
+			</div>
+			@if ( weapon.PrimaryAmmoType is { } type )
+			{
+				<div class="type">@( weapon.IsReloading ? "Reloading" : type.Title )</div>
+			}
+		</div>
+	</root>
+}
+
+@code
+{
+	/// <summary>
+	/// The magazine counts as low at or below this fraction of its size.
+	/// </summary>
+	[Property, Range( 0, 1 )] public float LowAmmoFraction { get; set; } = 0.3f;
+
+	/// <summary>
+	/// The held weapon of the local player, if it uses ammo. Nothing is drawn while a Navi app or a menu has the screen.
+	/// </summary>
+	BaseSandboxWeapon Weapon
+	{
+		get
+		{
+			if ( NaviInputCapture.Current is not null || AbilityMenu.IsOpen || CharacterMenu.IsOpen )
+				return null;
+
+			var weapon = Scene.GetAllComponents<WeaponInventory>().FirstOrDefault( x => !x.IsProxy )?.ActiveWeapon;
+			return weapon.IsValid() && weapon.UsesAmmo ? weapon : null;
+		}
+	}
+
+	bool low => Weapon is { UsesClips: true } weapon && weapon.ClipMaxSize > 0
+	            && weapon.Clip1 <= weapon.ClipMaxSize * LowAmmoFraction;
+
+	protected override int BuildHash()
+	{
+		var weapon = Weapon;
+		return weapon.IsValid()
+			? HashCode.Combine( weapon.GameObject.Id, weapon.Clip1, weapon.Ammo1, weapon.IsReloading, low )
+			: 0;
+	}
+}
