@@ -1,0 +1,9 @@
+{
+  "Prefab": "weapons/mp5/mp5.prefab",
+  "Title": "SG-5",
+  "Description": "An SMG with an underbarrel grenade launcher",
+  "Category": "Weapon",
+  "IncludeCode": false,
+  "__references": [],
+  "__version": 0
+}
