@@ -5,7 +5,7 @@
 /// high beam.
 /// </summary>
 [Title( "Vehicle Lights" ), Category( "Vehicles" ), Icon( "highlight" )]
-public sealed class VehicleLights : Component, IPlayerControllable
+public sealed class VehicleLights : Component
 {
 	public enum HeadlightMode
 	{
@@ -16,7 +16,7 @@ public sealed class VehicleLights : Component, IPlayerControllable
 
 	[Property] public FourWheelVehicle Vehicle { get; set; }
 
-	[Property, Group( "Input" )] public ClientInput Switch { get; set; } = new() { Action = "Flashlight" };
+	[Property, Group( "Input" )] public string SwitchAction { get; set; } = "Flashlight";
 
 	/// <summary>
 	/// How long the key has to be held to switch beams, seconds. A shorter press switches the lights on or off.
@@ -57,11 +57,32 @@ public sealed class VehicleLights : Component, IPlayerControllable
 	private float _highLevel;
 
 	/// <summary>
-	/// Tap to switch the lights, hold to switch beams. Runs on the host, from the driver's seat.
+	/// Whether the player in the driver's seat is this machine's player.
 	/// </summary>
-	void IPlayerControllable.OnControl()
+	private bool IsLocalDriver
 	{
-		var down = Switch.Down();
+		get
+		{
+			var seat = Vehicle?.Seat;
+			if ( !seat.IsValid() || !seat.IsOccupied ) return false;
+
+			var occupant = seat.GetOccupant();
+			return occupant.IsValid() && !occupant.IsProxy;
+		}
+	}
+
+	/// <summary>
+	/// Tap to switch the lights, hold to switch beams. Read on the driver's own machine, which asks the host.
+	/// </summary>
+	private void ReadSwitch()
+	{
+		if ( !IsLocalDriver )
+		{
+			_wasDown = false;
+			return;
+		}
+
+		var down = Input.Down( SwitchAction );
 
 		if ( down && !_wasDown )
 		{
@@ -72,15 +93,29 @@ public sealed class VehicleLights : Component, IPlayerControllable
 		if ( down && !_holdUsed && _pressed >= HoldTime )
 		{
 			_holdUsed = true;
-			SetMode( Mode == HeadlightMode.High ? HeadlightMode.Low : HeadlightMode.High );
+			RequestSwitch( true );
 		}
 
 		if ( !down && _wasDown && !_holdUsed )
-		{
-			SetMode( Mode == HeadlightMode.Off ? HeadlightMode.Low : HeadlightMode.Off );
-		}
+			RequestSwitch( false );
 
 		_wasDown = down;
+	}
+
+	/// <summary>
+	/// The driver asks to switch the lights on or off, or the beam between low and high. Runs on the host.
+	/// </summary>
+	[Rpc.Host]
+	private void RequestSwitch( bool beam )
+	{
+		var seat = Vehicle?.Seat;
+		if ( !seat.IsValid() || !seat.IsOccupied ) return;
+		if ( seat.GetOccupant()?.Network.Owner != Rpc.Caller ) return;
+
+		if ( beam )
+			SetMode( Mode == HeadlightMode.High ? HeadlightMode.Low : HeadlightMode.High );
+		else
+			SetMode( Mode == HeadlightMode.Off ? HeadlightMode.Low : HeadlightMode.Off );
 	}
 
 	private void SetMode( HeadlightMode mode )
@@ -99,15 +134,10 @@ public sealed class VehicleLights : Component, IPlayerControllable
 			Sound.Play( sound, WorldPosition );
 	}
 
-	protected override void OnFixedUpdate()
-	{
-		// let go of the key if the driver got out holding it
-		if ( Networking.IsHost && !(Vehicle?.Seat?.IsOccupied ?? false) )
-			_wasDown = false;
-	}
-
 	protected override void OnUpdate()
 	{
+		ReadSwitch();
+
 		var rate = Time.Delta / MathF.Max( WarmUpTime, 0.001f );
 		_lowLevel = _lowLevel.Approach( Mode != HeadlightMode.Off ? 1 : 0, rate );
 		_highLevel = _highLevel.Approach( Mode == HeadlightMode.High ? 1 : 0, rate );

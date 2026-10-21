@@ -16,15 +16,20 @@ public sealed class ControlSystem : GameObjectSystem<ControlSystem>
 		if ( Scene != Game.ActiveScene ) return;
 		if ( !Networking.IsHost ) return;
 
-		// Whoever sat down first claims the vehicle: a second seat on it does nothing.
+		// Whoever sat down first claims the contraption: a second seat on it does nothing.
 		var driven = new HashSet<GameObject>();
 
 		foreach ( var chair in GetSortedSeats() )
 		{
-			var root = chair.GameObject.Root;
-			if ( !driven.Add( root ) ) continue;
+			if ( driven.Contains( chair.GameObject.Root ) ) continue;
 
-			RunControl( chair, root );
+			var linked = new LinkedGameObjectBuilder();
+			linked.AddConnected( chair.GameObject );
+
+			if ( linked.Objects.Any( driven.Contains ) ) continue;
+			driven.UnionWith( linked.Objects );
+
+			RunControl( chair, linked );
 		}
 	}
 
@@ -45,7 +50,7 @@ public sealed class ControlSystem : GameObjectSystem<ControlSystem>
 			.OrderBy( chair => (float)_occupiedSince.GetValueOrDefault( chair, default ) );
 	}
 
-	private static void RunControl( BaseChair chair, GameObject root )
+	private static void RunControl( BaseChair chair, LinkedGameObjectBuilder linked )
 	{
 		var player = chair.GetOccupant()?.GetComponent<PlayerController>();
 		if ( !player.IsValid() ) return;
@@ -55,13 +60,16 @@ public sealed class ControlSystem : GameObjectSystem<ControlSystem>
 
 		using var scope = ControlContext.Push( player, connection );
 
-		foreach ( var component in root.GetComponentsInChildren<Component>() )
+		foreach ( var gameObject in linked.Objects )
 		{
-			if ( !component.IsValid() ) continue;
-			if ( component is not IPlayerControllable controllable ) continue;
-			if ( !controllable.CanControl( player ) ) continue;
+			foreach ( var component in gameObject.GetComponentsInChildren<Component>() )
+			{
+				if ( !component.IsValid() ) continue;
+				if ( component is not IPlayerControllable controllable ) continue;
+				if ( !controllable.CanControl( player ) ) continue;
 
-			controllable.OnControl();
+				controllable.OnControl();
+			}
 		}
 	}
 }

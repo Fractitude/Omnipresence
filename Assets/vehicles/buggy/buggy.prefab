@@ -1204,6 +1204,11 @@
   "MenuPath": null,
   "MenuIcon": null,
   "DontBreakAsTemplate": false,
-  "__references": [],
+  "__references": [
+    "facepunch.tractorwheel",
+    "facepunch.carseat",
+    "facepunch.beer_keg_a1",
+    "facepunch.tyre"
+  ],
   "__version": 2
 }

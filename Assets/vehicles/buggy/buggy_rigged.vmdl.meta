@@ -1,3 +1,31 @@
 {
-  "guid": "8c9db451-2d4f-44f1-bc17-37813b07728b"
+  "guid": "8c9db451-2d4f-44f1-bc17-37813b07728b",
+  "publish": {
+    "Enabled": false,
+    "ProjectConfig": {
+      "Title": "Buggy Rigged",
+      "Type": "model",
+      "Org": "local",
+      "Ident": "buggy_rigged",
+      "Schema": 0,
+      "IncludeSourceFiles": false,
+      "Resources": null,
+      "PackageReferences": null,
+      "EditorReferences": [
+        "facepunch.beer_keg_a1#282207",
+        "facepunch.carseat#143559",
+        "facepunch.tyre#275784",
+        "facepunch.tractorwheel#140646"
+      ],
+      "Mounts": null,
+      "IsStandaloneOnly": false,
+      "AI": {
+        "EnableMcpCommunication": true
+      },
+      "Metadata": {
+        "SingleAssetSource": "vehicles/buggy/buggy_rigged.vmdl",
+        "ParentPackage": "fractitude.omnipresence"
+      }
+    }
+  }
 }

@@ -2,11 +2,11 @@ using Sandbox.Citizen;
 
 /// <summary>
 /// The base for every weapon the player carries. Ported from Facepunch's sandbox game
-/// (https://github.com/Facepunch/sandbox) with the sandbox-only parts left out: seat and
-/// contraption control, NPC aiming, kill icons and the game's own Player type. Ballistics, ammo,
+/// (https://github.com/Facepunch/sandbox) with the sandbox-only parts left out: signal
+/// wiring, NPC aiming, kill icons and the game's own Player type. Ballistics, ammo,
 /// reload and the view model lifecycle come from the engine <see cref="BaseCombatWeapon"/>.
 /// </summary>
-public partial class BaseSandboxWeapon : BaseCombatWeapon
+public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 {
 	// DisplayName, DisplayIcon, Value, Slot, ViewModel and WorldModel are all inherited from the
 	// engine BaseCombatWeapon / BaseInventoryItem, and so is Owner (the PlayerController holding it).
@@ -20,6 +20,101 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon
 	/// The root GameObject to ignore when tracing from AimRay.
 	/// </summary>
 	public GameObject AimIgnoreRoot => HasOwner ? Owner.GameObject : GameObject;
+
+	/// <summary>
+	/// When true, a seated player aims it where the camera looks instead of along the muzzle. Override in weapons
+	/// that support player-directed aim.
+	/// </summary>
+	public virtual bool IsTargetedAim => false;
+
+	/// <summary>
+	/// Controlled from a seat with targeted aim fires where the camera looks, otherwise the engine's muzzle-based
+	/// unheld aim applies.
+	/// </summary>
+	protected override Ray UnheldAimRay
+	{
+		get
+		{
+			var seated = ControlContext.Player;
+			if ( seated.IsValid() && IsTargetedAim && Scene.Camera.IsValid() )
+				return new Ray( Scene.Camera.WorldPosition, Scene.Camera.WorldRotation.Forward );
+
+			return base.UnheldAimRay;
+		}
+	}
+
+	/// <summary>
+	/// Who gets credit for this weapon's damage: the owner if held, the seated player if controlled from a seat,
+	/// otherwise the engine's choice.
+	/// </summary>
+	protected override GameObject Attacker
+	{
+		get
+		{
+			if ( HasOwner ) return Owner.GameObject;
+
+			var seatedPlayer = ControlContext.Player;
+			if ( seatedPlayer.IsValid() ) return seatedPlayer.GameObject;
+
+			return base.Attacker;
+		}
+	}
+
+	//
+	// Seat inputs - a mounted weapon fires from the driver's configured bindings.
+	//
+
+	/// <summary>
+	/// The input that fires the primary attack when this weapon is controlled via a seat.
+	/// </summary>
+	[Property, Group( "Input" ), Title( "Primary" )]
+	public ClientInput ShootInput { get; set; }
+
+	/// <summary>
+	/// The input that fires the secondary attack when this weapon is controlled via a seat.
+	/// </summary>
+	[Property, Group( "Input" ), Title( "Secondary" )]
+	public ClientInput SecondaryInput { get; set; }
+
+	/// <summary>
+	/// A mounted weapon stays put: no pickup prompt, no touch pickup.
+	/// </summary>
+	protected override bool OnCanPickup( BaseInventoryComponent inventory )
+	{
+		return base.OnCanPickup( inventory ) && !ShootInput.IsEnabled && !SecondaryInput.IsEnabled;
+	}
+
+	/// <summary>
+	/// Stays put away while the owner sits with their weapons holstered (see <see cref="WeaponInventory.IsSeatHolstered"/>).
+	/// </summary>
+	protected override bool OnCanSwitchTo()
+	{
+		if ( Inventory is WeaponInventory { IsSeatHolstered: true } )
+			return false;
+
+		return base.OnCanSwitchTo();
+	}
+
+	/// <summary>
+	/// A seated player can only control this while not holding a weapon of their own.
+	/// </summary>
+	public virtual bool CanControl( PlayerController player )
+	{
+		var inventory = player.GetComponent<WeaponInventory>();
+		return inventory is null || !inventory.ActiveWeapon.IsValid();
+	}
+
+	void IPlayerControllable.OnControl()
+	{
+		if ( HasOwner ) return;
+		OnSeatControl();
+	}
+
+	protected virtual void OnSeatControl()
+	{
+		if ( ShootInput.Down() ) FirePrimary();
+		if ( SecondaryInput.Down() ) FireSecondary();
+	}
 
 	/// <summary>
 	/// If true the game should hide the hud when holding this weapon. Useful for cameras, or scopes.

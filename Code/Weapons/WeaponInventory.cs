@@ -1,3 +1,5 @@
+using Sandbox.Movement;
+
 namespace Sandbox;
 
 /// <summary>
@@ -20,8 +22,16 @@ public sealed class WeaponInventory : BaseInventoryComponent
 	/// </summary>
 	public IEnumerable<BaseSandboxWeapon> Weapons => Items.OfType<BaseSandboxWeapon>();
 
+	/// <summary>
+	/// True while the player sits in a seat with their weapons put away. They can't draw one until they get up, and
+	/// the weapon they held comes back then. A listener of <see cref="ISeatHolsterEvents"/> can keep the weapons out.
+	/// </summary>
+	public bool IsSeatHolstered { get; private set; }
+
 	PlayerController controller;
 	bool wasSeated;
+	ISitTarget seat;
+	BaseSandboxWeapon weaponBeforeSeat;
 
 	protected override void OnStart()
 	{
@@ -77,6 +87,9 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		wasSeated = seated;
 		if ( seated ) return;
 
+		UpdateSeat();
+		if ( IsSeatHolstered ) return;
+
 		ReadInput();
 
 		var weapon = ActiveWeapon;
@@ -84,6 +97,43 @@ public sealed class WeaponInventory : BaseInventoryComponent
 
 		if ( Input.Pressed( "Jump" ) && controller.IsOnGround )
 			weapon.OnJump();
+	}
+
+	/// <summary>
+	/// Sitting in a seat (a vehicle's, say) puts the weapon away, and getting out brings it back.
+	/// </summary>
+	void UpdateSeat()
+	{
+		var current = GetComponentInParent<ISitTarget>( false );
+		if ( current == seat ) return;
+		seat = current;
+
+		if ( IsSeatHolstered )
+		{
+			var weapon = weaponBeforeSeat;
+			weaponBeforeSeat = null;
+			IsSeatHolstered = false;
+
+			if ( weapon.IsValid() && weapon.Inventory == this )
+				Switch( weapon );
+		}
+
+		if ( seat is Component seatComponent )
+			HolsterForSeat( seatComponent.GameObject );
+	}
+
+	void HolsterForSeat( GameObject seatObject )
+	{
+		var holster = new SeatHolsterEvent { Player = controller, Seat = seatObject, Weapon = ActiveWeapon };
+		ISeatHolsterEvents.PostToGameObject( GameObject, x => x.OnSeatHolster( holster ) );
+		ISeatHolsterEvents.Post( x => x.OnSeatHolster( holster ) );
+
+		if ( holster.Cancelled )
+			return;
+
+		weaponBeforeSeat = ActiveWeapon;
+		IsSeatHolstered = true;
+		ForceHolster();
 	}
 
 	void ReadInput()
