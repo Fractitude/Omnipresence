@@ -328,7 +328,7 @@
           "go": "d4eff07e-86f4-42ff-bde0-680704e6e01b"
         },
         "SitHeight": 0.115207314,
-        "SitPose": "Chair",
+        "SitPose": "ChairForward",
         "TooltipDescription": "",
         "TooltipIcon": "directions_car",
         "TooltipTitle": "Drive",

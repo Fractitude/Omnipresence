@@ -288,5 +288,6 @@ public sealed partial class FourWheelVehicle : Component, IPlayerControllable
 		_steerPose = _steerPose.LerpTo( SteerAngle / Steering.DegreesSlow, 1 - MathF.Pow( 0.8f, Time.Delta * 50 ) );
 
 		PoseRig();
+		UpdateDriverHands();
 	}
 }

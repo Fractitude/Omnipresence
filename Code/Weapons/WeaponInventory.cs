@@ -81,6 +81,14 @@ public sealed class WeaponInventory : BaseInventoryComponent
 	{
 		base.OnUpdate();
 
+		// A weapon writes its hold pose while it is active. With none in hand the last one sticks (a pistol grip while
+		// holding a steering wheel), so empty hands are reset explicitly.
+		if ( controller.IsValid() && controller.Renderer.IsValid() && !ActiveWeapon.IsValid() )
+		{
+			controller.Renderer.Set( "holdtype", "none" );
+			controller.Renderer.Set( "holdtype_handedness", 0 );
+		}
+
 		if ( IsProxy || !controller.IsValid() ) return;
 
 		// Sitting down at a computer puts the weapon away. It stays away after getting up, and no slot key
