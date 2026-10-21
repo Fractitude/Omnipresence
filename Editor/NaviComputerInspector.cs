@@ -48,7 +48,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 
 		Add( "Apps", "apps", false, () => Sheet( computerObject,
 			nameof( NaviComputer.InstalledApps ), nameof( NaviComputer.InstalledPackages ),
-			nameof( NaviComputer.PinnedApps ), nameof( NaviComputer.StartFavorites ), nameof( NaviComputer.Tags ),
+			nameof( NaviComputer.PinnedApps ), nameof( NaviComputer.StartFavorites ), nameof( NaviComputer.ComputerTags ),
 			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.SystemAppFolders ) ) );
 
 		Add( "Permissions", "shield", false, () => Sheet( computerObject,

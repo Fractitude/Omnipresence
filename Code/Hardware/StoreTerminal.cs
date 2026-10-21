@@ -31,7 +31,7 @@ public sealed class StoreTerminal : Component
 
 		computer.OnlyApps = [StoreAppId];
 
-		if ( !computer.Tags.Contains( StoreTag ) )
-			computer.Tags = [.. computer.Tags, StoreTag];
+		if ( !computer.ComputerTags.Contains( StoreTag ) )
+			computer.ComputerTags = [.. computer.ComputerTags, StoreTag];
 	}
 }
