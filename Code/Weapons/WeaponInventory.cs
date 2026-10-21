@@ -37,6 +37,11 @@ public sealed class WeaponInventory : BaseInventoryComponent
 	{
 		controller = GetComponent<PlayerController>();
 
+		// Without this move mode a player in a seat keeps walking: no sitting pose, and the eyes stay where they were.
+		// Added here for the same reason as the loadout: the player prefab is never edited.
+		if ( !GetComponent<SitMoveMode>( true ).IsValid() )
+			AddComponent<SitMoveMode>();
+
 		if ( Networking.IsHost && !IsProxy )
 			_ = GiveLoadoutWhenReady();
 	}
