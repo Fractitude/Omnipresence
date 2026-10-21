@@ -48,4 +48,10 @@ public sealed class InteractionOption
 	[Property] public System.Action<GameObject> OnInteract { get; set; }
 
 	internal float NextUse;
+
+	/// <summary>
+	/// The name the inspector lists the option under: its <see cref="Id"/>, else its <see cref="Label"/>.
+	/// </summary>
+	public override string ToString() =>
+		!string.IsNullOrEmpty( Id ) ? Id : !string.IsNullOrEmpty( Label ) ? Label : "Interaction Option";
 }
