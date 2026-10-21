@@ -21,12 +21,13 @@ public sealed class Interactable : Component, Component.IPressable
 	[Property] public List<InteractionOption> Options { get; set; } = [new()];
 
 	/// <summary>
-	/// The farthest the player's eye can be, in world units, from this object's colliders (or its origin, if it has none) for
-	/// a <see cref="InteractionSide.Host"/> option to work. Checked on the pressing player's side, and again by the host for
-	/// clients, so a modified client can't use things from across the map. The player's own reach limits what they can look at
-	/// first, so keep this generous. 0 turns the check off.
+	/// The farthest the player's eye can be, in world units, from this object's colliders (or its origin, if it has none).
+	/// Beyond it the prompt is hidden and the press does nothing. The host checks every press from a client again, from the
+	/// player's eye: it must be within this range and see the object, with nothing in the way. The engine finds what the
+	/// player looks at within <see cref="PlayerController.ReachLength"/>, so that is the most this can reach. 0 turns the
+	/// checks off.
 	/// </summary>
-	[Property, Group( "Host" )] public float HostRange { get; set; } = 400f;
+	[Property] public float Range { get; set; } = 200f;
 
 	/// <summary>
 	/// The GameObject whose <see cref="IInteractionHandler"/> components answer to this Interactable (it and its children).
@@ -82,24 +83,69 @@ public sealed class Interactable : Component, Component.IPressable
 	}
 
 	/// <summary>
-	/// <paramref name="player"/> is within <see cref="HostRange"/> of this object.
+	/// The player's eye, or their feet if they have no controller.
+	/// </summary>
+	static Vector3 EyeOf( GameObject player ) => player.Components.Get<PlayerController>()?.EyePosition ?? player.WorldPosition;
+
+	/// <summary>
+	/// The player's eye is within <see cref="Range"/> of this object. Cheap: what the crosshair asks every frame.
 	/// </summary>
 	bool IsInRange( GameObject player )
 	{
-		if ( HostRange <= 0f )
+		if ( Range <= 0f )
 			return true;
 
 		if ( !player.IsValid() )
 			return false;
 
-		var eye = player.Components.Get<PlayerController>()?.EyePosition ?? player.WorldPosition;
+		var eye = EyeOf( player );
 		var nearest = Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants )
 			.Select( x => x.FindClosestPoint( eye ).Distance( eye ) )
 			.DefaultIfEmpty( WorldPosition.Distance( eye ) )
 			.Min();
 
-		return nearest <= HostRange;
+		return nearest <= Range;
 	}
+
+	/// <summary>
+	/// The player is within <see cref="Range"/> and can see the object: a ray from their eye to one of its colliders hits that
+	/// collider first, so a wall in between blocks it. What a press has to pass, on the host as well as the client.
+	/// </summary>
+	bool CanReach( GameObject player )
+	{
+		if ( Range <= 0f )
+			return true;
+
+		if ( !IsInRange( player ) )
+			return false;
+
+		var colliders = Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants ).ToList();
+		if ( colliders.Count == 0 )
+			return true;
+
+		var eye = EyeOf( player );
+		foreach ( var collider in colliders )
+		{
+			var point = collider.FindClosestPoint( eye );
+			var direction = point - eye;
+			if ( direction.Length < 1f )
+				return true;
+
+			var trace = Scene.Trace.Ray( eye, point + direction.Normal * 2f )
+				.IgnoreGameObjectHierarchy( player )
+				.Run();
+
+			if ( trace.Hit && colliders.Contains( trace.Collider ) )
+				return true;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// The player who looks at or presses this: the engine says so, else the local player.
+	/// </summary>
+	GameObject Who( Component.IPressable.Event e ) => e.Source?.GameObject ?? LocalPlayer;
 
 	/// <summary>
 	/// The local player's GameObject, or null.
@@ -184,7 +230,11 @@ public sealed class Interactable : Component, Component.IPressable
 
 	void Component.IPressable.Look( Component.IPressable.Event e )
 	{
-		Focused = this;
+		// Too far to offer: the prompt hides, and the press does nothing (CanPress).
+		if ( IsInRange( Who( e ) ) )
+			Focused = this;
+		else if ( Focused == this )
+			Focused = null;
 	}
 
 	protected override void OnUpdate()
@@ -207,20 +257,23 @@ public sealed class Interactable : Component, Component.IPressable
 
 	bool Component.IPressable.CanPress( Component.IPressable.Event e )
 	{
+		if ( !IsInRange( Who( e ) ) )
+			return false;
+
 		var entries = GetEntries();
-		return GetSelected( entries ) is var index and >= 0 && Describe( index, e.Source?.GameObject ).Enabled;
+		return GetSelected( entries ) is var index and >= 0 && Describe( index, Who( e ) ).Enabled;
 	}
 
 	bool Component.IPressable.Press( Component.IPressable.Event e )
 	{
 		var index = GetSelected( GetEntries() );
-		var interactor = e.Source?.GameObject;
+		var interactor = Who( e );
 
 		if ( index < 0 || !Describe( index, interactor ).Enabled )
 			return false;
 
 		var option = Options[index];
-		if ( option.RunOn == InteractionSide.Host && !IsInRange( interactor ) )
+		if ( !CanReach( interactor ) )
 			return false;
 
 		option.NextUse = Time.Now + option.Cooldown;
@@ -248,7 +301,7 @@ public sealed class Interactable : Component, Component.IPressable
 	Component.IPressable.Tooltip? Component.IPressable.GetTooltip( Component.IPressable.Event e )
 	{
 		var entries = GetEntries();
-		if ( entries.FirstOrDefault( x => x.Index == GetSelected( entries ) ) is not { Option: not null } entry )
+		if ( !IsInRange( Who( e ) ) || entries.FirstOrDefault( x => x.Index == GetSelected( entries ) ) is not { Option: not null } entry )
 			return null;
 
 		return new Component.IPressable.Tooltip( entry.Info.Label, entry.Info.Icon, entry.Info.Description, entry.Info.Enabled, this );
@@ -256,7 +309,7 @@ public sealed class Interactable : Component, Component.IPressable
 
 	/// <summary>
 	/// On the host: a client pressed Use on an option. The caller is the network's, never the client's word: its player must
-	/// be near enough, the option must exist and be usable for it, and the option must be one that runs on the host.
+	/// be in range and see the object, the option must exist and be usable for it, and the option must be one that runs on the host.
 	/// </summary>
 	[Rpc.Host]
 	void HostInteract( int index )
@@ -268,7 +321,7 @@ public sealed class Interactable : Component, Component.IPressable
 		if ( !player.IsValid() || index < 0 || index >= Options.Count || Options[index] is not { RunOn: InteractionSide.Host } option )
 			return;
 
-		if ( !IsInRange( player ) || !Describe( index, player ).Enabled )
+		if ( !CanReach( player ) || !Describe( index, player ).Enabled )
 			return;
 
 		option.NextUse = Time.Now + option.Cooldown;

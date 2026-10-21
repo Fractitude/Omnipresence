@@ -31,9 +31,9 @@ options under the crosshair. The mouse wheel picks one (it stops at the first an
 ## Multiplayer
 
 An option with `RunOn = Local` runs on the pressing client. `RunOn = Host` sends the press to the host, which finds the
-caller's player from the connection, checks the option is a host one, the player is within `HostRange` and the option is
+caller's player from the connection, checks the option is a host one, the player is in `Range` and can see the object, and the option is
 usable, then runs it. The GameObject must be a network object. Never trust a client's word about who pressed.
 
 `NaviSpectatorSeat` (in the Navi library, which can't use game code) is a plain `IPressable`, so it shows a single hint.
 
-`HostRange` is how far the player's eye can be from the object's colliders (its origin if it has none) for a Host option to work. It is checked on the pressing client and again on the host, and for the host's own presses too. 0 turns it off.
+`Range` (default 200) is how far the player's eye can be from the object's colliders (its origin if it has none). Beyond it the prompt is hidden and the press does nothing. A press also has to pass a line-of-sight check: a ray from the eye to one of the object's colliders must hit that collider first. The host runs the same check on every press from a client, from the player's own eye. The engine only finds what the player looks at within `PlayerController.ReachLength`, so that is the most `Range` can reach. 0 turns the checks off.
