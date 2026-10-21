@@ -1,0 +1,9 @@
+{
+  "Prefab": "weapons/sniper/sniper.prefab",
+  "Title": "M700",
+  "Description": "A bolt-action sniper rifle",
+  "Category": "Weapon",
+  "IncludeCode": false,
+  "__references": [],
+  "__version": 0
+}

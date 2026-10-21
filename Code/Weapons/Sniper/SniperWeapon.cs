@@ -1,0 +1,195 @@
+[Title( "M700" )]
+public sealed class SniperWeapon : BaseBulletWeapon
+{
+	[Property] public float ScopedFov { get; set; } = 20f;
+	[Property] public float ScopeSensitivity { get; set; } = 0.3f;
+	[Property] public SoundEvent BoltPullSound { get; set; }
+
+	private bool _isScoped;
+	private float _mouseDelta;
+	private SniperScopeEffect _scopeEffect;
+	private bool _hasFired;
+	private TimeUntil _timeUntilHideViewModel;
+	private bool _viewModelHidden;
+
+	public bool IsScoped => _isScoped;
+
+	protected override bool WantsPrimaryAttack()
+	{
+		return Input.Pressed( "attack1" );
+	}
+
+	protected override bool WantsSecondaryAttack()
+	{
+		return false;
+	}
+
+	public override bool CanSecondaryAttack()
+	{
+		return false;
+	}
+
+	public override void PrimaryAttack()
+	{
+		base.PrimaryAttack();
+		_hasFired = true;
+	}
+
+	private void SetScoped( bool scoped )
+	{
+		_isScoped = scoped;
+
+		// Trigger ironsights animation
+		ViewModel?.RunEvent<ViewModel>( x =>
+		{
+			x.Renderer?.Set( "ironsights", _isScoped ? 1 : 0 );
+		} );
+
+		if ( _isScoped )
+		{
+			// Delay hiding the viewmodel until the ADS animation finishes
+			_timeUntilHideViewModel = 0.2f;
+		}
+		else
+		{
+			ShowViewModel();
+
+			_scopeEffect?.Destroy();
+			_scopeEffect = default;
+		}
+	}
+
+	private void HideViewModel()
+	{
+		if ( _viewModelHidden ) return;
+		_viewModelHidden = true;
+
+		if ( ViewModel.IsValid() )
+			Scene.Camera.RenderExcludeTags.Add( "sniper_scoped" );
+
+		if ( ViewModel.IsValid() )
+			ViewModel.Tags.Add( "sniper_scoped" );
+	}
+
+	private void ShowViewModel()
+	{
+		if ( !_viewModelHidden ) return;
+		_viewModelHidden = false;
+
+		Scene.Camera.RenderExcludeTags.Remove( "sniper_scoped" );
+
+		if ( ViewModel.IsValid() )
+			ViewModel.Tags.Remove( "sniper_scoped" );
+	}
+
+	protected override void OnDisabled()
+	{
+		base.OnDisabled();
+
+		if ( _isScoped )
+			SetScoped( false );
+
+		ShowViewModel();
+
+		if ( HasOwner )
+			Owner.LookSensitivity = 1f;
+	}
+
+	protected override void OnControl()
+	{
+		base.OnControl();
+
+		_mouseDelta = new Vector2( Input.AnalogLook.yaw, Input.AnalogLook.pitch ).Length;
+
+		// Looking is slower through the scope.
+		if ( HasOwner )
+			Owner.LookSensitivity = _isScoped && _viewModelHidden ? ScopeSensitivity : 1f;
+
+		// Hold right mouse to scope, except while the reload animation owns the view model.
+		var wantsScope = Input.Down( "attack2" ) && !IsReloading;
+		if ( wantsScope != _isScoped )
+		{
+			SetScoped( wantsScope );
+		}
+
+		// Hide viewmodel once ADS animation has finished, then enable scope overlay
+		if ( _isScoped && !_viewModelHidden && _timeUntilHideViewModel )
+		{
+			HideViewModel();
+
+			_scopeEffect = Scene.Camera.Components.GetOrCreate<SniperScopeEffect>();
+			_scopeEffect.Flags |= ComponentFlags.NotNetworked;
+		}
+
+		if ( _hasFired && Input.Released( "attack1" ) )
+		{
+			_hasFired = false;
+
+			if ( BoltPullSound is not null )
+				Sound.Play( BoltPullSound, WorldPosition );
+
+			ViewModel?.RunEvent<ViewModel>( x =>
+			{
+				x.Renderer?.Set( "speed_reload", 1 );
+				x.Renderer?.Set( "b_reload_bolt", true );
+			} );
+		}
+	}
+
+	/// <summary>
+	/// Scoped zoom goes through the engine's camera modifier chain - one owner for the FOV, no
+	/// fighting the player's preference FOV write.
+	/// </summary>
+	protected override void ModifyCamera( CameraComponent camera, ref CameraView view )
+	{
+		if ( _isScoped && _viewModelHidden )
+		{
+			view.FieldOfView = ScopedFov;
+		}
+
+		// The base drives the view model's camera bone and placement.
+		base.ModifyCamera( camera, ref view );
+	}
+
+	/// <summary>
+	/// Updates the scope overlay while scoped, otherwise draws the targeting dot.
+	/// </summary>
+	public override void DrawHud( Painter painter, Vector2 crosshair )
+	{
+		if ( _isScoped )
+		{
+			UpdateScopeOverlay();
+			return;
+		}
+
+		DrawCrosshair( painter, crosshair );
+	}
+
+	/// <summary>
+	/// Draws an outlined targeting dot showing whether the weapon can fire.
+	/// </summary>
+	public override void DrawCrosshair( Painter painter, Vector2 center )
+	{
+		var color = !HasPrimaryAmmo() || IsReloading || NextPrimaryFire > 0 ? CrosshairNoShoot : CrosshairCanShoot;
+
+		using var scope = painter.Scope();
+		painter.BlendMode = BlendMode.Normal;
+		painter.Fill = color;
+		painter.Stroke = Stroke.Solid( Color.Black, 1f ).WithAlignment( Stroke.StrokeAlignment.Outside );
+		painter.Circle( center, 1.5f );
+	}
+
+	/// <summary>
+	/// Updates the scope's blur from mouse movement and player velocity.
+	/// </summary>
+	private void UpdateScopeOverlay()
+	{
+		if ( !_scopeEffect.IsValid() )
+			return;
+
+		var mouseBlur = _mouseDelta * 0.25f;
+		var velocityBlur = HasOwner ? (Owner.Velocity.Length / 300f).Clamp( 0f, 1f ) : 0f;
+
+		_scopeEffect.BlurInput = MathF.Min( mouseBlur + velocityBlur, 1f );
+	}
+}
