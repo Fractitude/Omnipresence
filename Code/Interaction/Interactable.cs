@@ -2,46 +2,23 @@ namespace Sandbox;
 
 /// <summary>
 /// Makes a GameObject something the player can look at and press Use on. Put it on any GameObject that has a collider the
-/// player's look can hit (or on its parent). The label shows under the crosshair (<c>Crosshair.razor</c>).
+/// player's look can hit (or on its parent). While they look at it, <c>Crosshair.razor</c> lists its <see cref="Options"/>
+/// under the crosshair; the mouse wheel picks one and Use does it.
 /// <para>
-/// What happens on use: the <see cref="IInteractionHandler"/> components on this GameObject and its children are told, then
-/// the <see cref="OnInteract"/> actions (wired in the editor) run, then <see cref="Interacted"/> (for code). The label can be
-/// plain properties, set by code, or taken from a handler's <see cref="IInteractionHandler.Describe"/>.
+/// What happens on use: the <see cref="IInteractionHandler"/> components that answer to this Interactable are told, then the
+/// option's <see cref="InteractionOption.OnInteract"/> action (wired in the editor) runs, then <see cref="Interacted"/> (for
+/// code). An option's label can be plain properties, set by code, or taken from a handler's
+/// <see cref="IInteractionHandler.Describe"/>.
 /// </para>
 /// It is built on the engine's <see cref="Component.IPressable"/>, so <see cref="PlayerController"/> finds and presses it.
 /// </summary>
 public sealed class Interactable : Component, Component.IPressable
 {
 	/// <summary>
-	/// The hint the player sees, e.g. "Open". Empty hides the hint, and the object can still be used.
+	/// What the player can do with it, in the order they are listed. Change it from code the same way on every machine: the
+	/// host takes the option as its place in this list.
 	/// </summary>
-	[Property] public string Label { get; set; } = "Use";
-
-	/// <summary>
-	/// Material icon shown beside the label.
-	/// </summary>
-	[Property] public string Icon { get; set; } = "";
-
-	/// <summary>
-	/// A second line under the label.
-	/// </summary>
-	[Property] public string Description { get; set; } = "";
-
-	/// <summary>
-	/// Turn off to stop it being used. The hint stays, greyed out. Set it from code to lock and unlock.
-	/// </summary>
-	[Property] public bool Available { get; set; } = true;
-
-	/// <summary>
-	/// Where the handlers and events run. See <see cref="InteractionSide"/>.
-	/// </summary>
-	[Property] public InteractionSide RunOn { get; set; } = InteractionSide.Local;
-
-	/// <summary>
-	/// Seconds before it can be used again, for the player who used it (<see cref="InteractionSide.Local"/>) or for everyone
-	/// (<see cref="InteractionSide.Host"/>).
-	/// </summary>
-	[Property, Range( 0f, 10f )] public float Cooldown { get; set; }
+	[Property] public List<InteractionOption> Options { get; set; } = [new()];
 
 	/// <summary>
 	/// The farthest a player can be, in world units, for the host to accept their press. The look range is the player's; this
@@ -56,17 +33,25 @@ public sealed class Interactable : Component, Component.IPressable
 	[Property, Group( "Events" )] public GameObject HandlerObject { get; set; }
 
 	/// <summary>
-	/// Runs when the player uses it, with the player's GameObject (null if it can't be told). Connect any component's method
-	/// to it in the editor; one that doesn't need the player leaves the argument out.
-	/// </summary>
-	[Property, Group( "Events" )] public System.Action<GameObject> OnInteract { get; set; }
-
-	/// <summary>
-	/// Raised in code when the player uses it, after the handlers.
+	/// Raised in code when the player uses an option, after the handlers.
 	/// </summary>
 	public event System.Action<InteractionEvent> Interacted;
 
-	float nextUse;
+	/// <summary>
+	/// The Interactable the local player looks at, or null. The crosshair draws its menu.
+	/// </summary>
+	public static Interactable Focused { get; private set; }
+
+	/// <summary>
+	/// A row of the menu the local player sees.
+	/// </summary>
+	public readonly record struct Entry( int Index, InteractionOption Option, InteractionInfo Info );
+
+	/// <summary>
+	/// Index in <see cref="Options"/> of the option the wheel has picked, for the local player.
+	/// </summary>
+	int selected;
+
 	bool warnedNotNetworked;
 
 	/// <summary>
@@ -95,13 +80,21 @@ public sealed class Interactable : Component, Component.IPressable
 	}
 
 	/// <summary>
-	/// What the local player would see right now: the Interactable's own values, a handler's description in place of them,
-	/// and whether it can be used.
+	/// The local player's GameObject, or null.
 	/// </summary>
-	public InteractionInfo Describe( GameObject interactor )
+	GameObject LocalPlayer => Scene.GetAllComponents<PlayerController>().FirstOrDefault( x => !x.IsProxy )?.GameObject;
+
+	/// <summary>
+	/// What the local player would see for an option right now: the option's own values, a handler's description in place of
+	/// them, and whether it can be used.
+	/// </summary>
+	public InteractionInfo Describe( int index, GameObject interactor = null )
 	{
-		var e = new InteractionEvent( this, interactor );
-		var info = new InteractionInfo( Label, Icon, Description );
+		if ( index < 0 || index >= Options.Count || Options[index] is not { } option )
+			return new InteractionInfo( "", Enabled: false );
+
+		var e = new InteractionEvent( this, interactor, option, index );
+		var info = new InteractionInfo( option.Label, option.Icon, option.Description );
 		var handlers = GetHandlers();
 
 		foreach ( var handler in handlers )
@@ -113,21 +106,93 @@ public sealed class Interactable : Component, Component.IPressable
 			}
 		}
 
-		var enabled = info.Enabled && Available && Time.Now >= nextUse && handlers.All( x => x.CanInteract( e ) );
+		var enabled = info.Enabled && option.Available && Time.Now >= option.NextUse && handlers.All( x => x.CanInteract( e ) );
 		return info with { Enabled = enabled };
 	}
 
-	bool Component.IPressable.CanPress( Component.IPressable.Event e ) => Describe( e.Source?.GameObject ).Enabled;
+	/// <summary>
+	/// The rows the local player sees: every option that has a label, in order.
+	/// </summary>
+	public List<Entry> GetEntries()
+	{
+		var player = LocalPlayer;
+		var entries = new List<Entry>();
+
+		for ( var i = 0; i < Options.Count; i++ )
+		{
+			if ( Options[i] is null )
+				continue;
+
+			var info = Describe( i, player );
+			if ( !string.IsNullOrEmpty( info.Label ) )
+				entries.Add( new Entry( i, Options[i], info ) );
+		}
+
+		return entries;
+	}
+
+	/// <summary>
+	/// Which row is picked: the wheel's choice, or the first row if that one is hidden.
+	/// </summary>
+	public int GetSelected( List<Entry> entries ) =>
+		entries.Any( x => x.Index == selected ) ? selected : entries.Count > 0 ? entries[0].Index : -1;
+
+	/// <summary>
+	/// The mouse wheel moves the pick up or down the rows, wrapping round. Not while a menu has the cursor.
+	/// </summary>
+	void ScrollSelection()
+	{
+		var wheel = Input.MouseWheel.y;
+		if ( wheel == 0f || Mouse.Visibility == MouseVisibility.Visible )
+			return;
+
+		var entries = GetEntries();
+		if ( entries.Count < 2 )
+			return;
+
+		var position = entries.FindIndex( x => x.Index == GetSelected( entries ) );
+		position = ((position + (wheel > 0f ? -1 : 1)) % entries.Count + entries.Count) % entries.Count;
+		selected = entries[position].Index;
+	}
+
+	void Component.IPressable.Hover( Component.IPressable.Event e ) => selected = 0;
+
+	void Component.IPressable.Look( Component.IPressable.Event e )
+	{
+		Focused = this;
+		ScrollSelection();
+	}
+
+	void Component.IPressable.Blur( Component.IPressable.Event e )
+	{
+		if ( Focused == this )
+			Focused = null;
+	}
+
+	protected override void OnDisabled()
+	{
+		if ( Focused == this )
+			Focused = null;
+	}
+
+	bool Component.IPressable.CanPress( Component.IPressable.Event e )
+	{
+		var entries = GetEntries();
+		return GetSelected( entries ) is var index and >= 0 && Describe( index, e.Source?.GameObject ).Enabled;
+	}
 
 	bool Component.IPressable.Press( Component.IPressable.Event e )
 	{
+		var index = GetSelected( GetEntries() );
 		var interactor = e.Source?.GameObject;
-		if ( !Describe( interactor ).Enabled )
+
+		if ( index < 0 || !Describe( index, interactor ).Enabled )
 			return false;
 
-		nextUse = Time.Now + Cooldown;
+		var option = Options[index];
+		option.NextUse = Time.Now + option.Cooldown;
 
-		if ( RunOn == InteractionSide.Host && Networking.IsActive && !Networking.IsHost )
+		if ( option.RunOn == InteractionSide.Host && Networking.IsActive && !Networking.IsHost )
 		{
 			if ( !GameObject.Network.Active && !warnedNotNetworked )
 			{
@@ -136,50 +201,57 @@ public sealed class Interactable : Component, Component.IPressable
 					+ "Set its GameObject's Network Mode to Object." );
 			}
 
-			HostInteract();
+			HostInteract( index );
 			return true;
 		}
 
-		Execute( new InteractionEvent( this, interactor ) );
+		Execute( new InteractionEvent( this, interactor, option, index ) );
 		return true;
 	}
 
+	/// <summary>
+	/// The picked row, for tools that read the engine's tooltips instead of drawing the menu.
+	/// </summary>
 	Component.IPressable.Tooltip? Component.IPressable.GetTooltip( Component.IPressable.Event e )
 	{
-		var info = Describe( e.Source?.GameObject );
-		if ( string.IsNullOrEmpty( info.Label ) )
+		var entries = GetEntries();
+		if ( entries.FirstOrDefault( x => x.Index == GetSelected( entries ) ) is not { Option: not null } entry )
 			return null;
 
-		return new Component.IPressable.Tooltip( info.Label, info.Icon, info.Description, info.Enabled, this );
+		return new Component.IPressable.Tooltip( entry.Info.Label, entry.Info.Icon, entry.Info.Description, entry.Info.Enabled, this );
 	}
 
 	/// <summary>
-	/// On the host: a client pressed Use. The caller is the network's, never the client's word: its player must be near
-	/// enough and the object must be usable for it.
+	/// On the host: a client pressed Use on an option. The caller is the network's, never the client's word: its player must
+	/// be near enough, the option must exist and be usable for it, and the option must be one that runs on the host.
 	/// </summary>
 	[Rpc.Host]
-	void HostInteract()
+	void HostInteract( int index )
 	{
 		var caller = Rpc.Caller;
 		var player = Scene.GetAllComponents<PlayerController>()
 			.FirstOrDefault( x => caller is null ? !x.IsProxy : x.Network.Owner == caller )?.GameObject;
 
-		if ( !player.IsValid() || player.WorldPosition.Distance( WorldPosition ) > HostRange || !Describe( player ).Enabled )
+		if ( !player.IsValid() || index < 0 || index >= Options.Count || Options[index] is not { RunOn: InteractionSide.Host } option )
 			return;
 
-		nextUse = Time.Now + Cooldown;
-		Execute( new InteractionEvent( this, player ) );
+		if ( player.WorldPosition.Distance( WorldPosition ) > HostRange || !Describe( index, player ).Enabled )
+			return;
+
+		option.NextUse = Time.Now + option.Cooldown;
+		Execute( new InteractionEvent( this, player, option, index ) );
 	}
 
 	/// <summary>
-	/// Use it from code, as if the player pressed Use. Runs here, on the side you call it on, and skips the checks.
+	/// Use an option from code, as if the player pressed Use on it. Runs here, on the side you call it on, and skips the
+	/// checks.
 	/// </summary>
 	public void Execute( InteractionEvent e )
 	{
 		foreach ( var handler in GetHandlers() )
 			Guard( () => handler.OnInteract( e ) );
 
-		Guard( () => OnInteract?.Invoke( e.Interactor ) );
+		Guard( () => e.Option?.OnInteract?.Invoke( e.Interactor ) );
 		Guard( () => Interacted?.Invoke( e ) );
 	}
 

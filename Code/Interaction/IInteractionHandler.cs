@@ -10,7 +10,9 @@ public readonly record struct InteractionInfo( string Label, string Icon = "", s
 /// </summary>
 /// <param name="Interactable">The thing being used.</param>
 /// <param name="Interactor">The player's GameObject, or null if it can't be told.</param>
-public readonly record struct InteractionEvent( Interactable Interactable, GameObject Interactor );
+/// <param name="Option">Which of the Interactable's options is meant.</param>
+/// <param name="Index">Its place in <see cref="Interactable.Options"/>.</param>
+public readonly record struct InteractionEvent( Interactable Interactable, GameObject Interactor, InteractionOption Option, int Index );
 
 /// <summary>
 /// Where an <see cref="Interactable"/> runs its handlers and events when it is used.
@@ -36,18 +38,19 @@ public enum InteractionSide
 public interface IInteractionHandler
 {
 	/// <summary>
-	/// The player used the object. Runs where <see cref="Interactable.RunOn"/> says.
+	/// The player used one of the object's options (<see cref="InteractionEvent.Option"/>). Runs where its
+	/// <see cref="InteractionOption.RunOn"/> says.
 	/// </summary>
 	void OnInteract( InteractionEvent e );
 
 	/// <summary>
-	/// What the player sees while looking at the object, in place of the Interactable's own label. Null leaves it as is.
+	/// What the player sees for one option, in place of the option's own label. Null leaves it as is.
 	/// Runs on the looking player's client every frame, so keep it cheap.
 	/// </summary>
 	InteractionInfo? Describe( InteractionEvent e ) => null;
 
 	/// <summary>
-	/// May the player use the object now? False greys it out and stops the press. Checked on the host again for
+	/// May the player use this option now? False greys it out and stops the press. Checked on the host again for
 	/// <see cref="InteractionSide.Host"/>, so don't trust client-only state.
 	/// </summary>
 	bool CanInteract( InteractionEvent e ) => true;
