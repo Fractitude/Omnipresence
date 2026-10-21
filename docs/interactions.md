@@ -9,7 +9,7 @@ Anything the player can look at and press Use on is an `Interactable` (`Code/Int
 1. Give the GameObject (or a child) a collider the player's look can hit.
 2. Add `Interactable`. Set `Label`, and optionally `Icon` (a Material icon name) and `Description`.
 3. React to it, any of these:
-   - Wire a component's method to `OnInteract` / `OnInteractBy` in the editor.
+   - Wire a component's method to `OnInteract` in the editor (it passes the player's GameObject; a method that doesn't need it leaves it out).
    - Implement `IInteractionHandler` on a component on the same GameObject or a child.
    - Subscribe to `Interactable.Interacted` in code.
 

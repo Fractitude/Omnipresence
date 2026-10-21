@@ -50,14 +50,10 @@ public sealed class Interactable : Component, Component.IPressable
 	[Property, Group( "Host" )] public float HostRange { get; set; } = 400f;
 
 	/// <summary>
-	/// Runs when the player uses it. Connect any component's method to it in the editor.
+	/// Runs when the player uses it, with the player's GameObject (null if it can't be told). Connect any component's method
+	/// to it in the editor; one that doesn't need the player leaves the argument out.
 	/// </summary>
-	[Property, Group( "Events" )] public System.Action OnInteract { get; set; }
-
-	/// <summary>
-	/// Like <see cref="OnInteract"/>, with the player who used it.
-	/// </summary>
-	[Property, Group( "Events" )] public System.Action<GameObject> OnInteractBy { get; set; }
+	[Property, Group( "Events" )] public System.Action<GameObject> OnInteract { get; set; }
 
 	/// <summary>
 	/// Raised in code when the player uses it, after the handlers.
@@ -152,8 +148,7 @@ public sealed class Interactable : Component, Component.IPressable
 		foreach ( var handler in Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelfAndDescendants ).ToList() )
 			Guard( () => handler.OnInteract( e ) );
 
-		Guard( () => OnInteract?.Invoke() );
-		Guard( () => OnInteractBy?.Invoke( e.Interactor ) );
+		Guard( () => OnInteract?.Invoke( e.Interactor ) );
 		Guard( () => Interacted?.Invoke( e ) );
 	}
 
