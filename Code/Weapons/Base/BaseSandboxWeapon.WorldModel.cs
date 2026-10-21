@@ -14,6 +14,11 @@ public partial class BaseSandboxWeapon
 		var player = GetComponentInParent<PlayerController>();
 		if ( player?.Renderer is null ) return;
 
+		// The world model hangs on the hold bone. Without bone objects it would fall back to the weapon itself, which
+		// sits at the player's feet.
+		if ( !player.Renderer.CreateBoneObjects )
+			player.Renderer.CreateBoneObjects = true;
+
 		CreateWorldModel( player.Renderer );
 	}
 
