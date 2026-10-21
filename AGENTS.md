@@ -41,6 +41,16 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - Publish apps under the `fractitude` org; the Store marks them as official.
 - Publishing a Store app: publish the Navi library first if it changed (open `Libraries/navi/navi.sbproj`, normal Publish), restart the addon editor, then right-click the `.napp` in the addon's Asset Browser and choose **Publish** (ident `napp_<name>`). A package without code makes the game log `has no panel class`; it happened when the addon was on an old Navi (the `.napp` type then didn't include code). Batch Publish is untested with a current Navi. A good package has the code (`.cll`); Pac-Man's has 5 files. If the editor says "Can't publish" or shows stale or foreign assets, close the addon editor and delete its `.sbox/cloud` and `.sbox/cloud.db`. Each publish gets the next version number by itself. Details are in `Libraries/navi/README.md`.
 
+## Weapons
+
+Ported from Facepunch's open-source sandbox game (`github.com/Facepunch/sandbox`), whose M4a1 is the reference. Ballistics, ammo, reload, the view model and world model lifecycle live in the **engine** (`BaseCombatWeapon`, `BaseInventoryComponent`, `BaseWeaponModel`); `Code/Weapons/` is the game layer on top, kept close to Facepunch's files so upstream changes diff cleanly.
+
+- `Base/BaseSandboxWeapon*.cs` is trimmed (no seats, NPCs, kill icons or their `Player` type; `Owner` is the engine's `PlayerController`). `BaseBulletWeapon` adds recoil, `IronSightsWeapon` aim down sights, `M4a1/` the rifle. `ViewModel/` drives the first-person arms.
+- `WeaponInventory` is the hotbar on the player prefab. It is separate from the grid `PlayerInventory`. Slot keys, `Drop` and the `Slot…` input actions are read there.
+- Weapon prefabs live in `Assets/weapons/<name>/` (`<name>.prefab`, `_vm` view model, `_wm` world model). The models are Facepunch cloud packages (`facepunch.w_m4a1`, `v_m4a1`, `rifle_muzzleflash`, `v_first_person_arms_human`); `install_package` them.
+- Bullets trace with the `bullet` collision rule (`ProjectSettings/Collision.config`).
+- **Leave `GiveOnStart` off on the player prefab's `WeaponInventory`** and turn `UsesLoadout` on: the engine's start-up grant made `PlayerController` throw a NullReferenceException while it was created. `WeaponInventory` grants the loadout itself 0.1 s later.
+
 ## Security
 
 **Always think about privilege escalation attacks.** For every change to Navi, ask how an app could use it to get permissions or root it wasn't granted, to act as another app, or to act without the player's consent. Assume Store apps are written by a stranger who wants that.

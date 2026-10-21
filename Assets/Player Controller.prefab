@@ -241,6 +241,23 @@
         "UseInputControls": true,
         "UseLookControls": true,
         "WalkSpeed": 110
+      },
+      {
+        "__type": "Sandbox.WeaponInventory",
+        "__guid": "5c2f0a64-9b1e-4d7a-8e3c-1f6a7b9d2e10",
+        "__enabled": true,
+        "Flags": 0,
+        "Behaviour": "Hotbar",
+        "MaxSlots": 6,
+        "PickupMode": "Touch",
+        "UsesLoadout": true,
+        "GiveOnStart": false,
+        "StartingItems": [
+          {
+            "_type": "gameobject",
+            "prefab": "weapons/m4a1/m4a1.prefab"
+          }
+        ]
       }
     ],
     "Children": [
