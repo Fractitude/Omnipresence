@@ -47,7 +47,7 @@
 				Close();
 			}
 		}
-		else if ( Input.Pressed( "Abilities" ) && NaviInputCapture.Current is null )
+		else if ( Input.Pressed( "Abilities" ) && NaviInputCapture.Current is null && !CharacterMenu.IsOpen )
 		{
 			Open();
 		}

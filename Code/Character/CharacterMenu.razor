@@ -49,8 +49,7 @@
 	{
 		if ( IsOpen )
 		{
-			if ( Input.EscapePressed || Input.Pressed( "CharacterMenu" )
-			     || NaviInputCapture.Current is not null || AbilityMenu.IsOpen )
+			if ( Input.EscapePressed || Input.Pressed( "CharacterMenu" ) || NaviInputCapture.Current is not null )
 			{
 				Input.EscapePressed = false;
 				Close();

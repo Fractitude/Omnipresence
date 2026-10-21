@@ -52,7 +52,7 @@
 
 	protected override void OnUpdate()
 	{
-		if ( AbilityMenu.IsOpen || NaviInputCapture.Current is not null )
+		if ( AbilityMenu.IsOpen || CharacterMenu.IsOpen || NaviInputCapture.Current is not null )
 			return;
 
 		for ( var i = 0; i < AbilityLoadout.SlotCount; i++ )
