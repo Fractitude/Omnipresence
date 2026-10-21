@@ -35,3 +35,5 @@ caller's player from the connection, checks the option is a host one, the player
 usable, then runs it. The GameObject must be a network object. Never trust a client's word about who pressed.
 
 `NaviSpectatorSeat` (in the Navi library, which can't use game code) is a plain `IPressable`, so it shows a single hint.
+
+`HostRange` is how far the player's eye can be from the object's colliders (its origin if it has none) for a Host option to work. It is checked on the pressing client and again on the host, and for the host's own presses too. 0 turns it off.

@@ -21,8 +21,10 @@ public sealed class Interactable : Component, Component.IPressable
 	[Property] public List<InteractionOption> Options { get; set; } = [new()];
 
 	/// <summary>
-	/// The farthest a player can be, in world units, for the host to accept their press. The look range is the player's; this
-	/// is a generous limit for <see cref="InteractionSide.Host"/> so a modified client can't use things from across the map.
+	/// The farthest the player's eye can be, in world units, from this object's colliders (or its origin, if it has none) for
+	/// a <see cref="InteractionSide.Host"/> option to work. Checked on the pressing player's side, and again by the host for
+	/// clients, so a modified client can't use things from across the map. The player's own reach limits what they can look at
+	/// first, so keep this generous. 0 turns the check off.
 	/// </summary>
 	[Property, Group( "Host" )] public float HostRange { get; set; } = 400f;
 
@@ -77,6 +79,26 @@ public sealed class Interactable : Component, Component.IPressable
 		}
 
 		return own;
+	}
+
+	/// <summary>
+	/// <paramref name="player"/> is within <see cref="HostRange"/> of this object.
+	/// </summary>
+	bool IsInRange( GameObject player )
+	{
+		if ( HostRange <= 0f )
+			return true;
+
+		if ( !player.IsValid() )
+			return false;
+
+		var eye = player.Components.Get<PlayerController>()?.EyePosition ?? player.WorldPosition;
+		var nearest = Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants )
+			.Select( x => x.FindClosestPoint( eye ).Distance( eye ) )
+			.DefaultIfEmpty( WorldPosition.Distance( eye ) )
+			.Min();
+
+		return nearest <= HostRange;
 	}
 
 	/// <summary>
@@ -198,6 +220,9 @@ public sealed class Interactable : Component, Component.IPressable
 			return false;
 
 		var option = Options[index];
+		if ( option.RunOn == InteractionSide.Host && !IsInRange( interactor ) )
+			return false;
+
 		option.NextUse = Time.Now + option.Cooldown;
 
 		if ( option.RunOn == InteractionSide.Host && Networking.IsActive && !Networking.IsHost )
@@ -243,7 +268,7 @@ public sealed class Interactable : Component, Component.IPressable
 		if ( !player.IsValid() || index < 0 || index >= Options.Count || Options[index] is not { RunOn: InteractionSide.Host } option )
 			return;
 
-		if ( player.WorldPosition.Distance( WorldPosition ) > HostRange || !Describe( index, player ).Enabled )
+		if ( !IsInRange( player ) || !Describe( index, player ).Enabled )
 			return;
 
 		option.NextUse = Time.Now + option.Cooldown;
