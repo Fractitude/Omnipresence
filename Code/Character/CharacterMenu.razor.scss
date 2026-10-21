@@ -21,14 +21,20 @@ CharacterMenu
 
 .window
 {
-	width: 420px;
 	padding: 18px 20px;
-	flex-direction: column;
-	gap: 10px;
+	flex-direction: row;
+	gap: 24px;
 	background-color: rgba(18, 17, 30, 0.8);
 	backdrop-filter-blur: 14px;
 	border: 1px solid rgba(242, 238, 226, 0.12);
 	border-radius: 10px;
+}
+
+.character
+{
+	width: 420px;
+	flex-direction: column;
+	gap: 10px;
 }
 
 .title
@@ -58,4 +64,39 @@ CharacterMenu
 {
 	font-size: 13px;
 	opacity: 0.7;
+}
+
+.ghost
+{
+	position: absolute;
+	width: 64px;
+	height: 64px;
+	margin-left: -32px;
+	margin-top: -32px;
+	pointer-events: none;
+}
+
+.details
+{
+	position: absolute;
+	max-width: 260px;
+	padding: 10px 12px;
+	flex-direction: column;
+	gap: 4px;
+	pointer-events: none;
+	background-color: rgba(18, 17, 30, 0.95);
+	border: 1px solid rgba(242, 238, 226, 0.2);
+	border-radius: 6px;
+
+	.name
+	{
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	.description
+	{
+		font-size: 13px;
+		opacity: 0.8;
+	}
 }

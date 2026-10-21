@@ -1,0 +1,39 @@
+InventoryGrid
+{
+	flex-direction: column;
+	gap: 10px;
+
+	.heading
+	{
+		font-size: 22px;
+		font-weight: 700;
+	}
+
+	.grid
+	{
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+
+	.slot
+	{
+		width: 64px;
+		height: 64px;
+		padding: 4px;
+		pointer-events: all;
+		background-color: rgba(8, 8, 16, 0.5);
+		border: 1px solid rgba(242, 238, 226, 0.12);
+		border-radius: 6px;
+
+		&:hover
+		{
+			border-color: rgba(125, 255, 176, 0.7);
+		}
+
+		&.dragged
+		{
+			opacity: 0.35;
+		}
+	}
+}

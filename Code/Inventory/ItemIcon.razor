@@ -1,0 +1,25 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace Sandbox
+
+<root>
+	@if ( ItemIcons.SceneFor( ModelPath ) is { } scene )
+	{
+		@* The scene is given as an attribute, so the panel never ticks the game scene (see AGENTS.md, "UI pitfalls"). *@
+		<ScenePanel class="scene" RenderScene=@scene/>
+	}
+	else
+	{
+		<i>inventory_2</i>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The resource path of the model drawn.
+	/// </summary>
+	public string ModelPath { get; set; }
+
+	protected override int BuildHash() => System.HashCode.Combine( ModelPath );
+}

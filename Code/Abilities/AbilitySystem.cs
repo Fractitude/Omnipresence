@@ -15,7 +15,7 @@ public sealed class AbilitySystem : GameObjectSystem<AbilitySystem>
 	void EnsureHud()
 	{
 		// Not in the Character menu's preview scene either: it is a scene too, and the systems start in it.
-		if ( hud.IsValid() || Scene == CharacterMenu.PreviewScene || !Game.IsPlaying || Scene.IsEditor
+		if ( hud.IsValid() || CharacterMenu.IsPreview( Scene ) || !Game.IsPlaying || Scene.IsEditor
 		     || Application.IsHeadless )
 			return;
 

@@ -1,0 +1,139 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace Sandbox
+
+<root>
+	<div class="heading">Inventory</div>
+	@if ( Inventory is { } inventory )
+	{
+		<div @ref="Grid" class="grid" style="width: @( inventory.Columns * (SlotSize + Gap) - Gap )px">
+			@for ( var i = 0; i < inventory.SlotCount; i++ )
+			{
+				var slot = i;
+				var item = inventory.At( slot );
+				<div class="slot @( item is null ? "empty" : "" ) @( DragFrom == slot ? "dragged" : "" )"
+				     @onmousedown=@( () => BeginDrag( slot ) )
+				     @onmouseover=@( () => Hovered = slot )
+				     @onmouseout=@( () => { if ( Hovered == slot ) Hovered = -1; } )>
+					@if ( item is not null )
+					{
+						<ItemIcon ModelPath=@item.ModelPath/>
+					}
+				</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	const int SlotSize = 64;
+	const int Gap = 6;
+
+	// Static: the panel's mouse events and the menu's updates are not always on the same instance.
+	static InventoryGrid current;
+	static int dragFrom = -1;
+	static int hovered = -1;
+
+	/// <summary>
+	/// The slot being dragged, or -1.
+	/// </summary>
+	public static int DragFrom => dragFrom;
+
+	/// <summary>
+	/// The slot the mouse is over, or -1.
+	/// </summary>
+	public static int Hovered
+	{
+		get => hovered;
+		private set => hovered = value;
+	}
+
+	/// <summary>
+	/// The item being dragged, or null.
+	/// </summary>
+	public static ItemData Dragged => dragFrom >= 0 ? PlayerInventory.Local?.At( dragFrom ) : null;
+
+	/// <summary>
+	/// The item under the mouse while nothing is dragged, or null.
+	/// </summary>
+	public static ItemData HoveredItem => dragFrom < 0 && hovered >= 0 ? PlayerInventory.Local?.At( hovered ) : null;
+
+	/// <summary>
+	/// A hash of what the grid shows, for the menu that draws the dragged icon and the details.
+	/// </summary>
+	public static int State => System.HashCode.Combine( PlayerInventory.Local?.Version, dragFrom, hovered );
+
+	PlayerInventory Inventory => PlayerInventory.Local;
+
+	Panel Grid { get; set; }
+
+	protected override void OnAfterTreeRender( bool firstTime )
+	{
+		current = this;
+	}
+
+	public override void OnDeleted()
+	{
+		if ( current == this )
+			current = null;
+	}
+
+	static void BeginDrag( int slot )
+	{
+		if ( PlayerInventory.Local?.At( slot ) is not null )
+			dragFrom = slot;
+	}
+
+	/// <summary>
+	/// Forget the drag and the hover, e.g. when the menu closes.
+	/// </summary>
+	public static void Cancel()
+	{
+		dragFrom = -1;
+		hovered = -1;
+	}
+
+	/// <summary>
+	/// The mouse button came up: drop the dragged item on the slot under the mouse, or on the floor when the mouse is
+	/// outside the whole window. Dropped on the window but not on a slot, it stays where it was.
+	/// </summary>
+	public static void EndDrag( Vector2 mouse, Rect window )
+	{
+		var from = dragFrom;
+		dragFrom = -1;
+
+		if ( from < 0 || PlayerInventory.Local is not { } inventory )
+			return;
+
+		var to = SlotAt( mouse );
+
+		if ( to >= 0 )
+			inventory.Move( from, to );
+		else if ( !window.IsInside( mouse ) )
+			inventory.Drop( from );
+	}
+
+	/// <summary>
+	/// The slot under a screen position, or -1.
+	/// </summary>
+	static int SlotAt( Vector2 screenPosition )
+	{
+		if ( current?.Grid is not { } grid )
+			return -1;
+
+		var index = 0;
+
+		foreach ( var child in grid.Children )
+		{
+			if ( child.Box.Rect.IsInside( screenPosition ) )
+				return index;
+
+			index++;
+		}
+
+		return -1;
+	}
+
+	protected override int BuildHash() => State;
+}

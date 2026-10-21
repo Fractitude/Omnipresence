@@ -5,13 +5,36 @@
 <root class="@( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
 	@if ( IsOpen )
 	{
-		<div class="window">
-			<div class="title">Character</div>
-			<div class="viewport" @onmousedown=@BeginDrag>
-				<ScenePanel @ref="View" class="view" RenderScene=@scene/>
+		<div @ref="Window" class="window">
+			<div class="character">
+				<div class="title">Character</div>
+				<div class="viewport" @onmousedown=@BeginDrag>
+					<ScenePanel @ref="View" class="view" RenderScene=@scene/>
+				</div>
+				<div class="hint">Drag to turn your character.</div>
 			</div>
-			<div class="hint">Drag to turn your character.</div>
+			<InventoryGrid class="inventory"/>
 		</div>
+
+		@if ( InventoryGrid.Dragged is { } dragged )
+		{
+			var position = Mouse.Position * Panel.ScaleFromScreen;
+			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px">
+				<ItemIcon ModelPath=@dragged.ModelPath/>
+			</div>
+		}
+		else if ( InventoryGrid.HoveredItem is { } hovered )
+		{
+			@* The full details of the item under the mouse. *@
+			var position = Mouse.Position * Panel.ScaleFromScreen;
+			<div class="details" style="left: @( position.x + 18 )px; top: @( position.y + 18 )px">
+				<div class="name">@hovered.Name</div>
+				@if ( !string.IsNullOrEmpty( hovered.Description ) )
+				{
+					<div class="description">@hovered.Description</div>
+				}
+			</div>
+		}
 	}
 </root>
 
@@ -29,11 +52,19 @@
 
 	ScenePanel View { get; set; }
 
+	Panel Window { get; set; }
+
 	/// <summary>
 	/// The scene that draws the character. It is a scene like any other, so the game systems start in it too: they must
 	/// not put a HUD in it.
 	/// </summary>
 	public static Scene PreviewScene { get; private set; }
+
+	/// <summary>
+	/// Whether the scene only draws a preview for this menu (the character or an item icon). Game systems must not put a
+	/// HUD in it.
+	/// </summary>
+	public static bool IsPreview( Scene scene ) => scene == PreviewScene || ItemIcons.IsIconScene( scene );
 
 	Scene scene;
 	GameObject pivot;
@@ -65,6 +96,7 @@
 
 		Mouse.Visibility = MouseVisibility.Visible;
 		FreeControls( false );
+		ItemIcons.Spin();
 
 		try
 		{
@@ -97,6 +129,11 @@
 	void EndDrag()
 	{
 		dragging = false;
+
+		if ( Window is { IsValid: true } )
+			InventoryGrid.EndDrag( Mouse.Position, Window.Box.Rect );
+		else
+			InventoryGrid.Cancel();
 	}
 
 	void Open()
@@ -111,6 +148,7 @@
 	{
 		IsOpen = false;
 		dragging = false;
+		InventoryGrid.Cancel();
 		FreeControls( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}
@@ -194,5 +232,10 @@
 		return created;
 	}
 
-	protected override int BuildHash() => System.HashCode.Combine( IsOpen );
+	protected override int BuildHash()
+	{
+		// The dragged icon and the details follow the mouse.
+		var following = InventoryGrid.Dragged is not null || InventoryGrid.HoveredItem is not null;
+		return System.HashCode.Combine( IsOpen, InventoryGrid.State, following ? Mouse.Position : default );
+	}
 }
