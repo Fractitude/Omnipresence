@@ -64,6 +64,27 @@ public sealed class Interactable : Component, Component.IPressable
 	bool warnedNotNetworked;
 
 	/// <summary>
+	/// The handlers that answer to this Interactable: those on this GameObject and its children, or, if there are none, those
+	/// on the nearest parent that has any. So the Interactable can sit on a child (where the collider is) while the
+	/// component that handles it is on the object's root.
+	/// </summary>
+	List<IInteractionHandler> GetHandlers()
+	{
+		var own = Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelfAndDescendants ).ToList();
+		if ( own.Count > 0 )
+			return own;
+
+		for ( var parent = GameObject.Parent; parent.IsValid() && parent is not Sandbox.Scene; parent = parent.Parent )
+		{
+			var found = parent.Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelf ).ToList();
+			if ( found.Count > 0 )
+				return found;
+		}
+
+		return own;
+	}
+
+	/// <summary>
 	/// What the local player would see right now: the Interactable's own values, a handler's description in place of them,
 	/// and whether it can be used.
 	/// </summary>
@@ -71,7 +92,7 @@ public sealed class Interactable : Component, Component.IPressable
 	{
 		var e = new InteractionEvent( this, interactor );
 		var info = new InteractionInfo( Label, Icon, Description );
-		var handlers = Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelfAndDescendants ).ToList();
+		var handlers = GetHandlers();
 
 		foreach ( var handler in handlers )
 		{
@@ -145,7 +166,7 @@ public sealed class Interactable : Component, Component.IPressable
 	/// </summary>
 	public void Execute( InteractionEvent e )
 	{
-		foreach ( var handler in Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelfAndDescendants ).ToList() )
+		foreach ( var handler in GetHandlers() )
 			Guard( () => handler.OnInteract( e ) );
 
 		Guard( () => OnInteract?.Invoke( e.Interactor ) );
