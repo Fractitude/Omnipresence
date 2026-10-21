@@ -45,10 +45,11 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 Ported from Facepunch's open-source sandbox game (`github.com/Facepunch/sandbox`), whose M4a1 is the reference. Ballistics, ammo, reload, the view model and world model lifecycle live in the **engine** (`BaseCombatWeapon`, `BaseInventoryComponent`, `BaseWeaponModel`); `Code/Weapons/` is the game layer on top, kept close to Facepunch's files so upstream changes diff cleanly.
 
-- `Base/BaseSandboxWeapon*.cs` is trimmed (no seats, NPCs, kill icons or their `Player` type; `Owner` is the engine's `PlayerController`). `BaseBulletWeapon` adds recoil, `IronSightsWeapon` aim down sights, `M4a1/` the rifle. `ViewModel/` drives the first-person arms.
+- `Base/BaseSandboxWeapon*.cs` is trimmed (no seats, NPCs, kill icons or their `Player` type; `Owner` is the engine's `PlayerController`). `BaseBulletWeapon` adds recoil, `IronSightsWeapon` aim down sights, `MeleeWeapon` swings, `ProjectileEntity` is the base of rockets and launcher grenades. `ViewModel/` drives the first-person arms. Weapons: M4a1, Colt1911, Glock, Revolver, Mp5 (with grenade launcher), Shotgun, Sniper (scope shader `Assets/shaders/postprocess/sniper_scope.shader`), Rpg, HandGrenade, Crowbar.
 - `WeaponInventory` is the hotbar on the player prefab. It is separate from the grid `PlayerInventory`. Slot keys, `Drop` and the `Slot…` input actions are read there.
-- Weapon prefabs live in `Assets/weapons/<name>/` (`<name>.prefab`, `_vm` view model, `_wm` world model). The models are Facepunch cloud packages (`facepunch.w_m4a1`, `v_m4a1`, `rifle_muzzleflash`, `v_first_person_arms_human`); `install_package` them.
+- Weapon prefabs live in `Assets/weapons/<name>/` (`<name>.prefab`, `_vm` view model, `_wm` world model). The models are Facepunch cloud packages (`facepunch.w_m4a1`, `v_m4a1`, `rifle_muzzleflash`, `v_first_person_arms_human`); `install_package` them. Some sounds come from cloud packages too (the revolver's `rust.python…`). When a prefab logs a missing `.vsnd_c` or `.vmdl_c`, read `__references` in the file and install that package.
 - Bullets trace with the `bullet` collision rule (`ProjectSettings/Collision.config`).
+- Upstream hooks that need seats, NPCs or the `Player` type (`OnPrimaryPressed`, `OnCameraMove`, `OnPlayerDeath`, contraption inputs, `ImpactPrefab`'s direction argument) were dropped when porting. Scope sensitivity uses `PlayerController.LookSensitivity`.
 - **Leave `GiveOnStart` off on the player prefab's `WeaponInventory`** and turn `UsesLoadout` on: the engine's start-up grant made `PlayerController` throw a NullReferenceException while it was created. `WeaponInventory` grants the loadout itself 0.1 s later.
 
 ## Security
