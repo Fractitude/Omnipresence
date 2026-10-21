@@ -21,6 +21,7 @@ public sealed class WeaponInventory : BaseInventoryComponent
 	public IEnumerable<BaseSandboxWeapon> Weapons => Items.OfType<BaseSandboxWeapon>();
 
 	PlayerController controller;
+	bool wasSeated;
 
 	protected override void OnStart()
 	{
@@ -66,6 +67,15 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		base.OnUpdate();
 
 		if ( IsProxy || !controller.IsValid() ) return;
+
+		// Sitting down at a computer puts the weapon away. It stays away after getting up, and no slot key
+		// draws one while seated.
+		var seated = Scene.GetAllComponents<NaviComputer>().Any( x => x.IsSeated );
+		if ( seated && !wasSeated && ActiveWeapon.IsValid() )
+			ForceHolster();
+
+		wasSeated = seated;
+		if ( seated ) return;
 
 		ReadInput();
 
