@@ -39,6 +39,11 @@
       "DefaultMap": null,
       "MapTarget": null
     },
-    "DedicatedServerStartupScene": "scenes/home.scene"
+    "DedicatedServerStartupScene": "scenes/home.scene",
+    "ControlModes": {
+      "Keyboard": true,
+      "VR": false,
+      "Gamepad": false
+    }
   }
 }

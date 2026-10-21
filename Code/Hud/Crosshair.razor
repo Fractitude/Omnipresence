@@ -7,6 +7,47 @@
 	@if ( NaviInputCapture.Current is null && !AbilityMenu.IsOpen && !CharacterMenu.IsOpen )
 	{
 		<div class="dot"></div>
+
+		@if ( Entries.Count > 0 )
+		{
+			@* The options of what the player looks at: the mouse wheel picks the highlighted one, Use does it. *@
+			<div class="hint menu">
+				@foreach ( var entry in Entries )
+				{
+					var picked = entry.Index == Selected;
+					<div class="option @( picked ? "picked" : "" ) @( entry.Info.Enabled ? "" : "disabled" )">
+						<div class="row">
+							@if ( !string.IsNullOrEmpty( entry.Info.Icon ) )
+							{
+								<i>@entry.Info.Icon</i>
+							}
+							<label>@entry.Info.Label</label>
+						</div>
+						@if ( picked && !string.IsNullOrEmpty( entry.Info.Description ) )
+						{
+							<label class="description">@entry.Info.Description</label>
+						}
+					</div>
+				}
+			</div>
+		}
+		else if ( Hint is { } hint )
+		{
+			@* What the player is looking at and can press Use on, e.g. a spectator seat. *@
+			<div class="hint @( hint.Enabled ? "" : "disabled" )">
+				<div class="row">
+					@if ( !string.IsNullOrEmpty( hint.Icon ) )
+					{
+						<i>@hint.Icon</i>
+					}
+					<label>@hint.Title</label>
+				</div>
+				@if ( !string.IsNullOrEmpty( hint.Description ) )
+				{
+					<label class="description">@hint.Description</label>
+				}
+			</div>
+		}
 	}
 </root>
 
@@ -19,6 +60,22 @@
 	/// </summary>
 	[Property] public bool HideCursor { get; set; } = true;
 
+	/// <summary>
+	/// The rows of the <see cref="Interactable"/> the local player looks at.
+	/// </summary>
+	List<Interactable.Entry> Entries => Interactable.Focused.IsValid() ? Interactable.Focused.GetEntries() : [];
+
+	int Selected => Interactable.Focused.IsValid() ? Interactable.Focused.GetSelected( Entries ) : -1;
+
+	/// <summary>
+	/// The tooltip of the pressable object the local player looks at, or null.
+	/// </summary>
+	Component.IPressable.Tooltip? Hint => Scene.GetAllComponents<PlayerController>()
+		.FirstOrDefault( x => !x.IsProxy )?.Tooltips
+		.Where( x => x.Enabled && !string.IsNullOrEmpty( x.Title ) )
+		.Select( x => (Component.IPressable.Tooltip?)x )
+		.FirstOrDefault();
+
 	protected override void OnUpdate()
 	{
 		if ( HideCursor && NaviInputCapture.Current is null && !AbilityMenu.IsOpen && !CharacterMenu.IsOpen )
@@ -28,7 +85,13 @@
 	}
 
 	protected override int BuildHash()
-		=> System.HashCode.Combine( NaviInputCapture.Current, AbilityMenu.IsOpen, CharacterMenu.IsOpen );
+	{
+		var entries = Entries;
+		var menu = string.Join( "|", entries.Select( x => $"{x.Index}{x.Info.Label}{x.Info.Icon}{x.Info.Description}{x.Info.Enabled}" ) );
+
+		return System.HashCode.Combine( NaviInputCapture.Current, AbilityMenu.IsOpen, CharacterMenu.IsOpen, menu, Selected,
+			(Hint?.Title, Hint?.Icon, Hint?.Description, Hint?.Enabled) );
+	}
 
 	protected override void OnDisabled()
 	{
