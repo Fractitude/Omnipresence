@@ -154,26 +154,18 @@ public sealed class WeaponInventory : BaseInventoryComponent
 
 	/// <summary>
 	/// First person draws the arms and the weapon on the camera (tagged <c>firstperson</c>), third person the player's
-	/// own body with the world model. In third person the camera leaves the <c>firstperson</c> tag out and the view
-	/// model is dropped, so effects start at the weapon in the hands and not at one floating behind the camera.
+	/// own body with the world model. In third person the camera leaves the <c>firstperson</c> tag out. The view model
+	/// stays alive, hidden, so its animations carry on; the engine sees the tag and plays effects from the world model.
 	/// </summary>
 	void UpdatePerspective()
 	{
 		var camera = Scene.Camera;
-		var thirdPerson = controller.ThirdPerson;
+		if ( !camera.IsValid() ) return;
 
-		if ( camera.IsValid() )
-		{
-			if ( thirdPerson )
-				camera.RenderExcludeTags.Add( "firstperson" );
-			else
-				camera.RenderExcludeTags.Remove( "firstperson" );
-		}
-
-		var weapon = ActiveWeapon;
-		if ( !weapon.IsValid() ) return;
-
-		weapon.SetViewModelShown( !thirdPerson );
+		if ( controller.ThirdPerson )
+			camera.RenderExcludeTags.Add( "firstperson" );
+		else
+			camera.RenderExcludeTags.Remove( "firstperson" );
 	}
 
 	void ReadInput()

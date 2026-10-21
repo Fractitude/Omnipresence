@@ -245,19 +245,43 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	}
 
 	/// <summary>
-	/// Shows or drops the first-person view model, for switching between first and third person. Owner only.
+	/// The view model's <see cref="BaseWeaponModel"/>, when it isn't the one <see cref="BaseCombatWeapon.WeaponModel"/>
+	/// already drives. In third person the view model stays alive, hidden, and the engine drives only the world model.
 	/// </summary>
-	public void SetViewModelShown( bool shown )
+	BaseWeaponModel HiddenViewModel
 	{
-		if ( !shown && ViewModel.IsValid() )
-			DestroyViewModel();
-		else if ( shown && !ViewModel.IsValid() && IsHeld )
+		get
 		{
-			// The weapon never left the player's hands, so it shouldn't be pulled out again.
-			global::ViewModel.SkipNextDeploy = true;
-			CreateViewModel();
-			global::ViewModel.SkipNextDeploy = false;
+			var model = ViewModel?.GetComponentInChildren<BaseWeaponModel>();
+			return model.IsValid() && model != WeaponModel ? model : null;
 		}
+	}
+
+	// Reloads drive the hidden view model too, so after switching back from third person it is in the same state
+	// (still reloading, or done) and its reload sounds play.
+
+	protected override void OnReloadStarted()
+	{
+		base.OnReloadStarted();
+		HiddenViewModel?.OnReloadStart();
+	}
+
+	protected override void OnReloadFinished()
+	{
+		base.OnReloadFinished();
+		HiddenViewModel?.OnReloadFinish();
+	}
+
+	protected override void OnReloadCancelled()
+	{
+		base.OnReloadCancelled();
+		HiddenViewModel?.OnReloadCancel();
+	}
+
+	protected override void OnReloadInserted()
+	{
+		base.OnReloadInserted();
+		HiddenViewModel?.OnIncrementalReload();
 	}
 
 	/// <summary>
