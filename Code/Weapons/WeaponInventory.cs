@@ -26,21 +26,39 @@ public sealed class WeaponInventory : BaseInventoryComponent
 	{
 		controller = GetComponent<PlayerController>();
 
-		if ( UsesLoadout && !GiveOnStart && Networking.IsHost && !IsProxy )
+		if ( Networking.IsHost && !IsProxy )
 			_ = GiveLoadoutWhenReady();
 	}
 
 	/// <summary>
-	/// Hands out the loadout once the player controller has finished building the player. The engine's own
-	/// <c>GiveOnStart</c> made the controller throw a NullReferenceException while it was being created, so leave
-	/// it off on the player prefab and turn <c>UsesLoadout</c> on.
+	/// The weapons a player spawns with, by name, separated by spaces: <c>m4a1 glock crowbar</c> gives
+	/// <c>weapons/m4a1/m4a1.prefab</c> and so on. Saved, so set it once from the console. It lives here and not on the
+	/// player prefab because editing <see cref="PlayerController"/> in the Inspector makes it throw.
+	/// </summary>
+	[ConVar( "omni.loadout", ConVarFlags.Saved )]
+	public static string Loadout { get; set; } = "m4a1 glock crowbar";
+
+	/// <summary>
+	/// The prefab of a weapon, from its short name like <c>m4a1</c>.
+	/// </summary>
+	public static string PrefabPath( string weapon ) => $"weapons/{weapon.ToLowerInvariant()}/{weapon.ToLowerInvariant()}.prefab";
+
+	/// <summary>
+	/// Hands out <see cref="Loadout"/> once the player controller has finished building the player. The engine's own
+	/// <c>GiveOnStart</c> made the controller throw a NullReferenceException while it was being created, so the
+	/// prefab leaves it off, and its <c>StartingItems</c> stay empty.
 	/// </summary>
 	async Task GiveLoadoutWhenReady()
 	{
 		await GameTask.DelaySeconds( 0.1f );
 
-		if ( this.IsValid() && !Items.Any() )
-			GiveLoadout();
+		if ( !this.IsValid() || Items.Any() )
+			return;
+
+		foreach ( var weapon in Loadout.Split( ' ', StringSplitOptions.RemoveEmptyEntries ) )
+		{
+			Pickup( PrefabPath( weapon ) );
+		}
 	}
 
 	protected override void OnUpdate()

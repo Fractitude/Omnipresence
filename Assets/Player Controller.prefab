@@ -250,22 +250,9 @@
         "Behaviour": "Hotbar",
         "MaxSlots": 6,
         "PickupMode": "Touch",
-        "UsesLoadout": true,
+        "UsesLoadout": false,
         "GiveOnStart": false,
-        "StartingItems": [
-          {
-            "_type": "gameobject",
-            "prefab": "weapons/m4a1/m4a1.prefab"
-          },
-          {
-            "_type": "gameobject",
-            "prefab": "weapons/crowbar/crowbar.prefab"
-          },
-          {
-            "_type": "gameobject",
-            "prefab": "weapons/glock/glock.prefab"
-          }
-        ]
+        "StartingItems": []
       }
     ],
     "Children": [
