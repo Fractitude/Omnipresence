@@ -329,6 +329,23 @@ public sealed partial class ViewModel : Sandbox.BaseWeaponModel
 		Renderer.Set( "move_z", velocity.z );
 	}
 
+	/// <summary>
+	/// Set just before a view model is created to skip its deploy animation and sound, for bringing back the weapon
+	/// that is already in the player's hands (after third person). Used up by the next deploy.
+	/// </summary>
+	public static bool SkipNextDeploy;
+
+	public override void OnDeploy()
+	{
+		if ( SkipNextDeploy )
+		{
+			SkipNextDeploy = false;
+			return;
+		}
+
+		base.OnDeploy();
+	}
+
 	public override void OnAttack( Vector3? hitPoint = null, Vector3? origin = null )
 	{
 		base.OnAttack( hitPoint, origin );

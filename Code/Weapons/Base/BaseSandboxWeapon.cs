@@ -252,7 +252,12 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 		if ( !shown && ViewModel.IsValid() )
 			DestroyViewModel();
 		else if ( shown && !ViewModel.IsValid() && IsHeld )
+		{
+			// The weapon never left the player's hands, so it shouldn't be pulled out again.
+			global::ViewModel.SkipNextDeploy = true;
 			CreateViewModel();
+			global::ViewModel.SkipNextDeploy = false;
+		}
 	}
 
 	/// <summary>
