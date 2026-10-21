@@ -52,17 +52,17 @@ public sealed class Interactable : Component, Component.IPressable
 	/// <summary>
 	/// Runs when the player uses it. Connect any component's method to it in the editor.
 	/// </summary>
-	[Property, Group( "Events" )] public Action OnInteract { get; set; }
+	[Property, Group( "Events" )] public System.Action OnInteract { get; set; }
 
 	/// <summary>
 	/// Like <see cref="OnInteract"/>, with the player who used it.
 	/// </summary>
-	[Property, Group( "Events" )] public Action<GameObject> OnInteractBy { get; set; }
+	[Property, Group( "Events" )] public System.Action<GameObject> OnInteractBy { get; set; }
 
 	/// <summary>
 	/// Raised in code when the player uses it, after the handlers.
 	/// </summary>
-	public event Action<InteractionEvent> Interacted;
+	public event System.Action<InteractionEvent> Interacted;
 
 	float nextUse;
 	bool warnedNotNetworked;
@@ -160,7 +160,7 @@ public sealed class Interactable : Component, Component.IPressable
 	/// <summary>
 	/// One failing handler mustn't stop the others.
 	/// </summary>
-	void Guard( Action action )
+	void Guard( System.Action action )
 	{
 		try
 		{
