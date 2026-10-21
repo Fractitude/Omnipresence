@@ -33,7 +33,7 @@ public sealed class InteractionOption
 	/// <summary>
 	/// Where the handlers and events run. See <see cref="InteractionSide"/>.
 	/// </summary>
-	[Property] public InteractionSide RunOn { get; set; } = InteractionSide.Local;
+	[Property] public InteractionSide RunOn { get; set; } = InteractionSide.Host;
 
 	/// <summary>
 	/// Seconds before it can be used again, for the player who used it (<see cref="InteractionSide.Local"/>) or for everyone
