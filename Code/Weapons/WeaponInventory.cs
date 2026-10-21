@@ -98,6 +98,9 @@ public sealed class WeaponInventory : BaseInventoryComponent
 			ForceHolster();
 
 		wasSeated = seated;
+
+		UpdatePerspective();
+
 		if ( seated ) return;
 
 		UpdateSeat();
@@ -147,6 +150,30 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		weaponBeforeSeat = ActiveWeapon;
 		IsSeatHolstered = true;
 		ForceHolster();
+	}
+
+	/// <summary>
+	/// First person draws the arms and the weapon on the camera (tagged <c>firstperson</c>), third person the player's
+	/// own body with the world model. In third person the camera leaves the <c>firstperson</c> tag out and the view
+	/// model is dropped, so effects start at the weapon in the hands and not at one floating behind the camera.
+	/// </summary>
+	void UpdatePerspective()
+	{
+		var camera = Scene.Camera;
+		var thirdPerson = controller.ThirdPerson;
+
+		if ( camera.IsValid() )
+		{
+			if ( thirdPerson )
+				camera.RenderExcludeTags.Add( "firstperson" );
+			else
+				camera.RenderExcludeTags.Remove( "firstperson" );
+		}
+
+		var weapon = ActiveWeapon;
+		if ( !weapon.IsValid() ) return;
+
+		weapon.SetViewModelShown( !thirdPerson );
 	}
 
 	void ReadInput()

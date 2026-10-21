@@ -245,6 +245,17 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	}
 
 	/// <summary>
+	/// Shows or drops the first-person view model, for switching between first and third person. Owner only.
+	/// </summary>
+	public void SetViewModelShown( bool shown )
+	{
+		if ( !shown && ViewModel.IsValid() )
+			DestroyViewModel();
+		else if ( shown && !ViewModel.IsValid() && IsHeld )
+			CreateViewModel();
+	}
+
+	/// <summary>
 	/// Is this item currently being used? When true, prevents auto-switching away on item pickup etc.
 	/// </summary>
 	public virtual bool IsInUse()
