@@ -36,7 +36,7 @@ public sealed class WeaponInventory : BaseInventoryComponent
 	/// player prefab because editing <see cref="PlayerController"/> in the Inspector makes it throw.
 	/// </summary>
 	[ConVar( "omni.loadout", ConVarFlags.Saved )]
-	public static string Loadout { get; set; } = "m4a1 glock crowbar";
+	public static string Loadout { get; set; } = "m4a1 glock crowbar physgun";
 
 	/// <summary>
 	/// The prefab of a weapon, from its short name like <c>m4a1</c>.

@@ -21,7 +21,7 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | Command | What it does |
 |---|---|
 | `give <weapon>` | Give yourself a weapon by its short name: `m4a1`, `colt1911`, `glock`, `revolver`, `mp5`, `shotgun`, `sniper`, `rpg`, `grenade`, `crowbar`, `camera`, `physgun`. |
-| `omni.loadout "<weapons>"` | The weapons you spawn with, separated by spaces, e.g. `omni.loadout "m4a1 glock physgun"`. Saved. Applies from your next spawn. |
+| `omni.loadout "<weapons>"` | The weapons you spawn with, separated by spaces, e.g. `omni.loadout "m4a1 glock physgun"`. The default is `m4a1 glock crowbar physgun`. Saved. Applies from your next spawn. |
 
 ## World clock
 
