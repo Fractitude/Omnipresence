@@ -10,9 +10,10 @@ namespace Sandbox;
 /// code). An option's label can be plain properties, set by code, or taken from a handler's
 /// <see cref="IInteractionHandler.Describe"/>.
 /// </para>
-/// It is built on the engine's <see cref="Component.IPressable"/>, so <see cref="PlayerController"/> finds and presses it.
+/// <see cref="InteractionSystem"/> finds what the local player looks at: a ray from their eye must hit one of this
+/// object's colliders (or its children's) within <see cref="Range"/>. It does not use the engine's pressables.
 /// </summary>
-public sealed class Interactable : Component, Component.IPressable
+public sealed class Interactable : Component
 {
 	/// <summary>
 	/// What the player can do with it, in the order they are listed. Change it from code the same way on every machine: the
@@ -23,11 +24,9 @@ public sealed class Interactable : Component, Component.IPressable
 	/// <summary>
 	/// The farthest the player's eye can be, in world units, from this object's colliders (or its origin, if it has none).
 	/// Beyond it the prompt is hidden and the press does nothing. The host checks every press from a client again, from the
-	/// player's eye: it must be within this range and see the object, with nothing in the way. The engine finds what the
-	/// player looks at within <see cref="PlayerController.ReachLength"/>, so that is the most this can reach. 0 turns the
-	/// checks off.
+	/// player's eye: it must be within this range and see the object, with nothing in the way. 0 turns the checks off.
 	/// </summary>
-	[Property] public float Range { get; set; } = 200f;
+	[Property] public float Range { get; set; } = 50f;
 
 	/// <summary>
 	/// The GameObject whose <see cref="IInteractionHandler"/> components answer to this Interactable (it and its children).
@@ -44,6 +43,25 @@ public sealed class Interactable : Component, Component.IPressable
 	/// The Interactable the local player looks at, or null. The crosshair draws its menu.
 	/// </summary>
 	public static Interactable Focused { get; private set; }
+
+	/// <summary>
+	/// Make <paramref name="interactable"/> the one looked at. A new one starts on its first option.
+	/// </summary>
+	internal static void SetFocus( Interactable interactable )
+	{
+		if ( Focused == interactable )
+			return;
+
+		Focused = interactable;
+		if ( interactable.IsValid() )
+			interactable.selected = 0;
+	}
+
+	/// <summary>
+	/// A collider of this Interactable, or of its children: the ones a look can hit.
+	/// </summary>
+	internal bool OwnsCollider( Collider collider ) =>
+		collider.IsValid() && Components.GetAll<Collider>( FindMode.EnabledInSelfAndDescendants ).Contains( collider );
 
 	/// <summary>
 	/// A row of the menu the local player sees.
@@ -90,7 +108,7 @@ public sealed class Interactable : Component, Component.IPressable
 	/// <summary>
 	/// The player's eye is within <see cref="Range"/> of this object. Cheap: what the crosshair asks every frame.
 	/// </summary>
-	bool IsInRange( GameObject player )
+	internal bool IsInRange( GameObject player )
 	{
 		if ( Range <= 0f )
 			return true;
@@ -143,14 +161,9 @@ public sealed class Interactable : Component, Component.IPressable
 	}
 
 	/// <summary>
-	/// The player who looks at or presses this: the engine says so, else the local player.
-	/// </summary>
-	GameObject Who( Component.IPressable.Event e ) => e.Source?.GameObject ?? LocalPlayer;
-
-	/// <summary>
 	/// The local player's GameObject, or null.
 	/// </summary>
-	GameObject LocalPlayer => Scene.GetAllComponents<PlayerController>().FirstOrDefault( x => !x.IsProxy )?.GameObject;
+	internal GameObject LocalPlayer => Scene.GetAllComponents<PlayerController>().FirstOrDefault( x => !x.IsProxy )?.GameObject;
 
 	/// <summary>
 	/// What the local player would see for an option right now: the option's own values, a handler's description in place of
@@ -226,27 +239,10 @@ public sealed class Interactable : Component, Component.IPressable
 		selected = entries[position].Index;
 	}
 
-	void Component.IPressable.Hover( Component.IPressable.Event e ) => selected = 0;
-
-	void Component.IPressable.Look( Component.IPressable.Event e )
-	{
-		// Too far to offer: the prompt hides, and the press does nothing (CanPress).
-		if ( IsInRange( Who( e ) ) )
-			Focused = this;
-		else if ( Focused == this )
-			Focused = null;
-	}
-
 	protected override void OnUpdate()
 	{
 		if ( Focused == this )
 			ScrollSelection();
-	}
-
-	void Component.IPressable.Blur( Component.IPressable.Event e )
-	{
-		if ( Focused == this )
-			Focused = null;
 	}
 
 	protected override void OnDisabled()
@@ -255,19 +251,12 @@ public sealed class Interactable : Component, Component.IPressable
 			Focused = null;
 	}
 
-	bool Component.IPressable.CanPress( Component.IPressable.Event e )
-	{
-		if ( !IsInRange( Who( e ) ) )
-			return false;
-
-		var entries = GetEntries();
-		return GetSelected( entries ) is var index and >= 0 && Describe( index, Who( e ) ).Enabled;
-	}
-
-	bool Component.IPressable.Press( Component.IPressable.Event e )
+	/// <summary>
+	/// The player pressed Use while looking at this: do the picked option, if they can.
+	/// </summary>
+	internal bool TryPress( GameObject interactor )
 	{
 		var index = GetSelected( GetEntries() );
-		var interactor = Who( e );
 
 		if ( index < 0 || !Describe( index, interactor ).Enabled )
 			return false;
@@ -293,18 +282,6 @@ public sealed class Interactable : Component, Component.IPressable
 
 		Execute( new InteractionEvent( this, interactor, option, index ) );
 		return true;
-	}
-
-	/// <summary>
-	/// The picked row, for tools that read the engine's tooltips instead of drawing the menu.
-	/// </summary>
-	Component.IPressable.Tooltip? Component.IPressable.GetTooltip( Component.IPressable.Event e )
-	{
-		var entries = GetEntries();
-		if ( !IsInRange( Who( e ) ) || entries.FirstOrDefault( x => x.Index == GetSelected( entries ) ) is not { Option: not null } entry )
-			return null;
-
-		return new Component.IPressable.Tooltip( entry.Info.Label, entry.Info.Icon, entry.Info.Description, entry.Info.Enabled, this );
 	}
 
 	/// <summary>
