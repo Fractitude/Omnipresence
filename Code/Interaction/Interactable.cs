@@ -27,7 +27,7 @@ public sealed class Interactable : Component, Component.IPressable
 	/// player looks at within <see cref="PlayerController.ReachLength"/>, so that is the most this can reach. 0 turns the
 	/// checks off.
 	/// </summary>
-	[Property] public float Range { get; set; } = 200f;
+	[Property] public float Range { get; set; } = 50f;
 
 	/// <summary>
 	/// The GameObject whose <see cref="IInteractionHandler"/> components answer to this Interactable (it and its children).
