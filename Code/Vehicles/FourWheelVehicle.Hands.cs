@@ -20,12 +20,12 @@ public sealed partial class FourWheelVehicle
 	/// <summary>
 	/// Turns the hands on the rim, degrees.
 	/// </summary>
-	[Property, Group( "Steering Wheel" )] public Angles HandRotation { get; set; } = new( -90f, 0f, 0f );
+	[Property, Group( "Steering Wheel" )] public Angles HandRotation { get; set; } = new( 0f, 0f, 0f );
 
 	/// <summary>
 	/// Turns the right hand on the rim, degrees. The two hands are mirror images, so it isn't the left's.
 	/// </summary>
-	[Property, Group( "Steering Wheel" )] public Angles RightHandRotation { get; set; } = new( -90f, 180f, 0f );
+	[Property, Group( "Steering Wheel" )] public Angles RightHandRotation { get; set; } = new( 0f, 0f, 0f );
 
 	private SkinnedModelRenderer _handsOn;
 
@@ -64,9 +64,15 @@ public sealed partial class FourWheelVehicle
 	{
 		var position = centre + direction * HandRadius;
 
-		// The fingers wrap round the rim: along the way the rim runs, palm to the wheel's centre.
-		var tangent = Vector3.Cross( axis, direction ).Normal * sign;
-		renderer.SetIk( name, new Transform( position, Rotation.LookAt( tangent, -direction ) * ( sign < 0 ? HandRotation : RightHandRotation ).ToRotation() ) );
+		// The fingers run along the rim, the way the wheel's top is, and the palm faces the rim. The hand bones have
+		// fingers along X and the palm along +Z (left hand) or -Z (right), so the hands are mirrors of each other.
+		var fingers = Vector3.Cross( axis, direction ).Normal;
+		if ( fingers.Dot( Vector3.Up ) < 0 )
+			fingers = -fingers;
+
+		var palm = direction * sign;
+		var rotation = Rotation.LookAt( fingers, palm ) * ( sign < 0 ? HandRotation : RightHandRotation ).ToRotation();
+		renderer.SetIk( name, new Transform( position, rotation ) );
 	}
 
 	private void ReleaseDriverHands()
