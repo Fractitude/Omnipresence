@@ -256,6 +256,14 @@
           {
             "_type": "gameobject",
             "prefab": "weapons/m4a1/m4a1.prefab"
+          },
+          {
+            "_type": "gameobject",
+            "prefab": "weapons/crowbar/crowbar.prefab"
+          },
+          {
+            "_type": "gameobject",
+            "prefab": "weapons/glock/glock.prefab"
           }
         ]
       }
