@@ -79,22 +79,20 @@ public static class ItemIcons
 				goto done;
 			}
 
-			// Frame the longest side it shows while it turns: its height, or its widest turn (the diagonal of its base).
-			var size = bounds.Size;
-			var extent = System.MathF.Max( size.z, System.MathF.Sqrt( size.x * size.x + size.y * size.y ) );
-			extent = System.MathF.Max( extent, 0.1f );
+			// Frame all of it, whichever way it turns: back off until the sphere around its bounds fits the view.
+			const float fieldOfView = 30f;
+			var radius = System.MathF.Max( bounds.Size.Length * 0.5f, 0.1f );
+			var distance = radius / System.MathF.Sin( (fieldOfView * 0.5f).DegreeToRadian() ) * 1.15f;
 
 			var camera = new GameObject( true, "camera" ).AddComponent<CameraComponent>();
 			camera.BackgroundColor = Color.Transparent;
-			camera.Orthographic = true;
-			camera.OrthographicHeight = extent * 1.1f;
+			camera.FieldOfView = fieldOfView;
 
-			// Looking down a little. The distance doesn't change the size, but must clear the model.
-			var distance = System.MathF.Max( size.Length * 2f, 50f );
+			// Looking down a little.
 			var position = new Vector3( System.MathF.Cos( 20f.DegreeToRadian() ), 0, System.MathF.Sin( 20f.DegreeToRadian() ) ) * distance;
 			camera.WorldPosition = position;
 			camera.WorldRotation = Rotation.LookAt( -position );
-			camera.ZNear = 1f;
+			camera.ZNear = distance * 0.05f;
 			camera.ZFar = distance * 4f;
 
 			var sun = new GameObject( true, "sun" );
