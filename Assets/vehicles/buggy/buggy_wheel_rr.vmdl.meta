@@ -1,3 +1,31 @@
 {
-  "guid": "80d49ba0-2fa2-4818-86fb-a638b682d6b8"
+  "guid": "80d49ba0-2fa2-4818-86fb-a638b682d6b8",
+  "publish": {
+    "Enabled": false,
+    "ProjectConfig": {
+      "Title": "Buggy Wheel Rr",
+      "Type": "model",
+      "Org": "local",
+      "Ident": "buggy_wheel_rr",
+      "Schema": 0,
+      "IncludeSourceFiles": false,
+      "Resources": null,
+      "PackageReferences": null,
+      "EditorReferences": [
+        "facepunch.beer_keg_a2#282208",
+        "facepunch.carseat#143559",
+        "facepunch.cartyre#275783",
+        "facepunch.tractorwheel#140646"
+      ],
+      "Mounts": null,
+      "IsStandaloneOnly": false,
+      "AI": {
+        "EnableMcpCommunication": true
+      },
+      "Metadata": {
+        "SingleAssetSource": "vehicles/buggy/buggy_wheel_rr.vmdl",
+        "ParentPackage": "fractitude.omnipresence"
+      }
+    }
+  }
 }

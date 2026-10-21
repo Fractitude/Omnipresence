@@ -1082,14 +1082,6 @@
               "Type": "Component",
               "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
             },
-            "Property": "RequireSeat",
-            "Value": true
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-            },
             "Property": "StartFavorites",
             "Value": [
               "navi/system/thewired.napp",
@@ -1212,27 +1204,9 @@
               "Type": "Component",
               "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
             },
-            "Property": "RequireSeat",
-            "Value": true
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-            },
             "Property": "StartFavorites",
             "Value": [
               "navi/shop/hardwarestore.napp"
-            ]
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
-            },
-            "Property": "Tags",
-            "Value": [
-              "hardware-store"
             ]
           },
           {
@@ -1314,7 +1288,7 @@
       "__version": 2,
       "Flags": 0,
       "Name": "Ball",
-      "Position": "-290.073029,-0.188567042,9.82969189",
+      "Position": "-356.889496,199.292221,9.82969856",
       "Rotation": "0,0,0,1",
       "Scale": "0.270352274,0.270352274,0.270352274",
       "Tags": "",
@@ -1425,7 +1399,7 @@
       "__version": 2,
       "Flags": 0,
       "Name": "Pins",
-      "Position": "-378.249573,-10.242609,11.0040693",
+      "Position": "-543.488953,189.23819,11.004076",
       "Rotation": "0,0,0,1",
       "Scale": "0.146968842,0.146968842,0.422682524",
       "Tags": "",
@@ -1965,17 +1939,96 @@
         "6c59e0e5-8108-4f80-8ca9-94e1a3a17af1": "0d414613-dee8-4406-af81-463a2f0c5c5b",
         "f2063d76-ad0c-49cc-bd28-451310dc08ac": "f3741ebb-1de7-4b84-9269-fc11b01a4307",
         "9639a424-dbfe-48b6-b56e-b2e6d78a06c0": "66630a6d-afb2-8e1c-bad8-c166713e5d99",
+        "f72884d2-353a-4152-82fc-830810b9fed9": "a06acdd3-c532-89f1-b73b-3722e1b9abf0",
+        "cce07291-3ce5-4d94-8772-98bdd3d5a90c": "02f8e835-f409-827e-9fa9-708fc843e077",
         "74b07c64-abf7-4f98-b738-a3328ec64704": "d1fc7b6b-994e-8796-9331-32dd3b4ac1f1",
         "da6221f6-fccf-4cab-b012-84932949b53e": "1e619ce2-421d-4bec-8375-0bb33c6741e6",
+        "8999ef46-232c-4dd2-8be2-8dfe96fcfa04": "22a72816-ba24-4f86-880e-17dccf38d851",
         "fe63845e-6af7-409b-988f-d3c58612e71a": "2fafc65d-f105-4b75-a554-99f4dda76e48",
         "fe5d6c05-4655-42b9-96e0-ece36cdc8cfb": "f86c5dab-9574-466f-8846-325c818016bd",
-        "4897be97-04f4-4bcd-9a3b-a417a6f0dbc7": "e835e7cc-7acd-4e32-85c5-3f2c1ea35789",
-        "cce07291-3ce5-4d94-8772-98bdd3d5a90c": "02f8e835-f409-827e-9fa9-708fc843e077",
-        "8999ef46-232c-4dd2-8be2-8dfe96fcfa04": "22a72816-ba24-4f86-880e-17dccf38d851",
         "56beded9-38d7-4bb1-ba89-2c698157a935": "d206e1a2-6c04-8823-b8d7-942cf82e8a67",
         "694a5181-f33b-472c-bb4d-03a50bec9ca9": "7dbccd96-2242-47c0-8b6a-0defa712c31c",
-        "bd8991d2-aaae-417f-b4e7-3555ae88e870": "f6f5e763-4230-82f7-bfb6-18a7da37af21",
-        "f72884d2-353a-4152-82fc-830810b9fed9": "a06acdd3-c532-89f1-b73b-3722e1b9abf0"
+        "4897be97-04f4-4bcd-9a3b-a417a6f0dbc7": "e835e7cc-7acd-4e32-85c5-3f2c1ea35789",
+        "bd8991d2-aaae-417f-b4e7-3555ae88e870": "f6f5e763-4230-82f7-bfb6-18a7da37af21"
+      }
+    },
+    {
+      "__guid": "14ee9112-5ec9-4f61-bee6-df5abdd92fde",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "476be875-57ee-46e7-ae3c-3d5611883f30",
+        "Path": "vehicles/buggy/buggy.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "0a06c34c-bbb9-40eb-8362-2618d2e930e8"
+            },
+            "Property": "Position",
+            "Value": "-251.533142,-72.6947937,2.88762283"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "0a06c34c-bbb9-40eb-8362-2618d2e930e8"
+            },
+            "Property": "Rotation",
+            "Value": "0,0,1,-4.37113883E-08"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "eb16cb28-e64e-43e7-96c5-21c7337c5b9d"
+            },
+            "Property": "Rotation",
+            "Value": "0,0,0,1"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "0a06c34c-bbb9-40eb-8362-2618d2e930e8": "14ee9112-5ec9-4f61-bee6-df5abdd92fde",
+        "a661012c-ba29-48f2-b4ab-90b92d36261a": "7c849053-889e-4371-98a8-d5a7c662aed6",
+        "d4eff07e-86f4-42ff-bde0-680704e6e01b": "3624469d-32a5-4bbb-bb1f-5c188c6e5c4c",
+        "97264915-0461-48f5-a8a1-f9abf7226b76": "b1b09e43-fc9e-4c80-aa53-d335c181e774",
+        "a3ae9c9b-e4c9-46e0-9abc-45aa1b40d138": "c8f8a13e-1e6a-4373-a1bd-4bf485b1ac87",
+        "cb601b4e-7f58-4e64-b9b3-a2244c69bcea": "d4aeccdf-dd7d-420b-99a0-d0912004788c",
+        "5834c181-b1e7-49c0-811f-ef90317b17a5": "9eb2d401-9324-4817-89dd-842737d617ae",
+        "a5887363-2176-42af-8247-35e612754832": "97140156-a93a-4462-aec3-2e252316a746",
+        "07d59a99-16b6-45c3-81a0-ef2228ec35f9": "4c707676-5c51-4c33-a6e7-49d8605f5f0a",
+        "eb16cb28-e64e-43e7-96c5-21c7337c5b9d": "7fe826fc-8a7b-4f1d-bee3-171110e1f19e",
+        "01a3afa7-b825-4fe7-91bb-cd6a7efd381a": "54293472-5e8d-4b89-bba5-b4f99d87548a",
+        "3590de3d-099f-4642-a4b4-1d3abd978304": "05c1c793-fb73-49c1-a71b-e80f1ddf64b9",
+        "99f894fb-6e0b-484d-afad-4189041503c4": "f7970798-d9c0-40fd-bd41-8ae26a82ef09",
+        "514e2d82-4abc-4222-83fe-583ae9c3734a": "44e795e4-529e-4719-a5ac-b15485f7c5a5",
+        "71f7fb34-d6fd-4c8a-9cde-953c0d4ed483": "240032a4-749f-4a40-817f-957d0e858f3b",
+        "8c0b01a4-1e66-4846-8b1d-b9e83b3fac07": "9a271ce3-1e95-464f-ace0-3b60d68cac11",
+        "fdf34dc0-37ef-4e28-82f2-26b5bf652fd5": "58458f24-8056-4639-ad2f-f730ffbd1958",
+        "36a180d7-fbd8-44dc-8581-2a3afd8e9d0d": "4d482cf2-8dfe-4d16-86bb-1ab8939fcf23",
+        "860549ef-f856-4e97-a5f0-0b5a415e08ce": "cacd33fc-c695-4946-878c-df94b339d015",
+        "e08dcf5f-de1e-400a-af44-94edcb967813": "0d139614-b6c9-4eba-b668-26a28f7cc0eb",
+        "85600acb-50da-4edd-ad7c-4b763de6f5cf": "0d3141bb-e2a0-451b-8035-62db245deb89",
+        "653f8969-a7d7-4b23-8aae-8a37445d9de9": "b59b5f01-a211-460b-a176-d3fdbc771460",
+        "8088f199-b18e-4b8e-83a7-e4b662f1a995": "95a4ea04-fbde-4172-a119-bae8cdce5c06",
+        "d2801357-79e4-4d72-94eb-3adcc2ca9232": "46dac6e7-cbeb-47fc-90e6-0213d6160071",
+        "d19d2fc9-9874-47af-ab8e-26ccd54b5276": "12ab54bf-aaed-4c27-8216-b01c6d9e6c82",
+        "1f06362f-c675-4c1c-a7bb-d00948a606e5": "c9b37936-744b-41a4-a2a3-8a24fd0575fa",
+        "3fdcbaec-8c3e-4c7e-923f-9076eebcdaa1": "d82da391-a29b-4fe5-9095-150fabf0878f",
+        "ed9bb092-2170-409f-aa65-9a2d1e84591d": "81d2ae44-7919-400d-801f-7b4de186e031",
+        "d942361e-d0bb-4764-987e-d6c684d4fcb5": "a9eb6531-1257-467c-8bf5-b8015417d7b7",
+        "b7134d8a-6bf7-4b0c-9485-d89fb422b2ac": "f9bd37a6-e689-4c94-9ba2-ef8bf542e297",
+        "5114b06f-6501-4c82-b14e-ca24ef65d5b1": "99c2356e-759f-40cd-bfbe-a096b11cf76e",
+        "bf9ed575-307b-4faf-adb5-a3cb2fbe6021": "9bd46e52-2985-44e9-b678-2fb215c2a74b",
+        "ca869fae-3a54-460f-9148-8dee074887c0": "c19dc75d-176a-4d7f-bc46-57e77e3a9c78",
+        "5736aeda-00b6-4bee-bdc2-658b95e1f3e5": "f411713b-ecca-4f94-85b8-9801d653df20",
+        "07d72dd4-7d55-427f-9cd2-230e9368902c": "8551e7a1-ef36-4a8b-b0f0-c83b6cfd69c9",
+        "2516ca8f-68f5-4f07-9cb5-b6d678907754": "9f10e78e-38ff-400e-9e42-af4fee9bffe9",
+        "9b087f08-e103-43d2-8737-4b71b136e26f": "4fba16b0-29bc-4b7a-afac-294b30746d2c",
+        "07ef457d-96a6-4e0b-9a20-7b325f53ec36": "529e6a61-2771-4041-8d27-b31eed4e5f50"
       }
     }
   ],

@@ -24,7 +24,7 @@
       },
       "Metadata": {
         "SingleAssetSource": "vehicles/buggy/buggy_wheel_fr.vmdl",
-        "ParentPackage": "facepunch.sandbox"
+        "ParentPackage": "fractitude.omnipresence"
       }
     }
   }
