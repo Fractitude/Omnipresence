@@ -1,0 +1,419 @@
+{
+  "RootObject": {
+    "__guid": "3c948bf4-5353-443a-bb65-8f28584fed1b",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "glock",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 1,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "GlockWeapon",
+        "__guid": "45dbfc9d-3b70-4986-994e-905d4f1670ba",
+        "__enabled": true,
+        "Flags": 0,
+        "AimFovScale": 0.8,
+        "AimFovTransitionTime": 0.15,
+        "AttackSound": {
+          "Id": "d975fca1-696e-4a95-bfb6-367875d8b2ae",
+          "Path": "weapons/glock/glock_shoot.sound"
+        },
+        "AutoReload": true,
+        "Ballistics": {
+          "Damage": 12,
+          "Pellets": 1,
+          "Range": 4096,
+          "Radius": 1,
+          "Force": 300,
+          "SpreadBase": "0.5,0.25",
+          "SpreadGrowth": "3,3",
+          "SpreadRecovery": 0.2
+        },
+        "CameraRecoilFrequency": 1,
+        "CameraRecoilStrength": 1,
+        "CanCancelReload": false,
+        "ClipMaxSize": 17,
+        "DeployTime": 0.2,
+        "DisplayIcon": {
+          "$compiler": "texture",
+          "$source": "imagefile",
+          "data": {
+            "FilePath": "ui/weapons/up_45_icon.png",
+            "MaxSize": 4096,
+            "ConvertHeightToNormals": false,
+            "NormalScale": 1,
+            "Rotate": 0,
+            "FlipVertical": false,
+            "FlipHorizontal": false,
+            "Cropping": {
+              "Left": 0,
+              "Top": 0,
+              "Right": 0,
+              "Bottom": 0
+            },
+            "Padding": {
+              "Left": 0,
+              "Top": 0,
+              "Right": 0,
+              "Bottom": 0
+            },
+            "InvertColor": false,
+            "Tint": "1,1,1,1",
+            "Blur": 0,
+            "Sharpen": 0,
+            "Brightness": 1,
+            "Contrast": 1,
+            "Saturation": 1,
+            "Hue": 0,
+            "Colorize": false,
+            "TargetColor": "1,1,1,1",
+            "CacheToDisk": true,
+            "FormatOverride": "RGBA8888"
+          },
+          "compiled": "textures/generated/imagefile/c32ae5e3ab92dd2.vtex"
+        },
+        "DisplayName": "UP-45",
+        "DroppedGameObject": {
+          "_type": "gameobject",
+          "go": "51cd1382-f0cf-4c2c-b0d4-1f70dd48e24f"
+        },
+        "DryFireSound": {
+          "Id": "066c6fdf-2cb5-44dc-b97e-630b53d8ed25",
+          "Path": "sounds/dry_fire.sound"
+        },
+        "FirstShellReloadTime": 0,
+        "Handedness": "Both",
+        "HoldBone": "hold_r",
+        "HoldType": "Pistol",
+        "IncrementalReloading": false,
+        "IronSightsFireScale": 0.2,
+        "Npc": {
+          "MinRange": 0,
+          "MaxRange": 1400,
+          "BurstMin": 2,
+          "BurstMax": 5,
+          "RestMin": 0.3,
+          "RestMax": 0.6,
+          "SpreadScale": 3,
+          "CanBePickedUp": true
+        },
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "PreferredSlot": 1,
+        "PrimaryAmmoType": {
+          "Id": "091bfde9-872e-46c2-b6ce-4a6948df5eea",
+          "Path": "ammo/9mm.ammo"
+        },
+        "PrimaryAutomatic": true,
+        "PrimaryDelay": 0.1,
+        "RagdollBodyShare": 0.3,
+        "RagdollImpactScale": 1,
+        "RecoilPitch": "-0.300000012,-0.100000001",
+        "RecoilYaw": "-0.100000001,0.100000001",
+        "ReloadStartTime": 0,
+        "ReloadTime": 1.5,
+        "SecondaryAmmoType": null,
+        "SecondaryAutomatic": false,
+        "SecondaryClipSize": -1,
+        "SecondaryDefaultClip": -1,
+        "SecondaryDelay": 0.5,
+        "ShootForce": 100000,
+        "SlotOrder": 2,
+        "StartingAmmo": 60,
+        "UsableByNpcs": true,
+        "UsesAmmo": true,
+        "UsesClips": true,
+        "Value": 2,
+        "ViewModelPrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/glock/glock_vm.prefab"
+        },
+        "WorldModelPrefab": {
+          "_type": "gameobject",
+          "prefab": "weapons/glock/glock_wm.prefab"
+        }
+      },
+      {
+        "__type": "Sandbox.ModelCollider",
+        "__guid": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+        "__enabled": true,
+        "Flags": 0,
+        "ColliderFlags": 0,
+        "Elasticity": null,
+        "Friction": null,
+        "IsTrigger": false,
+        "Model": {
+          "Id": "412b6aa2-7b35-43b2-8fe4-f8c81a604bc1",
+          "Path": "models/weapons/sbox_pistol_usp/w_usp.vmdl"
+        },
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OnObjectTriggerEnter": null,
+        "OnObjectTriggerExit": null,
+        "OnTriggerEnter": null,
+        "OnTriggerExit": null,
+        "RollingResistance": null,
+        "Static": false,
+        "Surface": null,
+        "SurfaceVelocity": "0,0,0"
+      },
+      {
+        "__type": "Sandbox.Rigidbody",
+        "__guid": "2a84405e-f4db-4117-a46a-72baed362953",
+        "__enabled": true,
+        "Flags": 0,
+        "AngularDamping": 0,
+        "EnableImpactDamage": true,
+        "EnhancedCcd": false,
+        "Gravity": true,
+        "GravityScale": 1,
+        "ImpactDamage": 0,
+        "InertiaScale": 1,
+        "LinearDamping": 0,
+        "Locking": {
+          "X": false,
+          "Y": false,
+          "Z": false,
+          "Pitch": false,
+          "Yaw": false,
+          "Roll": false
+        },
+        "MassCenterOverride": "0,0,0",
+        "MassOverride": 0,
+        "MinImpactDamageSpeed": 500,
+        "MotionEnabled": true,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OverrideMassCenter": false,
+        "RigidbodyFlags": 0,
+        "SleepThreshold": 2,
+        "StartAsleep": false
+      }
+    ],
+    "Children": [
+      {
+        "__guid": "51cd1382-f0cf-4c2c-b0d4-1f70dd48e24f",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "standalone_wm",
+        "Position": "0,0,0",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.BaseWeaponModel",
+            "__guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "__enabled": true,
+            "Flags": 0,
+            "DeploySound": null,
+            "EjectBrass": null,
+            "MuzzleEffect": {
+              "_type": "gameobject",
+              "prefab": "prefabs/effects/default_muzzleflash.prefab"
+            },
+            "MuzzleGameObject": {
+              "_type": "gameobject",
+              "go": "d4e5f6a7-b8c9-0123-def0-234567890123"
+            },
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Renderer": {
+              "_type": "component",
+              "component_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+              "go": "51cd1382-f0cf-4c2c-b0d4-1f70dd48e24f",
+              "component_type": "SkinnedModelRenderer"
+            },
+            "ShellEjectGameObject": {
+              "_type": "gameobject",
+              "go": "e5f6a7b8-c9d0-1234-ef01-345678901234"
+            },
+            "TracerEffect": {
+              "_type": "gameobject",
+              "prefab": "prefabs/effects/default_tracer.prefab"
+            }
+          },
+          {
+            "__type": "Sandbox.SkinnedModelRenderer",
+            "__guid": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+            "__enabled": true,
+            "Flags": 0,
+            "AnimationGraph": null,
+            "BodyGroups": 9513,
+            "BoneMergeTarget": null,
+            "CreateAttachments": true,
+            "CreateBoneObjects": false,
+            "DeformationMode": "Normal",
+            "LodOverride": null,
+            "MaterialGroup": null,
+            "MaterialOverride": null,
+            "Materials": null,
+            "Model": {
+              "Id": "412b6aa2-7b35-43b2-8fe4-f8c81a604bc1",
+              "Path": "models/weapons/sbox_pistol_usp/w_usp.vmdl"
+            },
+            "Morphs": {},
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Parameters": {},
+            "PlaybackRate": 1,
+            "RenderOptions": {
+              "GameLayer": true,
+              "OverlayLayer": false,
+              "BloomLayer": false,
+              "AfterUILayer": false
+            },
+            "RenderType": "On",
+            "Sequence": {
+              "Name": null,
+              "Looping": true,
+              "Blending": false
+            },
+            "Tint": "1,1,1,1",
+            "UseAnimGraph": false
+          }
+        ],
+        "Children": [
+          {
+            "__guid": "d4e5f6a7-b8c9-0123-def0-234567890123",
+            "__version": 2,
+            "Flags": 0,
+            "Name": "muzzle",
+            "Position": "0,0,0",
+            "Rotation": "0,0,0,1",
+            "Scale": "1,1,1",
+            "Tags": "",
+            "Enabled": true,
+            "NetworkMode": 2,
+            "NetworkFlags": 0,
+            "NetworkOrphaned": 0,
+            "NetworkTransmit": true,
+            "OwnerTransfer": 1,
+            "Components": [],
+            "Children": []
+          },
+          {
+            "__guid": "e5f6a7b8-c9d0-1234-ef01-345678901234",
+            "__version": 2,
+            "Flags": 0,
+            "Name": "eject",
+            "Position": "0,0,0",
+            "Rotation": "0,0,0,1",
+            "Scale": "1,1,1",
+            "Tags": "",
+            "Enabled": true,
+            "NetworkMode": 2,
+            "NetworkFlags": 0,
+            "NetworkOrphaned": 0,
+            "NetworkTransmit": true,
+            "OwnerTransfer": 1,
+            "Components": [],
+            "Children": []
+          }
+        ]
+      },
+      {
+        "__guid": "3a5883df-a493-430a-b90b-24307cda87c2",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Thumbnail Camera",
+        "Position": "27.5527496,51.8191833,12.4747009",
+        "Rotation": "0.036979001,-0.258468986,0.814125001,-0.518676996",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "ThumbnailCamera",
+            "__guid": "7486e699-37eb-4ac7-b5f5-8009ebef53e8",
+            "__enabled": true,
+            "Flags": 0,
+            "FieldOfView": 12,
+            "FitToBounds": true,
+            "Focus": "0.100000001,0",
+            "GizmoDistance": 60,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Padding": 0.08,
+            "Zoom": 1.15
+          }
+        ],
+        "Children": []
+      }
+    ],
+    "__properties": {
+      "NetworkInterpolation": true,
+      "PhysicsMode": "Physics3D",
+      "TimeScale": 1,
+      "WantsSystemScene": true,
+      "Metadata": {},
+      "NavMesh": {
+        "Enabled": false,
+        "IncludeStaticBodies": true,
+        "IncludeKeyframedBodies": true,
+        "EditorAutoUpdate": false,
+        "AgentHeight": 64,
+        "AgentRadius": 16,
+        "AgentStepSize": 18,
+        "AgentMaxSlope": 40,
+        "ExcludedBodies": "",
+        "IncludedBodies": "",
+        "DeferGeneration": false,
+        "CustomBounds": false
+      }
+    },
+    "__variables": []
+  },
+  "ResourceVersion": 2,
+  "ShowInMenu": true,
+  "MenuPath": "Deathmatch/Items/Glock",
+  "MenuIcon": null,
+  "DontBreakAsTemplate": true,
+  "__references": [
+    "facepunch.w_usp#278999"
+  ],
+  "__version": 2
+}
