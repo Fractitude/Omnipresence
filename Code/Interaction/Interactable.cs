@@ -143,7 +143,12 @@ public sealed class Interactable : Component, Component.IPressable
 	void ScrollSelection()
 	{
 		var wheel = Input.MouseWheel.y;
-		if ( wheel == 0f || Mouse.Visibility == MouseVisibility.Visible )
+		if ( wheel == 0f )
+			return;
+
+		Log.Info( $"[Interactable debug] wheel={wheel} visibility={Mouse.Visibility} cursorVisible={Input.MouseCursorVisible}" );
+
+		if ( Mouse.Visibility == MouseVisibility.Visible )
 			return;
 
 		var entries = GetEntries();
@@ -160,7 +165,12 @@ public sealed class Interactable : Component, Component.IPressable
 	void Component.IPressable.Look( Component.IPressable.Event e )
 	{
 		Focused = this;
-		ScrollSelection();
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( Focused == this )
+			ScrollSelection();
 	}
 
 	void Component.IPressable.Blur( Component.IPressable.Event e )
