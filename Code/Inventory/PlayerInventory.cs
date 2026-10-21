@@ -21,7 +21,7 @@ public sealed class PlayerInventory : Component
 	/// The slots as JSON, set by the host. Everyone else reads <see cref="slots"/> from it.
 	/// </summary>
 	[Sync( SyncFlags.FromHost ), Change( nameof( OnSavedChanged ) )]
-	string Saved { get; set; }
+	string Saved { get; set; } = "";
 
 	ItemData[] slots = [];
 

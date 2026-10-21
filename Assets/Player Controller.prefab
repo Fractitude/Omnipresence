@@ -33,12 +33,6 @@
         "__enabled": true,
         "Flags": 0,
         "Columns": 6,
-        "OnComponentDestroy": null,
-        "OnComponentDisabled": null,
-        "OnComponentEnabled": null,
-        "OnComponentFixedUpdate": null,
-        "OnComponentStart": null,
-        "OnComponentUpdate": null,
         "Rows": 5
       },
       {
@@ -258,7 +252,7 @@
         "Position": "0,0,0",
         "Rotation": "0,0,0,1",
         "Scale": "1,1,1",
-        "Tags": "local_player",
+        "Tags": "",
         "Enabled": true,
         "NetworkMode": 2,
         "NetworkFlags": 0,
@@ -317,7 +311,7 @@
         ],
         "Children": [
           {
-            "__guid": "5d55abcc-e751-488e-97ad-eedce5eb0801",
+            "__guid": "82185a49-7dd7-46c0-a7f8-474533bf54ac",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - y_front_pants_white",
@@ -334,7 +328,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "cfa4afe9-1347-4504-8c73-0140960329b2",
+                "__guid": "fc093a40-a6a9-4232-931f-5cd9fb942684",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
