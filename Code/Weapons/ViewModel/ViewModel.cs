@@ -149,6 +149,7 @@ public sealed partial class ViewModel : Sandbox.BaseWeaponModel
 
 	protected override void OnUpdate()
 	{
+		SkipAheadOfDeploy();
 		UpdateAnimation();
 	}
 
@@ -340,10 +341,24 @@ public sealed partial class ViewModel : Sandbox.BaseWeaponModel
 		if ( SkipNextDeploy )
 		{
 			SkipNextDeploy = false;
+			_fastForward = 3;
 			return;
 		}
 
 		base.OnDeploy();
+	}
+
+	/// <summary>
+	/// Frames left to run the animation ahead, past the draw the animgraph starts in.
+	/// </summary>
+	int _fastForward;
+
+	void SkipAheadOfDeploy()
+	{
+		if ( _fastForward <= 0 ) return;
+		_fastForward--;
+
+		Renderer?.SceneModel?.Update( 2f );
 	}
 
 	public override void OnAttack( Vector3? hitPoint = null, Vector3? origin = null )
