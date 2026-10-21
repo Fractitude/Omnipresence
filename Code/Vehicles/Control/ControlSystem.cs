@@ -6,6 +6,13 @@ public sealed class ControlSystem : GameObjectSystem<ControlSystem>
 {
 	private static Dictionary<BaseChair, RealTimeSince> _occupiedSince = new();
 
+	/// <summary>
+	/// The key that gets the driver out. It is ignored for a moment after sitting down, so the press that sat them
+	/// there doesn't stand them straight up again.
+	/// </summary>
+	private const string LeaveAction = "Use";
+	private const float LeaveDelay = 0.4f;
+
 	public ControlSystem( Scene scene ) : base( scene )
 	{
 		Listen( Stage.StartFixedUpdate, 10, OnTick, "ControlSystem" );
@@ -21,6 +28,8 @@ public sealed class ControlSystem : GameObjectSystem<ControlSystem>
 
 		foreach ( var chair in GetSortedSeats() )
 		{
+			if ( TryLeave( chair ) ) continue;
+
 			if ( driven.Contains( chair.GameObject.Root ) ) continue;
 
 			var linked = new LinkedGameObjectBuilder();
@@ -48,6 +57,21 @@ public sealed class ControlSystem : GameObjectSystem<ControlSystem>
 		return chairs
 			.Where( chair => chair.IsValid() && chair.IsOccupied )
 			.OrderBy( chair => (float)_occupiedSince.GetValueOrDefault( chair, default ) );
+	}
+
+	/// <summary>
+	/// The seated player pressed Use: ask the seat to let them out.
+	/// </summary>
+	private bool TryLeave( BaseChair chair )
+	{
+		if ( _occupiedSince.GetValueOrDefault( chair, default ) < LeaveDelay ) return false;
+
+		var player = chair.GetOccupant()?.GetComponent<PlayerController>();
+		var connection = player.IsValid() ? player.Network?.Owner : null;
+		if ( connection?.Pressed( LeaveAction ) != true ) return false;
+
+		chair.AskToLeave( player );
+		return true;
 	}
 
 	private static void RunControl( BaseChair chair, LinkedGameObjectBuilder linked )
