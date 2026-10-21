@@ -71,6 +71,18 @@ s&box uses a scene/GameObject/Component model. Gameplay is written as `Component
 
 Losing such a field fails silently. Navi lost its map of downloaded Store apps this way, so installed Store apps vanished from the start menu, and it also lost the game's Store allowlist. To check a change, set the state, force a reload (edit a file in the same assembly), and read it back with `sbox-cli --call run_csharp`.
 
+### UI pitfalls
+
+Found building the Character menu (`Code/Character/`). Each one froze the editor, closed the menu at once or left the player without controls.
+
+- **A `ScenePanel` with no `RenderScene` ticks the game scene**, which runs the panel's own component again, in itself. Build the scene before the panel exists and pass it as an attribute (`<ScenePanel RenderScene=@scene/>`). Never destroy a scene while a panel still draws it.
+- **A `new Scene()` starts every `GameObjectSystem` in it**, so a system that makes a HUD makes one there too (a second menu that shares `static` state and closes the first). Skip it: see `CharacterMenu.PreviewScene` in `AbilitySystem`.
+- **`Input` mouse buttons read false while the cursor is over a panel that takes the mouse**, and `HasActive`/`HasHovered` can stay false. Use the panel's events (`@onmousedown`, `@onmouseup`, `@onclick`), as `AbilityMenu` does.
+- **A panel's event handlers and its component's `OnUpdate` were not on the same instance.** State they share must be `static`.
+- **Turning off `UseInputControls` leaves `WishVelocity` as it was**, so a held key walks on. Set `WishVelocity = 0` every frame while it is off, as `NaviInputCapture` does.
+- **Removing a `GameObjectSystem` class** makes the open editor log an error every frame until it restarts.
+- **The editor's console buffer and `sbox-dev.log` lag behind a hang.** To debug one, write lines to `FileSystem.Data` at once (the game's data folder under the engine's `data/`), and remove them when done. Tests that call private methods through `run_csharp` can freeze the editor: press the real key.
+
 ## Code style
 
 `docs/code-style.md` is the contract: Rider's **default** code style settings over the repo's `.editorconfig`, which is what formats the files in `Code/`, `Editor/`, `Addons/` and `Libraries/navi/Code/`. Run Reformat Code (Ctrl+Alt+L) on the files you touch before committing.

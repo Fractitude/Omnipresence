@@ -1,0 +1,199 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
+	@if ( IsOpen )
+	{
+		<div class="window">
+			<div class="title">Character</div>
+			<div class="viewport" @onmousedown=@BeginDrag>
+				<ScenePanel @ref="View" class="view" RenderScene=@scene/>
+			</div>
+			<div class="hint">Drag to turn your character.</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the menu is open on this computer. The crosshair reads it.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	/// <summary>
+	/// Degrees the character turns per pixel the mouse is dragged.
+	/// </summary>
+	const float DragDegrees = 0.5f;
+
+	ScenePanel View { get; set; }
+
+	/// <summary>
+	/// The scene that draws the character. It is a scene like any other, so the game systems start in it too: they must
+	/// not put a HUD in it.
+	/// </summary>
+	public static Scene PreviewScene { get; private set; }
+
+	Scene scene;
+	GameObject pivot;
+	CameraComponent camera;
+
+	float yaw;
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static bool dragging;
+	static float lastMouseX;
+
+	protected override void OnUpdate()
+	{
+		if ( IsOpen )
+		{
+			if ( Input.EscapePressed || Input.Pressed( "CharacterMenu" )
+			     || NaviInputCapture.Current is not null || AbilityMenu.IsOpen )
+			{
+				Input.EscapePressed = false;
+				Close();
+			}
+		}
+		else if ( Input.Pressed( "CharacterMenu" ) && NaviInputCapture.Current is null && !AbilityMenu.IsOpen )
+		{
+			Open();
+		}
+
+		if ( !IsOpen )
+			return;
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		FreeControls( false );
+
+		try
+		{
+			UpdateView();
+		}
+		catch ( System.Exception e )
+		{
+			// Never leave the player without controls because the preview failed.
+			Log.Error( e, "Character menu preview failed" );
+			Close();
+		}
+	}
+
+	protected override void OnDisabled()
+	{
+		if ( IsOpen )
+			Close();
+	}
+
+	/// <summary>
+	/// The button went down on the view: turn the character with the mouse until it comes up. The game's own mouse input
+	/// is blocked while the mouse is over a panel that takes it, so this is read from the panel's events.
+	/// </summary>
+	void BeginDrag()
+	{
+		dragging = true;
+		lastMouseX = Mouse.Position.x * (View?.ScaleFromScreen ?? 1);
+	}
+
+	void EndDrag()
+	{
+		dragging = false;
+	}
+
+	void Open()
+	{
+		// Before the panel exists: a ScenePanel with no scene ticks the game scene, which holds this very menu.
+		scene ??= CreateScene();
+		IsOpen = true;
+		dragging = false;
+	}
+
+	void Close()
+	{
+		IsOpen = false;
+		dragging = false;
+		FreeControls( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Take the look and move controls from the player while the menu is open, or give them back.
+	/// </summary>
+	void FreeControls( bool allowed )
+	{
+		var controller = Scene.GetAll<PlayerController>().FirstOrDefault( x => !x.IsProxy );
+
+		if ( controller is null )
+			return;
+
+		controller.UseLookControls = allowed;
+		controller.UseInputControls = allowed;
+
+		// The controller keeps the last move it was given, so a held key would walk on: zero it, as the Navi seat does.
+		if ( !allowed )
+			controller.WishVelocity = 0;
+	}
+
+	/// <summary>
+	/// Give the view its scene, and turn the character with the mouse while a drag is on.
+	/// </summary>
+	void UpdateView()
+	{
+		if ( View is not { IsValid: true } )
+			return;
+
+		if ( View.RenderScene != scene )
+			View.RenderScene = scene;
+
+		var mouseX = Mouse.Position.x * View.ScaleFromScreen;
+
+		if ( dragging )
+			yaw += (mouseX - lastMouseX) * DragDegrees;
+
+		lastMouseX = mouseX;
+
+		pivot.WorldRotation = Rotation.FromYaw( yaw );
+	}
+
+	/// <summary>
+	/// A small scene of its own: the character in front of a camera and a light. Built once and kept, like the Turntable
+	/// app's: the panel that draws it comes and goes with the menu, so the scene is never destroyed under it.
+	/// </summary>
+	Scene CreateScene()
+	{
+		var created = new Scene();
+		PreviewScene = created;
+
+		using ( created.Push() )
+		{
+			pivot = new GameObject( true, "pivot" );
+			var model = new GameObject( pivot, true, "model" ).AddComponent<ModelRenderer>();
+			model.Model = Model.Load( "models/citizen_human/human.vmdl" );
+
+			// Centred on the pivot, so it turns on the spot.
+			var bounds = model.Model.Bounds;
+			model.LocalPosition = -bounds.Center;
+
+			camera = new GameObject( true, "camera" ).AddComponent<CameraComponent>();
+			camera.BackgroundColor = Color.Parse( "#1b1a2e" ) ?? Color.Black;
+			camera.FieldOfView = 30;
+			// In front of the character, who faces +X.
+			var position = new Vector3( 1, 0, 0.1f ) * bounds.Size.Length * 1.6f;
+			camera.WorldPosition = position;
+			camera.WorldRotation = Rotation.LookAt( -position );
+
+			var sun = new GameObject( true, "sun" );
+			// Shines the way the camera looks, from a little above and to its side.
+			sun.WorldRotation = Rotation.From( 35, 200, 0 );
+			var light = sun.AddComponent<DirectionalLight>();
+			light.LightColor = Color.White * 2.5f;
+			light.SkyColor = Color.Parse( "#2a2840" ) ?? Color.Gray;
+
+			new GameObject( true, "ambient" ).AddComponent<AmbientLight>().Color = Color.Parse( "#4a4638" ) ?? Color.Gray;
+		}
+
+		return created;
+	}
+
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen );
+}
