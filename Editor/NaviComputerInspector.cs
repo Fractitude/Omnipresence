@@ -80,7 +80,7 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 		} );
 
 		Add( "Seat and network", "event_seat", false, () => Sheet( computerObject,
-			nameof( NaviComputer.SeatTimeout ), nameof( NaviComputer.NetworkRange ),
+			nameof( NaviComputer.RequireSeat ), nameof( NaviComputer.SeatTimeout ), nameof( NaviComputer.NetworkRange ),
 			nameof( NaviComputer.OutOfRangeColor ) ) );
 
 		if ( captureObject is not null )
