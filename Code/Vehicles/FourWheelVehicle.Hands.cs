@@ -22,6 +22,11 @@ public sealed partial class FourWheelVehicle
 	/// </summary>
 	[Property, Group( "Steering Wheel" )] public Angles HandRotation { get; set; } = new( -90f, 0f, 0f );
 
+	/// <summary>
+	/// Turns the right hand on the rim, degrees. The two hands are mirror images, so it isn't the left's.
+	/// </summary>
+	[Property, Group( "Steering Wheel" )] public Angles RightHandRotation { get; set; } = new( -90f, 180f, 0f );
+
 	private SkinnedModelRenderer _handsOn;
 
 	/// <summary>
@@ -51,8 +56,8 @@ public sealed partial class FourWheelVehicle
 		var lift = MathX.DegreeToRadian( HandAngle );
 		var centre = wheel.WorldPosition;
 
-		SetHand( renderer, LeftHand, centre, axis, turn * (-side * MathF.Cos( lift ) + up * MathF.Sin( lift )), -1 );
-		SetHand( renderer, RightHand, centre, axis, turn * (side * MathF.Cos( lift ) + up * MathF.Sin( lift )), 1 );
+		SetHand( renderer, LeftHand, centre, axis, turn * (side * MathF.Cos( lift ) + up * MathF.Sin( lift )), -1 );
+		SetHand( renderer, RightHand, centre, axis, turn * (-side * MathF.Cos( lift ) + up * MathF.Sin( lift )), 1 );
 	}
 
 	private void SetHand( SkinnedModelRenderer renderer, string name, Vector3 centre, Vector3 axis, Vector3 direction, float sign )
@@ -61,7 +66,7 @@ public sealed partial class FourWheelVehicle
 
 		// The fingers wrap round the rim: along the way the rim runs, palm to the wheel's centre.
 		var tangent = Vector3.Cross( axis, direction ).Normal * sign;
-		renderer.SetIk( name, new Transform( position, Rotation.LookAt( tangent, -direction ) * HandRotation.ToRotation() ) );
+		renderer.SetIk( name, new Transform( position, Rotation.LookAt( tangent, -direction ) * ( sign < 0 ? HandRotation : RightHandRotation ).ToRotation() ) );
 	}
 
 	private void ReleaseDriverHands()
