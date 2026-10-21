@@ -138,15 +138,13 @@ public sealed class Interactable : Component, Component.IPressable
 		entries.Any( x => x.Index == selected ) ? selected : entries.Count > 0 ? entries[0].Index : -1;
 
 	/// <summary>
-	/// The mouse wheel moves the pick up or down the rows, wrapping round. Not while a menu has the cursor.
+	/// The mouse wheel moves the pick up or down the rows, stopping at the first and last. Not while a menu has the cursor.
 	/// </summary>
 	void ScrollSelection()
 	{
 		var wheel = Input.MouseWheel.y;
 		if ( wheel == 0f )
 			return;
-
-		Log.Info( $"[Interactable debug] wheel={wheel} visibility={Mouse.Visibility} cursorVisible={Input.MouseCursorVisible}" );
 
 		if ( Mouse.Visibility == MouseVisibility.Visible )
 			return;
@@ -156,7 +154,7 @@ public sealed class Interactable : Component, Component.IPressable
 			return;
 
 		var position = entries.FindIndex( x => x.Index == GetSelected( entries ) );
-		position = ((position + (wheel > 0f ? -1 : 1)) % entries.Count + entries.Count) % entries.Count;
+		position = System.Math.Clamp( position + (wheel > 0f ? -1 : 1), 0, entries.Count - 1 );
 		selected = entries[position].Index;
 	}
 

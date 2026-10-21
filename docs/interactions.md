@@ -2,7 +2,7 @@
 
 Anything the player can look at and press Use on is an `Interactable` (`Code/Interaction/`). It is built on the engine's
 `Component.IPressable`, so `PlayerController` finds and presses it. While the player looks at one, `Crosshair.razor` lists its
-options under the crosshair. The mouse wheel picks one (it wraps round), and Use does it. Other pressables (like
+options under the crosshair. The mouse wheel picks one (it stops at the first and last), and Use does it. Other pressables (like
 `NaviSpectatorSeat`) show a single hint from `PlayerController.Tooltips`.
 
 ## Set one up
