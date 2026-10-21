@@ -809,6 +809,55 @@
           "Children": []
         },
         {
+          "__guid": "73665f72-9821-470f-ac17-58fdd822de99",
+          "__version": 2,
+          "Flags": 0,
+          "Name": "Weapon Mount",
+          "Position": "57.9456558,44.8629303,39.8421021",
+          "Rotation": "0,0,0,1",
+          "Scale": "0.0367353559,0.435065806,0.215949982",
+          "Tags": "",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "NetworkFlags": 0,
+          "NetworkOrphaned": 0,
+          "NetworkTransmit": true,
+          "OwnerTransfer": 1,
+          "Components": [
+            {
+              "__type": "Sandbox.ModelRenderer",
+              "__guid": "34b79579-ad45-4dad-9eb2-21ac63528307",
+              "__enabled": true,
+              "Flags": 0,
+              "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
+              "LodOverride": null,
+              "MaterialGroup": null,
+              "MaterialOverride": null,
+              "Materials": null,
+              "Model": {
+                "Id": "8a84e5a0-01f8-0000-f0db-b088f8010000",
+                "Path": "models/dev/box.vmdl"
+              },
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null,
+              "RenderOptions": {
+                "GameLayer": true,
+                "OverlayLayer": false,
+                "BloomLayer": false,
+                "AfterUILayer": false
+              },
+              "RenderType": "On",
+              "Tint": "0.06047,0.06047,0.06047,1"
+            }
+          ],
+          "Children": []
+        },
+        {
           "__guid": "2a13138d-e0d9-4109-9f48-889f954c0eac",
           "__version": 2,
           "__Prefab": {
@@ -1851,7 +1900,15 @@
               "IdValue": "94e905a5-f325-4814-94f6-f16a3a23a01a"
             },
             "Property": "Position",
-            "Value": "-51.9579048,53.731926,26.4375038"
+            "Value": "41.1912994,19.8683662,30.3708839"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "94e905a5-f325-4814-94f6-f16a3a23a01a"
+            },
+            "Property": "Rotation",
+            "Value": "-0.653281391,0.270598084,-0.270598114,0.65328145"
           }
         ],
         "MovedObjects": []
@@ -1861,12 +1918,64 @@
         "a695ada8-0feb-403b-bd5d-c95fc4c8bb4a": "cde510c3-af41-46a4-8c36-5f897270337e",
         "887435e9-a031-48e2-9ebc-b25ec0bac205": "e405baf9-2e8a-41fe-ba2b-2fd4f0587d2d",
         "037ab1c4-c96c-4f9f-8995-a9402daf548a": "6dc95c28-5479-4548-9d56-47dedd6a9b35",
-        "62766cc5-e6d2-471d-910f-d5f239f02c06": "ab88eb68-2a44-4bd6-aced-c90b8e150341",
-        "51d3ac71-71e7-4ee1-8f5f-041a43344c6f": "4cb766d7-9c93-491a-ba6d-51743c6fe0b9",
-        "085e39bb-d938-4fa8-97a9-9dde44dc8853": "a0bf6996-01dd-41f4-8896-c9972d5cfeb3",
         "95ded47a-26c0-4668-88b5-5335004a8390": "8aae3cb3-5059-8d71-979f-2a269137c0dd",
         "75543e4e-9d33-4285-b9f8-967e50c26605": "60a501c3-bb18-81e6-a294-d5bca091cf22",
-        "5d9b792e-47f7-468b-803c-1fdc2de47af4": "3388a6ab-6ceb-8bd9-8d82-82b076a0f672"
+        "5d9b792e-47f7-468b-803c-1fdc2de47af4": "3388a6ab-6ceb-8bd9-8d82-82b076a0f672",
+        "62766cc5-e6d2-471d-910f-d5f239f02c06": "ab88eb68-2a44-4bd6-aced-c90b8e150341",
+        "51d3ac71-71e7-4ee1-8f5f-041a43344c6f": "4cb766d7-9c93-491a-ba6d-51743c6fe0b9",
+        "085e39bb-d938-4fa8-97a9-9dde44dc8853": "a0bf6996-01dd-41f4-8896-c9972d5cfeb3"
+      }
+    },
+    {
+      "__guid": "cfe63987-4511-4ba2-a943-bfad5c14b64a",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "7b2cd926-812a-4433-add8-3ef26f9190b3",
+        "Path": "assaultrifle.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "fc403bcc-ee34-470a-b24a-ae892820bebc"
+            },
+            "Property": "Position",
+            "Value": "56.2108002,40.9561157,40.5564194"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "fc403bcc-ee34-470a-b24a-ae892820bebc"
+            },
+            "Property": "Rotation",
+            "Value": "0,0,0.707106769,0.707106769"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "fc403bcc-ee34-470a-b24a-ae892820bebc": "cfe63987-4511-4ba2-a943-bfad5c14b64a",
+        "38e14bb8-d7e7-4633-9922-2bb91024b971": "570c0fbf-68f0-4c9a-acf9-9365e8670872",
+        "62a90487-5448-418e-888b-6db6c2907ba3": "297f612b-7982-4f9c-86a3-9e00a95572b2",
+        "011a61aa-21d1-462a-9116-577f50b69665": "617e0428-23cf-4ee0-9f3d-085557037209",
+        "8399e81d-eed1-4bae-b4e5-1eb8670b5902": "b1bb9f8e-4f8b-4e05-82cf-c5bb5ce64d78",
+        "6c59e0e5-8108-4f80-8ca9-94e1a3a17af1": "0d414613-dee8-4406-af81-463a2f0c5c5b",
+        "f2063d76-ad0c-49cc-bd28-451310dc08ac": "f3741ebb-1de7-4b84-9269-fc11b01a4307",
+        "9639a424-dbfe-48b6-b56e-b2e6d78a06c0": "66630a6d-afb2-8e1c-bad8-c166713e5d99",
+        "694a5181-f33b-472c-bb4d-03a50bec9ca9": "7dbccd96-2242-47c0-8b6a-0defa712c31c",
+        "4897be97-04f4-4bcd-9a3b-a417a6f0dbc7": "e835e7cc-7acd-4e32-85c5-3f2c1ea35789",
+        "f72884d2-353a-4152-82fc-830810b9fed9": "a06acdd3-c532-89f1-b73b-3722e1b9abf0",
+        "cce07291-3ce5-4d94-8772-98bdd3d5a90c": "02f8e835-f409-827e-9fa9-708fc843e077",
+        "8999ef46-232c-4dd2-8be2-8dfe96fcfa04": "22a72816-ba24-4f86-880e-17dccf38d851",
+        "56beded9-38d7-4bb1-ba89-2c698157a935": "d206e1a2-6c04-8823-b8d7-942cf82e8a67",
+        "bd8991d2-aaae-417f-b4e7-3555ae88e870": "f6f5e763-4230-82f7-bfb6-18a7da37af21",
+        "74b07c64-abf7-4f98-b738-a3328ec64704": "d1fc7b6b-994e-8796-9331-32dd3b4ac1f1",
+        "da6221f6-fccf-4cab-b012-84932949b53e": "1e619ce2-421d-4bec-8375-0bb33c6741e6",
+        "fe63845e-6af7-409b-988f-d3c58612e71a": "2fafc65d-f105-4b75-a554-99f4dda76e48",
+        "fe5d6c05-4655-42b9-96e0-ece36cdc8cfb": "f86c5dab-9574-466f-8846-325c818016bd"
       }
     }
   ],

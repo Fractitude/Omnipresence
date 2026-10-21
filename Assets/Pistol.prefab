@@ -117,7 +117,7 @@
               "AfterUILayer": false
             },
             "RenderType": "On",
-            "Tint": "1,1,1,1"
+            "Tint": "0.20465,0.20465,0.20465,1"
           }
         ],
         "Children": []
@@ -166,7 +166,7 @@
               "AfterUILayer": false
             },
             "RenderType": "On",
-            "Tint": "1,1,1,1"
+            "Tint": "0.20465,0.20465,0.20465,1"
           }
         ],
         "Children": []
@@ -215,7 +215,7 @@
               "AfterUILayer": false
             },
             "RenderType": "On",
-            "Tint": "1,1,1,1"
+            "Tint": "0.20465,0.20465,0.20465,1"
           }
         ],
         "Children": []
