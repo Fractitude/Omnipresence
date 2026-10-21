@@ -14,4 +14,10 @@ internal static class GamePreferences
 	/// </summary>
 	[ConVar( "omni.viewbob", ConVarFlags.Saved )]
 	public static bool ViewBobbing { get; set; } = true;
+
+	/// <summary>
+	/// Intensity of camera shake, such as the vehicle camera's at speed.
+	/// </summary>
+	[ConVar( "omni.screenshake", ConVarFlags.Saved )]
+	public static float Screenshake { get; set; } = 0.3f;
 }

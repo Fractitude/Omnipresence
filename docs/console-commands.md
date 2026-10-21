@@ -23,6 +23,13 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `give <weapon>` | Give yourself a weapon by its short name: `m4a1`, `colt1911`, `glock`, `revolver`, `mp5`, `shotgun`, `sniper`, `rpg`, `grenade`, `crowbar`, `camera`, `physgun`. |
 | `omni.loadout "<weapons>"` | The weapons you spawn with, separated by spaces, e.g. `omni.loadout "m4a1 glock physgun"`. The default is `m4a1 glock crowbar physgun`. Saved. Applies from your next spawn. |
 
+## Vehicles
+
+| Command | What it does |
+|---|---|
+| `spawn_buggy` | Spawn a buggy in front of you. Walk up to it and press Use to drive: WASD, Shift to boost, Space for the handbrake, F to switch the headlights. |
+| `omni.screenshake <0..2>` | How hard the camera shakes, such as in a fast vehicle. Default 0.3. Saved. |
+
 ## World clock
 
 The game's own time. A new world starts at 12:00 on Day 1, which is a Monday, and the host saves it to `world.json`. Same rules as above: editor only, and the host moves the clock for everyone. Clients follow on the next sync. Moving the clock back delays shipments; moving it forward makes them arrive.

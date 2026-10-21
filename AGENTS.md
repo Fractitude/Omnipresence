@@ -33,6 +33,10 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `Libraries/` — s&box library packages. `Libraries/navi/` is the Navi computer (`fractitude.navi`), a git submodule of `git@github.com:Fractitude/Navi.git` (clone with `--recurse-submodules`; commit library changes in that repo first): OS (`NaviComputer`), desktop UI (`NaviDesktop`), the app system and built-in apps. It is our own library, made to be installed in other games too; see `Libraries/navi/README.md`. Libraries can't reference game code.
 - `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 
+## Vehicles
+
+Ported from Facepunch's open-source sandbox game (`github.com/Facepunch/sandbox`, MIT), like the weapons. `Code/Vehicles/` is `FourWheelVehicle` (a rigidbody whose wheels are raycast suspension, posed from the model's bones; see `Assets/vehicles/buggy/RIG.md`), `VehicleCamera`, `VehicleSounds` and `VehicleLights`, kept close to upstream. `Code/Vehicles/Control/` is a small stand-in for upstream's ControlSystem: on the host, `ControlSystem` calls `IPlayerControllable.OnControl` on the object of any occupied engine `BaseChair`, with the seated player's keys readable through `ClientInput`. Dropped: the tuning HUD (`VehicleDebugSection`) and the flashlight-key takeover. `spawn_buggy` spawns the buggy.
+
 ## Navi Store apps
 
 - **Always prefix a Navi app's package ident with `napp_`**, e.g. `fractitude.napp_pacman`. This is the ident set when publishing the app's `.napp` asset, not the addon project's own ident.
