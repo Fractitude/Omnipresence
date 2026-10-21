@@ -12,9 +12,15 @@ public static class ItemIcons
 	/// </summary>
 	const float SpinSpeed = 45f;
 
+	/// <summary>
+	/// Raise it when the code that builds an icon scene changes, so a hot reload doesn't keep the old scenes.
+	/// </summary>
+	const int FramingVersion = 3;
+
 	// Not readonly: a hot reload would reset these (see AGENTS.md, "Static state and hot reload").
 	static Dictionary<string, Scene> scenes = new();
 	static Dictionary<string, GameObject> pivots = new();
+	static int builtWith;
 
 	/// <summary>
 	/// Whether the scene is one of the icon scenes. Game systems must not put a HUD in those.
@@ -34,6 +40,15 @@ public static class ItemIcons
 
 	static Scene SceneFor( string path, bool prefab )
 	{
+		// A hot reload keeps the statics: drop scenes made by older framing code, so icons are built again.
+		// Panels that still draw an old scene keep it until the menu is opened again.
+		if ( builtWith != FramingVersion )
+		{
+			builtWith = FramingVersion;
+			scenes.Clear();
+			pivots.Clear();
+		}
+
 		var key = (prefab ? "prefab:" : "model:") + path;
 
 		if ( scenes.TryGetValue( key, out var existing ) )
