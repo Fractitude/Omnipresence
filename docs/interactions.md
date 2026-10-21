@@ -12,6 +12,7 @@ Anything the player can look at and press Use on is an `Interactable` (`Code/Int
    - Wire a component's method to `OnInteract` in the editor (it passes the player's GameObject; a method that doesn't need it leaves it out).
    - Implement `IInteractionHandler` on a component on the same GameObject or a child, or, if there is none, on the nearest
      parent that has one. The Interactable can sit on a child with the collider while the handler is on the root (`MailBox`).
+     To pick the object yourself, set `HandlerObject`: its handlers (and its children's) are used instead.
    - Subscribe to `Interactable.Interacted` in code.
 
 ## From code

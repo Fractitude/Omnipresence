@@ -50,6 +50,12 @@ public sealed class Interactable : Component, Component.IPressable
 	[Property, Group( "Host" )] public float HostRange { get; set; } = 400f;
 
 	/// <summary>
+	/// The GameObject whose <see cref="IInteractionHandler"/> components answer to this Interactable (it and its children).
+	/// Empty searches near this one instead: see <see cref="GetHandlers"/>.
+	/// </summary>
+	[Property, Group( "Events" )] public GameObject HandlerObject { get; set; }
+
+	/// <summary>
 	/// Runs when the player uses it, with the player's GameObject (null if it can't be told). Connect any component's method
 	/// to it in the editor; one that doesn't need the player leaves the argument out.
 	/// </summary>
@@ -64,12 +70,16 @@ public sealed class Interactable : Component, Component.IPressable
 	bool warnedNotNetworked;
 
 	/// <summary>
-	/// The handlers that answer to this Interactable: those on this GameObject and its children, or, if there are none, those
-	/// on the nearest parent that has any. So the Interactable can sit on a child (where the collider is) while the
-	/// component that handles it is on the object's root.
+	/// The handlers that answer to this Interactable: those on <see cref="HandlerObject"/> and its children if one is set.
+	/// Otherwise those on this GameObject and its children, or, if there are none, those on the nearest parent that has any.
+	/// So the Interactable can sit on a child (where the collider is) while the component that handles it is on the object's
+	/// root.
 	/// </summary>
 	List<IInteractionHandler> GetHandlers()
 	{
+		if ( HandlerObject.IsValid() )
+			return HandlerObject.Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelfAndDescendants ).ToList();
+
 		var own = Components.GetAll<IInteractionHandler>( FindMode.EnabledInSelfAndDescendants ).ToList();
 		if ( own.Count > 0 )
 			return own;
