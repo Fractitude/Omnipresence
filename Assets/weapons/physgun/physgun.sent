@@ -1,0 +1,10 @@
+{
+  "Prefab": "weapons/physgun/physgun.prefab",
+  "Title": "Physgun",
+  "Description": "Moves, freezes and pulls physics objects",
+  "Category": "Weapon/Utility",
+  "IncludeCode": false,
+  "Developer": false,
+  "__references": [],
+  "__version": 0
+}
