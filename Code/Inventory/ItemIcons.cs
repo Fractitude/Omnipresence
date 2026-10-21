@@ -1,8 +1,9 @@
 namespace Sandbox;
 
 /// <summary>
-/// The scenes that draw item icons: the item's model on a spinning pivot, framed by its longest side. One scene for each
-/// model, made when first asked for and kept, since a panel may still draw it (see AGENTS.md, "UI pitfalls").
+/// The scenes that draw item icons: the item's prefab (or just its model) on a spinning pivot, framed by its longest
+/// side. One scene for each prefab or model, made when first asked for and kept, since a panel may still draw it (see
+/// AGENTS.md, "UI pitfalls").
 /// </summary>
 public static class ItemIcons
 {
@@ -21,20 +22,26 @@ public static class ItemIcons
 	public static bool IsIconScene( Scene scene ) => scene is not null && scenes.ContainsValue( scene );
 
 	/// <summary>
-	/// The scene that draws a model, or null if there is no such model.
+	/// The scene that draws an item: the whole prefab if there is one that loads, else the model. Null if neither does.
 	/// </summary>
-	public static Scene SceneFor( string modelPath )
+	public static Scene SceneFor( string prefabPath, string modelPath )
 	{
-		if ( string.IsNullOrEmpty( modelPath ) )
-			return null;
+		if ( !string.IsNullOrEmpty( prefabPath ) && SceneFor( prefabPath, true ) is { } fromPrefab )
+			return fromPrefab;
 
-		if ( scenes.TryGetValue( modelPath, out var existing ) )
+		return string.IsNullOrEmpty( modelPath ) ? null : SceneFor( modelPath, false );
+	}
+
+	static Scene SceneFor( string path, bool prefab )
+	{
+		var key = (prefab ? "prefab:" : "model:") + path;
+
+		if ( scenes.TryGetValue( key, out var existing ) )
 			return existing;
 
-		var model = Model.Load( modelPath );
-		var scene = model is null || model.IsError ? null : Create( modelPath, model );
-		scenes[modelPath] = scene;
-		return scene;
+		// Registered (as null) first, so a failure isn't tried again every frame.
+		scenes[key] = null;
+		return Create( key, path, prefab );
 	}
 
 	/// <summary>
@@ -51,23 +58,26 @@ public static class ItemIcons
 		}
 	}
 
-	static Scene Create( string key, Model model )
+	static Scene Create( string key, string path, bool prefab )
 	{
 		var created = new Scene();
 		// Registered before anything is built in it, so the game systems that start in it know it is an icon scene.
 		scenes[key] = created;
+
+		var failed = false;
 
 		using ( created.Push() )
 		{
 			var pivot = new GameObject( true, "pivot" );
 			pivots[key] = pivot;
 
-			var renderer = new GameObject( pivot, true, "model" ).AddComponent<ModelRenderer>();
-			renderer.Model = model;
+			var content = prefab ? CreatePrefabContent( pivot, path ) : CreateModelContent( pivot, path );
 
-			// Centred on the pivot, so it turns on the spot.
-			var bounds = model.Bounds;
-			renderer.LocalPosition = -bounds.Center;
+			if ( content is not { } bounds )
+			{
+				failed = true;
+				goto done;
+			}
 
 			// Frame the longest side it shows while it turns: its height, or its widest turn (the diagonal of its base).
 			var size = bounds.Size;
@@ -96,6 +106,72 @@ public static class ItemIcons
 			new GameObject( true, "ambient" ).AddComponent<AmbientLight>().Color = Color.Parse( "#4a4638" ) ?? Color.Gray;
 		}
 
-		return created;
+		done:
+
+		if ( !failed )
+			return created;
+
+		// Nothing to draw: forget the scene. No panel draws it yet.
+		scenes[key] = null;
+		pivots.Remove( key );
+		created.Destroy();
+		return null;
+	}
+
+	/// <summary>
+	/// Put a model on the pivot, centred on it. Returns its bounds, or null if it doesn't load.
+	/// </summary>
+	static BBox? CreateModelContent( GameObject pivot, string modelPath )
+	{
+		var model = Model.Load( modelPath );
+
+		if ( model is null || model.IsError )
+			return null;
+
+		var renderer = new GameObject( pivot, true, "model" ).AddComponent<ModelRenderer>();
+		renderer.Model = model;
+		var bounds = model.Bounds;
+		renderer.LocalPosition = -bounds.Center;
+		return bounds;
+	}
+
+	/// <summary>
+	/// Put a copy of a prefab on the pivot, centred on it, with only what is drawn kept: its game components (pickup,
+	/// colliders, physics, network) are removed, so it is a picture and does nothing. Returns the bounds of what is
+	/// drawn, or null if the prefab doesn't load or draws nothing.
+	/// </summary>
+	static BBox? CreatePrefabContent( GameObject pivot, string prefabPath )
+	{
+		if ( !ResourceLibrary.TryGet<PrefabFile>( prefabPath, out var file ) )
+			return null;
+
+		// Disabled while it is stripped, so none of its components wake up.
+		var clone = GameObject.Clone( file, new CloneConfig { Parent = pivot, StartEnabled = false, Transform = new Transform( Vector3.Zero ) } );
+		clone.NetworkMode = NetworkMode.Never;
+
+		foreach ( var go in clone.GetAllObjects( false ).Append( clone ) )
+			go.NetworkMode = NetworkMode.Never;
+
+		foreach ( var component in clone.Components.GetAll( FindMode.EverythingInSelfAndDescendants ).ToList() )
+		{
+			if ( component is not Renderer )
+				component.Destroy();
+		}
+
+		clone.Enabled = true;
+
+		var renderers = clone.Components.GetAll<Renderer>( FindMode.EnabledInSelfAndDescendants ).ToList();
+
+		if ( renderers.Count == 0 )
+		{
+			clone.Destroy();
+			return null;
+		}
+
+		var bounds = clone.GetBounds();
+
+		// Centred on the pivot, so it turns on the spot. The pivot is at the origin, so bounds are in its space.
+		clone.WorldPosition = -bounds.Center;
+		return new BBox( bounds.Mins - bounds.Center, bounds.Maxs - bounds.Center );
 	}
 }

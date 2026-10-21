@@ -17,7 +17,7 @@
 				     @onmouseout=@( () => { if ( Hovered == slot ) Hovered = -1; } )>
 					@if ( item is not null )
 					{
-						<ItemIcon ModelPath=@item.ModelPath/>
+						<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath/>
 					}
 				</div>
 			}

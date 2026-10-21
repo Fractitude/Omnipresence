@@ -19,9 +19,11 @@ public class PickupItem : Component, IItem, IInteractionHandler
 	[Property, TextArea] public string ItemDescription { get; set; } = "";
 
 	/// <summary>
-	/// The icon's model. Empty uses the first model on the object.
+	/// The icon's model. Empty draws the whole object from its prefab, or its first model if it is not from one.
 	/// </summary>
 	[Property] public Model IconModel { get; set; }
+
+	string IItem.ItemPrefab => IconModel.IsValid() ? "" : ItemData.NearestPrefab( GameObject );
 
 	Model IItem.ItemModel => IconModel ?? Components.Get<ModelRenderer>( FindMode.EnabledInSelfAndDescendants )?.Model;
 

@@ -3,7 +3,7 @@
 @namespace Sandbox
 
 <root>
-	@if ( ItemIcons.SceneFor( ModelPath ) is { } scene )
+	@if ( ItemIcons.SceneFor( PrefabPath, ModelPath ) is { } scene )
 	{
 		@* The scene is given as an attribute, so the panel never ticks the game scene (see AGENTS.md, "UI pitfalls"). *@
 		<ScenePanel class="scene" RenderScene=@scene/>
@@ -17,9 +17,14 @@
 @code
 {
 	/// <summary>
-	/// The resource path of the model drawn.
+	/// The resource path of the prefab drawn. Empty draws only the model.
+	/// </summary>
+	public string PrefabPath { get; set; }
+
+	/// <summary>
+	/// The resource path of the model drawn, when there is no prefab (or it doesn't load).
 	/// </summary>
 	public string ModelPath { get; set; }
 
-	protected override int BuildHash() => System.HashCode.Combine( ModelPath );
+	protected override int BuildHash() => System.HashCode.Combine( PrefabPath, ModelPath );
 }
