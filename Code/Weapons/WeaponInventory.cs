@@ -46,7 +46,8 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		if ( !GetComponent<SitMoveMode>( true ).IsValid() )
 			AddComponent<SitMoveMode>();
 
-		if ( Networking.IsHost && !IsProxy )
+		// The host hands out every player's loadout, its own and the clients' (theirs are proxies here).
+		if ( Networking.IsHost )
 			_ = GiveLoadoutWhenReady();
 	}
 
