@@ -68,6 +68,10 @@ Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`,
 - `GameManager` also: out-of-bounds bodies are destroyed, `SpawnPlacement` picks a free, floor-settled spawn point (not the last one used), `Notify( text )` and `Kick` (`GameManager.Util.cs`; the `kick` command is the engine's), and `GameManager.PropImpactShake.cs` shakes nearby cameras when a prop hits the world (scaled by `omni.screenshake`).
 - Not ported: Steam stats, the kill feed, gibs, `HudElement` hiding, upstream's spawn, material and morph RPCs, `LimitsSystem`, `ServerSettings`, `CleanupSystem`.
 
+## The Wired
+
+The Wired is in the same scene as the real world, under the map. `WiredTravel.Cross( connection )` (host only, from The Wired app, for the player in the seat) teleports the player to a random object tagged `spawn_point_wired` and back to where they were; `PlayerData.InWired` says which. `WiredWorldSystem` dresses each client's own view for its own player: the 2D skybox on the object tagged `skybox` and `wired` is on and the other `skybox` objects' are off, and the main camera excludes the tag `map`. Apps ask `WiredTravel.PlaceOf( seat )`, never the scene.
+
 ## Security
 
 **Always think about privilege escalation attacks.** For every change to Navi, ask how an app could use it to get permissions or root it wasn't granted, to act as another app, or to act without the player's consent. Assume Store apps are written by a stranger who wants that.
