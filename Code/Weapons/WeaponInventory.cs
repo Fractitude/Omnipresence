@@ -79,6 +79,10 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		{
 			Pickup( PrefabPath( weapon ) );
 		}
+
+		// Like the engine's GiveLoadout, the player spawns with their best weapon out.
+		if ( !ActiveItem.IsValid() )
+			SwitchToBest();
 	}
 
 	protected override void OnUpdate()
