@@ -64,7 +64,8 @@ Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`,
 - `GameManager` is a `GameObjectSystem`, so the engine makes it in every scene and nothing needs to carry it. It is a small version of upstream's: `PlayerData` per connection (kills, deaths, god mode), `SpawnPlayer`, `Respawn`, `RequestRespawn` (from `PlayerObserver`) and `OnDeath`. The first spawn is still the scene's `NetworkHelper`; respawns use its player prefab and spawn points.
 - Events are `Local.IPlayerEvents` and `Global.IPlayerEvents` (`PlayerEvents.cs`), the subset health needs. Fall damage comes from `PlayerController.IEvents.OnLanded` in `PlayerFallDamage`.
 - `HealthHud` (bottom left, like `AmmoHud`) is put on screen by `HealthHudSystem`. `PlayerDamageIndicators` paints the red direction arrows.
-- Not ported: Steam stats, the kill feed, gibs, `HudElement` hiding.
+- `GameManager` also: out-of-bounds bodies are destroyed, `SpawnPlacement` picks a free, floor-settled spawn point (not the last one used), `Notify( text )` and `Kick` (`GameManager.Util.cs`; the `kick` command is the engine's), and `GameManager.PropImpactShake.cs` shakes nearby cameras when a prop hits the world (scaled by `omni.screenshake`).
+- Not ported: Steam stats, the kill feed, gibs, `HudElement` hiding, upstream's spawn, material and morph RPCs, `LimitsSystem`, `ServerSettings`, `CleanupSystem`.
 
 ## Security
 

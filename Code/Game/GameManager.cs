@@ -8,7 +8,8 @@ namespace Sandbox;
 /// player joins is still the scene's <see cref="NetworkHelper"/>; this takes over from there, using its player prefab
 /// and spawn points.
 /// </summary>
-public sealed class GameManager : GameObjectSystem<GameManager>, Component.INetworkListener
+public sealed partial class GameManager : GameObjectSystem<GameManager>, Component.INetworkListener,
+	IScenePhysicsEvents
 {
 	public GameManager( Scene scene ) : base( scene )
 	{
@@ -146,16 +147,37 @@ public sealed class GameManager : GameObjectSystem<GameManager>, Component.INetw
 		manager.DestroyObservers( connection );
 	}
 
+	/// <summary>Approximate standing-player hull, used for spawn clearance and floor settling.</summary>
+	static readonly BBox PlayerHull = new( new Vector3( -16f, -16f, 0f ), new Vector3( 16f, 16f, 72f ) );
+
+	/// <summary>The last position we spawned a player at, so we can avoid reusing it.</summary>
+	Vector3? lastSpawnPosition;
+
 	/// <summary>
-	/// Pick one of the NetworkHelper's spawn points at random, or its own position when it has none.
+	/// Find a place to respawn: one of the NetworkHelper's spawn points, settled onto the floor, that nobody is
+	/// standing on, avoiding the last one used. Without spawn points it is the NetworkHelper's own position.
 	/// </summary>
-	static Transform FindSpawnLocation( NetworkHelper helper )
+	Transform FindSpawnLocation( NetworkHelper helper )
 	{
 		var points = helper.SpawnPoints?.Where( x => x.IsValid() ).ToArray();
 		if ( points is null || points.Length == 0 )
 			return helper.WorldTransform;
 
-		return points[Random.Shared.Next( points.Length )].WorldTransform;
+		var transform = SpawnPlacement.FindSpawnPosition(
+			points.OrderBy( _ => Random.Shared.Next() ).Select( x => x.WorldTransform ),
+			PlayerHull,
+			avoid: lastSpawnPosition );
+
+		lastSpawnPosition = transform.Position;
+		return transform;
+	}
+
+	/// <summary>
+	/// Anything that falls out of the world is removed.
+	/// </summary>
+	void IScenePhysicsEvents.OnOutOfBounds( Rigidbody body )
+	{
+		body.DestroyGameObject();
 	}
 
 	/// <summary>
