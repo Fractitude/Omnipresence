@@ -114,7 +114,7 @@ type in them is registered**. Engine types are registered only with `[Expose]`, 
 | Remove the type from the `TypeLibrary` | no public way |
 
 So only `private`/`internal` members are safe. That is not enough alone: Navi is a separate assembly, and the game calls
-`NaviComputer.Lock`, `InstallHardware`, `Launch`, … from `Code/`. s&box has no `InternalsVisibleTo`, so they must stay
+`NaviComputer.Lock`, `InstallHardware`, `Launch`, ... from `Code/`. s&box has no `InternalsVisibleTo`, so they must stay
 `public`.
 
 ### The guard (tested, works)
@@ -170,7 +170,7 @@ Before a script engine goes into Navi or the game:
 - Candidates to guard in `NaviComputer`: `Lock`, `Unlock`, `InstallHardware`, `RemoveHardware`, `CaptureSave`,
   `RestoreSave`, `Files`, `Launch`, `Install`, and the `NaviMessages`, `NaviNpc` and `NaviPluginManager` statics. Game
   types: `PlayerHealth` setters, `WeaponCommands.Give`, `PlayerInventory`, `GameManager`.
-- Run scripts only on the seated player's client or on the host, never from a remote request, and keep the instruction
+- Run scripts only on the host (Navi does: `RunScript` is host only) or on the seated player's client, never from a remote request, and keep the instruction
   limit low.
 
 This matches the known limit in `AGENTS.md`: hostile package code can already reach public members. Scripts make that
@@ -188,6 +188,36 @@ easier, since no package has to be published.
 - A test that adds a type to `Code/` (to try an attribute) triggers a hot reload. Delete it afterwards and wait for
   the compile to finish (`editor_status`).
 - Do not save the scene or prefabs after probing in play mode.
+
+## What Navi has built on it
+
+Code Edit has a **Run** button (`Libraries/navi`, see its README, "Scripts"). The pieces:
+
+- `NaviComputer.ScriptingEnabled`: inspector, group **Other**, **off by default**. Only the game or the inspector sets
+  it (a script setting it is ignored). Code Edit draws Run dimmed with the tooltip "Running scripts is disabled" while it
+  is off; the host's copy refuses too.
+- Permission `navi.scripts.run` ("Run scripts"). The app asks for it the first time, through the secure layer.
+- Calls `scripting.enabled` and `scripting.run` (`Navi.Scripts.IsEnabledAsync()`, `RunAsync( source )`). `RunAsync` runs
+  on the host through `NaviComputer.RunScript` (internal, so a script cannot reach it), with an instruction limit of
+  1,000,000, and answers `ScriptResult( Ok, Message, Start, Length )`. Code Edit shows the line of an error. A script
+  returns nothing to the app.
+- `NaviScriptGuard` (Navi library). `RunScript` is the only caller of `Game.Scripting`. While a script runs, these return
+  without doing anything: `Lock`, `Unlock`, `InstallHardware`, `RemoveHardware`, `CaptureSave`, `RestoreSave`, `Install`,
+  `Uninstall`, `InstallPackageAsync`, `UninstallPackage`, `SetPermissions`, `AnswerPermissionRequest`,
+  `ReviewPermissions`, `MountDrive`, `EjectDrive`, `SetIpAddress`, and the `ScriptingEnabled` setter.
+
+Tested in play mode: flag off gives UiState `ScriptingEnabled = false` and the Run tool has the `unavailable` class; flag
+on flips it within a poll (0.25 s); with the permission, `return 1;` and `var a = 1 + 2;` run, `var x = ;` fails with the
+range 8..9, `while ( true ) { }` stops at the limit; a script calling `Lock()` left `IsLocked` false, one setting
+`ScriptingEnabled = false` left it true, one calling `RemoveHardware` left both pieces installed, and one calling
+`SetPermissions` to take Code Edit's own permission away left it intact; with the flag off and the permission held, the
+call answers "Running scripts is disabled." Not tested: the real permission prompt (it needs a real mouse press), a
+client in multiplayer.
+
+**The guard is a list, not a wall.** A script can still reach what is not on it: `NaviComputer.Files`, `NaviMessages`,
+`NaviNpcs`, `NaviPluginManager`, other `NaviComputer` setters and the game's own types (`PlayerHealth`, the player's
+position, `WeaponCommands.Give`). Any new public method that changes state or leaks a secret must check
+`NaviScriptGuard.Active`, or it is open to scripts. Turn the flag on only where you trust scripts as much as game code.
 
 ## Open questions
 
