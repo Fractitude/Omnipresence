@@ -72,7 +72,11 @@
         "Tags": [],
         "Theme": "Glass",
         "TransparencyLevel": 2,
-        "Wallpaper": "Glass"
+        "Wallpaper": "Glass",
+        "Hardware": [
+          "navi/hardware/networkcard.nhw",
+          "navi/hardware/soundcard.nhw"
+        ]
       },
       {
         "__type": "Sandbox.NaviDesktop",

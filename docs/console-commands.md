@@ -70,6 +70,16 @@ Look at and change a computer's files while no app does it. Host only. Each take
 | `navi_fs_usb [label]` | Put in a new, empty 8 MB removable drive, to try `/Volumes`. `USB` by default. |
 | `navi_fs_eject <path>` | Eject the removable drive at `path`. |
 
+## Navi: hardware
+
+Host only. They work on the computer you sit at, or else the nearest one. Code: `Libraries/navi/Code/Navi/NaviComputer.Hardware.cs`.
+
+| Command | What it does |
+|---|---|
+| `navi_hardware` | Log the computer's hardware, whether it is online, its IP address, and the hardware there is. |
+| `navi_hardware_install <name>` | Install hardware by its id or file name, e.g. `networkcard`, `soundcard`. |
+| `navi_hardware_remove <name>` | Take hardware out, e.g. `navi_hardware_remove networkcard` to take the computer offline. |
+
 ## Navi: plugins
 
 Plugins are part of the OS and run with no sandbox, so only the host may use these. They refuse to run on a client (`NaviPluginManager.CanManage`). Code: `Libraries/navi/Code/Navi/Plugins/NaviPluginManager.cs`.
