@@ -99,7 +99,21 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 			return panel;
 		} );
 
-		Add( "Scripting", "code", false, () => Sheet( computerObject, nameof( NaviComputer.ScriptingEnabled ) ) );
+		Add( "Scripting", "code", false, () =>
+		{
+			var panel = new Widget( this ) { Layout = Layout.Column() };
+			panel.Layout.Spacing = 4;
+
+			var badges = panel.Layout.AddRow();
+			badges.Spacing = 6;
+			badges.Add( new Badge( panel, "Danger", "#d9534f", "Scripts see every public member of the game and Navi. Only enable it for scripts you trust." ) );
+			badges.Add( new Badge( panel, "Experimental", "#e8a33d", "The engine's run-time scripting is experimental and may change or break." ) );
+			badges.AddStretchCell();
+
+			panel.Layout.Add( Sheet( computerObject, nameof( NaviComputer.ScriptingEnabled ) ) );
+
+			return panel;
+		} );
 
 		Add( "Other", "more_horiz", false, () => Sheet( computerObject, nameof( NaviComputer.SolidObject ) ) );
 
@@ -150,6 +164,39 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 	}
 
 	static Color Hex( string hex ) => Color.Parse( hex ) ?? Color.Magenta;
+
+	/// <summary>
+	/// A small colored label, with a tooltip saying what it means.
+	/// </summary>
+	sealed class Badge : Widget
+	{
+		readonly string text;
+		readonly Color color;
+
+		public Badge( Widget parent, string text, string color, string tooltip ) : base( parent )
+		{
+			this.text = text;
+			this.color = Hex( color );
+			ToolTip = tooltip;
+
+			FixedHeight = 18;
+			FixedWidth = text.Length * 7 + 16;
+		}
+
+		protected override void OnPaint()
+		{
+			Paint.ClearPen();
+			Paint.SetBrush( color.WithAlpha( 0.2f ) );
+			Paint.DrawRect( LocalRect, 9 );
+
+			Paint.SetPen( color );
+			Paint.ClearBrush();
+			Paint.DrawRect( LocalRect.Shrink( 0.5f ), 9 );
+
+			Paint.SetDefaultFont( 8, 700 );
+			Paint.DrawText( LocalRect, text, TextFlag.Center );
+		}
+	}
 
 	/// <summary>
 	/// A collapsible card: a clickable header, and a body built the first time it is opened.
