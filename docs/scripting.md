@@ -96,22 +96,80 @@ inside the method. In the editor the player is the host, so those checks pass.
 I could not test: a client in a multiplayer game, a published build (the whitelist), or whether `Compile()` finds
 unknown members (it does not: it said true for a field that does not exist; binding happens at run).
 
+## Narrowing what a script can reach
+
+Tried on engine 26.10.13a. The engine builds the resolver itself (`new() { Resolver = new TypeLibraryScriptResolver(
+context.TypeLibrary ) }`), so there is no setting to shorten the list.
+
+How the list is made (`TypeLibrary.AddAssembly`): the game's and its libraries' assemblies are "dynamic", so **every
+type in them is registered**. Engine types are registered only with `[Expose]`, plus a fixed set of safe system types.
+
+| Way to hide something | Result |
+| --- | --- |
+| Make a **member** `private` or `internal` (property, setter, method, field) | **hidden** |
+| Make a **class** `internal` | still reachable (its public members work: `VehicleMath.Sign`, `GamePreferences.Screenshake`) |
+| `[Hide]` on a class or a member | still reachable |
+| `[System.Obsolete]`, `[Title]` on a member | still reachable |
+| `[EditorBrowsable]` | cannot compile (`SB1000`, not on the API whitelist) |
+| Remove the type from the `TypeLibrary` | no public way |
+
+So only `private`/`internal` members are safe. That is not enough alone: Navi is a separate assembly, and the game calls
+`NaviComputer.Lock`, `InstallHardware`, `Launch`, … from `Code/`. s&box has no `InternalsVisibleTo`, so they must stay
+`public`.
+
+### The guard (tested, works)
+
+Run every script through one runner that counts a depth, and make sensitive public methods refuse while it is above zero:
+
+```csharp
+public static class ScriptGuard
+{
+	static int depth;                                    // private: a script cannot set it
+	public static bool Active => depth > 0;
+	internal static void Enter() => depth++;             // internal: a script cannot call it
+	internal static void Exit() => depth--;
+
+	public static T Run<T>( string source, int limit = 100000 )
+	{
+		var script = Game.Scripting.CreateScript( source );
+		Enter();
+		try { return script.RunAndReturn<T>( limit ); }
+		finally { Exit(); }
+	}
+}
+
+public static string Sensitive() => ScriptGuard.Active ? "refused" : "ran";
+```
+
+Results: called from game code it ran; called from a script run through `ScriptGuard.Run` it was refused; a script
+calling `ScriptGuard.Exit()` or setting `depth` was refused as unavailable; a nested `ScriptGuard.Run` stayed refused;
+the flag was back to false afterwards. Scripts are synchronous and cannot start tasks or lambdas, so the flag covers all
+their calls.
+
+Rules for it:
+
+- Nothing but the runner may call `Game.Scripting`. A second path that skips the runner skips the guard.
+- The guard class and the checks must live where the sensitive code lives. For Navi: in the library, so
+  `NaviComputer` can check it. The game's runner calls the library's `Run`.
+- Default to refusing, then allow. Walk the public surface of what scripts may touch (a short list) and add the check to
+  every method and setter that changes state or leaks secrets, not just the ones we thought of. A new public method is
+  open to scripts until someone guards it.
+- A better design is to give scripts a small facade: do not let them run in a game with the full `TypeLibrary` at all if
+  the facade will do. We cannot hide the rest, so the guard is what makes a facade enforceable.
+
 ## What this means for Navi (security)
 
-**The type list is the only wall.** A script can hurt the game as much as any public API can: set health, teleport the
-player, give weapons, lock the computer, read the saved lock secrets, install hardware. Private and internal members are
-safe, so the project's rule of keeping security state `private`/`internal` matters.
+**The type list is the only wall, and only private/internal members are behind it.** A script can hurt the game as much
+as any public API can: set health, teleport the player, give weapons, lock the computer, read the saved lock secrets,
+install hardware.
 
 Before a script engine goes into Navi or the game:
 
-- Do not run player-written or Store-app-written scripts with the full `TypeLibrary`. Navi's permissions
+- Do not run player-written or Store-app-written scripts without the guard above. Navi's permissions
   (`NaviSystemCalls`) would be skipped: the script calls `NaviComputer` itself.
-- Public methods that must not be reachable by scripts need a different guard. Candidates in `NaviComputer`:
-  `Lock`, `Unlock`, `InstallHardware`, `RemoveHardware`, `CaptureSave`, `RestoreSave`, `Files`, `Launch`, `Install`.
-  Make them `internal` where Navi's own code is the only caller, or check a "script is running" flag inside them.
-- Game helpers like `WeaponCommands.Give` and the `PlayerHealth` setters are open to scripts. Decide per type.
-- Check whether the resolver honours `[Expose]`/attribute filters or can be given a smaller list. We found no setting for
-  it: `new() { Resolver = new TypeLibraryScriptResolver( context.TypeLibrary ) }` is built by the engine.
+- Candidates to guard in `NaviComputer`: `Lock`, `Unlock`, `InstallHardware`, `RemoveHardware`, `CaptureSave`,
+  `RestoreSave`, `Files`, `Launch`, `Install`, and the `NaviMessages`, `NaviNpc` and `NaviPluginManager` statics. Game
+  types: `PlayerHealth` setters, `WeaponCommands.Give`, `PlayerInventory`, `GameManager`.
 - Run scripts only on the seated player's client or on the host, never from a remote request, and keep the instruction
   limit low.
 
@@ -122,5 +180,5 @@ easier, since no package has to be published.
 
 - Is the language really "C#-like", or its own language with C# names? (Breen has no public docs.)
 - Does it work in a published build, and does the API whitelist change what `TypeLibrary` contains there?
-- Can a game restrict which types a script sees? Ask in the s&box issue tracker.
+- Can a game restrict which types a script sees? Not today (see "Narrowing"). Ask in the s&box issue tracker.
 - How stable is it? It is marked experimental.
