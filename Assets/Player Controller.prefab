@@ -279,7 +279,43 @@
         "__guid": "40beb48f-11a2-401d-9168-da02cbbde13f",
         "__enabled": true,
         "Flags": 0,
-        "RadialDamageIcon": null
+        "RadialDamageIcon": {
+          "$compiler": "texture",
+          "$source": "imagefile",
+          "data": {
+            "FilePath": "ui/damage_radial.png",
+            "MaxSize": 4096,
+            "ConvertHeightToNormals": false,
+            "NormalScale": 1,
+            "Rotate": 0,
+            "FlipVertical": false,
+            "FlipHorizontal": false,
+            "Cropping": {
+              "Left": 0,
+              "Top": 0,
+              "Right": 0,
+              "Bottom": 0
+            },
+            "Padding": {
+              "Left": 0,
+              "Top": 0,
+              "Right": 0,
+              "Bottom": 0
+            },
+            "InvertColor": false,
+            "Tint": "1,1,1,1",
+            "Blur": 0,
+            "Sharpen": 0,
+            "Brightness": 1,
+            "Contrast": 1,
+            "Saturation": 1,
+            "Hue": 0,
+            "Colorize": false,
+            "TargetColor": "1,1,1,1",
+            "CacheToDisk": true,
+            "FormatOverride": "RGBA8888"
+          }
+        }
       }
     ],
     "Children": [
