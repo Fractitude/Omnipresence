@@ -27,6 +27,7 @@ public sealed class PaymentsViewModel
 	const int MaxDigits = 12;
 
 	readonly Func<Connection> getSeat;
+	readonly Func<NaviComputer> getComputer;
 
 	PaymentsScreen screen;
 	string targetId = "";
@@ -39,9 +40,10 @@ public sealed class PaymentsViewModel
 	int revision;
 	RealTimeSince sinceSuccess;
 
-	public PaymentsViewModel( Func<Connection> getSeat )
+	public PaymentsViewModel( Func<Connection> getSeat, Func<NaviComputer> getComputer )
 	{
 		this.getSeat = getSeat;
+		this.getComputer = getComputer;
 		UiState = Build();
 	}
 
@@ -62,6 +64,10 @@ public sealed class PaymentsViewModel
 		}
 
 		if ( screen == PaymentsScreen.Success && sinceSuccess > SuccessSeconds )
+			GoHome( "" );
+
+		// Payments need the network: a payment being chosen is dropped when it goes down.
+		if ( screen == PaymentsScreen.Send && !GameAppNetwork.IsOnline( getComputer() ) )
 			GoHome( "" );
 
 		if ( Signature( seat, PlayerProgress.For( seat ), Payees( seat ) ) != signature )
@@ -102,7 +108,7 @@ public sealed class PaymentsViewModel
 
 	void Choose( string id )
 	{
-		if ( screen != PaymentsScreen.Home || Payees( getSeat() ).All( x => x.SteamId.ToString() != id ) )
+		if ( screen != PaymentsScreen.Home || !GameAppNetwork.IsOnline( getComputer() ) || Payees( getSeat() ).All( x => x.SteamId.ToString() != id ) )
 			return;
 
 		screen = PaymentsScreen.Send;
@@ -125,7 +131,7 @@ public sealed class PaymentsViewModel
 
 	void Send()
 	{
-		if ( screen != PaymentsScreen.Send )
+		if ( screen != PaymentsScreen.Send || !GameAppNetwork.IsOnline( getComputer() ) )
 			return;
 
 		var seat = getSeat();
@@ -157,6 +163,8 @@ public sealed class PaymentsViewModel
 	string Signature( Connection seat, PlayerProgress progress, List<Connection> payees ) =>
 		HashCode.Combine(
 			seat?.Id,
+			GameAppNetwork.IsOnline( getComputer() ),
+			getComputer()?.HasNetworkCard,
 			progress?.Version,
 			screen,
 			targetId,
@@ -185,6 +193,9 @@ public sealed class PaymentsViewModel
 		signature = Signature( seat, progress, payees );
 
 		var state = new PaymentsUiState { Revision = ++revision, Screen = screen, Notice = notice };
+
+		if ( !GameAppNetwork.IsOnline( getComputer() ) )
+			return state with { Screen = PaymentsScreen.Home, Message = GameAppNetwork.OfflineMessage( getComputer() ) };
 
 		if ( seat is null )
 			return state with { Screen = PaymentsScreen.Home, Message = "Sit down to see your account." };

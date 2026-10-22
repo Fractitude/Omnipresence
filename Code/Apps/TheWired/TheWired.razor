@@ -29,7 +29,7 @@
 	/// <summary>
 	/// What this player's window says, from where they are: every viewer's own, whether or not they sit at the computer.
 	/// </summary>
-	TheWiredUiState UiState => TheWiredViewModel.Describe( WiredTravel.PlaceOf( Connection.Local ) );
+	TheWiredUiState UiState => TheWiredViewModel.Describe( WiredTravel.PlaceOf( Connection.Local ), GetComputer() );
 
 	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
 

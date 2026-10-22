@@ -30,18 +30,28 @@ public sealed class TheWiredViewModel
 		if ( action != CrossAction || getSeat() is not { } seat )
 			return;
 
+		// Connecting needs the network. Disconnecting never does, so nobody is stuck in the Wired.
+		if ( WiredTravel.PlaceOf( seat ) != WiredPlace.Wired && !GameAppNetwork.IsOnline( getComputer() ) )
+			return;
+
 		// Connecting stands the player up from the seat at once, not when they have moved out of its reach.
 		getComputer()?.StandUp();
 		WiredTravel.Cross( seat );
 	}
 
 	/// <summary>
-	/// What the window says for a player who is at <paramref name="place"/>.
+	/// What the window says for a player who is at <paramref name="place"/>, on <paramref name="computer"/>. At home it
+	/// offers no way in while the computer is offline.
 	/// </summary>
-	public static TheWiredUiState Describe( WiredPlace place ) => place switch
+	public static TheWiredUiState Describe( WiredPlace place, NaviComputer computer ) => place switch
 	{
 		WiredPlace.Wired => new()
 			{ Revision = 2, Status = "Present day. Present time.", ButtonText = "Disconnect" },
+		_ when !GameAppNetwork.IsOnline( computer ) => new()
+		{
+			Revision = computer is { HasNetworkCard: true } ? 3 : 4,
+			Status = $"Not connected. {GameAppNetwork.OfflineMessage( computer )}",
+		},
 		_ => new() { Revision = 1, Status = "Not connected.", ButtonText = "Connect" },
 	};
 }

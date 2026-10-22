@@ -123,7 +123,7 @@
 	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
 	/// this panel is in.
 	/// </summary>
-	PaymentsViewModel ViewModel => field ??= new( GetSeat );
+	PaymentsViewModel ViewModel => field ??= new( GetSeat, GetComputer );
 
 	PaymentsUiState UiState =>
 		Navi.IsViewer ? Navi.GetState<PaymentsUiState>() ?? PaymentsUiState.Empty : ViewModel.UiState;
@@ -134,6 +134,8 @@
 	TextEntry AmountEntry { get; set; }
 
 	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
 
 	/// <summary>
 	/// Whole numbers only: anything else typed or pasted is dropped before the host hears of it.
