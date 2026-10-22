@@ -70,7 +70,7 @@ Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`,
 
 ## The Wired
 
-The Wired is in the same scene as the real world, under the map. `WiredTravel.Cross( connection )` (host only, from The Wired app, for the player in the seat) teleports the player to a random object tagged `spawn_point_wired` and back to where they were; `PlayerData.InWired` says which. `WiredWorldSystem` dresses each client's own view for its own player: the 2D skybox on the object tagged `skybox` and `wired` is on and the other `skybox` objects' are off, and the main camera excludes the tag `map`. Apps ask `WiredTravel.PlaceOf( seat )`, never the scene.
+The Wired is in the same scene as the real world, under the map. `WiredTravel.Cross( connection )` (host only, from The Wired app, for the player in the seat) teleports the player to a random object tagged `spawn_point_wired` and back to where they were; `PlayerData.InWired` says which. `WiredWorldSystem` dresses each client's own view for its own player: the 2D skybox on the object tagged `skybox` and `wired` is on and the other `skybox` objects' are off, and the main camera excludes the tag `map` while in the Wired and the tag `wired` at home, so neither draws the other's world. Apps ask `WiredTravel.PlaceOf( seat )`, never the scene.
 
 ## Security
 

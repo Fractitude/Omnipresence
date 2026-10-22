@@ -4,7 +4,7 @@ namespace Sandbox;
 /// Makes the Wired look like a place of its own although it is in the same scene as the real world. On this client,
 /// while the local player is in the Wired (<see cref="PlayerData.InWired"/>): the 2D skybox of the Wired is on and the
 /// real world's is off, and the main camera leaves out everything tagged <see cref="MapTag"/>, so the map under which
-/// the Wired lies is not drawn. Nothing is networked: each client dresses its own view for its own player.
+/// the Wired lies is not drawn. At home it leaves out <see cref="WiredTag"/> instead, so the Wired is not drawn. Nothing is networked: each client dresses its own view for its own player.
 /// </summary>
 public sealed class WiredWorldSystem : GameObjectSystem<WiredWorldSystem>
 {
@@ -14,7 +14,7 @@ public sealed class WiredWorldSystem : GameObjectSystem<WiredWorldSystem>
 	public const string SkyboxTag = "skybox";
 
 	/// <summary>
-	/// On the skybox object of the Wired.
+	/// On the skybox object of the Wired. The camera does not draw what has this tag while the player is at home.
 	/// </summary>
 	public const string WiredTag = "wired";
 
@@ -60,12 +60,21 @@ public sealed class WiredWorldSystem : GameObjectSystem<WiredWorldSystem>
 	void ApplyCamera( bool inWired )
 	{
 		var camera = Scene.Camera;
-		if ( !camera.IsValid() || camera.RenderExcludeTags.Has( MapTag ) == inWired )
+		if ( !camera.IsValid() )
 			return;
 
-		if ( inWired )
-			camera.RenderExcludeTags.Add( MapTag );
+		SetExcluded( camera.RenderExcludeTags, MapTag, inWired );
+		SetExcluded( camera.RenderExcludeTags, WiredTag, !inWired );
+	}
+
+	static void SetExcluded( TagSet tags, string tag, bool excluded )
+	{
+		if ( tags.Has( tag ) == excluded )
+			return;
+
+		if ( excluded )
+			tags.Add( tag );
 		else
-			camera.RenderExcludeTags.Remove( MapTag );
+			tags.Remove( tag );
 	}
 }
