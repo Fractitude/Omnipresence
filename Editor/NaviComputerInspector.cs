@@ -99,8 +99,9 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 			return panel;
 		} );
 
-		Add( "Other", "more_horiz", false, () => Sheet( computerObject,
-			nameof( NaviComputer.SolidObject ), nameof( NaviComputer.ScriptingEnabled ) ) );
+		Add( "Scripting", "code", false, () => Sheet( computerObject, nameof( NaviComputer.ScriptingEnabled ) ) );
+
+		Add( "Other", "more_horiz", false, () => Sheet( computerObject, nameof( NaviComputer.SolidObject ) ) );
 
 		Layout.AddStretchCell();
 	}
