@@ -158,7 +158,7 @@
 	/// </summary>
 	void FreeControls( bool allowed )
 	{
-		var controller = Scene.GetAll<PlayerController>().FirstOrDefault( x => !x.IsProxy );
+		var controller = Players.LocalController;
 
 		if ( controller is null )
 			return;

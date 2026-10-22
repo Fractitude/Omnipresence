@@ -33,6 +33,8 @@ All in `Code/Progression/`:
 | `PlayerProgression` | Static, host only. Holds the store and a cache of loaded records. Load, change, save, evict. |
 | `ProgressCurve` | XP to level, and back. |
 | `PlayerProgress` | Component on the player prefab. `[Sync]` copies of level, XP and money for the HUD. |
+| `ProgressEvents` | `Global.IProgressEvents`: posted on the host when a `PlayerProgress` loads or changes, with `ProgressChange` flags. |
+| `WorldClockSystem` | Runs the world clock on the host: loads `world.json`, saves it every 10 s. `PlayerProgress.HostNow` carries the time to clients. |
 | `ProgressionHud` | Panel that draws them for the local player. |
 | `ProgressCommands` | Console commands to grant XP and money while testing. |
 

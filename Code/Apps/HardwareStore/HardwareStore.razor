@@ -220,16 +220,9 @@
 
 	void WordEntered( string word ) => Navi.Act( HardwareStoreViewModel.WordAction, word );
 
-	bool AtStoreTerminal() =>
-		StoreTerminal.IsStore( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer );
+	bool AtStoreTerminal() => StoreTerminal.IsStore( GameAppSeat.ComputerOf( this ) );
 
-	Connection GetSeat()
-	{
-		if ( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer is not { HasUser: true } computer )
-			return null;
-
-		return Networking.IsActive ? computer.User : Connection.Local;
-	}
+	Connection GetSeat() => GameAppSeat.UserOf( this );
 
 	public override void Tick()
 	{

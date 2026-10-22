@@ -36,8 +36,7 @@ public sealed class PlayerHealth : Component, Component.IDamageable, IKillSource
 	/// <summary>
 	/// Find a player for this connection
 	/// </summary>
-	public static PlayerHealth FindForConnection( Connection c ) =>
-		Game.ActiveScene.GetAll<PlayerHealth>().FirstOrDefault( x => x.Network.Owner == c );
+	public static PlayerHealth FindForConnection( Connection c ) => Players.For<PlayerHealth>( c );
 
 	public bool IsLocalPlayer => !IsProxy;
 

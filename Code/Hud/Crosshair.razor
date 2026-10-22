@@ -70,8 +70,7 @@
 	/// <summary>
 	/// The tooltip of the pressable object the local player looks at, or null.
 	/// </summary>
-	Component.IPressable.Tooltip? Hint => Scene.GetAllComponents<PlayerController>()
-		.FirstOrDefault( x => !x.IsProxy )?.Tooltips
+	Component.IPressable.Tooltip? Hint => Players.LocalController?.Tooltips
 		.Where( x => x.Enabled && !string.IsNullOrEmpty( x.Title ) )
 		.Select( x => (Component.IPressable.Tooltip?)x )
 		.FirstOrDefault();

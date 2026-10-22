@@ -96,6 +96,13 @@ Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`,
 
 s&box uses a scene/GameObject/Component model. Gameplay is written as `Component` subclasses that override lifecycle hooks (`OnUpdate`, `OnFixedUpdate`, `OnPreRender`, …). Movement is handled by the engine's built-in `PlayerController` with `MoveMode*` components. A custom component can drive it by setting `WishVelocity` / `EyeAngles` and pull it in with `[RequireComponent]`.
 
+### How systems find and react to each other
+
+- **Find a player's parts with `Players`** (`Code/Game/Players.cs`): `Players.LocalController`, `Players.LocalObject`, `Players.Local<T>()` and `Players.For<T>( connection )`. Every player component is on the player prefab, so any of them can be asked for. Don't write another `GetAll<…>().FirstOrDefault( x => !x.IsProxy )`.
+- **React to a change with a scene event, not by polling.** Implement the interface on a component: `Global.IPlayerEvents` (spawn, damage, death, kills), `Global.IProgressEvents` (a `PlayerProgress` loaded or changed, with `ProgressChange` flags saying what; host only) and `Global.IInventoryEvents` (slots changed, item dropped). A new system that others may care about posts its own `Global.I…Events`, the same way.
+- **Redraw with one `Version`.** `PlayerProgress`, `PlayerInventory` and `AbilityLoadout` each bump a `Version` on every change; a panel or view model hashes it in `BuildHash` or its signature.
+- **The game's own Navi apps find their seat with `GameAppSeat`** (`UserOf( panel )`, `ComputerOf( panel )`), never from what an action says.
+
 ### Static state and hot reload
 
 **Never make static state that changes at run time `readonly`, including get-only auto-properties (`{ get; } = new()`).** A hot reload resets a `static readonly` field to its initial value when its type holds only engine or BCL types (`string`, numbers, `HashSet<string>`, `Dictionary<string, long>`). Fields that aren't readonly keep their values, and so do readonly ones that hold the assembly's own types. Use `static Dictionary<…> x = new()` or `{ get; private set; } = new()`. Constants (lookup tables nobody changes) can stay readonly, since a reset only picks up edits. Instance fields aren't affected: a readonly instance field keeps its value.

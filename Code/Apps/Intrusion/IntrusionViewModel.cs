@@ -317,10 +317,7 @@ public sealed class IntrusionViewModel
 	string Signature( Connection seat, PlayerProgress progress ) =>
 		HashCode.Combine(
 			seat?.Id,
-			progress is { Loaded: true },
-			progress?.IntrusionVersion,
-			progress?.OperationVersion,
-			progress?.HackXp,
+			progress?.Version,
 			WiredTravel.Current,
 			screen ).ToString();
 

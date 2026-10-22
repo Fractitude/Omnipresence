@@ -133,13 +133,7 @@
 	/// </summary>
 	TextEntry AmountEntry { get; set; }
 
-	Connection GetSeat()
-	{
-		if ( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer is not { HasUser: true } computer )
-			return null;
-
-		return Networking.IsActive ? computer.User : Connection.Local;
-	}
+	Connection GetSeat() => GameAppSeat.UserOf( this );
 
 	/// <summary>
 	/// Whole numbers only: anything else typed or pasted is dropped before the host hears of it.

@@ -156,7 +156,7 @@ public static class AbilityLoadout
 		if ( ability.Cooldown > 0f )
 			readyAt[ability.Id] = RealTime.Now + ability.Cooldown;
 
-		ability.Use?.Invoke( PlayerProgress.Local?.GameObject );
+		ability.Use?.Invoke( Players.LocalObject );
 		return true;
 	}
 

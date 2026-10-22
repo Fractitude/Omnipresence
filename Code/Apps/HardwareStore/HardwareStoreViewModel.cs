@@ -262,9 +262,7 @@ public sealed class HardwareStoreViewModel
 	string Signature( Connection seat, PlayerProgress progress ) =>
 		HashCode.Combine(
 			seat?.Id,
-			progress is { Loaded: true } ? progress.Money : -1,
-			progress?.HardwareVersion,
-			progress?.IntrusionVersion,
+			progress?.Version,
 			atStoreTerminal(),
 			screen,
 			notice,

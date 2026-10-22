@@ -61,7 +61,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		var playerData = GetOrCreatePlayerData( connection );
 
 		// does this connection already have a player?
-		if ( Scene.GetAll<PlayerHealth>().Any( x => x.Network.Owner == connection ) )
+		if ( PlayerHealth.FindForConnection( connection ).IsValid() )
 			return null;
 
 		var helper = Scene.GetAllComponents<NetworkHelper>().FirstOrDefault();

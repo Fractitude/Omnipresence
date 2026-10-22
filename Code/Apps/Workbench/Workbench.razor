@@ -89,13 +89,7 @@
 	WorkbenchUiState UiState =>
 		Navi.IsViewer ? Navi.GetState<WorkbenchUiState>() ?? WorkbenchUiState.Empty : ViewModel.UiState;
 
-	Connection GetSeat()
-	{
-		if ( AncestorsAndSelf.OfType<NaviAppHost>().FirstOrDefault()?.Computer is not { HasUser: true } computer )
-			return null;
-
-		return Networking.IsActive ? computer.User : Connection.Local;
-	}
+	Connection GetSeat() => GameAppSeat.UserOf( this );
 
 	public override void Tick()
 	{

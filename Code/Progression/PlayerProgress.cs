@@ -40,6 +40,12 @@ public sealed class PlayerProgress : Component
 	/// </summary>
 	[Sync( SyncFlags.FromHost )] public long HackXp { get; private set; }
 
+	/// <summary>
+	/// Bumps whenever anything in the progress changes, so a screen knows to redraw. Host only. To react to a change
+	/// instead, implement <see cref="Global.IProgressEvents"/>.
+	/// </summary>
+	public int Version { get; private set; }
+
 	public int Level => ProgressCurve.LevelFor( Xp );
 
 	public int HackLevel => HackingCurve.LevelFor( HackXp );
@@ -55,11 +61,6 @@ public sealed class PlayerProgress : Component
 	public IReadOnlyList<PaymentRecord> Payments => record?.Payments ?? [];
 
 	/// <summary>
-	/// Bumps whenever a payment is added, so a screen knows to redraw. Host only.
-	/// </summary>
-	public int PaymentVersion { get; private set; }
-
-	/// <summary>
 	/// The ids of the dead servers this player has breached. Host only: empty anywhere else.
 	/// </summary>
 	public IReadOnlyList<string> ClearedServers => record?.Cleared ?? [];
@@ -70,19 +71,9 @@ public sealed class PlayerProgress : Component
 	public IReadOnlyList<string> Blueprints => record?.Blueprints ?? [];
 
 	/// <summary>
-	/// Bumps whenever a server is breached, so a screen knows to redraw. Host only.
-	/// </summary>
-	public int IntrusionVersion { get; private set; }
-
-	/// <summary>
 	/// What the player has done in each operation. Host only: empty anywhere else.
 	/// </summary>
 	public IReadOnlyList<OperationRecord> Operations => record?.Operations ?? [];
-
-	/// <summary>
-	/// Bumps whenever an operation is finished, so a screen knows to redraw. Host only.
-	/// </summary>
-	public int OperationVersion { get; private set; }
 
 	/// <summary>
 	/// Hardware the player owns and hasn't installed, one entry per piece. Host only: empty anywhere else.
@@ -105,21 +96,14 @@ public sealed class PlayerProgress : Component
 	public IReadOnlyList<string> ReroutedOrders => record?.Rerouted ?? [];
 
 	/// <summary>
-	/// Bumps whenever the inventory, the installed hardware or the shipments change, so a screen knows to redraw. Host
-	/// only.
-	/// </summary>
-	public int HardwareVersion { get; private set; }
-
-	/// <summary>
 	/// The progress of the player on this connection, or null if they have none yet.
 	/// </summary>
-	public static PlayerProgress For( Connection connection ) =>
-		connection is null ? null : Game.ActiveScene?.GetAll<PlayerProgress>().FirstOrDefault( x => x.Owner == connection );
+	public static PlayerProgress For( Connection connection ) => Players.For<PlayerProgress>( connection );
 
 	/// <summary>
 	/// The progress of the player at this computer, or null before their player has spawned.
 	/// </summary>
-	public static PlayerProgress Local => Game.ActiveScene?.GetAll<PlayerProgress>().FirstOrDefault( x => !x.IsProxy );
+	public static PlayerProgress Local => Players.Local<PlayerProgress>();
 
 	const float SaveDelay = 2f;
 
@@ -130,11 +114,23 @@ public sealed class PlayerProgress : Component
 	bool saving;
 	RealTimeSince sinceChange;
 	RealTimeSince sinceDeliveryCheck;
+	RealTimeSince sinceClockSync;
 
 	protected override void OnUpdate()
 	{
 		if ( !Networking.IsHost )
+		{
+			if ( !IsProxy )
+				WorldClock.Follow( HostNow );
+
 			return;
+		}
+
+		if ( sinceClockSync > 1 )
+		{
+			sinceClockSync = 0;
+			HostNow = WorldClock.Now;
+		}
 
 		if ( !started )
 		{
@@ -168,11 +164,11 @@ public sealed class PlayerProgress : Component
 		try
 		{
 			record = await PlayerProgression.LoadAsync( steamId );
-			Xp = record.Xp;
-			HackXp = record.HackXp;
-			Money = record.Money;
-			Credits = record.Credits;
+			ShowStats();
 			Loaded = true;
+			Version++;
+
+			Global.IProgressEvents.Post( x => x.OnProgressLoaded( this ) );
 		}
 		catch ( System.Exception e )
 		{
@@ -233,7 +229,7 @@ public sealed class PlayerProgress : Component
 			return;
 
 		record.Xp = System.Math.Min( record.Xp + amount, ProgressCurve.MaxXp );
-		Changed();
+		Changed( ProgressChange.Stats );
 	}
 
 	/// <summary>
@@ -245,7 +241,7 @@ public sealed class PlayerProgress : Component
 			return;
 
 		record.HackXp = System.Math.Min( record.HackXp + amount, HackingCurve.MaxXp );
-		Changed();
+		Changed( ProgressChange.Stats );
 	}
 
 	/// <summary>
@@ -257,7 +253,7 @@ public sealed class PlayerProgress : Component
 			return;
 
 		record.Money = System.Math.Min( record.Money + amount, ProgressRecord.MaxMoney );
-		Changed();
+		Changed( ProgressChange.Stats );
 	}
 
 	/// <summary>
@@ -269,7 +265,7 @@ public sealed class PlayerProgress : Component
 			return false;
 
 		record.Money -= amount;
-		Changed();
+		Changed( ProgressChange.Stats );
 		return true;
 	}
 
@@ -282,7 +278,7 @@ public sealed class PlayerProgress : Component
 			return;
 
 		record.Credits = System.Math.Min( record.Credits + amount, ProgressRecord.MaxCredits );
-		Changed();
+		Changed( ProgressChange.Stats );
 	}
 
 	/// <summary>
@@ -294,7 +290,7 @@ public sealed class PlayerProgress : Component
 			return false;
 
 		record.Credits -= amount;
-		Changed();
+		Changed( ProgressChange.Stats );
 		return true;
 	}
 
@@ -342,8 +338,7 @@ public sealed class PlayerProgress : Component
 		if ( credits > 0 )
 			record.Credits = System.Math.Min( record.Credits + credits, ProgressRecord.MaxCredits );
 
-		IntrusionVersion++;
-		Changed();
+		Changed( ProgressChange.Intrusions );
 		return true;
 	}
 
@@ -377,8 +372,7 @@ public sealed class PlayerProgress : Component
 		record.HackXp = System.Math.Min( record.HackXp + System.Math.Max( hackXp, 0 ), HackingCurve.MaxXp );
 		record.Credits = System.Math.Min( record.Credits + paidCredits + paidBonus, ProgressRecord.MaxCredits );
 
-		OperationVersion++;
-		Changed();
+		Changed( ProgressChange.Operations );
 		return new OperationPayout( hackXp, paidCredits, paidBonus, first );
 	}
 
@@ -422,8 +416,7 @@ public sealed class PlayerProgress : Component
 
 		record.Shipments.Add( new() { ItemId = itemId, ArriveAt = arrive, Source = source } );
 		record.Shipments.Sort( ( x, y ) => x.ArriveAt.CompareTo( y.ArriveAt ) );
-		HardwareVersion++;
-		Changed();
+		Changed( ProgressChange.Hardware );
 	}
 
 	/// <summary>
@@ -436,8 +429,7 @@ public sealed class PlayerProgress : Component
 
 		record.Inventory.Remove( itemId );
 		record.Installed.Add( itemId );
-		HardwareVersion++;
-		Changed();
+		Changed( ProgressChange.Hardware );
 		return true;
 	}
 
@@ -450,8 +442,7 @@ public sealed class PlayerProgress : Component
 			return false;
 
 		record.Inventory.Add( itemId );
-		HardwareVersion++;
-		Changed();
+		Changed( ProgressChange.Hardware );
 		return true;
 	}
 
@@ -474,8 +465,7 @@ public sealed class PlayerProgress : Component
 				record.Inventory.Add( shipment.ItemId );
 		}
 
-		HardwareVersion++;
-		Changed();
+		Changed( ProgressChange.Hardware );
 	}
 
 	void AddPayment( PaymentRecord payment )
@@ -485,18 +475,32 @@ public sealed class PlayerProgress : Component
 		if ( record.Payments.Count > PaymentRecord.MaxKept )
 			record.Payments.RemoveAt( 0 );
 
-		PaymentVersion++;
-		Changed();
+		Changed( ProgressChange.Payments );
 	}
 
-	void Changed()
+	/// <summary>
+	/// The record changed: show it, save it soon, and tell the scene. <paramref name="change"/> names what changed
+	/// besides the stats, which are compared here.
+	/// </summary>
+	void Changed( ProgressChange change )
+	{
+		if ( Xp != record.Xp || HackXp != record.HackXp || Money != record.Money || Credits != record.Credits )
+			change |= ProgressChange.Stats;
+
+		ShowStats();
+		Version++;
+		dirty = true;
+		sinceChange = 0;
+
+		Global.IProgressEvents.Post( x => x.OnProgressChanged( this, change ) );
+	}
+
+	void ShowStats()
 	{
 		Xp = record.Xp;
 		HackXp = record.HackXp;
 		Money = record.Money;
 		Credits = record.Credits;
-		dirty = true;
-		sinceChange = 0;
 	}
 
 	/// <summary>

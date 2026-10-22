@@ -157,8 +157,7 @@ public sealed class PaymentsViewModel
 	string Signature( Connection seat, PlayerProgress progress, List<Connection> payees ) =>
 		HashCode.Combine(
 			seat?.Id,
-			progress is { Loaded: true } ? progress.Money : -1,
-			progress?.PaymentVersion,
+			progress?.Version,
 			screen,
 			targetId,
 			notice,

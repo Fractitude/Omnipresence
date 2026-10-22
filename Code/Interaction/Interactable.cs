@@ -145,12 +145,7 @@ public sealed class Interactable : Component, Component.IPressable
 	/// <summary>
 	/// The player who looks at or presses this: the engine says so, else the local player.
 	/// </summary>
-	GameObject Who( Component.IPressable.Event e ) => e.Source?.GameObject ?? LocalPlayer;
-
-	/// <summary>
-	/// The local player's GameObject, or null.
-	/// </summary>
-	GameObject LocalPlayer => Scene.GetAllComponents<PlayerController>().FirstOrDefault( x => !x.IsProxy )?.GameObject;
+	GameObject Who( Component.IPressable.Event e ) => e.Source?.GameObject ?? Players.LocalObject;
 
 	/// <summary>
 	/// What the local player would see for an option right now: the option's own values, a handler's description in place of
@@ -183,7 +178,7 @@ public sealed class Interactable : Component, Component.IPressable
 	/// </summary>
 	public List<Entry> GetEntries()
 	{
-		var player = LocalPlayer;
+		var player = Players.LocalObject;
 		var entries = new List<Entry>();
 
 		for ( var i = 0; i < Options.Count; i++ )
@@ -315,8 +310,7 @@ public sealed class Interactable : Component, Component.IPressable
 	void HostInteract( int index )
 	{
 		var caller = Rpc.Caller;
-		var player = Scene.GetAllComponents<PlayerController>()
-			.FirstOrDefault( x => caller is null ? !x.IsProxy : x.Network.Owner == caller )?.GameObject;
+		var player = (caller is null ? Players.LocalController : Players.For<PlayerController>( caller ))?.GameObject;
 
 		if ( !player.IsValid() || index < 0 || index >= Options.Count || Options[index] is not { RunOn: InteractionSide.Host } option )
 			return;

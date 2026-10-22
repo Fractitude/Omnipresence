@@ -97,8 +97,7 @@ public sealed class WorkbenchViewModel
 	string Signature( Connection seat, PlayerProgress progress ) =>
 		HashCode.Combine(
 			seat?.Id,
-			progress is { Loaded: true },
-			progress?.HardwareVersion,
+			progress?.Version,
 			WiredTravel.Current,
 			notice ).ToString();
 

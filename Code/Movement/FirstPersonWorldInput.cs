@@ -17,7 +17,7 @@ public sealed class FirstPersonWorldInput : GameObjectSystem<FirstPersonWorldInp
 
 	void Update()
 	{
-		var controller = Scene.GetAll<PlayerController>().FirstOrDefault( x => !x.IsProxy );
+		var controller = Players.LocalController;
 		if ( !controller.IsValid() )
 			return;
 

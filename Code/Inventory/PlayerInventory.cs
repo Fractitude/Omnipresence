@@ -26,31 +26,15 @@ public sealed class PlayerInventory : Component
 	ItemData[] slots = [];
 
 	/// <summary>
-	/// Bumps whenever a slot changes, so a panel knows to redraw.
+	/// Bumps whenever a slot changes, so a panel knows to redraw. To react to a change instead, implement
+	/// <see cref="Global.IInventoryEvents"/>.
 	/// </summary>
 	public int Version { get; private set; }
 
 	/// <summary>
-	/// Raised on the host when an item is dropped. The item is out of the inventory by then. Nothing puts it back in the
-	/// world yet.
-	/// </summary>
-	public event System.Action<PlayerInventory, ItemData> ItemDropped;
-
-	static PlayerInventory local;
-
-	/// <summary>
 	/// The inventory of the player on this computer, or null.
 	/// </summary>
-	public static PlayerInventory Local
-	{
-		get
-		{
-			if ( !local.IsValid() )
-				local = Game.ActiveScene?.GetAllComponents<PlayerInventory>().FirstOrDefault( x => !x.IsProxy );
-
-			return local;
-		}
-	}
+	public static PlayerInventory Local => Players.Local<PlayerInventory>();
 
 	/// <summary>
 	/// This computer runs the game's rules: the host, or a game with no network.
@@ -184,7 +168,7 @@ public sealed class PlayerInventory : Component
 			return;
 
 		Log.Warning( $"PlayerInventory: dropped '{item.Name}', but nothing puts it back in the world yet." );
-		ItemDropped?.Invoke( this, item );
+		Global.IInventoryEvents.Post( x => x.OnItemDropped( this, item ) );
 	}
 
 	bool CheckAuthority( string method )
@@ -204,13 +188,23 @@ public sealed class PlayerInventory : Component
 
 	void Changed()
 	{
-		Version++;
 		Saved = Json.Serialize( slots );
+		Updated();
 	}
 
 	void OnSavedChanged( string oldValue, string newValue )
 	{
+		// The host made this change itself and has already told the scene.
+		if ( IsAuthority )
+			return;
+
 		slots = string.IsNullOrEmpty( newValue ) ? [] : Json.Deserialize<ItemData[]>( newValue ) ?? [];
+		Updated();
+	}
+
+	void Updated()
+	{
 		Version++;
+		Global.IInventoryEvents.Post( x => x.OnInventoryChanged( this ) );
 	}
 }
