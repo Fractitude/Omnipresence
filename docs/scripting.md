@@ -176,6 +176,19 @@ Before a script engine goes into Navi or the game:
 This matches the known limit in `AGENTS.md`: hostile package code can already reach public members. Scripts make that
 easier, since no package has to be published.
 
+## Testing it
+
+- Run scripts from `sbox-cli --call run_csharp` (see `Libraries/navi/docs/driving-navi.md`), with `Game.Scripting.CreateScript(
+  src )` and `RunAndReturn<string>`. Return strings (`"" + value`) to read results.
+- `Script.Compile()` does not tell you whether a member is reachable: it said `true` for a field that does not exist.
+  Binding happens at run, so a test must run the script.
+- Probes change the live play-mode scene (health, position, destroyed objects). Run them against objects you made, or
+  put the old value back after, and do not run `Destroy` on a scene object. `Destroy` is also deferred to the end of the
+  frame, so a count taken right after still shows the object.
+- A test that adds a type to `Code/` (to try an attribute) triggers a hot reload. Delete it afterwards and wait for
+  the compile to finish (`editor_status`).
+- Do not save the scene or prefabs after probing in play mode.
+
 ## Open questions
 
 - Is the language really "C#-like", or its own language with C# names? (Breen has no public docs.)
