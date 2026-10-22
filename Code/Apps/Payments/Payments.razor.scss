@@ -15,6 +15,34 @@ i
 	font-family: Material Icons;
 }
 
+// Shown in place of the account while the computer is offline.
+.offline
+{
+	flex-grow: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	text-align: center;
+
+	i
+	{
+		font-size: 40px;
+		color: #6f7a8c;
+	}
+
+	.offline-heading
+	{
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	.offline-hint
+	{
+		color: #6f7a8c;
+	}
+}
+
 .message, .empty
 {
 	color: #6f7a8c;

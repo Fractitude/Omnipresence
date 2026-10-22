@@ -16,10 +16,4 @@ public static class GameAppNetwork
 	/// </summary>
 	public static string OfflineHint( NaviComputer computer ) => computer is { HasNetworkCard: true }
 		? "The network is turned off."
-		: "This computer has no network card.";
-
-	/// <summary>
-	/// A line that tells the player the app is offline, with the way back.
-	/// </summary>
-	public static string OfflineMessage( NaviComputer computer ) => $"No network connection. {OfflineHint( computer )}";
-}
+		: "This computer has no network card.";}

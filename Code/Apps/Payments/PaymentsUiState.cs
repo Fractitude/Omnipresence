@@ -31,6 +31,9 @@ public sealed record PaymentsUiState
 	/// <summary>Shown instead of the account when there is none.</summary>
 	public string Message { get; init; } = "";
 
+	/// <summary>While the computer is offline: why. The window says so in place of everything else.</summary>
+	public string OfflineHint { get; init; }
+
 	public string Owner { get; init; } = "";
 	public string Balance { get; init; } = "";
 

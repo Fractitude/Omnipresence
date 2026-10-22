@@ -8,7 +8,15 @@
 @* in the seat, worked out on the host, never from what the panel sends. *@
 
 <root>
-	@if ( !UiState.HasAccount )
+	@if ( UiState.OfflineHint is not null )
+	{
+		<div class="offline">
+			<i>wifi_off</i>
+			<div class="offline-heading">No network connection</div>
+			<div class="offline-hint">@UiState.OfflineHint</div>
+		</div>
+	}
+	else if ( !UiState.HasAccount )
 	{
 		<div class="message">@UiState.Message</div>
 	}

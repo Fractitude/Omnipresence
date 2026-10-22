@@ -7,7 +7,16 @@
 @* It is shared, so the host's copy moves the player in the seat; each viewer's window says where they are. *@
 
 <root>
-	<div class="status">@UiState.Status</div>
+	@if ( UiState.OfflineHint is not null )
+	{
+		<i class="offline-icon">wifi_off</i>
+		<div class="offline-heading">No network connection</div>
+		<div class="offline-hint">@UiState.OfflineHint</div>
+	}
+	else
+	{
+		<div class="status">@UiState.Status</div>
+	}
 
 	@if ( UiState.ButtonText is not null )
 	{

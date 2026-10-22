@@ -13,6 +13,9 @@ public sealed record TheWiredUiState
 
 	public string Status { get; init; } = "";
 
+	/// <summary>While the computer is offline: why. The window says so instead of the status.</summary>
+	public string OfflineHint { get; init; }
+
 	/// <summary>The button's label, or null for no button.</summary>
 	public string ButtonText { get; init; }
 }

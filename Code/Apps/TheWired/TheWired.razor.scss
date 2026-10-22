@@ -16,6 +16,27 @@ TheWired
 	font-size: 12px;
 }
 
+// Shown instead of the status while the computer is offline. Text-align keeps the longer hint centered.
+.offline-icon
+{
+	font-family: Material Icons;
+	font-size: 28px;
+	color: #8f87a3;
+}
+
+.offline-heading
+{
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.offline-hint
+{
+	font-size: 11px;
+	color: #8f87a3;
+	text-align: center;
+}
+
 .button
 {
 	padding: 6px 16px;

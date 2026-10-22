@@ -195,7 +195,7 @@ public sealed class PaymentsViewModel
 		var state = new PaymentsUiState { Revision = ++revision, Screen = screen, Notice = notice };
 
 		if ( !GameAppNetwork.IsOnline( getComputer() ) )
-			return state with { Screen = PaymentsScreen.Home, Message = GameAppNetwork.OfflineMessage( getComputer() ) };
+			return state with { Screen = PaymentsScreen.Home, OfflineHint = GameAppNetwork.OfflineHint( getComputer() ) };
 
 		if ( seat is null )
 			return state with { Screen = PaymentsScreen.Home, Message = "Sit down to see your account." };
