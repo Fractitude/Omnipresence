@@ -7,20 +7,23 @@ namespace OmnipresenceApps;
 /// disconnects them back home. Runs in the host's copy only (the app is shared), since only the host can move a player.
 /// </summary>
 /// <remarks>
-/// Who travels is always the player in the seat, worked out from the computer. The action carries nothing.
+/// Who travels is always the player in the seat, worked out from the computer. The action carries nothing. They are
+/// stood up from the seat as they go.
 /// </remarks>
 public sealed class TheWiredViewModel
 {
 	public const string CrossAction = "cross";
 
 	readonly Func<Connection> getSeat;
+	readonly Func<NaviComputer> getComputer;
 
 	string signature;
 	int revision;
 
-	public TheWiredViewModel( Func<Connection> getSeat )
+	public TheWiredViewModel( Func<Connection> getSeat, Func<NaviComputer> getComputer )
 	{
 		this.getSeat = getSeat;
+		this.getComputer = getComputer;
 		UiState = Describe( null, 1 );
 	}
 
@@ -42,8 +45,12 @@ public sealed class TheWiredViewModel
 
 	public void Act( string action, string[] args )
 	{
-		if ( action == CrossAction && getSeat() is { } seat )
-			WiredTravel.Cross( seat );
+		if ( action != CrossAction || getSeat() is not { } seat )
+			return;
+
+		// Connecting stands the player up from the seat at once, not when they have moved out of its reach.
+		getComputer()?.StandUp();
+		WiredTravel.Cross( seat );
 	}
 
 	static TheWiredUiState Describe( WiredPlace? place, int revision ) => place switch

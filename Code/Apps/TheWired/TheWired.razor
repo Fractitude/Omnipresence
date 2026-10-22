@@ -20,9 +20,11 @@
 	/// <summary>
 	/// The app's logic and its state, in the host's copy only.
 	/// </summary>
-	TheWiredViewModel ViewModel => field ??= new( GetSeat );
+	TheWiredViewModel ViewModel => field ??= new( GetSeat, GetComputer );
 
 	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
 
 	TheWiredUiState UiState =>
 		Navi.IsViewer ? Navi.GetState<TheWiredUiState>() ?? TheWiredUiState.Empty : ViewModel.UiState;
