@@ -35,6 +35,10 @@ public sealed class WeaponInventory : BaseInventoryComponent
 
 	protected override void OnStart()
 	{
+		// The base equips the weapon already in hand when this player arrives in a joining client's snapshot (snapshots
+		// don't run Change callbacks), so without it they saw the hold pose but no world model.
+		base.OnStart();
+
 		controller = GetComponent<PlayerController>();
 
 		// Without this move mode a player in a seat keeps walking: no sitting pose, and the eyes stay where they were.
