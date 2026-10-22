@@ -1,0 +1,76 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+@if ( Player is { } player )
+{
+	<root>
+		<div class="box @( low ? "low" : "" ) @( flashing ? "flash" : "" )">
+			<div class="name">Health</div>
+			<div class="counts">
+				<label class="value">@( (int)player.Health )</label>
+				<label class="max">/ @( (int)player.MaxHealth )</label>
+			</div>
+			@if ( player.Armour >= 1 )
+			{
+				<div class="armour">Armour @( (int)player.Armour )</div>
+			}
+		</div>
+	</root>
+}
+
+@code
+{
+	/// <summary>
+	/// Health counts as low at or below this fraction of the maximum, and the readout turns to the warning color.
+	/// </summary>
+	[Property, Range( 0, 1 )] public float LowHealthFraction { get; set; } = 0.2f;
+
+	/// <summary>
+	/// The readout flashes for this long when health drops.
+	/// </summary>
+	[Property, Range( 0, 1 )] public float DamageFlashDuration { get; set; } = 0.15f;
+
+	float lastHealth = -1;
+	TimeSince timeSinceDamage = 1000;
+
+	/// <summary>
+	/// The living local player. Nothing is drawn while a Navi app or a menu has the screen.
+	/// </summary>
+	PlayerHealth Player
+	{
+		get
+		{
+			if ( NaviInputCapture.Current is not null || AbilityMenu.IsOpen || CharacterMenu.IsOpen )
+				return null;
+
+			var player = PlayerHealth.FindLocalPlayer();
+			return player.IsValid() ? player : null;
+		}
+	}
+
+	bool low => Player is { } player && player.MaxHealth > 0 && player.Health <= player.MaxHealth * LowHealthFraction;
+
+	bool flashing => timeSinceDamage < DamageFlashDuration;
+
+	protected override void OnUpdate()
+	{
+		var player = PlayerHealth.FindLocalPlayer();
+		if ( !player.IsValid() )
+		{
+			lastHealth = -1;
+			return;
+		}
+
+		if ( lastHealth >= 0 && player.Health < lastHealth )
+			timeSinceDamage = 0;
+
+		lastHealth = player.Health;
+	}
+
+	protected override int BuildHash()
+	{
+		var player = Player;
+		return player.IsValid() ? HashCode.Combine( (int)player.Health, (int)player.MaxHealth, (int)player.Armour, low, flashing ) : 0;
+	}
+}

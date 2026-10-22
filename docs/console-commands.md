@@ -16,6 +16,16 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars and credits. |
 
+## Health
+
+Code: `Code/Health/`.
+
+| Command | What it does |
+|---|---|
+| `kill` | Kill yourself. You watch your ragdoll, then respawn after a few seconds or on a click. |
+| `god` | Toggle invulnerability (host, cheats). |
+| `omni.spawnprotection <seconds>` | Seconds of invulnerability after spawning. Default 5, 0 turns it off. Saved. |
+
 ## Weapons
 
 | Command | What it does |

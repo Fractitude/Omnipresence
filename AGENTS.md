@@ -56,6 +56,16 @@ Ported from Facepunch's open-source sandbox game (`github.com/Facepunch/sandbox`
 - Upstream hooks that need seats, NPCs or the `Player` type (`OnPrimaryPressed`, `OnCameraMove`, `OnPlayerDeath`, contraption inputs, `ImpactPrefab`'s direction argument) were dropped when porting. Scope sensitivity uses `PlayerController.LookSensitivity`.
 - **Leave `GiveOnStart` off on the player prefab's `WeaponInventory`** and turn `UsesLoadout` on: the engine's start-up grant made `PlayerController` throw a NullReferenceException while it was created. `WeaponInventory` grants the loadout itself 0.1 s later.
 
+## Health
+
+Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`, `PlayerFallDamage`, `HealthPickup`), in `Code/Health/`. The engine only gives `Component.IDamageable` and `DamageInfo`; the health is ours.
+
+- `PlayerHealth` is on the player prefab: `Health`, `MaxHealth`, `Armour` (synced from the host), `OnDamage` (host only: spawn protection, god mode, `OnDamaging` event that can cancel or change damage, headshot x2, armour first), then `Kill`: ragdoll, observer, destroy the player.
+- `GameManager` is a small version of upstream's: `PlayerData` per connection (kills, deaths, god mode), `SpawnPlayer`, `Respawn`, `RequestRespawn` (from `PlayerObserver`) and `OnDeath`. The first spawn is still the scene's `NetworkHelper`; respawns use its player prefab and spawn points.
+- Events are `Local.IPlayerEvents` and `Global.IPlayerEvents` (`PlayerEvents.cs`), the subset health needs. Fall damage comes from `PlayerController.IEvents.OnLanded` in `PlayerFallDamage`.
+- `HealthHud` (bottom left, like `AmmoHud`) is put on screen by `HealthHudSystem`. `PlayerDamageIndicators` paints the red direction arrows.
+- Not ported: Steam stats, the kill feed, gibs, `HudElement` hiding.
+
 ## Security
 
 **Always think about privilege escalation attacks.** For every change to Navi, ask how an app could use it to get permissions or root it wasn't granted, to act as another app, or to act without the player's consent. Assume Store apps are written by a stranger who wants that.
