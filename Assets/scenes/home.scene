@@ -53,12 +53,71 @@
                 {
                   "_type": "gameobject",
                   "go": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc"
+                },
+                {
+                  "_type": "gameobject",
+                  "go": "de245894-60b2-4e83-98f6-e24d2033eeb3"
                 }
               ],
               "StartServer": true
             }
           ],
           "Children": []
+        },
+        {
+          "__guid": "c122643a-14d8-47a1-a712-6eea09229c52",
+          "__version": 2,
+          "Flags": 0,
+          "Name": "Spawn Points",
+          "Position": "-21.799057,106.250122,-16.9569016",
+          "Rotation": "0,0,0,1",
+          "Scale": "1,1,1",
+          "Tags": "",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "NetworkFlags": 0,
+          "NetworkOrphaned": 0,
+          "NetworkTransmit": true,
+          "OwnerTransfer": 1,
+          "Components": [],
+          "Children": [
+            {
+              "__guid": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Spawn point",
+              "Position": "0,0,0",
+              "Rotation": "0,0,0,1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": []
+            },
+            {
+              "__guid": "de245894-60b2-4e83-98f6-e24d2033eeb3",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Spawn point (1)",
+              "Position": "-29.1676674,0,0",
+              "Rotation": "0,0,0,1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": []
+            }
+          ]
         },
         {
           "__guid": "ee9c0d25-fa24-4b62-b586-e7da25eecf45",
@@ -253,43 +312,6 @@
             }
           ],
           "Children": []
-        },
-        {
-          "__guid": "c122643a-14d8-47a1-a712-6eea09229c52",
-          "__version": 2,
-          "Flags": 0,
-          "Name": "Spawn Points",
-          "Position": "-21.799057,106.250122,-16.9569016",
-          "Rotation": "0,0,0,1",
-          "Scale": "1,1,1",
-          "Tags": "",
-          "Enabled": true,
-          "NetworkMode": 2,
-          "NetworkFlags": 0,
-          "NetworkOrphaned": 0,
-          "NetworkTransmit": true,
-          "OwnerTransfer": 1,
-          "Components": [],
-          "Children": [
-            {
-              "__guid": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc",
-              "__version": 2,
-              "Flags": 0,
-              "Name": "Spawn point 1",
-              "Position": "0,0,0",
-              "Rotation": "0,0,0,1",
-              "Scale": "1,1,1",
-              "Tags": "",
-              "Enabled": true,
-              "NetworkMode": 2,
-              "NetworkFlags": 0,
-              "NetworkOrphaned": 0,
-              "NetworkTransmit": true,
-              "OwnerTransfer": 1,
-              "Components": [],
-              "Children": []
-            }
-          ]
         }
       ]
     },
@@ -1889,12 +1911,12 @@
         "8a4c24de-e11e-87bd-d360-9b1d1112a9d5": "2d8639fb-b44a-4c29-921e-7563299476cf",
         "9b5d35ef-f22f-98ce-e471-ac2e2223bae6": "2dc7b7e0-4fb9-42a2-86ef-f6bb797b9a0f",
         "67b82163-0cee-4cd9-a778-f311348de612": "03382d8d-2193-44bf-a69d-178b44b86718",
-        "5d1f91ab-beeb-548a-a03d-68eaeed96a02": "bdb8036b-00f7-4fe1-bfdc-dec974600a07",
-        "6e2a02bc-cffc-659b-b14e-79fbfff07b13": "6657ade8-b269-4729-8c57-0cf2e6c90c7b",
-        "f0122cf0-28a8-48b5-aee8-1815d729ce56": "48179396-1a5a-40aa-9367-afc5ad7c7f22",
         "45dbfc9d-3b70-4986-994e-905d4f1670ba": "ea729f12-f7b4-4a1e-b141-5ba6573738f6",
         "7f3b13cd-d00d-76ac-c25f-8a0c000198c4": "38317216-7470-420e-adbc-6ce9cdce36df",
-        "558f08b2-be5c-411e-990a-9984fbea59ea": "ee95830c-ff18-47b1-a855-926ab8d9dbbf"
+        "558f08b2-be5c-411e-990a-9984fbea59ea": "ee95830c-ff18-47b1-a855-926ab8d9dbbf",
+        "5d1f91ab-beeb-548a-a03d-68eaeed96a02": "bdb8036b-00f7-4fe1-bfdc-dec974600a07",
+        "6e2a02bc-cffc-659b-b14e-79fbfff07b13": "6657ade8-b269-4729-8c57-0cf2e6c90c7b",
+        "f0122cf0-28a8-48b5-aee8-1815d729ce56": "48179396-1a5a-40aa-9367-afc5ad7c7f22"
       }
     },
     {

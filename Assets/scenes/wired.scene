@@ -275,8 +275,8 @@
               "__guid": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc",
               "__version": 2,
               "Flags": 0,
-              "Name": "Spawn point 1",
-              "Position": "0,0,0",
+              "Name": "Spawn point",
+              "Position": "-15.0390701,0,0",
               "Rotation": "0,0,0,1",
               "Scale": "1,1,1",
               "Tags": "",
@@ -333,7 +333,7 @@
           },
           "Scale": 0.3,
           "TextScope": {
-            "Text": "The Wired\nHang-out space",
+            "Text": "The Wired",
             "TextColor": "1,1,1,1",
             "FontName": "Poppins",
             "FontSize": 64,
@@ -933,7 +933,7 @@
           "IsStatic": true,
           "MaterialGroup": null,
           "Model": {
-            "Id": "da0b3bce-c4e0-4ff9-ae85-e6e0deb998a8",
+            "Id": "670886fb-c331-46f1-a6ec-cc81f27bd842",
             "Path": "super_computer.vmdl"
           },
           "OnComponentDestroy": null,
@@ -960,7 +960,7 @@
           "MaterialOverride": null,
           "Materials": null,
           "Model": {
-            "Id": "da0b3bce-c4e0-4ff9-ae85-e6e0deb998a8",
+            "Id": "670886fb-c331-46f1-a6ec-cc81f27bd842",
             "Path": "super_computer.vmdl"
           },
           "OnComponentDestroy": null,
@@ -988,7 +988,7 @@
           "Friction": null,
           "IsTrigger": false,
           "Model": {
-            "Id": "da0b3bce-c4e0-4ff9-ae85-e6e0deb998a8",
+            "Id": "670886fb-c331-46f1-a6ec-cc81f27bd842",
             "Path": "super_computer.vmdl"
           },
           "OnComponentDestroy": null,
