@@ -104,7 +104,13 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		// draws one while seated.
 		var seated = Scene.GetAllComponents<NaviComputer>().Any( x => x.IsSeated );
 		if ( seated && !wasSeated && ActiveWeapon.IsValid() )
-			ForceHolster();
+		{
+			// ForceHolster is host only; a client asks the host through Switch.
+			if ( !Networking.IsActive || Networking.IsHost )
+				ForceHolster();
+			else
+				Switch( null, allowHolster: true );
+		}
 
 		wasSeated = seated;
 
