@@ -1,0 +1,23 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	<div class="fade @( IsBlack ? "black" : "" )" style="transition: opacity @( Duration )s linear;"></div>
+</root>
+
+@code
+{
+	/// <summary>
+	/// How long the screen takes to go to black or back, in seconds.
+	/// </summary>
+	public const float Duration = 0.4f;
+
+	/// <summary>
+	/// Is the screen fading to black, or black? Not a property of the panel: the panel's handlers and its component were
+	/// not on the same instance, and this is set from anywhere (see AGENTS.md, UI pitfalls).
+	/// </summary>
+	public static bool IsBlack { get; set; }
+
+	protected override int BuildHash() => HashCode.Combine( IsBlack );
+}

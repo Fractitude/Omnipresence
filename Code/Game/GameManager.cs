@@ -196,6 +196,22 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		TeleportRpc( connection.Id, destination.Position, destination.Rotation.Angles().yaw );
 	}
 
+	/// <summary>
+	/// Fades one player's screen to black, or back. Host only; the screen is theirs, so only their client does it.
+	/// </summary>
+	public void Fade( Connection connection, bool toBlack )
+	{
+		Assert.True( Networking.IsHost, "Only the host fades a player's screen" );
+		FadeRpc( connection.Id, toBlack );
+	}
+
+	[Rpc.Broadcast( NetFlags.HostOnly | NetFlags.Reliable )]
+	void FadeRpc( Guid connection, bool toBlack )
+	{
+		if ( Connection.Local?.Id == connection )
+			ScreenFade.IsBlack = toBlack;
+	}
+
 	[Rpc.Broadcast( NetFlags.HostOnly | NetFlags.Reliable )]
 	void TeleportRpc( Guid connection, Vector3 position, float yaw )
 	{

@@ -1,0 +1,22 @@
+ScreenFade
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.fade
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	opacity: 0;
+	pointer-events: none;
+
+	&.black
+	{
+		opacity: 1;
+	}
+}

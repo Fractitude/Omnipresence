@@ -22,18 +22,59 @@ public static class WiredTravel
 		PlayerData.For( connection ) is { InWired: true } ? WiredPlace.Wired : WiredPlace.Home;
 
 	/// <summary>
+	/// Who is crossing now, so a second press can't start another while the screen fades.
+	/// </summary>
+	static HashSet<Guid> crossing = new();
+
+	/// <summary>
 	/// Connect the player to the Wired from home, or disconnect them back home from the Wired. Only the host can; does
-	/// nothing for someone without a body.
+	/// nothing for someone without a body. The screen fades to black, the player is moved while it is black, and it fades
+	/// back in.
 	/// </summary>
 	public static void Cross( Connection connection )
 	{
-		if ( !Networking.IsHost || GameManager.Current is not { } manager )
+		if ( !Networking.IsHost || connection is null || !crossing.Add( connection.Id ) )
 			return;
 
+		_ = CrossAsync( connection );
+	}
+
+	static async Task CrossAsync( Connection connection )
+	{
+		var manager = GameManager.Current;
+
+		try
+		{
+			if ( manager is null || !CanCross( connection ) )
+				return;
+
+			manager.Fade( connection, true );
+			await GameTask.DelaySeconds( ScreenFade.Duration );
+
+			// They may have died or left while the screen faded.
+			if ( CanCross( connection ) )
+				Move( manager, connection );
+
+			// The world swaps on their client a frame after they move; hold the black until it has.
+			await GameTask.DelaySeconds( 0.15f );
+		}
+		finally
+		{
+			crossing.Remove( connection.Id );
+
+			if ( manager is not null && Networking.IsHost )
+				manager.Fade( connection, false );
+		}
+	}
+
+	static bool CanCross( Connection connection ) =>
+		connection is not null && PlayerData.For( connection ).IsValid()
+		&& PlayerHealth.FindForConnection( connection ).IsValid();
+
+	static void Move( GameManager manager, Connection connection )
+	{
 		var data = PlayerData.For( connection );
 		var player = PlayerHealth.FindForConnection( connection );
-		if ( !data.IsValid() || !player.IsValid() )
-			return;
 
 		if ( !data.InWired )
 		{
