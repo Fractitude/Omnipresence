@@ -4,7 +4,7 @@
 
 @* The game's own system app, part of the OS: described by Assets/navi/system/thewired.napp, so it is always *@
 @* installed and has root. *@
-@* It is shared: the host's copy changes the scene, and every player sees the same window. *@
+@* It is shared: the host's copy moves the player in the seat, and every player sees the same window. *@
 
 <root>
 	<div class="status">@UiState.Status</div>
@@ -20,7 +20,9 @@
 	/// <summary>
 	/// The app's logic and its state, in the host's copy only.
 	/// </summary>
-	TheWiredViewModel ViewModel => field ??= new();
+	TheWiredViewModel ViewModel => field ??= new( GetSeat );
+
+	Connection GetSeat() => GameAppSeat.UserOf( this );
 
 	TheWiredUiState UiState =>
 		Navi.IsViewer ? Navi.GetState<TheWiredUiState>() ?? TheWiredUiState.Empty : ViewModel.UiState;
@@ -29,8 +31,11 @@
 	{
 		base.Tick();
 
-		if ( !Navi.IsViewer )
-			Navi.Publish( ViewModel.UiState );
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
 	}
 
 	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );

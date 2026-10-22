@@ -4,8 +4,8 @@ The game has two currencies. Each belongs to one world, and the two never mix.
 
 | Currency | World | Symbol | Field |
 | --- | --- | --- | --- |
-| Dollars | The real world (`home.scene`) | `$` | `PlayerProgress.Money` |
-| Credits | The Wired (`wired.scene`) | credits | `PlayerProgress.Credits` |
+| Dollars | The real world | `$` | `PlayerProgress.Money` |
+| Credits | The Wired (under the map, in the same scene) | credits | `PlayerProgress.Credits` |
 
 ## Rules
 

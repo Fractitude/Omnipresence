@@ -15,8 +15,8 @@ servers, and the server is the only place this data is kept and changed.
   a value; it can only ask for something to happen, and the host decides. Clients get a synced copy to draw the HUD.
 - **A player is a Steam ID.** Everything is keyed by `Connection.SteamId`. The host knows it, and a client can't
   fake it.
-- **Progress outlives the player object.** `WiredTravel` changes the scene for everyone, and the player object is
-  destroyed and spawned again. So the data lives in a static host-side service (`PlayerProgression`) and the
+- **Progress outlives the player object.** Dying destroys the player object and a new one is spawned. (`WiredTravel` only
+  teleports the player, so it doesn't.) So the data lives in a static host-side service (`PlayerProgression`) and the
   `PlayerProgress` component on the player only shows it and forwards changes to it.
 - **Level is derived.** The record stores XP, not level. `ProgressCurve` turns XP into a level, so changing the curve
   later never leaves saved data out of step.

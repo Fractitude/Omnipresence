@@ -98,7 +98,7 @@ public sealed class WorkbenchViewModel
 		HashCode.Combine(
 			seat?.Id,
 			progress?.Version,
-			WiredTravel.Current,
+			WiredTravel.PlaceOf( seat ),
 			notice ).ToString();
 
 	WorkbenchUiState Build()
@@ -113,7 +113,7 @@ public sealed class WorkbenchViewModel
 		if ( seat is null )
 			return state with { Message = "Sit down to use the workbench." };
 
-		if ( WiredTravel.Current == WiredPlace.Wired )
+		if ( WiredTravel.PlaceOf( seat ) == WiredPlace.Wired )
 			return state with { Message = "Your tools are at home. Disconnect first." };
 
 		if ( progress is not { Loaded: true } )

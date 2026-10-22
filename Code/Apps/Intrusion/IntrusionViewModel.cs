@@ -318,7 +318,7 @@ public sealed class IntrusionViewModel
 		HashCode.Combine(
 			seat?.Id,
 			progress?.Version,
-			WiredTravel.Current,
+			WiredTravel.PlaceOf( seat ),
 			screen ).ToString();
 
 	IntrusionUiState Build()
@@ -333,7 +333,7 @@ public sealed class IntrusionViewModel
 		if ( seat is null )
 			return state with { Message = "Sit down to use the terminal." };
 
-		if ( WiredTravel.Current == WiredPlace.Home )
+		if ( WiredTravel.PlaceOf( seat ) == WiredPlace.Home )
 			return state with { Message = "No signal. Connect to the Wired first." };
 
 		if ( progress is not { Loaded: true } )

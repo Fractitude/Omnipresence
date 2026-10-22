@@ -1,68 +1,82 @@
-using System;
-
 namespace Sandbox;
 
 /// <summary>
-/// Going between the real world (home.scene) and the Wired (wired.scene). The host changes the scene for everyone.
+/// Going between the real world and the Wired, which are in the same scene: the Wired is under the map. Connecting
+/// teleports the player to a random object tagged <see cref="SpawnTag"/>; disconnecting takes them back to where they
+/// were. Each player is in one or the other (<see cref="PlayerData.InWired"/>).
 /// </summary>
 public static class WiredTravel
 {
-	public const string HomeScene = "scenes/home.scene";
-	public const string WiredScene = "scenes/wired.scene";
+	/// <summary>
+	/// The tag on the objects in the scene where a player arrives in the Wired.
+	/// </summary>
+	public const string SpawnTag = "spawn_point_wired";
+
+	/// <summary>Approximate standing-player hull, used to find a spawn nobody is standing on.</summary>
+	static readonly BBox PlayerHull = new( new Vector3( -16f, -16f, 0f ), new Vector3( 16f, 16f, 72f ) );
 
 	/// <summary>
-	/// Where the player is: home, the Wired, or neither (another scene, e.g. the playground).
+	/// Where a player is: the real world, or the Wired. Someone without a body or data yet is in the real world.
 	/// </summary>
-	public static WiredPlace Current
+	public static WiredPlace PlaceOf( Connection connection ) =>
+		PlayerData.For( connection ) is { InWired: true } ? WiredPlace.Wired : WiredPlace.Home;
+
+	/// <summary>
+	/// Connect the player to the Wired from home, or disconnect them back home from the Wired. Only the host can; does
+	/// nothing for someone without a body.
+	/// </summary>
+	public static void Cross( Connection connection )
 	{
-		get
+		if ( !Networking.IsHost || GameManager.Current is not { } manager )
+			return;
+
+		var data = PlayerData.For( connection );
+		var player = PlayerHealth.FindForConnection( connection );
+		if ( !data.IsValid() || !player.IsValid() )
+			return;
+
+		if ( !data.InWired )
 		{
-			var path = Game.ActiveScene?.Source?.ResourcePath;
+			var destination = FindWiredSpawn();
+			if ( destination is null )
+			{
+				Log.Warning( $"WiredTravel: no object in the scene has the tag '{SpawnTag}'" );
+				return;
+			}
 
-			if ( string.Equals( path, HomeScene, StringComparison.OrdinalIgnoreCase ) )
-				return WiredPlace.Home;
-
-			if ( string.Equals( path, WiredScene, StringComparison.OrdinalIgnoreCase ) )
-				return WiredPlace.Wired;
-
-			return WiredPlace.Elsewhere;
+			data.HomeTransform = player.WorldTransform;
+			data.InWired = true;
+			manager.Teleport( connection, destination.Value );
+			return;
 		}
+
+		// Back to where they were, or to a spawn if they have no record (they were put in the Wired some other way).
+		var home = data.HomeTransform ?? manager.FindSpawnLocation();
+		data.InWired = false;
+		data.HomeTransform = null;
+		manager.Teleport( connection, home );
 	}
 
 	/// <summary>
-	/// Go to the Wired from home, or home from the Wired, bringing every player. Only the host can; does nothing
-	/// elsewhere.
+	/// A random Wired spawn that nobody is standing on, or null when the scene has none.
 	/// </summary>
-	public static void Cross()
+	static Transform? FindWiredSpawn()
 	{
-		if ( !Networking.IsHost )
-			return;
+		var spawns = Game.ActiveScene?.GetAllObjects( true )
+			.Where( x => x.Tags.Has( SpawnTag ) )
+			.OrderBy( _ => Random.Shared.Next() )
+			.Select( x => x.WorldTransform )
+			.ToArray();
 
-		var target = Current switch
-		{
-			WiredPlace.Home => WiredScene,
-			WiredPlace.Wired => HomeScene,
-			_ => null,
-		};
+		if ( spawns is null || spawns.Length == 0 )
+			return null;
 
-		if ( target is null )
-			return;
-
-		var options = new SceneLoadOptions();
-
-		if ( !options.SetScene( target ) )
-		{
-			Log.Warning( $"WiredTravel: can't find {target}" );
-			return;
-		}
-
-		Game.ChangeScene( options );
+		return SpawnPlacement.FindSpawnPosition( spawns, PlayerHull );
 	}
 }
 
 public enum WiredPlace
 {
-	Elsewhere,
 	Home,
 	Wired,
 }

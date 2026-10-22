@@ -71,6 +71,10 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 			return null;
 		}
 
+		// A new body is in the real world, wherever the last one died.
+		playerData.InWired = false;
+		playerData.HomeTransform = null;
+
 		var startLocation = FindSpawnLocation( helper ).WithScale( 1 );
 
 		// Fire pre-respawn event - listeners can move or cancel the spawn, unless we're forcing it
@@ -154,6 +158,16 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	Vector3? lastSpawnPosition;
 
 	/// <summary>
+	/// A place to spawn a player in the real world: <see cref="FindSpawnLocation(NetworkHelper)"/> for the scene's
+	/// <see cref="NetworkHelper"/>, or the origin without one.
+	/// </summary>
+	public Transform FindSpawnLocation()
+	{
+		var helper = Scene.GetAllComponents<NetworkHelper>().FirstOrDefault();
+		return helper.IsValid() ? FindSpawnLocation( helper ) : Transform.Zero;
+	}
+
+	/// <summary>
 	/// Find a place to respawn: one of the NetworkHelper's spawn points, settled onto the floor, that nobody is
 	/// standing on, avoiding the last one used. Without spawn points it is the NetworkHelper's own position.
 	/// </summary>
@@ -170,6 +184,33 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 
 		lastSpawnPosition = transform.Position;
 		return transform;
+	}
+
+	/// <summary>
+	/// Moves a player to <paramref name="destination"/> and stops them. Host only: the player's own machine does it,
+	/// since that is where their movement is simulated.
+	/// </summary>
+	public void Teleport( Connection connection, Transform destination )
+	{
+		Assert.True( Networking.IsHost, "Only the host teleports players" );
+		TeleportRpc( connection.Id, destination.Position, destination.Rotation.Angles().yaw );
+	}
+
+	[Rpc.Broadcast( NetFlags.HostOnly | NetFlags.Reliable )]
+	void TeleportRpc( Guid connection, Vector3 position, float yaw )
+	{
+		if ( Connection.Local?.Id != connection )
+			return;
+
+		var controller = Players.LocalController;
+		if ( !controller.IsValid() )
+			return;
+
+		controller.WorldPosition = position;
+		controller.EyeAngles = new Angles( 0, yaw, 0 );
+
+		if ( controller.Body.IsValid() )
+			controller.Body.Velocity = Vector3.Zero;
 	}
 
 	/// <summary>
