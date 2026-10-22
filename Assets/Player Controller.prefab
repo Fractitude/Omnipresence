@@ -279,7 +279,7 @@
         "__guid": "40beb48f-11a2-401d-9168-da02cbbde13f",
         "__enabled": true,
         "Flags": 0,
-        "RadialDamageIcon": null
+        "RadialDamageIcon": "ui/damage_radial.png"
       }
     ],
     "Children": [
