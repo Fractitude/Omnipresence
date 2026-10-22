@@ -1,10 +1,11 @@
 using Sandbox.Movement;
 
 /// <summary>
-/// Keeps another player's collider off for a moment after they get up from a seat. <see cref="BaseChair.Eject"/> moves
-/// the player to the exit point only on their own machine; everywhere else the parent change arrives before the new
-/// position, so <see cref="SitMoveMode"/> turned the collider back on inside the seat. On the host that collider shoved
-/// the vehicle (and the player with it) into the air.
+/// Keeps another player's collider off while they get in and out of a seat. <see cref="BaseChair.Sit"/> and
+/// <see cref="BaseChair.Eject"/> run only on the seated player's own machine; everywhere else only the parent change
+/// arrives. Sitting down, the collider stayed on for a physics step under the seat, and getting up,
+/// <see cref="SitMoveMode"/> turned it back on before the player had moved to the exit point. On the host either one
+/// shoved the vehicle (and the player with it) into the air.
 /// </summary>
 public sealed class SeatExitCollision : GameObjectSystem<SeatExitCollision>
 {
@@ -33,7 +34,10 @@ public sealed class SeatExitCollision : GameObjectSystem<SeatExitCollision>
 
 			if ( seated )
 			{
-				_seated.Add( player );
+				// Before the physics step that would have pushed the vehicle: SitMoveMode turns it off only after it.
+				if ( _seated.Add( player ) )
+					SetCollision( player, false );
+
 				_leftSeat.Remove( player );
 				continue;
 			}
