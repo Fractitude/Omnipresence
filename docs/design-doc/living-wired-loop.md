@@ -4,6 +4,36 @@ Companion to [living-wired.md](living-wired.md) and [living-wired-toys.md](livin
 
 It builds on what already exists: Intrusion and Operations ([hacking.md](../hacking.md)), the hardware store, workbench and rig ([hardware.md](../hardware.md)), the two currencies ([currency.md](../currency.md)), and character plus hacking levels.
 
+## What game this is (provisional)
+
+**Status: working hypothesis, not decided.** Picked because it builds on what already exists and is cheap to test. Change it freely if a playtest says otherwise.
+
+**Genre:** co-op heist game with a social hub.
+
+**What people do:** a crew (2 to 4) takes a job on a system, plans it, breaks in with stealth powers, and is graded on how clean it was (Ghost, Clean, Noisy, Sloppy). They spend the rewards on better gear and powers, then take a harder job. Between jobs they hang out, play short rounds and show off in the plaza.
+
+**Core fun:** pulling off a clean run under pressure with friends, using weird powers in clever ways.
+
+**Roles in a heist:** an **Operator** at the terminal (Intrusion puzzles, already built) and **Runners** in the 3D space (move, scout, disable cameras, carry data). Powers are the Runners' stealth gadgets.
+
+**How the other ideas fit**
+
+| Idea | Role in this game |
+| --- | --- |
+| Exploits (Glide, Phase, Mimic, ...) | Heist gadgets, plus play in the plaza |
+| Plaza rounds | Side activity between jobs, and a way to earn credits and warm up |
+| Protocols | Rules of a heist target (low gravity vault, dark floor) and of hang-out rooms |
+| Hang out, make things | The hub and the social glue, not the core |
+| Hardware, store, workbench | Gear progression (already built) |
+| Two currencies | Unchanged |
+
+**What this changes in the prototype order:** the first test is not the flight toy. It is **one small 3D heist for two players** (an Operator at a terminal, a Runner who has to get past sentries with Phase or Mimic). The question: *is a clean run tense and fun, and do two people need each other?* The flight toy is the second step, as the Runner's movement kit.
+
+**What would change the decision**
+
+- If the heist test is not fun, fall back to a party-round hub (B) or a social sandbox (C) using the same powers.
+- If friends mostly want to play with powers and not do jobs, make rounds the core.
+
 ## The fantasy
 
 **Home is small and dull. The Wired is a playground where the rules bend.** You jack in and you are a full body in a place with no real-world rules. You can fly, phase through walls, shrink, bend gravity, and play with friends. You get those abilities by **hacking** the Wired itself.
