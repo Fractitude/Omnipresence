@@ -37,7 +37,8 @@ public sealed class FirstPersonWorldInput : GameObjectSystem<FirstPersonWorldInp
 	/// </summary>
 	void Create()
 	{
-		if ( Scene.Camera?.GameObject.GetComponent<WorldInput>() is not { } cameraInput )
+		// Include disabled: a previous stand-in turned the camera's input off and may have been destroyed since.
+		if ( Scene.Camera?.GameObject.Components.Get<WorldInput>( FindMode.EverythingInSelf ) is not { } cameraInput )
 			return;
 
 		eye = new GameObject( true, "First Person World Input" );
