@@ -58,10 +58,10 @@ Ported from Facepunch's open-source sandbox game (`github.com/Facepunch/sandbox`
 
 ## Health
 
-Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`, `PlayerFallDamage`, `HealthPickup`), in `Code/Health/`. The engine only gives `Component.IDamageable` and `DamageInfo`; the health is ours.
+Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`, `PlayerFallDamage`, `HealthPickup`), in `Code/Health/` (the player's health, fall damage, HUD, pickup) and `Code/Game/` (`GameManager`, `PlayerData`, events, observer). The engine only gives `Component.IDamageable` and `DamageInfo`; the health is ours.
 
 - `PlayerHealth` is on the player prefab: `Health`, `MaxHealth`, `Armour` (synced from the host), `OnDamage` (host only: spawn protection, god mode, `OnDamaging` event that can cancel or change damage, headshot x2, armour first), then `Kill`: ragdoll, observer, destroy the player.
-- `GameManager` is a small version of upstream's: `PlayerData` per connection (kills, deaths, god mode), `SpawnPlayer`, `Respawn`, `RequestRespawn` (from `PlayerObserver`) and `OnDeath`. The first spawn is still the scene's `NetworkHelper`; respawns use its player prefab and spawn points.
+- `GameManager` is a `GameObjectSystem`, so the engine makes it in every scene and nothing needs to carry it. It is a small version of upstream's: `PlayerData` per connection (kills, deaths, god mode), `SpawnPlayer`, `Respawn`, `RequestRespawn` (from `PlayerObserver`) and `OnDeath`. The first spawn is still the scene's `NetworkHelper`; respawns use its player prefab and spawn points.
 - Events are `Local.IPlayerEvents` and `Global.IPlayerEvents` (`PlayerEvents.cs`), the subset health needs. Fall damage comes from `PlayerController.IEvents.OnLanded` in `PlayerFallDamage`.
 - `HealthHud` (bottom left, like `AmmoHud`) is put on screen by `HealthHudSystem`. `PlayerDamageIndicators` paints the red direction arrows.
 - Not ported: Steam stats, the kill feed, gibs, `HudElement` hiding.
