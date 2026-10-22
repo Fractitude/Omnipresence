@@ -12,11 +12,10 @@ public static class GameAppNetwork
 	public static bool IsOnline( NaviComputer computer ) => computer is { IsOnline: true };
 
 	/// <summary>
-	/// What an app says while its computer is offline: why, and what to do about it. The player turned the network off, or
-	/// the computer has no network card.
+	/// Why the computer is offline, in a short sentence: the player turned the network off, or it has no network card.
 	/// </summary>
 	public static string OfflineHint( NaviComputer computer ) => computer is { HasNetworkCard: true }
-		? "The network is turned off. Right-click the network icon in the taskbar and choose Go online."
+		? "The network is turned off."
 		: "This computer has no network card.";
 
 	/// <summary>

@@ -50,7 +50,7 @@ public sealed class TheWiredViewModel
 		_ when !GameAppNetwork.IsOnline( computer ) => new()
 		{
 			Revision = computer is { HasNetworkCard: true } ? 3 : 4,
-			Status = $"Not connected. {GameAppNetwork.OfflineMessage( computer )}",
+			Status = $"Not connected. {GameAppNetwork.OfflineHint( computer )}",
 		},
 		_ => new() { Revision = 1, Status = "Not connected.", ButtonText = "Connect" },
 	};
