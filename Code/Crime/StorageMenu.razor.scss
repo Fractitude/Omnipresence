@@ -1,0 +1,175 @@
+StorageMenu
+{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	font-family: Poppins;
+	color: #f2eee2;
+	text-shadow: 1px 1px 2px #1b1a2e;
+
+	&.open
+	{
+		pointer-events: all;
+		background-color: rgba(27, 26, 46, 0.35);
+	}
+}
+
+.window
+{
+	padding: 18px 20px;
+	flex-direction: column;
+	gap: 12px;
+	background-color: rgba(18, 17, 30, 0.9);
+	backdrop-filter-blur: 14px;
+	border: 1px solid rgba(242, 238, 226, 0.12);
+	border-radius: 10px;
+}
+
+.header
+{
+	justify-content: space-between;
+	align-items: center;
+
+	.title
+	{
+		font-size: 22px;
+		font-weight: 700;
+	}
+}
+
+.body
+{
+	flex-direction: row;
+	gap: 28px;
+}
+
+.column
+{
+	flex-direction: column;
+	gap: 8px;
+}
+
+.heading
+{
+	font-size: 14px;
+	font-weight: 700;
+	opacity: 0.7;
+}
+
+.empty
+{
+	font-size: 14px;
+	opacity: 0.6;
+}
+
+.close
+{
+	padding: 4px 12px;
+	font-size: 14px;
+	border-radius: 6px;
+	border: 1px solid rgba(242, 238, 226, 0.3);
+	cursor: pointer;
+
+	&:hover
+	{
+		background-color: rgba(242, 238, 226, 0.12);
+	}
+}
+
+.grid
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.slot
+{
+	width: 56px;
+	height: 56px;
+	padding: 4px;
+	pointer-events: all;
+	cursor: pointer;
+	background-color: rgba(8, 8, 16, 0.5);
+	border: 1px solid rgba(242, 238, 226, 0.12);
+	border-radius: 6px;
+
+	&:hover
+	{
+		border-color: rgba(125, 255, 176, 0.7);
+	}
+
+	&.empty
+	{
+		cursor: default;
+	}
+
+	&.dragged
+	{
+		opacity: 0.35;
+	}
+
+	.count
+	{
+		position: absolute;
+		right: 4px;
+		bottom: 2px;
+		font-size: 12px;
+		font-weight: 700;
+		color: #f2eee2;
+		text-shadow: 1px 1px 2px #1b1a2e;
+	}
+}
+
+.notice
+{
+	padding: 8px 10px;
+	border-radius: 6px;
+	background-color: rgba(242, 238, 226, 0.1);
+}
+
+.hint
+{
+	font-size: 13px;
+	opacity: 0.6;
+}
+
+.ghost
+{
+	position: absolute;
+	width: 56px;
+	height: 56px;
+	margin-left: -28px;
+	margin-top: -28px;
+	pointer-events: none;
+}
+
+.details
+{
+	position: absolute;
+	max-width: 260px;
+	padding: 10px 12px;
+	flex-direction: column;
+	gap: 4px;
+	pointer-events: none;
+	background-color: rgba(18, 17, 30, 0.95);
+	border: 1px solid rgba(242, 238, 226, 0.2);
+	border-radius: 6px;
+
+	.name
+	{
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	.description
+	{
+		font-size: 13px;
+		opacity: 0.8;
+	}
+}

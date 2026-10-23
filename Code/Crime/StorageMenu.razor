@@ -1,0 +1,292 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( IsOpen ? "open" : "" )" @onmouseup=@CancelDrag>
+	@if ( IsOpen && target.IsValid() && PlayerCrime.Local is { } crime && PlayerInventory.Local is { } bag )
+	{
+		<div class="window">
+			<div class="header">
+				<div class="title">Storage box</div>
+				<div class="close" @onclick=@Close>Close</div>
+			</div>
+			<div class="body">
+				<div class="column">
+					<div class="heading">@( $"Your bag ({bag.SlotCount - bag.FreeSlots}/{bag.SlotCount})" )</div>
+					<div class="grid" style="width: @( bag.Columns * (SlotSize + Gap) - Gap )px">
+						@for ( var i = 0; i < bag.SlotCount; i++ )
+						{
+							var slot = i;
+							var item = bag.At( slot );
+							<div class="slot @( item is null ? "empty" : "" )"
+							     @onclick=@( () => Store( slot ) )
+							     @onmouseover=@( () => HoverBag( slot ) )
+							     @onmouseout=@( () => HoverBag( -1, slot ) )>
+								@if ( item is not null )
+								{
+									<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath
+									          Icon=@ItemCatalog.IconFor( item ) Color=@ItemCatalog.ColorFor( item )/>
+									@if ( item.IsBatch )
+									{
+										<div class="count">@( $"x{item.Count}" )</div>
+									}
+								}
+							</div>
+						}
+					</div>
+				</div>
+				<div class="column">
+					@if ( !target.ViewReady )
+					{
+						<div class="heading">Storage box</div>
+						<div class="empty">Opening...</div>
+					}
+					else
+					{
+						<div class="heading">@( $"Storage box ({target.ViewCount}/{target.Capacity})" )</div>
+						<div class="grid" style="width: @( target.Columns * (SlotSize + Gap) - Gap )px">
+							@for ( var i = 0; i < target.Capacity; i++ )
+							{
+								var slot = i;
+								var item = target.ViewAt( slot );
+								<div class="slot @( item is null ? "empty" : "" ) @( dragBox == slot ? "dragged" : "" )"
+								     @onclick=@( () => Take( slot ) )
+								     @onmousedown=@( () => BeginDrag( slot ) )
+								     @onmouseup=@( () => EndDrag( slot ) )
+								     @onmouseover=@( () => HoverBox( slot ) )
+								     @onmouseout=@( () => HoverBox( -1, slot ) )>
+									@if ( item is not null )
+									{
+										<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath
+										          Icon=@ItemCatalog.IconFor( item )
+										          Color=@ItemCatalog.ColorFor( item )/>
+										@if ( item.IsBatch )
+										{
+											<div class="count">@( $"x{item.Count}" )</div>
+										}
+									}
+								</div>
+							}
+						</div>
+					}
+				</div>
+			</div>
+			@if ( crime.ToldCount > toldAtOpen )
+			{
+				<div class="notice">@crime.LastTold</div>
+			}
+			<div class="hint">Click an item to move it across. Drag an item in the box to rearrange it.</div>
+		</div>
+
+		@if ( Dragged is { } dragged )
+		{
+			var position = Mouse.Position * Panel.ScaleFromScreen;
+			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px">
+				<ItemIcon PrefabPath=@dragged.PrefabPath ModelPath=@dragged.ModelPath
+				          Icon=@ItemCatalog.IconFor( dragged ) Color=@ItemCatalog.ColorFor( dragged )/>
+			</div>
+		}
+		else if ( Hovered is { } hovered )
+		{
+			@* The full details of the item under the mouse, like the inventory shows. *@
+			var position = Mouse.Position * Panel.ScaleFromScreen;
+			<div class="details" style="left: @( position.x + 18 )px; top: @( position.y + 18 )px">
+				<div class="name">@hovered.Name</div>
+				@if ( hovered.IsBatch )
+				{
+					@foreach ( var line in ItemCatalog.DescribeLines( hovered ) )
+					{
+						<div class="description">@line</div>
+					}
+				}
+				@if ( !string.IsNullOrEmpty( hovered.Description ) )
+				{
+					<div class="description">@hovered.Description</div>
+				}
+			</div>
+		}
+	}
+</root>
+
+@code
+{
+	const int SlotSize = 56;
+	const int Gap = 6;
+
+	/// <summary>
+	/// Seconds between asks for the box's contents while the panel is open (the host may have changed them).
+	/// </summary>
+	const float RefreshSeconds = 2f;
+
+	/// <summary>
+	/// Whether the panel is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static StorageBox target;
+	static int toldAtOpen;
+	static int hoverBag = -1;
+	static int hoverBox = -1;
+	static int dragBox = -1;
+	static RealTimeSince sinceRefresh;
+
+	/// <summary>
+	/// The item dragged inside the box, or null.
+	/// </summary>
+	static ItemData Dragged => dragBox >= 0 && target.IsValid() ? target.ViewAt( dragBox ) : null;
+
+	/// <summary>
+	/// The item under the mouse while nothing is dragged, or null.
+	/// </summary>
+	static ItemData Hovered
+	{
+		get
+		{
+			if ( dragBox >= 0 )
+				return null;
+
+			if ( hoverBag >= 0 )
+				return PlayerInventory.Local?.At( hoverBag );
+
+			return hoverBox >= 0 && target.IsValid() ? target.ViewAt( hoverBox ) : null;
+		}
+	}
+
+	/// <summary>
+	/// Open the panel, from a storage box the player used. Does nothing with another menu open.
+	/// </summary>
+	public static void Open( StorageBox box )
+	{
+		if ( IsOpen || !box.IsValid() || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen
+		     || NaviInputCapture.Current is not null )
+			return;
+
+		target = box;
+		toldAtOpen = crime.ToldCount;
+		hoverBag = hoverBox = dragBox = -1;
+		box.ClearView();
+		IsOpen = true;
+		GameMenus.SetOpen( "storage", true );
+
+		// The host answers with the contents, and claims an unclaimed box for this player.
+		box.RequestRefresh();
+		sinceRefresh = 0;
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "storage", false );
+
+		if ( target.IsValid() )
+			target.ClearView();
+
+		target = null;
+		hoverBag = hoverBox = dragBox = -1;
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// The host said the box is not this player's: close the panel (the host told them why).
+	/// </summary>
+	public static void Refused( StorageBox box )
+	{
+		if ( IsOpen && target == box )
+			Close();
+	}
+
+	/// <summary>
+	/// Ask the host to move the bag's item in a slot into the box. Only the slot goes; the host checks everything.
+	/// </summary>
+	static void Store( int slot )
+	{
+		if ( target.IsValid() && PlayerInventory.Local?.At( slot ) is not null )
+			target.RequestStore( slot );
+	}
+
+	/// <summary>
+	/// Ask the host to move the box's item in a slot into the bag.
+	/// </summary>
+	static void Take( int slot )
+	{
+		if ( target.IsValid() && target.ViewAt( slot ) is not null )
+			target.RequestTake( slot );
+	}
+
+	static void BeginDrag( int slot )
+	{
+		if ( target.IsValid() && target.ViewAt( slot ) is not null )
+			dragBox = slot;
+	}
+
+	/// <summary>
+	/// The mouse came up on a slot of the box: the dragged item goes there. On the slot it came from it is a plain
+	/// click, which takes the item out instead.
+	/// </summary>
+	static void EndDrag( int slot )
+	{
+		var from = dragBox;
+		dragBox = -1;
+
+		if ( from >= 0 && from != slot && target.IsValid() )
+			target.RequestMoveInBox( from, slot );
+	}
+
+	static void CancelDrag() => dragBox = -1;
+
+	static void HoverBag( int slot, int leaving = -1 )
+	{
+		if ( slot >= 0 || hoverBag == leaving )
+			hoverBag = slot;
+	}
+
+	static void HoverBox( int slot, int leaving = -1 )
+	{
+		if ( slot >= 0 || hoverBox == leaving )
+			hoverBox = slot;
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		var controller = Players.LocalController;
+
+		// Leave if the player walked away or died, the box is gone, another menu took over, or Escape was pressed.
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || PlayerCrime.Local is null
+		     || controller is null || !target.IsValid() || !target.IsNear( controller.WorldPosition ) )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+
+		if ( sinceRefresh > RefreshSeconds )
+		{
+			sinceRefresh = 0;
+			target.RequestRefresh();
+		}
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash()
+	{
+		// The dragged icon and the details follow the mouse.
+		var following = dragBox >= 0 || hoverBag >= 0 || hoverBox >= 0;
+
+		return System.HashCode.Combine(
+			IsOpen, target.IsValid() ? target.ViewVersion : 0, PlayerInventory.Local?.Version,
+			PlayerCrime.Local?.ToldCount, System.HashCode.Combine( hoverBag, hoverBox, dragBox ),
+			following ? Mouse.Position : default );
+	}
+}
