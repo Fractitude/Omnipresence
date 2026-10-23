@@ -435,12 +435,12 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 | 7 | **NPC types** | Police and buyers first. Staff NPCs after the first test. Civilians and traffic later. |
 | 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
 | 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
-| 10 | **First product** | A **fictional** substance, so no real recipes. Theme still open. |
+| 10 | **First product** | **Static** (placeholder name): a glowing culture grown in the dark, pressed into tabs. Fictional and abstract. Two minigames: **Climate** (growing) and **Tuning** (pressing, like tuning a radio). See [crime-rp-first-product.md](crime-rp-first-product.md). |
 
 ## Open questions
 
 1. **Mature-content policy (action item).** Check s&box and Steam rules on drug themes, and the age rating, before the identity depends on it. A stylised, made-up substance is the fallback.
-2. **First product and its theme.** Name, look, the chain and what is special about it.
+2. **First product details.** Static is drafted in [crime-rp-first-product.md](crime-rp-first-product.md); its open questions live there.
 3. **Wipe details.** What happens to a base whose owner is away for weeks (decay, repossession)? Is there a starter bonus for returning players?
 4. **Offline raiding numbers.** The 3 times breach time, the 25 percent cap and the heat penalty need tuning.
 5. **Market hosting.** Do markets run on a physical computer in the base (raidable, can be unplugged), or in rented hosting (safer, a recurring cost, a different target)?
