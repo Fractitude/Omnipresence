@@ -157,6 +157,17 @@ public sealed class ProgressCache
 	public IReadOnlyList<ulong> PendingIds => pending.ToList();
 
 	/// <summary>
+	/// Take an id out of the index without writing its record, for a record that was found to have nothing waiting.
+	/// </summary>
+	public async Task ClearPendingAsync( ulong steamId )
+	{
+		await EnsureIndexAsync();
+
+		if ( pending.Remove( steamId ) )
+			await Store.SavePendingAsync( pending );
+	}
+
+	/// <summary>
 	/// Read the index once (or, when there is none, look at every record to make it). Every caller shares the one run.
 	/// </summary>
 	public Task EnsureIndexAsync() => indexTask ??= ReadIndexAsync();
