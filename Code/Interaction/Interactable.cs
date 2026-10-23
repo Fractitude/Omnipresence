@@ -209,7 +209,7 @@ public sealed class Interactable : Component, Component.IPressable
 		if ( wheel == 0f )
 			return;
 
-		if ( Mouse.Visibility == MouseVisibility.Visible )
+		if ( Mouse.Visibility == MouseVisibility.Visible || GameMenus.IsAnyOpen )
 			return;
 
 		var entries = GetEntries();
@@ -266,6 +266,10 @@ public sealed class Interactable : Component, Component.IPressable
 
 	bool Component.IPressable.Press( Component.IPressable.Event e )
 	{
+		// Use must not fire through an open window.
+		if ( GameMenus.IsAnyOpen )
+			return false;
+
 		var index = GetSelected( GetEntries() );
 		var interactor = Who( e );
 

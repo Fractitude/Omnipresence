@@ -47,7 +47,7 @@
 				Close();
 			}
 		}
-		else if ( Input.Pressed( "Abilities" ) && NaviInputCapture.Current is null && !CharacterMenu.IsOpen )
+		else if ( Input.Pressed( "Abilities" ) && NaviInputCapture.Current is null && !GameMenus.IsAnyOpen )
 		{
 			Open();
 		}
@@ -77,12 +77,14 @@
 	void Open()
 	{
 		IsOpen = true;
+		GameMenus.SetOpen( "abilities", true );
 		AbilityLoadout.BeginDrag( null, -1 );
 	}
 
 	void Close()
 	{
 		IsOpen = false;
+		GameMenus.SetOpen( "abilities", false );
 		AbilityLoadout.BeginDrag( null, -1 );
 		FreeControls( true );
 		Mouse.Visibility = MouseVisibility.Hidden;

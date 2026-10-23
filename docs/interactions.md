@@ -37,3 +37,7 @@ usable, then runs it. The GameObject must be a network object. Never trust a cli
 `NaviSpectatorSeat` (in the Navi library, which can't use game code) is a plain `IPressable`, so it shows a single hint.
 
 `Range` (default 50) is how far the player's eye can be from the object's colliders (its origin if it has none). Beyond it the prompt is hidden and the press does nothing. A press also has to pass a line-of-sight check: a ray from the eye to one of the object's colliders must hit that collider first. The host runs the same check on every press from a client, from the player's own eye. The engine only finds what the player looks at within `PlayerController.ReachLength`, so that is the most `Range` can reach. 0 turns the checks off.
+
+## Windows hide the prompts
+
+While any full-screen window (a menu that takes the mouse) is open, no interaction prompt or crosshair is drawn, the mouse wheel does not move the picked row, and Use does nothing (`Interactable.Press`). `GameMenus` (`Code/Hud/GameMenus.cs`) is the one switch. **A new window must register with it**: `GameMenus.SetOpen( "name", true )` when it opens and `SetOpen( "name", false )` on every way it closes (its Close, `OnDisabled`, the player leaving). The Character menu, the Ability menu and the packing panel do. `Crosshair.razor` and `Interactable` read `GameMenus.IsAnyOpen`; do not add another hard-coded menu check.

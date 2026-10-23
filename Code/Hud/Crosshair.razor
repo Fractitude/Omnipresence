@@ -4,7 +4,7 @@
 
 <root>
 	@* Hidden while a Navi app has the player's input: the view is on the screen then, not aimed at the world. *@
-	@if ( NaviInputCapture.Current is null && !AbilityMenu.IsOpen && !CharacterMenu.IsOpen )
+	@if ( NaviInputCapture.Current is null && !GameMenus.IsAnyOpen )
 	{
 		<div class="dot"></div>
 
@@ -77,7 +77,7 @@
 
 	protected override void OnUpdate()
 	{
-		if ( HideCursor && NaviInputCapture.Current is null && !AbilityMenu.IsOpen && !CharacterMenu.IsOpen )
+		if ( HideCursor && NaviInputCapture.Current is null && !GameMenus.IsAnyOpen )
 		{
 			Mouse.Visibility = MouseVisibility.Hidden;
 		}
@@ -88,7 +88,7 @@
 		var entries = Entries;
 		var menu = string.Join( "|", entries.Select( x => $"{x.Index}{x.Info.Label}{x.Info.Icon}{x.Info.Description}{x.Info.Enabled}" ) );
 
-		return System.HashCode.Combine( NaviInputCapture.Current, AbilityMenu.IsOpen, CharacterMenu.IsOpen, menu, Selected,
+		return System.HashCode.Combine( NaviInputCapture.Current, GameMenus.IsAnyOpen, menu, Selected,
 			(Hint?.Title, Hint?.Icon, Hint?.Description, Hint?.Enabled) );
 	}
 
