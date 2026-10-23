@@ -93,6 +93,14 @@ public static class ProgressCommands
 
 	static void ShiftTime( long seconds, bool relative )
 	{
+		// The host in the editor moves the clock itself, so it works without a player (a test of the offline
+		// processing).
+		if ( Application.IsEditor && Networking.IsHost )
+		{
+			WorldClock.Set( relative ? WorldClock.Now + seconds : seconds );
+			return;
+		}
+
 		if ( PlayerProgress.Local is not { Loaded: true } progress )
 		{
 			Log.Info( "No player progress yet" );

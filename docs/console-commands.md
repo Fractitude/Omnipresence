@@ -16,6 +16,7 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_give_crypto <amount>` | Give yourself crypto. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
+| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json` and the mailbox claims in `mailboxes_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
 
 ## Crime
 
@@ -28,6 +29,17 @@ Testing only, for the grow, press, post and Hush loop. They ask the host, which 
 | `crime_postal_now` | The mailman, the escrow release and the Exchange cash-outs are all due now. |
 | `crime_orders [count]` | Put more orders on the Hush board (up to 10). |
 | `crime_deliver_now` | Every delivery you bought in the Hush shop has reached your mailbox now. |
+
+## Offline processing
+
+Testing only, for the processing that carries on for players who are away (`OfflineCrimeSystem`, see [crime.md](crime.md), "When a player is away"). Editor only, on the host: they refuse anywhere else. Code: `Code/Crime/OfflineCommands.cs`.
+
+| Command | What it does |
+| --- | --- |
+| `offline_away` | Take your player object away without disconnecting, like a player who left or who is dead. The processor carries on with your record. |
+| `offline_back` | Respawn your player after `offline_away`. |
+| `offline_status` | Log the clock, the ids with work waiting, and for each whether a player is attached, whether the record is in memory and when the next event and the next look are. |
+| `offline_rescan` | Look at every saved record and rebuild the index of players with work waiting (`progress/_pending.json`). |
 
 ## Health
 
@@ -55,7 +67,7 @@ Code: `Code/Health/`.
 
 ## World clock
 
-The game's own time. A new world starts at 12:00 on Day 1, which is a Monday, and the host saves it to `world.json`. Same rules as above: editor only, and the host moves the clock for everyone. Clients follow on the next sync. Moving the clock back delays shipments; moving it forward makes them arrive.
+The game's own time. A new world starts at 12:00 on Day 1, which is a Monday, and the host saves it to `world.json`. Same rules as above: editor only, and the host moves the clock for everyone (the host in the editor moves it itself, so it works while your player is away). Clients follow on the next sync. Moving the clock back delays shipments; moving it forward makes them arrive.
 
 | Command | What it does |
 |---|---|
