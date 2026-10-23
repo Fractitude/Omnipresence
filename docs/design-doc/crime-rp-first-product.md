@@ -23,7 +23,9 @@ It was picked for four reasons:
 | 4 | **Dry** | Drying rack | Passive | About 6 min | 10 s to load and unload |
 | 5 | **Press** | Press bench | Minigame: **Tuning** | About 90 s | Fully active |
 | 6 | **Pack** | Any table | Quick UI | 30 s | 30 s |
-| 7 | **Sell** | Dark web or street | Market | N/A | N/A |
+| 7 | **Sell** | Dark web or street | Market, shipped by mail (see the market app doc) | N/A | N/A |
+
+Before step 1, you need **ingredients** (see "Ingredients and crafting" below).
 
 One batch is about **21 minutes** and only about **5 minutes** of active play. You run several in parallel, and use the waiting time for hacking, driving, defending, or other crimes.
 
@@ -117,6 +119,60 @@ Ignoring one is fine for a while. The case file adds it up.
 - **Sabotage:** break in and taint your culture, hack your controller, cut your power, tip off police.
 - **Raid:** police or rivals take the lab and the product.
 - **Nobody dies from the lab.** Fire damage is small and survivable.
+
+## Ingredients and crafting
+
+Step 0 of the chain: you need materials. Everything here is made up and abstract.
+
+### What Static needs
+
+| Ingredient | Used in | Grades |
+| --- | --- | --- |
+| **Culture** | Growing (starts the tray) | Wild, Cultivated, Elite |
+| **Nutrient Medium** | Growing (feeds the tray) | Technical, Lab, Reagent |
+| **Carrier** | Pressing (the Tuning minigame needs a stable base) | Technical, Lab, Reagent |
+| **Binder** | Pressing (holds the tab together) | Technical, Lab, Reagent |
+| **Filler** | Cutting (stretches the batch) | One grade |
+
+- **Input grade caps output quality.** Technical caps a batch near Street, Lab near Clean, Reagent allows Pure.
+- **Amounts scale with the batch.** A tray uses one Medium. A press run uses Carrier and Binder per ten tabs.
+
+### Three sources
+
+| Source | How it works | Risk | Cost |
+| --- | --- | --- | --- |
+| **Pharmacy** | An NPC shop in town. Legal and open to anyone with ID. Stock is limited and refills daily. | **Purchase records.** Odd or bulk buys are reported to the police. The pharmacist notices combinations. | Low to medium |
+| **Dark web** | Any amount through Hush, delivered by mail. | Mail inspection, mailbox theft, a strange sender. | High |
+| **Craft** | Make Carrier, Binder and Medium at a bench from basic materials. | Time, equipment tells (noise, smell, heat), and no record at all. | Lowest at scale |
+
+### The pharmacy
+
+- **Daily limit per ID** for each controlled ingredient. Over the limit the clerk refuses.
+- **Purchase log:** every controlled purchase is recorded with your ID. The police can read it. Records age out slowly.
+- **Suspicion:** buying many controlled items together, or the same thing every day, adds to your case file.
+- **Smurfing:** several small buys on different days, or with different IDs, keeps the log quiet but costs time.
+- **Fake IDs** can be bought or crafted. A fake ID's use leaves a different kind of record.
+- **The pharmacy is a target:** hack its records to erase purchases (an Intrusion operation), or rob it at night (alarm, cameras, guard NPC).
+
+### Crafting
+
+- **Benches:** a **Mixing Bench** makes Medium, Carrier and Binder from base materials (basic powders, water, solvents, all fictional). Better benches make higher grades.
+- **A light minigame:** set ratios with sliders and watch a gauge settle (about 20 to 40 seconds). It is not Tuning, it is quick and repeatable.
+- **Recipes** are unlocked by **blueprints**. Blueprints come from Intrusion servers and operations, so hacking feeds crafting.
+- **Base materials** are cheap, found at shops, scrap yards and the dark web.
+- **Tells:** a bench adds noise and a smell, like any other equipment.
+
+### Product roster (draft)
+
+Players need several products because demand shifts (see [crime-rp-dark-web-app.md](crime-rp-dark-web-app.md)). Each has different ingredients, equipment and a different minigame. Only Static is designed.
+
+| Product | Form | Idea | Minigame idea |
+| --- | --- | --- | --- |
+| **Static** | Glowing tabs | Grown, then tuned | Climate and Tuning |
+| **Frost** | Powder | Cooked from precursors, a loud and fast product | Temperature and timing |
+| **Haze** | Liquid | Distilled, slow and quiet | Pressure and flow |
+| **Pulse** | Capsules | Pressed from a few reagents, cheap and mass-market | A pill press rhythm game |
+| **Data** | Files | Stolen, packaged and sold as documents | Hacking |
 
 ## Equipment ladder
 

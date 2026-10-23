@@ -17,6 +17,32 @@ A persistent crime roleplay server with no jobs: grow and cook drugs, hack for m
 5. **Two worlds, two kinds of power, one reality.** In the real world you rely on guns, cars and cash. In the Wired you rely on powers and levels. Wired power reaches into the real world through its networked systems, and the Wired leaks into it.
 6. **Players make the stories.** Rivalries, betrayals, raids, takeovers.
 
+## In short: Rust, but the fight is business
+
+The structure is Rust's: gather, craft, build a base, defend it, expand, and start again each season. The contest is not combat between players. It is **business competition**: market share, prices, reputation, supply, and sabotage.
+
+| Rust | This game |
+| --- | --- |
+| Gather wood, stone, metal | Get ingredients: the pharmacy, the dark web, or craft them |
+| Craft tools and weapons | Craft equipment, precursors, packaging, products |
+| Build a base | A house, a lab, a warehouse, with smart devices and a network |
+| Raid for loot | Sabotage: hack a controller, steal from a mailbox, tip off the police, raid a lab. Possible, but not the main path. |
+| Fight players for resources | Compete for **customers, price and reputation** |
+| Monuments and NPC towns | The pharmacy, the post office, banks, the police, NPC buyers |
+| Clans | Crews, cartels, market operators |
+| Offline defence | Locks, alarms, cameras, guards, a clean network |
+| Tech tree | Blueprints, recipes, hardware, Wired power |
+| Wipe | Seasons that reset the business and keep skills |
+| Leaderboard of kills | Leaderboard of net worth, market share, reputation |
+
+**What follows from that**
+
+- Violence is **not the efficient path**. Police, heat and reputation punish it. Guns exist for defence and desperate moments.
+- **Winning looks like** the biggest, best-liked, hardest-to-catch business, not the biggest body count.
+- **Players hurt each other economically first:** undercutting, poaching vendors, stealing customers, ruining a rival's batch, leaking their data, getting them raided by police.
+- **Direct fighting is the last resort,** and it is costly.
+- A season ends with **rankings** (net worth, market share, rep) and titles.
+
 ## The two worlds
 
 | | **Real world (home map)** | **The Wired** |
