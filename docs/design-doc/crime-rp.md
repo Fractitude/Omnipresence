@@ -653,6 +653,7 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 | 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
 | 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
 | 10 | **First product** | **Static** (placeholder name): a glowing culture grown in the dark, pressed into tabs. Fictional and abstract. Two minigames: **Climate** (growing) and **Tuning** (pressing, like tuning a radio). See [crime-rp-first-product.md](crime-rp-first-product.md). |
+| 15 | **Player-made websites** | Players can build any kind of site, including scam sites and credential-stealing phishing pages, and send phishing emails. Everything is in-game: game-issued logins, game-drawn pages (no scripts, no real browser engine), capture keeps only real in-game matches, host authority. Comes after the first loop. See [crime-rp-websites.md](crime-rp-websites.md). |
 | 12 | **Currencies** | **Three:** Cash (dollars), Credits (the Wired) and Crypto (the dark web). Credits never convert. Crypto and cash convert through an exchange with fees and evidence. The dark web pays crypto. See "Three currencies". |
 | 13 | **Consumables** | Products can be **used** for temporary effects (pain tolerance, speed, less need for sleep, hacking focus), with crashes, tolerance and overdose. See "Consumables". |
 | 14 | **Street sales** | Selling directly to NPCs and players for cash is planned for later and is riskier than the dark web. See "Street sales". |
