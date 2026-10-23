@@ -61,20 +61,20 @@ public static class Exchange
 	}
 
 	/// <summary>
-	/// Pay the cash-outs whose delay is over. A payment the wallet cannot hold yet waits. Returns whether any was paid.
+	/// Pay the cash-outs whose delay is over by <paramref name="now"/>, into the record. Needs no player: the offline
+	/// processor calls it too. A payment the record cannot hold yet waits. Returns whether any was paid. Host only.
 	/// </summary>
-	public static bool Settle( PlayerWallet wallet, CrimeRecord crime )
+	public static bool Settle( ProgressRecord record, long now )
 	{
-		if ( !Networking.IsHost || wallet is null || crime is null )
+		if ( !Networking.IsHost || record?.Crime is null )
 			return false;
 
-		var now = WorldClock.Now;
-		var due = crime.Cashouts.Where( x => x.ReadyAt <= now && wallet.CanHoldCash( x.Cash ) ).ToList();
+		var due = record.Crime.Cashouts.Where( x => x.ReadyAt <= now && record.CanHoldCash( x.Cash ) ).ToList();
 
 		foreach ( var cashout in due )
 		{
-			wallet.AddCash( cashout.Cash );
-			crime.Cashouts.Remove( cashout );
+			record.AddCash( cashout.Cash );
+			record.Crime.Cashouts.Remove( cashout );
 		}
 
 		return due.Count > 0;

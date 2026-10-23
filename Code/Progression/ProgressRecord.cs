@@ -158,6 +158,51 @@ public sealed class ProgressRecord
 			Payments.RemoveRange( 0, Payments.Count - PaymentRecord.MaxKept );
 	}
 
+	// -- Balances and shipments ---------------------------------------------------------------------------------------
+	// Pure changes to the record, with the caps in one place. The PlayerWallet is the door for gameplay code and calls
+	// these; the crime rules call them on a record with no player (see CrimeRules).
+
+	internal bool CanHoldCash( long amount ) => Money + amount <= MaxMoney;
+
+	internal bool CanHoldCrypto( long amount ) => Crypto + amount <= MaxCrypto;
+
+	internal void AddCash( long amount )
+	{
+		if ( amount > 0 )
+			Money = System.Math.Min( Money + amount, MaxMoney );
+	}
+
+	internal void AddCredits( long amount )
+	{
+		if ( amount > 0 )
+			Credits = System.Math.Min( Credits + amount, MaxCredits );
+	}
+
+	internal void AddCrypto( long amount )
+	{
+		if ( amount > 0 )
+			Crypto = System.Math.Min( Crypto + amount, MaxCrypto );
+	}
+
+	/// <summary>
+	/// Move the hardware packages that have arrived by <paramref name="now"/> into the inventory. Returns whether any
+	/// moved.
+	/// </summary>
+	internal bool DeliverShipments( long now )
+	{
+		var arrived = Shipments.Where( x => x.ArriveAt <= now ).ToList();
+
+		foreach ( var shipment in arrived )
+		{
+			Shipments.Remove( shipment );
+
+			if ( Inventory.Count < MaxPieces )
+				Inventory.Add( shipment.ItemId );
+		}
+
+		return arrived.Count > 0;
+	}
+
 	public const int MaxPieces = 500;
 	const int MaxIds = 500;
 	const int MaxIdLength = 64;

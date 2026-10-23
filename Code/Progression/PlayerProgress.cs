@@ -371,21 +371,8 @@ public sealed class PlayerProgress : Component
 	/// </summary>
 	void Deliver()
 	{
-		var now = WorldClock.Now;
-		var arrived = record.Shipments.Where( x => x.ArriveAt <= now ).ToList();
-
-		if ( arrived.Count == 0 )
-			return;
-
-		foreach ( var shipment in arrived )
-		{
-			record.Shipments.Remove( shipment );
-
-			if ( record.Inventory.Count < ProgressRecord.MaxPieces )
-				record.Inventory.Add( shipment.ItemId );
-		}
-
-		Changed( ProgressChange.Hardware );
+		if ( record.DeliverShipments( WorldClock.Now ) )
+			Changed( ProgressChange.Hardware );
 	}
 
 	internal void AddPayment( PaymentRecord payment )

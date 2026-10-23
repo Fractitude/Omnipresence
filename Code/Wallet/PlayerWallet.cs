@@ -87,12 +87,13 @@ public sealed class PlayerWallet : Component
 	/// <summary>
 	/// Whether the player can hold this many more dollars before the cap.
 	/// </summary>
-	public bool CanHoldCash( long amount ) => Cash + amount <= ProgressRecord.MaxMoney;
+	public bool CanHoldCash( long amount ) => Record?.CanHoldCash( amount ) ?? Cash + amount <= ProgressRecord.MaxMoney;
 
 	/// <summary>
 	/// Whether the player can hold this much more crypto before the cap.
 	/// </summary>
-	public bool CanHoldCrypto( long amount ) => Crypto + amount <= ProgressRecord.MaxCrypto;
+	public bool CanHoldCrypto( long amount ) =>
+		Record?.CanHoldCrypto( amount ) ?? Crypto + amount <= ProgressRecord.MaxCrypto;
 
 	/// <summary>
 	/// Give dollars. Host only. Zero and negative amounts are ignored.
@@ -102,7 +103,7 @@ public sealed class PlayerWallet : Component
 		if ( !CanChange || amount <= 0 )
 			return;
 
-		Record.Money = System.Math.Min( Record.Money + amount, ProgressRecord.MaxMoney );
+		Record.AddCash( amount );
 		Changed();
 	}
 
@@ -127,7 +128,7 @@ public sealed class PlayerWallet : Component
 		if ( !CanChange || amount <= 0 )
 			return;
 
-		Record.Credits = System.Math.Min( Record.Credits + amount, ProgressRecord.MaxCredits );
+		Record.AddCredits( amount );
 		Changed();
 	}
 
@@ -152,7 +153,7 @@ public sealed class PlayerWallet : Component
 		if ( !CanChange || amount <= 0 )
 			return;
 
-		Record.Crypto = System.Math.Min( Record.Crypto + amount, ProgressRecord.MaxCrypto );
+		Record.AddCrypto( amount );
 		Changed();
 	}
 

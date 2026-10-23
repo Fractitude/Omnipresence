@@ -184,7 +184,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	/// <summary>
 	/// A copy of the crime state changed: show it, save it soon and tell the scene.
 	/// </summary>
-	void Changed()
+	void Changed( ProgressChange also = ProgressChange.None )
 	{
 		var crime = Crime;
 
@@ -192,7 +192,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return;
 
 		RefreshViews();
-		Progress.NotifyChanged( ProgressChange.Crime );
+		Progress.NotifyChanged( ProgressChange.Crime | also );
 	}
 
 	// -- Inventory: the batches survive a restart by being copied into the record ------------------------------------
@@ -773,151 +773,36 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	// -- Time ---------------------------------------------------------------------------------------------------------
 
 	/// <summary>
-	/// Once a second on the host: the post, deadlines, escrow and the Exchange.
+	/// Once a second on the host: the post, deadlines, escrow and the Exchange, by the same rules that run for a player
+	/// who is away (<see cref="CrimeRules"/>). What they did to the record is shown here: the bag, the messages, the
+	/// views.
 	/// </summary>
 	void Tick()
 	{
-		var crime = Crime;
 		RefreshViews();
 
-		var changed = PostalSystem.Tick( crime, OnParcelDelivered );
+		var result = CrimeRules.Advance( Progress.Owner.SteamId, Progress.Record, WorldClock.Now );
 
-		changed |= PostalSystem.TickDeliveries( crime );
-		changed |= CheckOrders( crime );
-		changed |= Exchange.Settle( Wallet, crime );
+		foreach ( var orderId in result.CancelledOrders )
+			TakeParcelsOf( orderId );
+
+		foreach ( var message in result.Messages )
+			Tell( CrimeResult.Fail( message ) );
 
 		UpdateFlag();
 
-		if ( changed )
-			Changed();
+		if ( result.Changed )
+			Changed( result.HardwareChanged ? ProgressChange.Hardware : ProgressChange.None );
 	}
 
 	/// <summary>
-	/// A parcel arrived. If it was for an order in time, the buyer reviews it now and the payment is released after the
-	/// escrow delay; if it came too late the order is dead.
+	/// A parcel for a cancelled order that is still in the player's bag is taken, since nobody wants it.
 	/// </summary>
-	void OnParcelDelivered( ParcelRecord parcel )
+	void TakeParcelsOf( string orderId )
 	{
-		var crime = Crime;
-		var order = crime.Orders.FirstOrDefault( x => x.Id == parcel.OrderId );
-
-		if ( order is not { State: OrderState.Shipped } )
-			return;
-
-		order.State = OrderState.Delivered;
-		order.ReleaseAt = WorldClock.Now + CrimeCatalog.EscrowSeconds;
-
-		// The part of the delivery window the parcel took, from accepting to arriving.
-		var window = (double)CrimeCatalog.DeliverWindowSeconds;
-		var timeUsed = System.Math.Clamp( (parcel.DeliverAt - (order.Deadline - window)) / window, 0, 1 );
-
-		// The deadline only governs sending: a parcel that comes after it is still paid for, and rated lower.
-		var secondsLate = parcel.DeliverAt - order.Deadline;
-		var stars = CrimeCatalog.Stars(
-			order.Personality, order.MinQuality, order.PackedQuality, secondsLate, timeUsed, random );
-
-		AddReview( order, stars, CrimeCatalog.PickReview( order.Personality, stars, secondsLate > 0, random ) );
-	}
-
-	void AddReview( OrderRecord order, int stars, string text )
-	{
-		var crime = Crime;
-
-		crime.Reviews.Add( new() { At = WorldClock.Now, Handle = order.Handle, Stars = stars, Text = text } );
-
-		if ( crime.Reviews.Count > CrimeRecord.MaxReviews )
-			crime.Reviews.RemoveAt( 0 );
-
-		crime.RatingSum += stars;
-		crime.RatingCount++;
-	}
-
-	/// <summary>
-	/// Release escrow for delivered orders, and cancel the ones that ran out of time.
-	/// </summary>
-	bool CheckOrders( CrimeRecord crime )
-	{
-		var now = WorldClock.Now;
-		var changed = false;
-
-		foreach ( var order in crime.Orders.ToList() )
-		{
-			if ( order.State == OrderState.Delivered && now >= order.ReleaseAt )
-				changed |= Release( crime, order );
-			else if ( now > order.Deadline && (order.State == OrderState.Accepted || order.State == OrderState.Packed) )
-			{
-				Cancel( order, "The deadline passed. The buyer cancelled the order." );
-				changed = true;
-			}
-			else if ( order.State == OrderState.Shipped )
-			{
-				changed |= CheckShipped( crime, order, now );
-			}
-		}
-
-		return changed;
-	}
-
-	/// <summary>
-	/// A sent order is never cancelled by the clock for being late, but one whose parcel is gone, or never completes,
-	/// would stay sent forever and block a slot. A missing parcel, or one that waited too long past the deadline, is
-	/// lost in the post (no penalty: it is not the player's fault); a parcel that is delivered while its order was
-	/// missed is completed through the normal path, once.
-	/// </summary>
-	bool CheckShipped( CrimeRecord crime, OrderRecord order, long now )
-	{
-		var parcel = crime.Parcels.FirstOrDefault( x => x.OrderId == order.Id );
-
-		if ( parcel is { State: ParcelState.Delivered } )
-		{
-			OnParcelDelivered( parcel );
-			return true;
-		}
-
-		if ( parcel is not null && now <= order.Deadline + CrimeCatalog.ShippedMaxSeconds )
-			return false;
-
-		order.State = OrderState.Cancelled;
-		Log.Info( $"PlayerCrime: order {order.Id} lost in the post" );
-		Tell( CrimeResult.Fail( "Your parcel was lost in the post. The order is cancelled." ) );
-		return true;
-	}
-
-	/// <summary>
-	/// Pay the player what escrow held, less the reputation fee.
-	/// </summary>
-	bool Release( CrimeRecord crime, OrderRecord order )
-	{
-		var gross = order.Total;
-		var fee = gross * CrimeCatalog.FeeFor( crime ) / 100;
-		var paid = gross - fee;
-
-		if ( !Wallet.CanHoldCrypto( paid ) )
-			return false;
-
-		Wallet.AddCrypto( paid );
-		order.Paid = paid;
-		order.State = OrderState.Released;
-		crime.GoodTrades++;
-		return true;
-	}
-
-	/// <summary>
-	/// The order is dead: it costs reputation (a bad trade and a one star review), and a parcel still in the player's bag is
-	/// taken, since nobody wants it.
-	/// </summary>
-	void Cancel( OrderRecord order, string reason )
-	{
-		var crime = Crime;
-
-		order.State = OrderState.Cancelled;
-		crime.BadTrades++;
-		AddReview( order, CrimeCatalog.CancelStars, CrimeCatalog.PickCancelReview( random ) );
-		Log.Info( $"PlayerCrime: order {order.Id} cancelled: {reason}" );
-
 		for ( var i = 0; i < Inventory.SlotCount; i++ )
 		{
-			if ( Inventory.At( i ) is { Kind: ItemCatalog.Parcel } parcel && parcel.OrderId == order.Id )
+			if ( Inventory.At( i ) is { Kind: ItemCatalog.Parcel } parcel && parcel.OrderId == orderId )
 				Inventory.TakeBatch( i );
 		}
 	}
@@ -947,7 +832,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		foreach ( var delivery in Crime.Deliveries )
 			delivery.ArriveAt = System.Math.Min( delivery.ArriveAt, WorldClock.Now );
 
-		PostalSystem.TickDeliveries( Crime );
+		PostalSystem.TickDeliveries( Crime, WorldClock.Now );
 		Changed();
 	}
 

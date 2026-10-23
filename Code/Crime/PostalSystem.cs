@@ -2,9 +2,10 @@ namespace Sandbox;
 
 /// <summary>
 /// The post: the mailman collects parcels from mailboxes at fixed times on the game clock (every
-/// <see cref="CrimeCatalog.CollectPeriod"/> seconds), and a collected parcel takes <see cref="CrimeCatalog.TransitSeconds"/>
-/// to arrive. Sending just before a collection is faster. Host only; <see cref="PlayerCrime"/> ticks it once a second, the
-/// way <see cref="PlayerProgress"/> delivers store packages.
+/// <see cref="CrimeCatalog.CollectPeriod"/> seconds), and a collected parcel takes
+/// <see cref="CrimeCatalog.TransitSeconds"/> to arrive. Sending just before a collection is faster. Host only;
+/// <see cref="CrimeRules"/> ticks it, for a player on <see cref="PlayerCrime"/> once a second and for one who is
+/// away on <see cref="OfflineCrimeSystem"/>.
 /// </summary>
 public static class PostalSystem
 {
@@ -48,11 +49,11 @@ public static class PostalSystem
 	public static int InPost( CrimeRecord crime ) => crime.Parcels.Count( x => x.State != ParcelState.Delivered );
 
 	/// <summary>
-	/// Deliveries bought in the shop whose time is up reach the mailbox. Returns whether anything changed.
+	/// Deliveries bought in the shop whose time is up by <paramref name="now"/> reach the mailbox. Returns whether
+	/// anything changed.
 	/// </summary>
-	public static bool TickDeliveries( CrimeRecord crime )
+	public static bool TickDeliveries( CrimeRecord crime, long now )
 	{
-		var now = WorldClock.Now;
 		var changed = false;
 
 		foreach ( var delivery in crime.Deliveries
@@ -66,12 +67,11 @@ public static class PostalSystem
 	}
 
 	/// <summary>
-	/// Move the parcels along: collected when the mailman comes, delivered when their time is up. Calls
-	/// <paramref name="delivered"/> for each parcel that arrives. Returns whether anything changed.
+	/// Move the parcels along as of <paramref name="now"/>: collected when the mailman comes, delivered when their time
+	/// is up. Calls <paramref name="delivered"/> for each parcel that arrives. Returns whether anything changed.
 	/// </summary>
-	public static bool Tick( CrimeRecord crime, System.Action<ParcelRecord> delivered )
+	public static bool Tick( CrimeRecord crime, long now, System.Action<ParcelRecord> delivered )
 	{
-		var now = WorldClock.Now;
 		var changed = false;
 
 		foreach ( var parcel in crime.Parcels.ToList() )
