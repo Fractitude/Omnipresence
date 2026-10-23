@@ -20,7 +20,7 @@
 						<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath Icon=@ItemCatalog.IconFor( item ) Color=@ItemCatalog.ColorFor( item )/>
 						@if ( item.IsBatch )
 						{
-							<div class="count">x@item.Count</div>
+							<div class="count">@( $"x{item.Count}" )</div>
 						}
 					}
 				</div>

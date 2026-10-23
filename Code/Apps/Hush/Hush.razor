@@ -139,7 +139,7 @@
 					{
 						<div class="filter @( UiState.ShopQuantity == quantity ? "active" : "" )"
 						     @onclick=@( () => Navi.Act( HushViewModel.QuantityAction, quantity.ToString() ) )>
-							x@quantity
+							@( $"x{quantity}" )
 						</div>
 					}
 				</div>
@@ -158,7 +158,7 @@
 								<div class="meta">@( item.CanBuy ? $"Total {item.Total} crypto" : item.Reason )</div>
 								<div class="button @( item.CanBuy ? "" : "disabled" )"
 								     @onclick=@( () => Buy( item.Id ) )>
-									Buy x@UiState.ShopQuantity
+									Buy @( $"x{UiState.ShopQuantity}" )
 								</div>
 							</div>
 						</div>
