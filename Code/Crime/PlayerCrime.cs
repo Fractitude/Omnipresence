@@ -641,6 +641,10 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	/// </summary>
 	public IReadOnlyList<PackOrder> PackableOrders()
 	{
+		// The prompt asks several times a frame: parse again only when the text changed.
+		if ( parsed is not null && parsedFrom == PackOrders )
+			return parsed;
+
 		var list = new List<PackOrder>();
 
 		foreach ( var part in (PackOrders ?? "").Split( ';', System.StringSplitOptions.RemoveEmptyEntries ) )
@@ -652,8 +656,12 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 				list.Add( new( f[0], f[1], f[2], count, asked, deadline ) );
 		}
 
-		return list;
+		parsedFrom = PackOrders;
+		return parsed = list;
 	}
+
+	string parsedFrom;
+	IReadOnlyList<PackOrder> parsed;
 
 	/// <summary>
 	/// The player asks to pack an order with the batch in an inventory slot. The host takes the player from the network
