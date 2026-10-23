@@ -21,6 +21,8 @@ StorageMenu
 
 .window
 {
+	width: 820px;
+	flex-shrink: 0;
 	padding: 18px 20px;
 	flex-direction: column;
 	gap: 12px;
@@ -51,6 +53,7 @@ StorageMenu
 .column
 {
 	flex-direction: column;
+	flex-shrink: 0;
 	gap: 8px;
 }
 
@@ -83,6 +86,7 @@ StorageMenu
 
 .grid
 {
+	flex-shrink: 0;
 	flex-direction: row;
 	flex-wrap: wrap;
 	gap: 6px;
@@ -90,6 +94,7 @@ StorageMenu
 
 .slot
 {
+	box-sizing: border-box;
 	width: 56px;
 	height: 56px;
 	padding: 4px;

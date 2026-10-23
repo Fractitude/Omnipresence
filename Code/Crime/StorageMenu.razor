@@ -13,7 +13,7 @@
 			<div class="body">
 				<div class="column">
 					<div class="heading">@( $"Your bag ({bag.SlotCount - bag.FreeSlots}/{bag.SlotCount})" )</div>
-					<div class="grid" style="width: @( bag.Columns * (SlotSize + Gap) - Gap )px">
+					<div class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
 						@for ( var i = 0; i < bag.SlotCount; i++ )
 						{
 							var slot = i;
@@ -44,7 +44,7 @@
 					else
 					{
 						<div class="heading">@( $"Storage box ({target.ViewCount}/{target.Capacity})" )</div>
-						<div class="grid" style="width: @( target.Columns * (SlotSize + Gap) - Gap )px">
+						<div class="grid" style="width: @( target.Columns * (SlotSize + Gap) )px">
 							@for ( var i = 0; i < target.Capacity; i++ )
 							{
 								var slot = i;
