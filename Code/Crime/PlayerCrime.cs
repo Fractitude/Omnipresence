@@ -20,6 +20,14 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	public string TrayView { get; private set; } = "";
 
 	/// <summary>
+	/// What the packing table should offer this player, as "status|handle|count|minQuality|have", set by the host for the
+	/// label of the table. Status is none (no accepted order), ok (the next order can be filled) or short (it cannot).
+	/// Only what the player already sees in Hush.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )]
+	public string PackView { get; private set; } = "none";
+
+	/// <summary>
 	/// Bumps whenever <see cref="TrayView"/> changes, on every machine.
 	/// </summary>
 	public int Version { get; private set; }
@@ -99,6 +107,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return;
 
 		TrayView = string.Join( ';', crime.Trays.Select( x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt}" ) );
+		UpdatePackView();
 		Progress.NotifyChanged( ProgressChange.Crime );
 	}
 
@@ -135,8 +144,11 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 	void Global.IInventoryEvents.OnInventoryChanged( PlayerInventory inventory )
 	{
-		if ( Networking.IsHost && restored && !restoring && inventory == Inventory )
-			SaveItems();
+		if ( !Networking.IsHost || !restored || restoring || inventory != Inventory )
+			return;
+
+		SaveItems();
+		UpdatePackView();
 	}
 
 	/// <summary>
@@ -410,6 +422,88 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
+	/// The accepted order, not past its deadline, that the inventory can fill now. The earliest deadline comes first.
+	/// Host only.
+	/// </summary>
+	OrderRecord NextPackable()
+	{
+		var now = WorldClock.Now;
+
+		return Crime?.Orders
+			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline
+			                                            && Inventory.CountOf( x.Kind, x.MinQuality ) >= x.Count )
+			.OrderBy( x => x.Deadline )
+			.FirstOrDefault();
+	}
+
+	/// <summary>
+	/// Refresh <see cref="PackView"/> for the packing table's label. Host only.
+	/// </summary>
+	void UpdatePackView()
+	{
+		if ( !Ready )
+			return;
+
+		var now = WorldClock.Now;
+
+		var fillable = NextPackable();
+
+		var order = fillable ?? Crime.Orders
+			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
+			.OrderBy( x => x.Deadline )
+			.FirstOrDefault();
+
+		var view = order is null
+			? "none"
+			: $"{(fillable is null ? "short" : "ok")}|{order.Handle}|{order.Count}|{order.MinQuality}"
+			  + $"|{Inventory.CountOf( order.Kind, order.MinQuality )}";
+
+		if ( view != PackView )
+			PackView = view;
+	}
+
+	/// <summary>
+	/// What the packing table offers, from the synced view so it works on a client too. Status is "none", "ok" or
+	/// "short".
+	/// </summary>
+	public (string Status, string Handle, int Count, int MinQuality, int Have) PackOffer()
+	{
+		var fields = (PackView ?? "").Split( '|' );
+
+		return fields.Length == 5 && int.TryParse( fields[2], out var count )
+		       && int.TryParse( fields[3], out var quality ) && int.TryParse( fields[4], out var have )
+			? (fields[0], fields[1], count, quality, have)
+			: ("none", "", 0, 0, 0);
+	}
+
+	/// <summary>
+	/// Pack the next order the inventory can fill (the earliest deadline), for the packing table. The host decides
+	/// which one; the player sends nothing. Host only.
+	/// </summary>
+	public CrimeResult PackNext()
+	{
+		if ( !Ready )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		if ( NextPackable() is { } order )
+			return Pack( order.Id );
+
+		var now = WorldClock.Now;
+
+		if ( Crime.Orders.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
+			    .OrderBy( x => x.Deadline )
+			    .FirstOrDefault() is { } waiting )
+		{
+			var have = Inventory.CountOf( waiting.Kind, waiting.MinQuality );
+
+			return CrimeResult.Fail(
+				$"{waiting.Handle} needs {waiting.Count} of quality {waiting.MinQuality} or better. You have {have}." );
+		}
+
+		return CrimeResult.Fail( "You have no accepted orders to pack." );
+	}
+
+	/// <summary>
 	/// Pack an accepted order: the host checks the inventory has enough of the right kind and quality, takes it, and gives a
 	/// parcel that remembers the order. Host only.
 	/// </summary>
@@ -483,6 +577,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	void Tick()
 	{
 		var crime = Crime;
+		UpdatePackView();
+
 		var changed = PostalSystem.Tick( crime, OnParcelDelivered );
 
 		changed |= CheckOrders( crime );

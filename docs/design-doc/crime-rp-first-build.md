@@ -11,7 +11,7 @@ A player grows Static, presses it into tabs, accepts an order in the **Hush** ap
 1. Sit at the home computer, open **Hush**, see 3 orders.
 2. Walk to the **grow tray**, plant a culture, wait (the game clock can be skipped in testing).
 3. Harvest. Walk to the **press bench**, press into tabs.
-4. Back at Hush, **accept** an order, then **pack** it (the parcel appears in the inventory).
+4. Back at Hush, **accept** an order. Then use the **packing table** to pack it (the parcel appears in the inventory).
 5. Walk to the **mailbox** and send the parcel.
 6. Watch it move in the **Shipments** tab: Collected, In transit, Delivered.
 7. Escrow releases. **Crypto** goes up. A review line appears. Reputation moves. Open the **Exchange** tab and cash out some crypto into dollars (with the fee).
@@ -48,7 +48,7 @@ A player grows Static, presses it into tabs, accepts an order in the **Hush** ap
 | **Crime state goes in its own `CrimeRecord`** inside `ProgressRecord` (bump `CurrentVersion` to 3). | Seasons will wipe it without touching XP, hack level, credits or cosmetics. |
 | **Items become batches.** One slot holds "40 Static tabs, purity 72". `ItemData` gets `Kind`, `Count`, `Quality`. | No stacking system needed. A batch is the unit the design already uses. |
 | **Trays and the press are saved per player** (a list in `CrimeRecord`) for now. | A solo test needs no world ownership. Move them to bases later. |
-| **Parcels are items.** Packing in Hush creates a `parcel` item in the inventory. The mailbox sends it. | Keeps the walk, needs no new UI for choosing items, and the parcel can be stolen or lost later. |
+| **Parcels are items.** Packing at the packing table creates a `parcel` item in the inventory. The mailbox sends it. | Keeps the walk, needs no new UI for choosing items, and the parcel can be stolen or lost later. |
 | **Orders are global on the host**, not saved. | They regenerate at restart. Accepted orders and escrow are saved with the player. |
 | **Hush is a system app** like Payments, and checks `WiredTravel.PlaceOf` itself. | It pays crypto, earned in the real world's dark web (see `currency.md` and "Three currencies" in `crime-rp.md`). |
 | **No hand edits of scenes while the editor is open.** Place the tray, bench and mailbox with the editor tools. | AGENTS.md. |
@@ -92,7 +92,7 @@ Sizes are rough: **S** about 30 minutes, **M** about an hour or two, **L** a few
 - `CrimeRecord`: `Reputation` (good trades, rating sum), `Orders` accepted (id, buyer, terms, escrow state), `Reviews` (last few).
 - Host rules, all inside `PlayerProgress`-style calls (`TryAcceptOrder`, `TryPackOrder`, release on delivery):
   - **Accept:** the order is reserved for this player, escrow marked held.
-  - **Pack:** the host checks the inventory has enough of the right kind and quality, takes them, and gives a `parcel` item that remembers the order.
+  - **Pack:** done at the packing table in the house, not in Hush. The host checks the inventory has enough of the right kind and quality, takes them, and gives a `parcel` item that remembers the order.
   - **Delivery:** when a parcel reaches `DeliverAt`, the order is marked delivered; the **buyer reviews** (rating from quality against what was asked, amount, speed) and escrow **releases** after a short timer. The player gets **crypto** (`AddCrypto`, new, host only) minus the fee. Cashing out to dollars is the Exchange tab.
   - **Deadline:** an order not delivered in time is cancelled and costs reputation.
 - Reputation levels (Newcomer, Known, Trusted) change the fee. Fees and prices come from one catalogue.
@@ -102,7 +102,7 @@ Sizes are rough: **S** about 30 minutes, **M** about an hour or two, **L** a few
 - `Code/Apps/Hush/`: `HushUiState.cs`, `HushViewModel.cs`, `Hush.razor` (+ `.scss`). Registered in `Assets/navi/system/hush.napp`.
 - Tabs for v0: **Orders**, **Shipments**, **Wallet**, **Reviews**, **Exchange** (crypto to dollars at a fixed rate with an 8 percent fee and a short delay, and dollars to crypto at 4 percent). Trends, Shop and Security come later.
 - **Crypto is the third currency.** Add `Crypto` to `ProgressRecord` and `PlayerProgress` (synced, host-only changes, own cap, `AddCrypto`/`TrySpendCrypto`), and update `docs/currency.md` from "planned" to as-built. No path may turn credits into crypto.
-- Actions carry only ids (`accept <orderId>`, `pack <orderId>`). The seat comes from `GameAppSeat`. The host re-checks everything.
+- Actions carry only ids (`accept <orderId>` in Hush; the packing table sends nothing but the press). The seat comes from `GameAppSeat`. The host re-checks everything.
 - The app says "No signal" or "Home only" in the Wired.
 - **Test:** the 10-minute script above.
 

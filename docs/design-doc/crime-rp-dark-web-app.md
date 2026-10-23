@@ -25,7 +25,7 @@ The player sits at a computer in their base, opens Navi, and uses **Hush**. That
 3. **Read the buyer.** Account age, past reviews, tone. A good buyer, a scammer, or a sting?
 4. **Accept.** The buyer's money goes into **escrow**. You have until the deadline to ship.
 5. **Make or pull** the goods from your stock (see the product doc).
-6. **Package.** Choose a box, add stealth, seal, take a **photo** of the sealed package (evidence), and print the **label** from the order.
+6. **Package.** Walk to the **packing table** in the house (not in the app). In the first build one press packs the next order you can fill; later: choose a box, add stealth, seal, take a **photo** of the sealed package (evidence), and print the **label** from the order.
 7. **Ship.** Put it in your **mailbox**, take it to the **post office**, or drop it in a **street box**. Each has different risk and cost.
 8. **Track.** The app shows the package moving: *Collected, In transit, Delivered.*
 9. **Release or dispute.** The buyer confirms, and escrow pays you. Or they claim a problem, and you defend yourself.

@@ -102,8 +102,7 @@ public sealed record MyOrderRow(
 	int MinQuality,
 	string Total,
 	MyOrderStatus Status,
-	string Detail,
-	bool CanPack );
+	string Detail );
 
 public sealed record HushShipmentRow( string Title, string Detail, bool Delivered );
 

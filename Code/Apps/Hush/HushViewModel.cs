@@ -16,7 +16,6 @@ public sealed class HushViewModel
 {
 	public const string TabAction = "tab";
 	public const string AcceptAction = "accept";
-	public const string PackAction = "pack";
 	public const string SellAction = "sell";
 	public const string BuyAction = "buy";
 
@@ -78,16 +77,12 @@ public sealed class HushViewModel
 					var accepted = crime.Accept( args[0] );
 					notice = accepted.Message;
 
-					// Packing and sending happen under Your orders.
+					// Packing (at the packing table) and sending happen under Your orders.
 					if ( accepted.Ok )
 						tab = HushTab.YourOrders;
 
 					break;
 				}
-
-				case PackAction when args.Length > 0:
-					notice = crime.Pack( args[0] ).Message;
-					break;
 
 				case SellAction when args.Length > 0:
 					notice = crime.SellCrypto( AmountOf( args[0], PlayerWallet.For( seat )?.Crypto ?? 0 ) ).Message;
@@ -204,21 +199,21 @@ public sealed class HushViewModel
 	static IReadOnlyList<MyOrderRow> BuildMine( PlayerCrime crime )
 	{
 		var now = WorldClock.Now;
-		var inventory = crime.Components.Get<PlayerInventory>();
 
 		return crime.Orders
 			.Reverse()
-			.Select( x => ToMyRow( x, now, inventory ) )
+			.Select( x => ToMyRow( x, now ) )
 			.ToList();
 	}
 
-	static MyOrderRow ToMyRow( OrderRecord order, long now, PlayerInventory inventory )
+	static MyOrderRow ToMyRow( OrderRecord order, long now )
 	{
 		var left = InteractionSetup.Countdown( order.Deadline - now );
 
 		var (status, detail) = order.State switch
 		{
-			OrderState.Accepted => (MyOrderStatus.ToPack, $"Deliver within {left}"),
+			OrderState.Accepted => (MyOrderStatus.ToPack,
+				$"Pack it at the packing table at home. Deliver within {left}"),
 			OrderState.Packed => (MyOrderStatus.ToSend, $"Take the parcel to your mailbox. {left} left"),
 			OrderState.Shipped => (MyOrderStatus.Shipped, $"On its way. {left} left"),
 			OrderState.Delivered => (MyOrderStatus.Escrow,
@@ -226,9 +221,6 @@ public sealed class HushViewModel
 			OrderState.Released => (MyOrderStatus.Paid, $"Paid {order.Paid:N0} after the fee"),
 			_ => (MyOrderStatus.Cancelled, "Cancelled"),
 		};
-
-		var canPack = order.State == OrderState.Accepted && now <= order.Deadline
-		              && (inventory?.CountOf( order.Kind, order.MinQuality ) ?? 0) >= order.Count;
 
 		return new MyOrderRow(
 			order.Id,
@@ -238,8 +230,7 @@ public sealed class HushViewModel
 			order.MinQuality,
 			$"{order.Total:N0}",
 			status,
-			detail,
-			canPack );
+			detail );
 	}
 
 	static IReadOnlyList<HushShipmentRow> BuildShipments( PlayerCrime crime )

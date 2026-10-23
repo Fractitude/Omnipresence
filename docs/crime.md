@@ -1,11 +1,11 @@
 # Crime: grow, press, ship, get paid
 
-The first playable slice of the crime game, as built. Grow Static, press it into tabs, take an order in the **Hush** app, pack a parcel, post it from your mailbox, and get paid from escrow in **crypto** with a review. Cash out through the Exchange. Everything is rough placeholder gameplay: no minigames, no police, no disputes. The plan and the reasons are in [design-doc/crime-rp-first-build.md](design-doc/crime-rp-first-build.md); the three currencies are in [currency.md](currency.md).
+The first playable slice of the crime game, as built. Grow Static, press it into tabs, take an order in the **Hush** app, pack a parcel at the packing table, post it from your mailbox, and get paid from escrow in **crypto** with a review. Cash out through the Exchange. Everything is rough placeholder gameplay: no minigames, no police, no disputes. The plan and the reasons are in [design-doc/crime-rp-first-build.md](design-doc/crime-rp-first-build.md); the three currencies are in [currency.md](currency.md).
 
 ```
 Static culture ──plant──► Grow Tray ──wait (game clock)──► harvest ──► raw Static
 raw Static ──press──► Press Bench ──► tabs (a batch with a quality)
-Hush: accept an order ──► pack (takes tabs, gives a parcel) ──► Mailbox: send
+Hush: accept an order ──► Packing table: pack (takes tabs, gives a parcel) ──► Mailbox: send
 Mailman collects on the clock ──► in transit ──► delivered ──► buyer reviews ──► escrow releases
 escrow pays crypto (minus a fee by reputation) ──► Hush Exchange: crypto ──► dollars (fee, delay)
 ```
@@ -20,11 +20,12 @@ escrow pays crypto (minus a fee by reputation) ──► Hush Exchange: crypto �
 | **Rules** | `Code/Crime/PlayerCrime.cs` | A component on the player (made by `PlayerProgress` like the wallet). Every action runs on the host. |
 | **Grow tray** | `Code/Crime/GrowTray.cs`, `Assets/crime/grow_tray.prefab` | One option; its label follows the looking player's own tray: Plant, Growing (countdown), Harvest. A world text above it (a local `TextRenderer` child made in code, never networked or saved) shows `Growing 62%  0:46` or `Ready to harvest` for the local player's own tray, only within 250 units. |
 | **Press bench** | `Code/Crime/PressBench.cs`, `Assets/crime/press_bench.prefab` | Presses all the raw Static carried into one batch of tabs. |
+| **Packing table** | `Code/Crime/PackingTable.cs`, `Assets/crime/packing_table.prefab` | One option. Packs the next accepted order the bag can fill (earliest deadline first) through `PlayerCrime.PackNext`. Its label comes from the synced `PlayerCrime.PackView`: `Pack order for Dex_44` (`10 x Static tabs, quality 40 or better`), or a disabled `No accepted orders`, or a disabled `Dex_44 needs 10 tabs at quality 40 or better` (`You have 6`). The result is told in chat. |
 | **Mailbox** | `Code/Objects/MailBox.cs` | Its only option is "Send parcel", set in code. Claimed by the first player who sends from it. The flag goes up while a parcel waits. |
 | **Post** | `Code/Crime/PostalSystem.cs` | The mailman collects at every multiple of 5 game minutes; transit takes 3. |
 | **Market** | `Code/Crime/MarketSystem.cs` | A `GameObjectSystem`. NPC buyers' open orders, not saved. |
 | **Exchange** | `Code/Crime/Exchange.cs` | The only crypto and dollars conversion. |
-| **Hush app** | `Code/Apps/Hush/`, `Assets/navi/system/hush.napp` | Orders, Shipments, Wallet, Reviews, Exchange. A shared system app. Home only. |
+| **Hush app** | `Code/Apps/Hush/`, `Assets/navi/system/hush.napp` | Orders, Your orders (with a to-do count), Shipments, Wallet, Reviews, Exchange. A shared system app. Home only. It cannot pack: Your orders says to pack at the packing table. |
 | **Tuning numbers and text** | `Code/Crime/CrimeCatalog.cs` | All times, prices, fees, and the hand-written note and review text. |
 | **Dev commands** | `Code/Crime/CrimeCommands.cs` | See [console-commands.md](console-commands.md). |
 
@@ -35,7 +36,7 @@ escrow pays crypto (minus a fee by reputation) ──► Hush Exchange: crypto �
 3. **Harvest.** Gives `HarvestRaw` raw Static and a culture back, so the loop can go on.
 4. **Press.** Use a press bench. All raw Static becomes one batch of tabs: `TabsPerRaw` tabs per raw, quality = the average of the raw nudged by up to +/-`PressQualitySpread` (placeholder for the Tuning minigame).
 5. **Orders.** In Hush the board shows 3 to 5 NPC orders (handle, note, count of tabs, minimum quality, price). Buyers are honest or picky (hidden from the UI): picky ones ask for 10 more quality, pay a little more and review harder. **Accept** takes it off the board, reserves it for you and holds its payment in escrow. You have `DeliverWindowSeconds` to deliver; at most 5 orders at once.
-6. **Pack.** The host checks the bag holds the count at the minimum quality or better, takes those tabs and gives one **parcel** item that remembers the order.
+6. **Pack.** Use the packing table at home (not Hush). The host picks the next accepted order, in time, that the bag can fill (earliest deadline first), checks the bag holds the count at the minimum quality or better, takes those tabs and gives one **parcel** item that remembers the order.
 7. **Send.** Use the mailbox with a parcel in the bag. The first sender claims the box (remembered in the save). The flag goes up. At the next collection time the mailman takes it (Shipments: "Collected, in transit"), and `TransitSeconds` later it is delivered.
 8. **Review and escrow.** On delivery the buyer reviews (1 to 5 stars from how far the quality beat the ask, a picky buyer is harder) and escrow releases `EscrowSeconds` later. You get the price minus a fee by reputation (10 percent Newcomer, 7 Known after 3 good trades, 4 Trusted after 10 good trades and a rating of 4 or more). A good trade counts.
 9. **Late.** An order that is not delivered by its deadline is cancelled: a bad trade, a 1-star review, and a parcel still in your bag is taken.
@@ -71,8 +72,8 @@ Old saves load: the section defaults to empty, and `Sanitize` clamps everything.
 
 Same rules as the apps in AGENTS.md.
 
-- **The host decides everything.** `PlayerCrime` methods run on the host only. The tray, bench and mailbox are `Interactable` options that run on the host (the host re-checks the player's reach). Hush is a shared app: its logic runs in the host's copy, and the seat comes from the computer (`GameAppSeat`), never from an action.
-- **Actions carry ids and amounts only.** `accept <orderId>`, `pack <orderId>`, `sell <amount>`, `buy <amount>`, `tab <name>`. The price, count, quality, times and fees come from the host's records. An exchange amount is the player's own to give and is checked against their balance and a maximum.
+- **The host decides everything.** `PlayerCrime` methods run on the host only. The tray, bench, packing table and mailbox are `Interactable` options that run on the host (the host re-checks the player's reach). Hush is a shared app: its logic runs in the host's copy, and the seat comes from the computer (`GameAppSeat`), never from an action.
+- **Actions carry ids and amounts only.** `accept <orderId>`, `sell <amount>`, `buy <amount>`, `tab <name>`. Hush has no pack action: the packing table sends nothing but the press, and the host picks the order (`PlayerCrime.PackNext`) and re-checks it. The price, count, quality, times and fees come from the host's records. An exchange amount is the player's own to give and is checked against their balance and a maximum.
 - **Buyers' secrets stay on the host.** The buyer type is not in the UI state. Nothing that sends a message as an NPC exists yet (buyer notes are plain text in the order).
 - **Credits are never touched.** Crypto and dollars change only in `Exchange`.
 - **Parcels cannot be dropped or faked.** `PlayerInventory.DoDrop` refuses a parcel. `crime_give` is editor only.
@@ -81,9 +82,9 @@ Same rules as the apps in AGENTS.md.
 
 ## Placing things in a scene
 
-`Assets/scenes/home.scene` has one of each placed through the editor (the scene change is not committed): **Grow Tray** at (-80, -60, 0) and **Press Bench** at (-80, -20, 0) (both from the prefabs in `Assets/crime/`), next to the existing **MailBox**. To place more by hand:
+`Assets/scenes/home.scene` has one of each placed through the editor (the scene change is not committed): **Grow Tray**, **Press Bench** and **Packing Table** at (-70, -50, 0) (from the prefabs in `Assets/crime/`), next to the existing **MailBox**. To place more by hand:
 
-- **Grow tray / press bench:** drag the prefab in. Or make a GameObject with a model, a collider, an `Interactable` and a `GrowTray` (or `PressBench`) component; **Network Mode must be Object**, or the press never reaches the host. The options are added in code, so the `Interactable` can keep its default option.
+- **Grow tray / press bench / packing table:** drag the prefab in. Or make a GameObject with a model, a collider, an `Interactable` and a `GrowTray` (or `PressBench`, `PackingTable`) component; **Network Mode must be Object**, or the press never reaches the host. The options are added in code, so the `Interactable` can keep its default option.
 - **Mailbox:** the existing `Assets/MailBox.prefab` works as is (it is a network object). The "Send parcel" option is added in code, and it is the only option: any other the object has is removed at run time, so the flag cannot be moved by hand.
 - Each tray is its own tray in the save, by its object's id. Do not duplicate a placed tray and expect two to share state.
 

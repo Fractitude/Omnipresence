@@ -1,0 +1,91 @@
+{
+  "RootObject": {
+    "__guid": "4b3167d1-6673-45b8-8ba7-603c87b9bcfb",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "PackingTable",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "Sandbox.PackingTable",
+        "__guid": "4b1554ad-36f0-4303-b3dd-231c6c1cb4d7",
+        "__enabled": true,
+        "Flags": 0
+      },
+      {
+        "__type": "Sandbox.Interactable",
+        "__guid": "cde87688-444a-48e3-a259-2f8137177d86",
+        "__enabled": true,
+        "Flags": 0,
+        "HandlerObject": null,
+        "Range": 200,
+        "Options": [
+          {
+            "Id": "pack",
+            "Label": "Packing table",
+            "Icon": "inventory_2",
+            "Description": "Pack an order into a parcel.",
+            "Available": true,
+            "RunOn": "Host",
+            "Cooldown": 0,
+            "OnInteract": null
+          }
+        ]
+      }
+    ],
+    "Children": [
+      {
+        "__guid": "ce6a0182-7713-4186-9c02-54b1bd121c06",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Model",
+        "Position": "0,0,15",
+        "Rotation": "0,0,0,1",
+        "Scale": "1.4,0.9,0.6",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 0,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.ModelRenderer",
+            "__guid": "d6a4a2fe-5e57-46ec-b25c-d1d4c49300ba",
+            "__enabled": true,
+            "Flags": 0,
+            "Model": {
+              "Id": "8a84e5a0-01f8-0000-f0db-b088f8010000",
+              "Path": "models/dev/box.vmdl"
+            },
+            "Tint": "0.72,0.56,0.36,1",
+            "RenderType": "On"
+          },
+          {
+            "__type": "Sandbox.BoxCollider",
+            "__guid": "684ada4c-afba-4979-8f41-54a80add3e18",
+            "__enabled": true,
+            "Flags": 0,
+            "Center": "0,0,0",
+            "Scale": "50,50,50",
+            "Static": true
+          }
+        ],
+        "Children": []
+      }
+    ]
+  },
+  "ResourceVersion": 1,
+  "__references": [],
+  "__version": 2
+}

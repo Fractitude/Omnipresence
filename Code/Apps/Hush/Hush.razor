@@ -97,13 +97,6 @@
 						<div class="what">@order.Count x @order.Product, quality @order.MinQuality or better</div>
 						<div class="card-bottom">
 							<div class="meta">@order.Detail</div>
-							@if ( order.Status == MyOrderStatus.ToPack )
-							{
-								<div class="button @( order.CanPack ? "" : "disabled" )"
-								     @onclick=@( () => Navi.Act( HushViewModel.PackAction, order.Id ) )>
-									Pack
-								</div>
-							}
 						</div>
 					</div>
 				}
