@@ -1,13 +1,11 @@
 using Sandbox;
 
 /// <summary>
-/// A mailbox whose flag shows whether it has mail. Its first option (<see cref="Interactable"/>) puts the flag up or down.
-/// Set the Interactable to run on the host, since <see cref="HasMail"/> is set there and synced to everyone else.
-/// <para>
-/// It is also where a player sends a parcel (the "Send parcel" option, added in code). A mailbox belongs to the first
-/// player who sends from it (<see cref="OwnerId"/>, remembered in their save by <see cref="BoxId"/>), and nobody else can
-/// use it. The flag goes up by itself while a parcel waits for the mailman (<see cref="PostalSystem"/>).
-/// </para>
+/// A mailbox whose flag shows whether it has mail. It is where a player sends a parcel: its only option is "Send parcel",
+/// added in code to the <see cref="Interactable"/> (any other option the object was set up with is removed, so the flag
+/// can't be moved by hand). A mailbox belongs to the first player who sends from it (<see cref="OwnerId"/>, remembered in
+/// their save by <see cref="BoxId"/>), and nobody else can use it. The flag goes up by itself while a parcel waits for the
+/// mailman (<see cref="PostalSystem"/>), which sets <see cref="HasMail"/> on the host and syncs it to everyone else.
 /// </summary>
 public sealed class MailBox : Component, Component.ExecuteInEditor, IInteractionHandler
 {
@@ -28,15 +26,19 @@ public sealed class MailBox : Component, Component.ExecuteInEditor, IInteraction
 
 	GameObject _flag;
 
-	protected override void OnStart() =>
+	protected override void OnStart()
+	{
 		InteractionSetup.EnsureOption( this, SendId, "Send parcel", "local_shipping", "Put a parcel in the mailbox." );
+
+		// Send parcel is the only thing to do here. Run the same way on every machine: the host takes an option as its
+		// place in the list. Not in the editor, so the scene is not changed by it.
+		if ( Game.IsPlaying && Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
+			interactable.Options = interactable.Options.Where( x => x?.Id == SendId ).ToList();
+	}
 
 	InteractionInfo? IInteractionHandler.Describe( InteractionEvent e )
 	{
-		if ( e.Option?.Id == SendId )
-			return DescribeSend( e );
-
-		return new( HasMail ? "Put flag down" : "Put flag up", "flag" );
+		return e.Option?.Id == SendId ? DescribeSend( e ) : null;
 	}
 
 	InteractionInfo DescribeSend( InteractionEvent e )
@@ -56,10 +58,7 @@ public sealed class MailBox : Component, Component.ExecuteInEditor, IInteraction
 	void IInteractionHandler.OnInteract( InteractionEvent e )
 	{
 		if ( e.Option?.Id != SendId )
-		{
-			HasMail = !HasMail;
 			return;
-		}
 
 		if ( Networking.IsHost && e.Interactor?.Components.Get<PlayerCrime>() is { } crime )
 			crime.Tell( crime.SendParcel( this ) );

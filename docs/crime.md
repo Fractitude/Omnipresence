@@ -20,7 +20,7 @@ escrow pays crypto (minus a fee by reputation) ──► Hush Exchange: crypto �
 | **Rules** | `Code/Crime/PlayerCrime.cs` | A component on the player (made by `PlayerProgress` like the wallet). Every action runs on the host. |
 | **Grow tray** | `Code/Crime/GrowTray.cs`, `Assets/crime/grow_tray.prefab` | One option; its label follows the looking player's own tray: Plant, Growing (countdown), Harvest. A world text above it (a local `TextRenderer` child made in code, never networked or saved) shows `Growing 62%  0:46` or `Ready to harvest` for the local player's own tray, only within 250 units. |
 | **Press bench** | `Code/Crime/PressBench.cs`, `Assets/crime/press_bench.prefab` | Presses all the raw Static carried into one batch of tabs. |
-| **Mailbox** | `Code/Objects/MailBox.cs` | Gets a "Send parcel" option in code. Claimed by the first player who sends from it. The flag goes up while a parcel waits. |
+| **Mailbox** | `Code/Objects/MailBox.cs` | Its only option is "Send parcel", set in code. Claimed by the first player who sends from it. The flag goes up while a parcel waits. |
 | **Post** | `Code/Crime/PostalSystem.cs` | The mailman collects at every multiple of 5 game minutes; transit takes 3. |
 | **Market** | `Code/Crime/MarketSystem.cs` | A `GameObjectSystem`. NPC buyers' open orders, not saved. |
 | **Exchange** | `Code/Crime/Exchange.cs` | The only crypto and dollars conversion. |
@@ -84,7 +84,7 @@ Same rules as the apps in AGENTS.md.
 `Assets/scenes/home.scene` has one of each placed through the editor (the scene change is not committed): **Grow Tray** at (-80, -60, 0) and **Press Bench** at (-80, -20, 0) (both from the prefabs in `Assets/crime/`), next to the existing **MailBox**. To place more by hand:
 
 - **Grow tray / press bench:** drag the prefab in. Or make a GameObject with a model, a collider, an `Interactable` and a `GrowTray` (or `PressBench`) component; **Network Mode must be Object**, or the press never reaches the host. The options are added in code, so the `Interactable` can keep its default option.
-- **Mailbox:** the existing `Assets/MailBox.prefab` works as is (it is a network object). The "Send parcel" option is added in code. Its first option still toggles the flag by hand.
+- **Mailbox:** the existing `Assets/MailBox.prefab` works as is (it is a network object). The "Send parcel" option is added in code, and it is the only option: any other the object has is removed at run time, so the flag cannot be moved by hand.
 - Each tray is its own tray in the save, by its object's id. Do not duplicate a placed tray and expect two to share state.
 
 ## Known gaps
