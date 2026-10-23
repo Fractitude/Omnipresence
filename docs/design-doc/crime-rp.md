@@ -386,6 +386,112 @@ This is Rust's "AFK is vulnerable" idea, made fun and tied to the Wired.
 
 The big idea: **the computer is the crime tool, and the same case file connects hacking, drugs, bases and the police.**
 
+## Seasons, rankings and titles
+
+**Decided 2026-10-23.** A season ends with **rankings** in three areas, and **titles** for the winners. This is the goal that gives the business competition a point, in place of Rust's kill count.
+
+### The three rankings
+
+| Ranking | What it measures | Why |
+| --- | --- | --- |
+| **Net worth** | How rich you are | The plain "who won" |
+| **Market share** | How much of the trade you took from NPC customers | Who actually dominated the market, not who sat on cash |
+| **Reputation** | How trusted and well reviewed you are | Rewards honest, reliable dealing |
+
+#### Net worth
+
+Everything the player owns, valued at season end, **in dollars only** (credits and anything in the Wired do not count).
+
+| Counts | How it is valued |
+| --- | --- |
+| **Cash and bank balances** | Face value |
+| **Market account and escrow due to you** | Face value |
+| **Stock** (products, ingredients) | The **current market average** for its quality, with a **20 percent haircut**. Your own asking prices never count. |
+| **Equipment and labs** | Purchase price, depreciated by use and age |
+| **Property** (houses, upgrades) | Purchase price, depreciated slightly |
+| **Vehicles** | Market value, depreciated |
+| **Debts, fines and unpaid bail** | Subtracted |
+| **Dirty money** | Counts in full in version 1 (laundering is later) |
+
+- The value is the **average of hourly snapshots over the last 48 hours**, so a last-minute trick or a single lucky sale cannot decide it.
+- **Seized goods count as lost.** Stolen goods count for the new owner.
+- **Items someone else holds** do not count for you.
+
+#### Market share
+
+- Measured as the **dollar value of NPC purchases** from the player (or from the market they run) as a share of all NPC purchases, over the **last 7 days**.
+- **Only NPC buyers count.** Player-to-player trades do not, so wash trading with an alt gives nothing.
+- A **per-product ranking** also exists (for example, "top Static vendor").
+- A **market operator's share** is the volume that passes through their market, ranked on its own.
+- **Recent days weigh more** than early ones, so late comebacks are possible.
+
+#### Reputation
+
+- The market reputation score: a **smoothed average** of review ratings, weighted by recency and trade size, **minus** lost disputes and seizures.
+- Smoothing means a handful of five-star reviews cannot top the board.
+- A **minimum of about 20 completed trades** is needed to qualify.
+
+### Combined: the Season Kingpin
+
+A fourth, combined board picks the overall winner.
+
+- Each player gets a **percentile** in each of the three rankings.
+- The combined score is the **average of the three percentiles**, with net worth counting a little more (for example 40, 30, 30 percent).
+- The top combined score is the **Season Kingpin**.
+
+### Titles
+
+| Title | Awarded to |
+| --- | --- |
+| **Season Kingpin** | Highest combined score |
+| **Tycoon** | Highest net worth |
+| **Market Leader** | Highest market share |
+| **The Honest Dealer** | Highest reputation |
+| **Untouchable** | Highest net worth among players with a clean case file (never arrested, low trace) |
+| **Operator of the Year** | The largest player-run market |
+| **The Saboteur** | The most economic damage dealt to rivals (measured in dollars of lost stock and lost orders) |
+| **Product kings** | Top vendor in each product (Static King, Frost King, and so on) |
+| **Crew of the Year** | Best crew by combined net worth and market share |
+
+- **Percentile badges** go to everyone: Bronze (top 50 percent), Silver (top 25), Gold (top 10). They are cosmetic and permanent.
+- **Titles and badges** stay on the account across seasons, shown next to the name.
+- **No power is awarded.** Rewards are cosmetic and prestige, plus a hall-of-fame entry. Nothing can be bought with a title.
+- **Rookie board.** Players who joined after the first two weeks are also ranked among themselves, so late joiners can still win something.
+
+### Visibility
+
+- **Market share and reputation** are public. A live leaderboard sits in Navi (a **Ledger** app) and on in-world billboards and the news ticker.
+- **Net worth is private.** Rivals only see a **rumoured wealth** rank for the top 3, with noise. Real figures are found by hacking, spying, or being robbed. Showing exact figures would make the richest player a target for the whole server by default.
+- **The last 6 hours are fogged.** Boards stop updating, so the end stays uncertain.
+
+### The end of a season
+
+- **The final 24 hours:** a **Final Sweep**. Police activity peaks, prices swing, rivals make last moves. It is the closing event.
+- **Freeze, then count.** The server computes the boards from the snapshots, awards titles and badges, and announces them in the world.
+- **Wipe,** as decided: houses, stock, dollars, cars and case files reset. Character level, hacking level, Wired powers, credits and cosmetics are kept.
+- **Intermission** of one to three days: crime is paused, the Wired stays open (events, arena, party rounds), and the hall of fame is shown. Then the next season starts.
+
+### Crews
+
+Players can form **crews** (a few members with a shared stash and name). Crews have their own board, summed from members' net worth and shared market share. Crew membership shows next to the name.
+
+### How it is built
+
+- A host-only `SeasonLedger` system takes **hourly snapshots** of each player's net worth, rolling NPC sales and reputation.
+- Valuation reads from the same catalogues and market averages that prices use.
+- At the end it computes ranks, titles and percentiles, stores them in the player's progress record, and then runs the wipe.
+- Clients only see the public boards through the Ledger app. Net worth and rumoured wealth are produced on the host.
+- Actions never carry values. The host computes everything, so a modified client cannot change a score.
+
+### Risks
+
+- **Net worth can be gamed** by hoarding items that are overvalued. The market-average haircut and the depreciation help.
+- **Alt accounts and crews** could feed one player. Only NPC purchases count for share, and crews are tracked as a unit.
+- **Last-day rushes** are cut by the 48-hour average and the fog.
+- **A runaway leader** makes the rest give up. The AI's catch-up (Final Sweep, extra police heat on the top) and the rookie board help.
+- **Rumoured wealth** might still make the top 3 a target. That is acceptable: it is the point.
+- **Percentile rewards** need enough players for each tier to mean something.
+
 ## Risks (read this)
 
 1. **Scope is enormous.** This is three games: a crime RP, a base-raid survival and a minigame hub. A full build is years. A slice must be small.
@@ -462,6 +568,7 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 | 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
 | 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
 | 10 | **First product** | **Static** (placeholder name): a glowing culture grown in the dark, pressed into tabs. Fictional and abstract. Two minigames: **Climate** (growing) and **Tuning** (pressing, like tuning a radio). See [crime-rp-first-product.md](crime-rp-first-product.md). |
+| 11 | **Season goal** | Seasons end with rankings by **net worth**, **market share** (NPC purchases only) and **reputation**, plus a combined **Season Kingpin** score and a set of titles and cosmetic badges. Net worth is private; market share and reputation are public. Measured by hourly snapshots on the host. See "Seasons, rankings and titles". |
 
 ## Open questions
 
@@ -483,3 +590,9 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 16. **Griefing limits.** Maximum lock-in time, immunity near spawn, and a way to break free from a locked-in situation.
 17. **Wired defeat.** Is the stun at your body enough, or should a real-world consequence be stronger?
 18. **Should the Wired map mirror the real map,** so a Wired position maps to a real-world position, or stay separate with only devices linking?
+19. **Ranking weights.** Is 40, 30, 30 percent right for the combined score, and is percentile the right way to combine?
+20. **Net worth visibility.** Is "private with rumours for the top 3" right, or should it be fully public or fully hidden?
+21. **Crews.** How large, and how is a shared stash protected from a member who walks off with it?
+22. **Intermission.** Is a one to three day pause good, or should seasons roll into each other with a short reset?
+23. **Season length.** 4 to 6 weeks is a guess. A shorter first season (2 weeks) may suit the playtest.
+24. **Title rewards.** Cosmetic only, or something that carries a small, fair advantage (for example, a starter bonus)?
