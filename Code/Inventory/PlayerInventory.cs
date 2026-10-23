@@ -172,6 +172,32 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
+	/// Put back what <see cref="TakeFrom"/> took from a slot: onto the same batch if it is still there, else into the
+	/// empty slot, else the first free one. Host only. Returns false if there is no room at all.
+	/// </summary>
+	public bool Return( int slot, ItemData piece )
+	{
+		if ( piece is null || !CheckAuthority( nameof( Return ) ) )
+			return false;
+
+		if ( At( slot ) is { } there && there.Kind == piece.Kind && there.Quality == piece.Quality )
+		{
+			there.Count += piece.Count;
+			Changed();
+			return true;
+		}
+
+		if ( At( slot ) is null )
+		{
+			slots[slot] = piece;
+			Changed();
+			return true;
+		}
+
+		return Add( piece );
+	}
+
+	/// <summary>
 	/// Take the whole batch out of a slot, or null if it is empty or not a batch. Host only.
 	/// </summary>
 	public ItemData TakeBatch( int slot ) => At( slot ) is { IsBatch: true } ? Remove( slot ) : null;

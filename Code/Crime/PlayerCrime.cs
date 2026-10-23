@@ -705,12 +705,19 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( batch.Count != order.Count && Inventory.FreeSlots < 1 )
 			return CrimeResult.Fail( "Your inventory is full." );
 
-		if ( Inventory.TakeFrom( slot, order.Count ) is not { } taken )
+		// All or nothing: build the parcel first, and if it cannot be added the batch goes back and the order is untouched.
+		var parcel = ItemCatalog.Make( ItemCatalog.Parcel, 1, batch.Quality, order.Id );
+
+		if ( parcel is null || Inventory.TakeFrom( slot, order.Count ) is not { } taken )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		var parcel = ItemCatalog.Make( ItemCatalog.Parcel, 1, taken.Quality, order.Id );
 		parcel.Contents.Add( new( taken.Kind, taken.Count, taken.Quality ) );
-		Inventory.Add( parcel );
+
+		if ( !Inventory.Add( parcel ) )
+		{
+			Inventory.Return( slot, taken );
+			return CrimeResult.Fail( "Your inventory is full." );
+		}
 
 		order.State = OrderState.Packed;
 		order.PackedQuality = taken.Quality;
