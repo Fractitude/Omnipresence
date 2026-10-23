@@ -8,6 +8,93 @@ The dark web in this game is not one app. It is **a web of sites that players an
 
 This gives the game a second kind of crime that needs **no lab and no gun**: social engineering, fake storefronts, and account theft, with a real defence game on the other side.
 
+## Site packages: `.nsite` (decided 2026-10-23)
+
+Websites are **packages**, added to Navi next to apps. Navi supports `.napp` for apps today. A new **`.nsite`** type is built in the same way (a manifest, pages, and a panel with a view model and UI state), but it is not an app.
+
+**What decided means here:**
+
+- A site is **not installed and not run from the start menu.** It runs **only inside the Navi browser, by its URL.**
+- A site needs a **server** to host it. You **own** one or **rent** one.
+- A site **can be taken down.**
+- The work happens in the **Navi library** (a separate repository, a git submodule), so library changes are committed there first. See `Libraries/navi/README.md`.
+
+### How a visit works
+
+1. The player types or clicks a URL in the Navi browser.
+2. A host-side **name registry** (the game's DNS) maps the domain to a **server**: a computer in the world with the server role. If the domain is unregistered, suspended, or its server is down, the browser shows an error.
+3. The server holds the site's package (its data, and any panel code) and answers requests.
+4. The browser draws the site, in a panel, with the site's own view model and a small **Site API**. It cannot call Navi system functions.
+5. Forms and clicks go to the server, handled on the **host**. Money, accounts and logins are always checked by the game.
+
+### Servers
+
+| Option | How | Risks |
+| --- | --- | --- |
+| **Own a server** | Buy hardware, put it in your base, give it a public address, install the package. | It is a real object: it needs power and network, can be raided, hacked, seized or unplugged, and it ties the site to your base and your address. |
+| **Rent a server** | Rent space from an **NPC hosting provider** (cheap, rules, monitored) or a **player-run hosting service**. | The provider can suspend you, log you, hand data to police, or go down. Bulletproof hosts ignore complaints and can scam you. |
+
+- **Capacity** (visitors at once, storage, uptime) depends on the hardware or the plan.
+- **Rent is paid** in crypto or cash, per day.
+- **A host can run many sites.**
+
+### Takedowns
+
+A site goes down when:
+
+- **Police seize** the server or its data (a raid on a base, a warrant to a provider).
+- **The provider suspends** the account (a complaint, a report, unpaid rent).
+- **The registrar suspends** the domain (the name stops resolving).
+- **A rival takes it out** (hacking, deleting files, overloading the server).
+- **The owner's server is switched off,** loses power, or is destroyed.
+
+A takedown loses the site's data on that server unless there is a backup, and the money in any store or vault on it.
+
+### How players make a site
+
+| Path | What it is | Who can use it |
+| --- | --- | --- |
+| **In-game Site Builder** | An app in Navi that builds a **declarative** site (blocks, forms, themes) and writes an `.nsite` onto the server. No code. | Everyone |
+| **Editor and publish** | Build a `.nsite` with a panel in the s&box editor, as for a `.napp`, publish it as a package, and install it on a server by its package ident. | People who can make s&box addons |
+
+### Two kinds of site (recommended, needs your decision)
+
+Site code is the sensitive part. A site's panel code runs **on the visitor's own machine**, and any package's code can see private game members, because s&box gives every package the same sandbox (see AGENTS.md, "Known limit"). Anything that runs code from a stranger when you click a link needs a gate.
+
+| | **Declarative site** | **Scripted site** |
+| --- | --- | --- |
+| Made with | Blocks, forms, themes, built-in components. Data only. | A published package with a panel and view model, like a `.napp`. |
+| Runs code on the visitor's machine | No. The browser draws it. | Yes. |
+| Gate | None needed. | The visitor's **first visit to a scripted site** asks in the secure layer: this site runs code, allow? Off by default. A warning for new authors. |
+| Permissions | None. | None. The Site API only. |
+| Good for | Almost every site: shops, blogs, forums, phishing pages | Mini-games on a site, custom tools, richer UI |
+
+**If you want to keep one kind only, keep declarative.** It is safe by construction, and it covers shops, scams and phishing.
+
+### Credential capture needs a secure input (recommended)
+
+My earlier safety rule was *capture only matches*: the host compares what a victim typed against their real in-game credential and discards anything else. If a site's code can read keystrokes, a scripted site can bypass that and read anything a visitor types.
+
+The fix mirrors the lock screen (see AGENTS.md, "The lock screen lives in the secure layer too"):
+
+- **A login field is drawn by the browser, not by the site.** The site asks for a `login-form` for a named service. The browser shows the fields.
+- **What the player types goes to the host, never to the site's code.** The host checks it against the real credential.
+- **If it matches, the attacker's server records the captured login** in the vault. If it does not, the input is thrown away.
+- So a phishing page can **look** like the real one (the page, the layout, the address), but cannot read a real password, even if a victim mistakenly types one.
+- The page cannot read the field's value, move focus to hide it, or copy it.
+
+This keeps credential theft a real, playable crime and keeps real passwords safe.
+
+### Other safety rules for site packages
+
+1. **No permissions.** A site has no access to Navi system calls, files, messages, notifications or the player's computer. It only has the Site API.
+2. **No navigation to local addresses.** A site cannot send the browser to `browser://` or `file:///` addresses (the existing Web Browser rule), and cannot open a real web address.
+3. **A hostile server can name any package.** A scripted site could point visitors at any published package. Scripted sites are therefore limited to the visit prompt, and the server's package list is checked by the game.
+4. **Limits.** Size, request rate, CPU time, and memory per site, with a kill switch for the browser.
+5. **Everything that matters is on the host:** forms, logins, money, captures, mail. The site's panel only draws and asks.
+6. **Reports and takedowns** for sites that break the rules, handled by the registrar and the provider.
+7. **Be honest in the UI:** these protections stop careless sites and UI tricks. They do not stop hostile code (AGENTS.md). Do not claim more.
+
 ## What players can build
 
 | Kind of site | What it does | Crime angle |
@@ -151,8 +238,8 @@ Websites feed the same case file as everything else (see [crime-rp-police-forens
 1. **All credentials and money are in-game.** No real accounts, no real brands, no real names.
 2. **Game-issued credentials.** In-game services generate logins. Players do not choose passwords for them, and are told never to use a real one.
 3. **Capture only matches.** Anything a victim types that is not their real in-game credential is thrown away and never reaches an attacker.
-4. **Pages are game-drawn.** No real browser engine loads a player's page. No scripts, no iframes, no external resources. (The Navi Web Browser loads real web pages in the player's real browser engine, so it must not be the viewer. See AGENTS.md on the Web Browser.)
-5. **No scripting for players.** The engine's run-time scripting sees every public type in the game (see AGENTS.md and `docs/scripting.md`), so it is never used for player content.
+4. **Sites are `.nsite` packages drawn by the game's own panels,** inside the Navi browser, by address. No real browser engine loads a player's page, no iframes, no external resources. (The Navi Web Browser loads real web pages in the player's real browser engine, so a site's content must never be loaded that way. See AGENTS.md on the Web Browser.)
+5. **Declarative sites are the default; scripted sites need a visit prompt.** The engine's run-time scripting (`Game.Scripting`, Breen) sees every public type in the game (AGENTS.md, `docs/scripting.md`) and is never used for site content. A scripted site is package code and has the same sandbox limit as any package. Logins are drawn by the browser (the secure input above), never by site code.
 6. **Host authority.** Sites, forms, captures, logins, mail and money all live on the host. Clients send ids. A client cannot read another player's vault, cannot forge a capture, and cannot change a victim's balance.
 7. **No identity leaks.** A site owner never sees a visitor's real name or Steam id. Visitors are handles.
 8. **Rate limits and caps** on mail volume, form submissions and sites per player.
@@ -167,7 +254,7 @@ This comes **after** the first loop (grow, ship, get paid) and the first Hush ma
 
 | Step | What | Fun test |
 | --- | --- | --- |
-| **W1** | The game-drawn page format and a viewer app ("Wired Browser") that opens game addresses. Hush becomes one site. | Can a player browse to Hush by address? |
+| **W1** | In **Navi**: the `.nsite` type, the browser opening a site by address, a server role, and the name registry. Hush becomes one declarative site. | Can a player browse to Hush by address, and does a server going down take it offline? |
 | **W2** | Site Builder with blocks, a theme, a domain, and basic hosting on your own computer. | Can a player make a page and a friend visit it? |
 | **W3** | Forms: contact form and a login form tied to a game service. | Can a friend log in through the form? |
 | **W4** | **Mail app** and a mailing list. NPC recipients open mail. | Do NPCs click? |
@@ -187,7 +274,8 @@ A page format, one viewer, one builder, one domain, one hosting option, one mail
 3. **Abuse of the content tools.** Player pages can carry slurs, doxing and harassment. Needs moderation tools from day one.
 4. **Fairness.** Players who lose money to scams may feel cheated. Clear alerts, reports and recovery help; some losses should be recoverable (limits, delays, an arbitration).
 5. **Balance.** If phishing is too easy it dominates the economy. If defences are too strong, nobody tries. Tune the open rate and the warnings.
-6. **Dependencies.** The existing Navi Web Browser is not a safe viewer for player pages. A separate game app avoids changing the Navi library (a separate repository).
+6. **Dependencies.** `.nsite` support lives in the Navi library, a separate repository (a git submodule). The package type, browser support, server role and name registry are library work, committed there first. The existing Web Browser loads real pages in the real engine, so it needs a distinct path for `.nsite` addresses.
+6b. **Scripted sites run stranger code on visitors' machines.** That is the same risk as Store apps, without a consent step by default. The visit prompt and the "declarative only" option are the answer; skipping both is a big risk.
 7. **Platform risk.** Scam themes and UGC may need a rating or a safe mode.
 8. **Complexity of NPCs.** NPC victims need accounts, habits and money to be convincing without generated text.
 
@@ -203,3 +291,10 @@ A page format, one viewer, one builder, one domain, one hosting option, one mail
 8. **What does a recovery look like** after an account is stolen (a helpdesk NPC, a delay, a cap)?
 9. **Safe mode.** Is it a server setting, a per-player setting, or both?
 10. **Does impersonating a real player's site count?** Allowed in the fiction, or limited?
+11. **Declarative only, or both kinds?** Recommended: declarative for everyone first, scripted sites later behind the visit prompt.
+12. **Is the secure login input accepted?** It keeps real passwords away from site code, but limits what a phishing page can do visually.
+13. **Where does the name registry live?** On the host with the world, or on a global backend shared across servers?
+14. **What is a server physically?** An existing Navi computer with a role, or a new object? How is it connected and given an address?
+15. **How are packages delivered to visitors?** As data from the server, or as packages the client downloads by ident? The second is the Store-app route and carries its trust problems.
+16. **Do rented servers sit in the world,** or do they only exist as accounts with an NPC provider?
+17. **Who can take a site down,** and how does the owner appeal or recover?
