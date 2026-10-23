@@ -71,7 +71,7 @@ All in `Code/Crime/CrimeCatalog.cs`. Times are game seconds (1 real second each)
 | Constant | Now | Meaning |
 | --- | --- | --- |
 | `GrowSeconds` | 10 | Tray growth (short for testing). |
-| `HarvestRaw` / `TabsPerRaw` | 12 / 4 | One harvest is 48 tabs. |
+| `HarvestRaw` / `TabsPerRaw` | 12 / 1 | One harvest is 12 tabs: pressing gives as many tabs as the raw Static put in. |
 | `CollectPeriod` / `TransitSeconds` | 300 / 180 | Mailman rhythm and transit. |
 | `EscrowSeconds` | 60 | Delay after delivery. |
 | `OpenSeconds` / `DeliverWindowSeconds` | 1800 / 3600 | How long an order stays on the board; time to **send** after accepting (the deadline). |

@@ -27,7 +27,7 @@ public static class CrimeCatalog
 	public const int GrowQualityMax = 85;
 
 	/// <summary>Tabs one raw makes at the press bench.</summary>
-	public const int TabsPerRaw = 4;
+	public const int TabsPerRaw = 1;
 
 	/// <summary>Most the press moves the quality either way.</summary>
 	public const int PressQualitySpread = 10;
