@@ -1,0 +1,247 @@
+namespace Sandbox;
+
+/// <summary>
+/// The rules of the storage boxes, on a player's <see cref="CrimeRecord"/> and bag alone: no box, no connection. Every
+/// move takes the item out of one place and puts it in the other in one go, and fails before changing anything, so an
+/// item is never lost or doubled. The box (<see cref="StorageBox"/>) checks who asks and how far they are, then calls
+/// these. Host only.
+/// </summary>
+public static class StorageRules
+{
+	/// <summary>The most boxes one player keeps items in.</summary>
+	public const int MaxBoxes = 20;
+
+	/// <summary>The most slots a box has (the largest grid, 12 by 8). A slot index outside it is refused.</summary>
+	public const int MaxSlots = 96;
+
+	public const int MaxColumns = 12;
+	public const int MaxRows = 8;
+
+	const int MaxTextLength = 200;
+
+	/// <summary>
+	/// The record of a box, or null when the player keeps nothing in it.
+	/// </summary>
+	public static StorageBoxRecord Find( CrimeRecord crime, string boxId ) =>
+		crime?.Storage?.FirstOrDefault( x => x.Id == boxId );
+
+	/// <summary>
+	/// The item in a slot of a box, or null when it is empty.
+	/// </summary>
+	public static ItemData At( StorageBoxRecord box, int slot ) =>
+		box?.Slots.FirstOrDefault( x => x.Slot == slot )?.Item;
+
+	/// <summary>
+	/// The first empty slot of a box with this many slots, or -1 when it is full.
+	/// </summary>
+	public static int FirstFree( StorageBoxRecord box, int capacity )
+	{
+		for ( var i = 0; i < capacity && i < MaxSlots; i++ )
+		{
+			if ( At( box, i ) is null )
+				return i;
+		}
+
+		return -1;
+	}
+
+	/// <summary>
+	/// The box's slots, one entry for each of its <paramref name="capacity"/> slots (null where empty), for the panel.
+	/// </summary>
+	public static ItemData[] View( CrimeRecord crime, string boxId, int capacity )
+	{
+		var box = Find( crime, boxId );
+		var view = new ItemData[System.Math.Clamp( capacity, 0, MaxSlots )];
+
+		for ( var i = 0; i < view.Length; i++ )
+			view[i] = At( box, i );
+
+		return view;
+	}
+
+	/// <summary>
+	/// Move the item in a bag slot to the first empty slot of the box. Nothing changes when the slot is empty or the
+	/// box is full.
+	/// </summary>
+	public static CrimeResult Store( CrimeRecord crime, string boxId, int capacity, PlayerInventory bag, int bagSlot )
+	{
+		if ( crime is null || bag is null || bagSlot < 0 || bagSlot >= bag.SlotCount || bag.At( bagSlot ) is null )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		var box = Find( crime, boxId );
+
+		if ( box is null && crime.Storage.Count >= MaxBoxes )
+			return CrimeResult.Fail( "You cannot keep things in any more boxes." );
+
+		var free = FirstFree( box, capacity );
+
+		if ( free < 0 )
+			return CrimeResult.Fail( "The storage box is full." );
+
+		// Checked everything; only now take it out of the bag and put it in the box.
+		if ( bag.Remove( bagSlot ) is not { } item )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		if ( box is null )
+		{
+			box = new StorageBoxRecord { Id = boxId };
+			crime.Storage.Add( box );
+		}
+
+		Set( box, free, item );
+		return CrimeResult.Success();
+	}
+
+	/// <summary>
+	/// Move the item in a box slot to the first free bag slot. Nothing changes when the slot is empty or the bag is
+	/// full. A slot beyond the box's size is still reachable, so a box made smaller does not lock items away.
+	/// </summary>
+	public static CrimeResult Take( CrimeRecord crime, string boxId, PlayerInventory bag, int boxSlot )
+	{
+		var box = Find( crime, boxId );
+
+		if ( bag is null || boxSlot < 0 || boxSlot >= MaxSlots || At( box, boxSlot ) is not { } item )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		// The bag takes it first; the box lets go only when it did.
+		if ( !bag.HasRoom || !bag.Add( item ) )
+			return CrimeResult.Fail( "Your bag is full. Make room first." );
+
+		Set( box, boxSlot, null );
+		Tidy( crime, box );
+		return CrimeResult.Success();
+	}
+
+	/// <summary>
+	/// Move the item in a box slot to another slot of the same box, swapping with what is there.
+	/// </summary>
+	public static CrimeResult MoveInBox( CrimeRecord crime, string boxId, int capacity, int from, int to )
+	{
+		var box = Find( crime, boxId );
+
+		if ( from == to || from < 0 || from >= MaxSlots || to < 0 || to >= capacity || to >= MaxSlots
+		     || At( box, from ) is not { } item )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		var other = At( box, to );
+		Set( box, to, item );
+		Set( box, from, other );
+		return CrimeResult.Success();
+	}
+
+	/// <summary>
+	/// Take the parcels of an order out of every box, since nobody wants them. Returns how many went. For a cancelled
+	/// order, whether its player is there or away.
+	/// </summary>
+	public static int RemoveParcelsOf( CrimeRecord crime, string orderId )
+	{
+		var removed = 0;
+
+		foreach ( var box in (crime?.Storage ?? []).ToList() )
+		{
+			removed += box.Slots.RemoveAll(
+				x => x.Item is { Kind: ItemCatalog.Parcel } parcel && parcel.OrderId == orderId );
+
+			Tidy( crime, box );
+		}
+
+		return removed;
+	}
+
+	/// <summary>
+	/// Put an item in a slot (or empty it, with null), keeping the list ordered by slot.
+	/// </summary>
+	static void Set( StorageBoxRecord box, int slot, ItemData item )
+	{
+		box.Slots.RemoveAll( x => x.Slot == slot );
+
+		if ( item is null )
+			return;
+
+		box.Slots.Add( new StorageSlotRecord { Slot = slot, Item = item } );
+		box.Slots.Sort( ( a, b ) => a.Slot.CompareTo( b.Slot ) );
+	}
+
+	/// <summary>
+	/// Forget a box that holds nothing, so the record does not fill up with empty ones.
+	/// </summary>
+	static void Tidy( CrimeRecord crime, StorageBoxRecord box )
+	{
+		if ( box is not null && box.Slots.Count == 0 )
+			crime.Storage.Remove( box );
+	}
+
+	// -- Loading ------------------------------------------------------------------------------------------------------
+
+	/// <summary>
+	/// Make loaded boxes safe: a file is outside input. Ids are checked, sizes capped, slots made unique and in range,
+	/// every item cleaned like a bag item (<see cref="CleanItem"/>), and boxes left empty are dropped.
+	/// </summary>
+	public static List<StorageBoxRecord> Clean( List<StorageBoxRecord> boxes )
+	{
+		var cleaned = new List<StorageBoxRecord>();
+
+		var unique = (boxes ?? [])
+			.Where( x => x is not null && IsId( x.Id ) )
+			.GroupBy( x => x.Id )
+			.Select( x => x.First() );
+
+		foreach ( var box in unique )
+		{
+			var clean = new StorageBoxRecord { Id = box.Id };
+
+			foreach ( var entry in (box.Slots ?? []).Where( x => x is not null && x.Slot is >= 0 and < MaxSlots ) )
+			{
+				if ( clean.Slots.All( x => x.Slot != entry.Slot ) && CleanItem( entry.Item ) is { } item )
+					clean.Slots.Add( new StorageSlotRecord { Slot = entry.Slot, Item = item } );
+			}
+
+			clean.Slots.Sort( ( a, b ) => a.Slot.CompareTo( b.Slot ) );
+
+			if ( clean.Slots.Count > 0 )
+				cleaned.Add( clean );
+
+			if ( cleaned.Count >= MaxBoxes )
+				break;
+		}
+
+		return cleaned;
+	}
+
+	/// <summary>
+	/// An item from a file, made safe: a batch of a known kind is rebuilt from the catalogue (count and quality
+	/// clamped, a parcel's contents capped); an ordinary item keeps its text, cut short, and a count of at least one.
+	/// An unknown kind, or nothing, gives null.
+	/// </summary>
+	public static ItemData CleanItem( ItemData item )
+	{
+		if ( item is null )
+			return null;
+
+		if ( !string.IsNullOrEmpty( item.Kind ) )
+		{
+			var order = Cut( item.OrderId, CrimeRecord.MaxIdLength );
+
+			if ( ItemCatalog.Make( item.Kind, item.Count, item.Quality, order ) is not { } batch )
+				return null;
+
+			batch.Contents = batch.Kind == ItemCatalog.Parcel ? CrimeRecord.CleanContents( item.Contents ) : new();
+			return batch;
+		}
+
+		return new ItemData
+		{
+			Name = Cut( item.Name, 64 ),
+			Description = Cut( item.Description, MaxTextLength ),
+			PrefabPath = Cut( item.PrefabPath, MaxTextLength ),
+			ModelPath = Cut( item.ModelPath, MaxTextLength ),
+			Count = System.Math.Clamp( item.Count, 1, ItemCatalog.MaxCount ),
+		};
+	}
+
+	static string Cut( string text, int max ) =>
+		string.IsNullOrEmpty( text ) ? "" : text.Length > max ? text[..max] : text;
+
+	static bool IsId( string id ) => !string.IsNullOrWhiteSpace( id ) && id.Length <= CrimeRecord.MaxIdLength
+		&& id.All( x => char.IsAsciiLetterOrDigit( x ) || x is '-' or '_' );
+}

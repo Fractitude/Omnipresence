@@ -32,6 +32,12 @@ public sealed class CrimeRecord
 	/// </summary>
 	public List<ItemData> Items { get; set; } = new();
 
+	/// <summary>
+	/// What the player keeps in each storage box, by the box's id. A separate section of the record, so a wipe of the
+	/// crime state resets it too. See <see cref="StorageRules"/>.
+	/// </summary>
+	public List<StorageBoxRecord> Storage { get; set; } = new();
+
 	public List<TrayRecord> Trays { get; set; } = new();
 
 	/// <summary>Orders the player accepted, newest last. See <see cref="OrderState"/>.</summary>
@@ -81,6 +87,8 @@ public sealed class CrimeRecord
 			} )
 			.Take( 200 )
 			.ToList();
+
+		Storage = StorageRules.Clean( Storage );
 
 		Trays ??= new();
 		Trays.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || x.Id.Length > MaxIdLength );
@@ -169,7 +177,7 @@ public sealed class CrimeRecord
 	/// A parcel's contents from a file: capped, counts and qualities clamped. An unknown kind is kept as stored (it
 	/// shows by its stored name); an empty one is dropped.
 	/// </summary>
-	static List<ItemContent> CleanContents( List<ItemContent> contents ) => (contents ?? [])
+	internal static List<ItemContent> CleanContents( List<ItemContent> contents ) => (contents ?? [])
 		.Where( x => x is not null && !string.IsNullOrWhiteSpace( x.Kind ) )
 		.Take( MaxContents )
 		.Select( x => new ItemContent( Clean( x.Kind ), System.Math.Clamp( x.Count, 1, ItemCatalog.MaxCount ),

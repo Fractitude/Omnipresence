@@ -229,6 +229,9 @@ public static class CrimeRules
 			crime, order.Deadline, order, CrimeCatalog.CancelStars,
 			CrimeCatalog.PickCancelReview( SeededRandom( steamId, order.Id, "cancel" ) ) );
 
+		// A parcel for it kept in a storage box goes too, whether the player is here or away.
+		StorageRules.RemoveParcelsOf( crime, order.Id );
+
 		Log.Info( $"CrimeRules: order {order.Id} cancelled: the deadline passed" );
 		result.CancelledOrders.Add( order.Id );
 	}
