@@ -333,24 +333,36 @@ Player-run markets (the second test), multiple products, laundering, staff NPCs,
 - Does a raid (either kind) make a story people retell?
 - Does the Wired feel like a break or a different game?
 
+## Decisions
+
+Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
+
+| # | Topic | Decision |
+| --- | --- | --- |
+| 1 | **Direction** | This crime RP is the working direction. The Lain pitches stay as **flavour**: the Wired, the lo-fi look, the themes of identity and memory. The Lain story, mystery and social features are parked as separate pitches. |
+| 2 | **Offline raiding, test** | None. A base is sealed while its owner is logged off. At 6 to 12 friends it will not matter. |
+| 2 | **Offline raiding, launch** | **Hard, not immune.** Offline bases get time-locked doors and safes (breach time about 3 times longer), and guard NPCs stay on duty. One raid can take at most about 25 percent of the stock; the rest sits in a time-locked vault. Raiding an offline base raises the raider's heat sharply. No raid windows. |
+| 2 | **Online and in the Wired** | A player who is online, or jacked into the Wired at their computer, is fully raidable. Jacking in is a risk. |
+| 3 | **Wipes, test** | No seasons. Wipe by hand whenever. |
+| 3 | **Wipes, launch** | **Seasons of 4 to 6 weeks.** A wipe resets houses, stock, dollars, cars and case files. It keeps character level, hacking level, Wired powers, credits and cosmetics. The Wired is the progression that carries over. |
+| 4 | **Player police** | No. Police are NPCs. A player cop role could be an optional job much later. |
+| 5 | **Currency** | The **target** decides the pay. Real-world targets (banks, companies, rival players) pay **dollars** and leave traces in the case file. Wired dead servers pay **credits** and are safe practice. Same puzzles, different risk. **Not yet done:** `docs/currency.md` and the Intrusion rewards still say the Wired pays only credits and need updating when this is built. |
+| 6 | **Wired and the real world** | The Wired gives no power over the real world. The only bridges are hardware and blueprints, as today. |
+| 7 | **NPC types** | Police and buyers first. Staff NPCs after the first test. Civilians and traffic later. |
+| 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
+| 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
+| 10 | **First product** | A **fictional** substance, so no real recipes. Theme still open. |
+
 ## Open questions
 
-1. **Is this the game?** It replaces the Lain-fan social pitch as the working direction. The Lain themes (the Wired, identity, the human-made stance) are now flavour, not the point. Is that intended?
-2. **Offline raiding.** Safe-while-offline, raid windows, or open raiding with a cost?
-3. **Seasons and wipes.** Does the server wipe (weekly, monthly), and what carries over (levels, powers, cosmetics, hacking skill)?
-4. **Do players ever play police?** "No jobs" suggests no, but a player cop role could be a plain optional job later.
-5. **Currency rules.** Hacking pays dollars (stolen cash) in this design. Intrusion currently pays credits. Which holds?
-6. **Does the Wired give power over the real world?** Proposed no, but a few bridges (hardware, blueprints) exist.
-7. **How many NPC types and how deep?** Police, buyers, staff, civilians, traffic. Start with police and buyers.
-8. **Server size.** 64 slots with persistence, or smaller servers (16 to 32) with a better feel?
-9. **Do rival players share the dark web, or are there separate markets?** Shared increases interaction and abuse.
-10. **What is the first product and its theme?** A fictional substance keeps it clear of real recipes.
-11. **Mature-content policy.** Does the platform allow it, and what rating?
-12. **Relationship to the earlier pitches.** Are the Lain story, mystery and social features parked, merged as flavour, or dropped?
-13. **Market hosting.** Do markets run on a physical computer in the base (raidable, can be unplugged), or in a rented hosting service (safer but a recurring cost and a different target)?
-14. **How many markets can exist** on a 32-player server? A cap, or whoever can afford it.
-15. **How is escrow money stored?** On the market's server (stealable) or by the game (safe)? Stealing it is a core fantasy, so the first.
-16. **Can players tax each other?** A market fee is one. Are protection rackets or regional monopolies in scope?
-17. **Can one operator run several markets?** Cartels and market mergers add depth and risk.
-18. **Is there a hard rule against real-world payment or trading?** No real-money tie. State it.
-19. **Market security.** The market software must be game code, with host-authoritative money and listings, so a Store app cannot forge anything. See AGENTS.md on untrusted apps.
+1. **Mature-content policy (action item).** Check s&box and Steam rules on drug themes, and the age rating, before the identity depends on it. A stylised, made-up substance is the fallback.
+2. **First product and its theme.** Name, look, the chain and what is special about it.
+3. **Wipe details.** What happens to a base whose owner is away for weeks (decay, repossession)? Is there a starter bonus for returning players?
+4. **Offline raiding numbers.** The 3 times breach time, the 25 percent cap and the heat penalty need tuning.
+5. **Market hosting.** Do markets run on a physical computer in the base (raidable, can be unplugged), or in rented hosting (safer, a recurring cost, a different target)?
+6. **How many markets can exist** on a 32-player server? A cap, or whoever can afford it.
+7. **How is escrow money stored?** On the market's server (stealable) or by the game (safe)? Stealing it is a core fantasy, so the first.
+8. **Can players tax each other?** A market fee is one. Are protection rackets or regional monopolies in scope?
+9. **Can one operator run several markets?** Cartels and market mergers add depth and risk.
+10. **Real money.** State a hard rule: no real-money tie, no real-money trading.
+11. **Market security.** The market software must be game code, with host-authoritative money and listings, so a Store app cannot forge anything. See AGENTS.md on untrusted apps.
