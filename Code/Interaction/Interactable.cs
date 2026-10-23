@@ -250,13 +250,18 @@ public sealed class Interactable : Component, Component.IPressable
 			Focused = null;
 	}
 
+	/// <summary>
+	/// Whether the engine may hover this: it only calls <c>Hover</c> and <c>Look</c> on what answers true, and a hover is
+	/// what resets the picked row and shows the menu. So it must not depend on the picked row being usable, or one greyed-out
+	/// row picked with the wheel (or a tray that is still growing) would hide the menu for good, with no way to pick another.
+	/// A press of an unusable row is refused in Press.
+	/// </summary>
 	bool Component.IPressable.CanPress( Component.IPressable.Event e )
 	{
 		if ( !IsInRange( Who( e ) ) )
 			return false;
 
-		var entries = GetEntries();
-		return GetSelected( entries ) is var index and >= 0 && Describe( index, Who( e ) ).Enabled;
+		return GetEntries().Count > 0;
 	}
 
 	bool Component.IPressable.Press( Component.IPressable.Event e )
