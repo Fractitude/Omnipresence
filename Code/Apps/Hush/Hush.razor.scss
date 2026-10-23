@@ -1,0 +1,280 @@
+Hush
+{
+	width: 380px;
+	height: 460px;
+	flex-direction: column;
+	padding: 12px;
+	gap: 8px;
+	background-color: #0b0a10;
+	color: #e3dff0;
+	font-size: 12px;
+}
+
+i
+{
+	font-family: Material Icons;
+}
+
+// Shown in place of the app when it can't work: offline, no signal, nobody in the seat.
+.offline
+{
+	flex-grow: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	text-align: center;
+
+	i
+	{
+		font-size: 40px;
+		color: #6f6a82;
+	}
+
+	.offline-heading
+	{
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	.offline-hint
+	{
+		color: #6f6a82;
+	}
+}
+
+.header
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.logo
+	{
+		font-size: 20px;
+		font-weight: 700;
+		letter-spacing: 3px;
+		color: #b48cff;
+	}
+
+	.balances
+	{
+		flex-direction: column;
+		align-items: flex-end;
+
+		.crypto
+		{
+			font-size: 15px;
+			font-weight: 700;
+			color: #b48cff;
+		}
+
+		.cash
+		{
+			font-size: 11px;
+			color: #6f6a82;
+		}
+	}
+}
+
+.tabs
+{
+	flex-direction: row;
+	gap: 4px;
+	flex-shrink: 0;
+
+	.tab
+	{
+		flex-grow: 1;
+		justify-content: center;
+		padding: 6px 0;
+		border-radius: 8px;
+		background-color: #15131f;
+		color: #8d88a3;
+		font-weight: 600;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #1d1a2b;
+		}
+
+		&.active
+		{
+			background-color: #3b2a66;
+			color: white;
+		}
+	}
+}
+
+.notice
+{
+	padding: 6px 10px;
+	border-radius: 8px;
+	background-color: rgba( 180, 140, 255, 0.14 );
+	color: #d6c2ff;
+	flex-shrink: 0;
+}
+
+.body
+{
+	flex-direction: column;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+	gap: 6px;
+}
+
+.heading
+{
+	margin-top: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #6f6a82;
+	flex-shrink: 0;
+}
+
+.empty, .meta
+{
+	color: #6f6a82;
+	flex-shrink: 0;
+}
+
+.card
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background-color: #15131f;
+	border: 1px solid #25213a;
+
+	&.done
+	{
+		opacity: 0.6;
+	}
+
+	&.cancelled
+	{
+		opacity: 0.5;
+	}
+
+	&.paid
+	{
+		border-color: #3dd68c;
+	}
+
+	.card-top, .card-bottom, .row
+	{
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.handle
+	{
+		font-weight: 700;
+		color: #e3dff0;
+	}
+
+	.price
+	{
+		font-weight: 700;
+		color: #b48cff;
+	}
+
+	.stars
+	{
+		font-weight: 700;
+		color: #ffd166;
+	}
+
+	.what
+	{
+		color: #cfcae0;
+	}
+
+	.note
+	{
+		color: #8d88a3;
+		font-style: italic;
+	}
+}
+
+.balance-card
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 14px 16px;
+	border-radius: 14px;
+	background-image: linear-gradient( 135deg, #3b2a66 0%, #1f1a3a 100% );
+
+	.card-label
+	{
+		font-size: 10px;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: rgba( 255, 255, 255, 0.65 );
+	}
+
+	.balance
+	{
+		font-size: 28px;
+		font-weight: 700;
+		color: white;
+	}
+}
+
+.button
+{
+	padding: 6px 16px;
+	justify-content: center;
+	align-items: center;
+	border-radius: 8px;
+	font-weight: 700;
+	color: #0b0a10;
+	background-color: #b48cff;
+	cursor: pointer;
+	flex-shrink: 0;
+
+	&:hover
+	{
+		background-color: #cdb0ff;
+	}
+
+	&.disabled
+	{
+		opacity: 0.35;
+	}
+}
+
+.chips
+{
+	flex-direction: row;
+	gap: 6px;
+	flex-shrink: 0;
+
+	.chip
+	{
+		flex-grow: 1;
+		justify-content: center;
+		padding: 8px 0;
+		border-radius: 8px;
+		background-color: #15131f;
+		border: 1px solid #25213a;
+		font-weight: 600;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: rgba( 180, 140, 255, 0.16 );
+			border-color: #b48cff;
+		}
+	}
+}

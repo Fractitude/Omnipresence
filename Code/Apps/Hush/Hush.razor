@@ -1,0 +1,247 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/hush.napp, so it is always installed and *@
+@* has root. A dark web market where NPC buyers post orders for Static. Orders and escrow pay in crypto; the Exchange tab *@
+@* changes crypto and dollars. It only works at home: in the Wired it has no signal. *@
+@* It is shared: the host's copy takes the orders and moves the money, and every player sees the same window. Whoever *@
+@* acts is the player in the seat, worked out on the host, never from what the panel sends. *@
+
+<root>
+	@if ( UiState.OfflineHint is not null )
+	{
+		<div class="offline">
+			<i>wifi_off</i>
+			<div class="offline-heading">No internet access</div>
+			<div class="offline-hint">@UiState.OfflineHint</div>
+		</div>
+	}
+	else if ( !UiState.HasAccount )
+	{
+		<div class="offline">
+			<i>@( UiState.NoSignal ? "signal_wifi_off" : "lock" )</i>
+			<div class="offline-heading">Hush</div>
+			<div class="offline-hint">@UiState.Message</div>
+		</div>
+	}
+	else
+	{
+		<div class="header">
+			<div class="logo">hush</div>
+			<div class="balances">
+				<div class="crypto">@UiState.Crypto crypto</div>
+				<div class="cash">@UiState.Cash</div>
+			</div>
+		</div>
+
+		<div class="tabs">
+			@foreach ( var tab in Tabs )
+			{
+				<div class="tab @( UiState.Tab == tab ? "active" : "" )" @onclick=@( () => Navi.Act( HushViewModel.TabAction, tab.ToString() ) )>
+					@tab
+				</div>
+			}
+		</div>
+
+		@if ( UiState.Notice != "" )
+		{
+			<div class="notice">@UiState.Notice</div>
+		}
+
+		<div class="body">
+			@if ( UiState.Tab == HushTab.Orders )
+			{
+				<div class="heading">Open orders</div>
+				@if ( UiState.Open.Count == 0 )
+				{
+					<div class="empty">No orders right now. Check back soon.</div>
+				}
+
+				@foreach ( var order in UiState.Open )
+				{
+					<div class="card">
+						<div class="card-top">
+							<div class="handle">@order.Handle</div>
+							<div class="price">@order.Total crypto</div>
+						</div>
+						<div class="what">@order.Count x @order.Product, quality @order.MinQuality or better</div>
+						<div class="note">"@order.Note"</div>
+						<div class="card-bottom">
+							<div class="meta">@order.PriceEach each. Leaves in @order.Expires</div>
+							@if ( order.CanAccept )
+							{
+								<div class="button" @onclick=@( () => Navi.Act( HushViewModel.AcceptAction, order.Id ) )>
+									Accept
+								</div>
+							}
+						</div>
+					</div>
+				}
+
+				<div class="heading">Your orders</div>
+				@if ( UiState.Mine.Count == 0 )
+				{
+					<div class="empty">You have no orders.</div>
+				}
+
+				@foreach ( var order in UiState.Mine )
+				{
+					<div class="card mine @order.Status.ToString().ToLower()">
+						<div class="card-top">
+							<div class="handle">@order.Handle</div>
+							<div class="price">@order.Total crypto</div>
+						</div>
+						<div class="what">@order.Count x @order.Product, quality @order.MinQuality or better</div>
+						<div class="card-bottom">
+							<div class="meta">@order.Detail</div>
+							@if ( order.Status == MyOrderStatus.ToPack )
+							{
+								<div class="button @( order.CanPack ? "" : "disabled" )"
+								     @onclick=@( () => Navi.Act( HushViewModel.PackAction, order.Id ) )>
+									Pack
+								</div>
+							}
+						</div>
+					</div>
+				}
+			}
+			else if ( UiState.Tab == HushTab.Shipments )
+			{
+				<div class="heading">Shipments</div>
+				@if ( UiState.Shipments.Count == 0 )
+				{
+					<div class="empty">Nothing packed or sent yet.</div>
+				}
+
+				@foreach ( var shipment in UiState.Shipments )
+				{
+					<div class="card @( shipment.Delivered ? "done" : "" )">
+						<div class="handle">@shipment.Title</div>
+						<div class="meta">@shipment.Detail</div>
+					</div>
+				}
+			}
+			else if ( UiState.Tab == HushTab.Wallet )
+			{
+				<div class="balance-card">
+					<div class="card-label">Crypto</div>
+					<div class="balance">@UiState.Crypto</div>
+					<div class="meta">@UiState.Escrow</div>
+				</div>
+
+				<div class="heading">Reputation</div>
+				<div class="card">
+					<div class="row"><div>Level</div><div>@UiState.Level</div></div>
+					<div class="row"><div>Rating</div><div>@UiState.Rating</div></div>
+					<div class="row"><div>Trades</div><div>@UiState.Trades</div></div>
+					<div class="row"><div>Fee</div><div>@UiState.FeeText</div></div>
+				</div>
+
+				@if ( UiState.Cashouts.Count > 0 )
+				{
+					<div class="heading">On their way to your bank</div>
+					@foreach ( var cashout in UiState.Cashouts )
+					{
+						<div class="card"><div class="meta">@cashout</div></div>
+					}
+				}
+			}
+			else if ( UiState.Tab == HushTab.Reviews )
+			{
+				<div class="heading">Reviews</div>
+				@if ( UiState.Reviews.Count == 0 )
+				{
+					<div class="empty">No reviews yet.</div>
+				}
+
+				@foreach ( var review in UiState.Reviews )
+				{
+					<div class="card">
+						<div class="card-top">
+							<div class="handle">@review.Handle</div>
+							<div class="stars">@Stars( review.Stars )</div>
+						</div>
+						<div class="note">"@review.Text"</div>
+						<div class="meta">@review.When</div>
+					</div>
+				}
+			}
+			else
+			{
+				<div class="balance-card">
+					<div class="card-label">Your wallet</div>
+					<div class="balance">@UiState.Crypto crypto</div>
+					<div class="meta">@UiState.Cash</div>
+				</div>
+
+				<div class="heading">Sell crypto for dollars</div>
+				<div class="meta">@UiState.SellRate</div>
+				<div class="chips">
+					@foreach ( var amount in SellAmounts )
+					{
+						<div class="chip" @onclick=@( () => Navi.Act( HushViewModel.SellAction, amount ) )>
+							@( amount == HushViewModel.AllAmount ? "All" : amount )
+						</div>
+					}
+				</div>
+
+				<div class="heading">Buy crypto with dollars</div>
+				<div class="meta">@UiState.BuyRate</div>
+				<div class="chips">
+					@foreach ( var amount in BuyAmounts )
+					{
+						<div class="chip" @onclick=@( () => Navi.Act( HushViewModel.BuyAction, amount ) )>
+							$@( amount == HushViewModel.AllAmount ? "All" : amount )
+						</div>
+					}
+				</div>
+
+				@if ( UiState.Cashouts.Count > 0 )
+				{
+					<div class="heading">Cash-outs waiting</div>
+					@foreach ( var cashout in UiState.Cashouts )
+					{
+						<div class="card"><div class="meta">@cashout</div></div>
+					}
+				}
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	static readonly HushTab[] Tabs = System.Enum.GetValues<HushTab>();
+	static readonly string[] SellAmounts = ["10", "50", "100", HushViewModel.AllAmount];
+	static readonly string[] BuyAmounts = ["10", "50", "100", HushViewModel.AllAmount];
+
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	HushViewModel ViewModel => field ??= new( GetSeat, GetComputer );
+
+	HushUiState UiState => Navi.IsViewer ? Navi.GetState<HushUiState>() ?? HushUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	static string Stars( int count ) => new string( '*', count ) + new string( '-', 5 - count );
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}
