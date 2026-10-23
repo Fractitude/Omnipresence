@@ -14,7 +14,7 @@ A persistent crime roleplay server with no jobs: grow and cook drugs, hack for m
 2. **The computer is the crime tool.** The dark web, VPNs, traces, smart locks and hacking are the thing this game has that DarkRP and Rust do not.
 3. **The world is staffed by NPCs.** Buyers, cops, workers, shopkeepers, so no player ever has to do a boring job.
 4. **Everything leaves a trace.** Real-world actions raise heat, digital actions leave logs, and both lead to the same investigation.
-5. **Two worlds, two kinds of power.** In the real world you rely on guns, cars and cash. In the Wired you rely on powers and levels.
+5. **Two worlds, two kinds of power, one reality.** In the real world you rely on guns, cars and cash. In the Wired you rely on powers and levels. Wired power reaches into the real world through its networked systems, and the Wired leaks into it.
 6. **Players make the stories.** Rivalries, betrayals, raids, takeovers.
 
 ## The two worlds
@@ -250,8 +250,92 @@ A separate, escapist space with its own rules. Its activities pay **credits** an
   - **Party rounds:** tag, race, hide and mimic.
 - **Hub:** a plaza with a shop for powers and cosmetics.
 - **Why it exists:** it gives players something to do when they are hot, jailed, broke or tired of crime, and it is where the "hard to kill" fantasy lives.
-- **Bridge to the real world:** hardware, blueprints and a few reward items (not currency). Credits never become dollars.
+- **Bridge to the real world:** hardware, blueprints and a few reward items (not currency). Credits never become dollars. **Wired power also acts on the real world's networked systems, and the Wired leaks**, see "The Wired leaks into the real world" below.
 - **Safe zone logic:** the Wired is not a place to hide from police, because your body is at your computer in the real world. See the next section.
+
+### The Wired leaks into the real world
+
+**Decided 2026-10-23, replacing the earlier "no power over the real world".** Both worlds are real in their own way. Everything in the real world is networked, so **power in the Wired is power over the real world's systems**. The Wired also **leaks**: odd things cross over.
+
+**The rule that keeps the balance:** Wired power acts on **systems, not on bodies**. It can lock a door, kill the lights, take over a car's controls or blind a camera. It cannot shoot a person, and a person with a gun is still dangerous. Killing stays a real-world, gun-and-explosion matter.
+
+#### 1. Reach: Wired power over networked things
+
+Your Wired level (and hardware) sets your **Reach**: which real-world devices you can touch from the Wired, from how far and with what force.
+
+| Tier | Reach | Examples |
+| --- | --- | --- |
+| **1. Nudge** | Weak, nearby, one device | Flicker a light, open a weak lock, read a camera, play a sound through a speaker |
+| **2. Control** | Several devices, a building | Cut a building's power, lock or unlock smart doors, disable an alarm, take a car's engine and doors, loop a camera |
+| **3. Influence** | A block or district | Change traffic lights, jam police radio, delay a dispatch, read an ATM's records, shut down a lab's sensors |
+| **4. Rewrite** | Rare, huge cost | A short, local **glitch field**: doors fail, lights stutter, props jitter, cameras show the wrong thing, time stutters |
+
+- **You do it from the Wired.** Real-world devices appear in the Wired as objects. Touching one acts on the real device. A town map in the Wired shows lit-up nodes.
+- **Powers are active, with cooldowns and Heat.** The Wired powers (Glide, Phase, Resize, Mimic and others) still work in the Wired. A few have real-world effects through networked things.
+- **Leaving a body:** you are in the Wired, so your body sits at the computer (see below). Acting in the real world from the Wired is a deliberate risk.
+
+#### 2. Signatures: it all leaves traces
+
+Every real-world action from the Wired leaves a **Wired signature** in the case file.
+
+- Heavier Reach leaves a bigger signature.
+- Police forensics NPCs follow signatures to your computer.
+- A VPN or relay helps, but strong effects are loud.
+- A rival with a Wired detector can see your signature and learn who did it.
+- A clean-up mission in the Wired (existing Cover stage) removes lines.
+
+#### 3. Leaks: the Wired spills into the world
+
+A **leak** is a spot in the real world where Wired energy has crossed over. Leaks are part of the world.
+
+- **Cause:** big Wired events (a boss dies, a Reach 4 effect, a huge hack, a Wired mode finishes) and slow build-up around heavy Wired traffic.
+- **What happens:** a small area behaves oddly for a few minutes: flickering lights, static on radios, a ghostly figure, objects drifting, a phone that rings by itself, a street sign that shows a Wired address.
+- **What it gives:** leaks drop **Wired artifacts**, strange items that exist in the real world: rare hardware, tools, valuables. They sell on the dark web and unlock Wired content.
+- **Competition:** the first people to find and reach a leak get the loot. Rivals can race, ambush or camp it. Police can cordon one off.
+- **Safety:** leaks never kill. They are strange and risky in a different way.
+
+#### 4. Presence: ghosts and voices
+
+- **Watch:** see through a camera, a TV or a phone camera that you reach.
+- **Speak:** talk through a speaker or a phone to a player or an NPC. Useful for scams, fear, instructions and bribes.
+- **Appear:** at higher tiers your Wired avatar can flicker as a **ghost** on screens and glass near your reach. Strictly for show.
+
+#### 5. Defence: how real-world people push back
+
+- **Go analog.** A base with no network and mechanical locks cannot be touched, but it also has no smart alarms, cameras or automation. A real trade.
+- **Air gaps and shielding.** Offline machines, shielded rooms and surge protectors block Reach.
+- **Jammers and detectors.** Buy gear that blocks signals or shows Wired activity near you.
+- **Hardware and a hacker of your own.** A friend in the Wired can defend your devices, or hunt the intruder's signature.
+- **Police.** Wired crime is crime. It leaves signatures.
+- **Cost:** a heavily networked base is easy to run and easy to attack. A mechanical base is slow and safe.
+
+#### 6. Both are real: stakes in the Wired
+
+- **Property in the Wired persists.** A Wired home, a server, powers and ranks all keep their value across seasons.
+- **Danger in the Wired.** Losing in the Wired costs credits and items there and a short stun at your real body (a few seconds of blur), because your mind took the hit. No death in the Wired.
+- **Death in the real world** drops you out of the Wired at once.
+- **Reputation crosses over.** Your Wired rank and your real-world standing are one name.
+
+#### Why this works
+
+- It makes the two worlds **one game**, so the Wired is not a separate arcade.
+- It gives the Wired real value to the crime loop: powerful Wired players become kingpins of infrastructure.
+- It sets Wired levels against guns and cash, so every kind of player has a path.
+- Leaks add events and a reason to go out and explore.
+- It uses the existing hacking, hardware and Navi systems.
+
+#### Risks
+
+- **Balance.** If Wired power scales too far, real-world players feel helpless. Tiers, cooldowns, signatures and the "systems, not bodies" rule are the safeguards. Playtest heavily.
+- **Two kinds of players.** Players who never touch the Wired must still have a real path (analog defence, guns, cars).
+- **Complexity.** Mirroring real devices in the Wired and keeping them in sync is a big build. Start with a handful of device types.
+- **Griefing.** Locking someone in, turning off their car and killing their lights can feel awful. Needs limits (duration, immunity windows, protections near spawn).
+- **Leaks may feel random.** They need clear telegraphing (a warning, a signal on Navi) so players can plan.
+- **Security.** Real-world effects from the Wired must run through the host with permission checks, signatures and rate limits. A Wired action must never act as a different player.
+
+#### Slice note
+
+Not in the first test. The earliest version is one Tier 1 effect (open a weak smart lock from the Wired), a signature in the case file, and one leak event. See the build order.
 
 ### Your body when you are in the Wired
 
@@ -347,7 +431,7 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 | 3 | **Wipes, launch** | **Seasons of 4 to 6 weeks.** A wipe resets houses, stock, dollars, cars and case files. It keeps character level, hacking level, Wired powers, credits and cosmetics. The Wired is the progression that carries over. |
 | 4 | **Player police** | No. Police are NPCs. A player cop role could be an optional job much later. |
 | 5 | **Currency** | The **target** decides the pay. Real-world targets (banks, companies, rival players) pay **dollars** and leave traces in the case file. Wired dead servers pay **credits** and are safe practice. Same puzzles, different risk. **Not yet done:** `docs/currency.md` and the Intrusion rewards still say the Wired pays only credits and need updating when this is built. |
-| 6 | **Wired and the real world** | The Wired gives no power over the real world. The only bridges are hardware and blueprints, as today. |
+| 6 | **Wired and the real world** | **Changed 2026-10-23:** the Wired leaks into the real world and Wired power affects it. Wired power acts on networked **systems, not bodies**, in tiers (Nudge, Control, Influence, Rewrite), leaves signatures in the case file, and can be countered by going analog. The Wired also causes **leaks**, real-world anomalies that drop Wired artifacts. Hardware and blueprints still bridge too. See "The Wired leaks into the real world". |
 | 7 | **NPC types** | Police and buyers first. Staff NPCs after the first test. Civilians and traffic later. |
 | 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
 | 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
@@ -366,3 +450,10 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 9. **Can one operator run several markets?** Cartels and market mergers add depth and risk.
 10. **Real money.** State a hard rule: no real-money tie, no real-money trading.
 11. **Market security.** The market software must be game code, with host-authoritative money and listings, so a Store app cannot forge anything. See AGENTS.md on untrusted apps.
+12. **Reach numbers.** How far, how long and how strong are each tier, and what hardware and level do they need?
+13. **Which real-world devices exist** at first (lights, locks, cameras, cars, alarms, ATMs, traffic lights) and which are built first?
+14. **How does the Wired show real devices?** A mirrored town, a list on Navi, or objects floating in a map?
+15. **Leak design.** How often, how large, how are they announced, and what artifacts do they drop?
+16. **Griefing limits.** Maximum lock-in time, immunity near spawn, and a way to break free from a locked-in situation.
+17. **Wired defeat.** Is the stun at your body enough, or should a real-world consequence be stronger?
+18. **Should the Wired map mirror the real map,** so a Wired position maps to a real-world position, or stay separate with only devices linking?
