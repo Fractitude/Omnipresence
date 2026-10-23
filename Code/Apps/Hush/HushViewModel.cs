@@ -352,17 +352,18 @@ public sealed class HushViewModel
 	{
 		var left = InteractionSetup.Countdown( order.Deadline - now );
 
-		var (status, detail) = order.State switch
+		var status = StatusOfOrder( order );
+
+		var detail = status switch
 		{
-			OrderState.Accepted => (MyOrderStatus.ToPack,
-				$"Pack it at the packing table at home. Send within {left}"),
-			OrderState.Packed => (MyOrderStatus.ToSend,
-				$"Parcel quality {order.PackedQuality}. Take it to your mailbox. {left} left to send"),
-			OrderState.Shipped => (MyOrderStatus.Shipped, $"On its way. Due {Clock( order.Deadline )}"),
-			OrderState.Delivered => (MyOrderStatus.Escrow,
-				$"Delivered. Escrow releases in {InteractionSetup.Countdown( order.ReleaseAt - now )}"),
-			OrderState.Released => (MyOrderStatus.Paid, $"Paid {order.Paid:N0} after the fee"),
-			_ => (MyOrderStatus.Cancelled, "Cancelled"),
+			MyOrderStatus.ToPack => $"Pack it at the packing table at home. Send within {left}",
+			MyOrderStatus.ToSend =>
+				$"Parcel quality {order.PackedQuality}. Take it to your mailbox. {left} left to send",
+			MyOrderStatus.Shipped => $"On its way. Due {Clock( order.Deadline )}",
+			MyOrderStatus.Escrow =>
+				$"Delivered. Escrow releases in {InteractionSetup.Countdown( order.ReleaseAt - now )}",
+			MyOrderStatus.Paid => $"Paid {order.Paid:N0} after the fee",
+			_ => "Cancelled",
 		};
 
 		return new MyOrderRow(
