@@ -8,10 +8,11 @@ public sealed class MarketOrder
 {
 	public string Id { get; init; } = "";
 	public string Handle { get; init; } = "";
-	public BuyerType Buyer { get; init; }
+	public BuyerPersonality Personality { get; init; }
 	public string Text { get; init; } = "";
 	public string Kind { get; init; } = "";
 	public int Count { get; init; }
+	/// <summary>The quality the buyer asks for. A guide for the rating, not a requirement.</summary>
 	public int MinQuality { get; init; }
 
 	/// <summary>Crypto per item.</summary>
@@ -109,12 +110,13 @@ public sealed class MarketSystem : GameObjectSystem<MarketSystem>
 	}
 
 	/// <summary>
-	/// A new order from a buyer: honest about two times in three, picky otherwise. Picky buyers ask for more quality and
-	/// pay a little more for it.
+	/// A new order from a buyer with a personality picked by the weights in <see cref="CrimeCatalog"/>. Some ask for
+	/// more quality and pay a little more for it.
 	/// </summary>
 	MarketOrder Generate()
 	{
-		var type = random.Next( 3 ) == 0 ? BuyerType.Picky : BuyerType.Honest;
+		var personality = CrimeCatalog.PickPersonality( random );
+		var rules = CrimeCatalog.RulesOf( personality );
 		var kind = ItemCatalog.StaticTab;
 		var steps = (CrimeCatalog.OrderCountMax - CrimeCatalog.OrderCountMin) / CrimeCatalog.OrderCountStep;
 		var count = CrimeCatalog.OrderCountMin + random.Next( steps + 1 ) * CrimeCatalog.OrderCountStep;
@@ -122,11 +124,8 @@ public sealed class MarketSystem : GameObjectSystem<MarketSystem>
 		var quality = random.Next( CrimeCatalog.OrderQualityMin, CrimeCatalog.OrderQualityMax + 1 );
 		var spread = random.Next( CrimeCatalog.PriceSpreadMin, CrimeCatalog.PriceSpreadMax + 1 );
 
-		if ( type == BuyerType.Picky )
-		{
-			quality = System.Math.Min( quality + CrimeCatalog.PickyExtraQuality, 95 );
-			spread += 15;
-		}
+		quality = System.Math.Min( quality + rules.ExtraAsk, 95 );
+		spread += rules.PriceBonus;
 
 		var basePrice = ItemCatalog.Find( kind )?.BasePrice ?? 1;
 		var price = System.Math.Max( 1, basePrice * spread / 100 );
@@ -135,8 +134,8 @@ public sealed class MarketSystem : GameObjectSystem<MarketSystem>
 		{
 			Id = System.Guid.NewGuid().ToString( "N" )[..8],
 			Handle = CrimeCatalog.PickHandle( random ),
-			Buyer = type,
-			Text = CrimeCatalog.PickNote( type, random ),
+			Personality = personality,
+			Text = CrimeCatalog.PickNote( personality, random ),
 			Kind = kind,
 			Count = count,
 			MinQuality = quality,

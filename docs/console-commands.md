@@ -27,6 +27,7 @@ Testing only, for the grow, press, post and Hush loop. They ask the host, which 
 | `crime_tray_ready` | Every tray you planted is ready to harvest now. |
 | `crime_postal_now` | The mailman, the escrow release and the Exchange cash-outs are all due now. |
 | `crime_orders [count]` | Put more orders on the Hush board (up to 10). |
+| `crime_deliver_now` | Every delivery you bought in the Hush shop has reached your mailbox now. |
 
 ## Health
 

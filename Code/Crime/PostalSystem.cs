@@ -48,6 +48,23 @@ public static class PostalSystem
 	public static int InPost( CrimeRecord crime ) => crime.Parcels.Count( x => x.State != ParcelState.Delivered );
 
 	/// <summary>
+	/// Deliveries bought in the shop whose time is up reach the mailbox. Returns whether anything changed.
+	/// </summary>
+	public static bool TickDeliveries( CrimeRecord crime )
+	{
+		var now = WorldClock.Now;
+		var changed = false;
+
+		foreach ( var delivery in crime.Deliveries.Where( x => x.State == DeliveryState.InTransit && now >= x.ArriveAt ) )
+		{
+			delivery.State = DeliveryState.InMailbox;
+			changed = true;
+		}
+
+		return changed;
+	}
+
+	/// <summary>
 	/// Move the parcels along: collected when the mailman comes, delivered when their time is up. Calls
 	/// <paramref name="delivered"/> for each parcel that arrives. Returns whether anything changed.
 	/// </summary>

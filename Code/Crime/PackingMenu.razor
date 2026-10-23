@@ -1,0 +1,186 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( IsOpen ? "open" : "" )">
+	@if ( IsOpen && PlayerCrime.Local is { } crime )
+	{
+		var orders = crime.PackableOrders();
+		var selected = orders.FirstOrDefault( x => x.Id == selectedId );
+
+		<div class="window">
+			<div class="header">
+				<div class="title">Packing table</div>
+				<div class="close" @onclick=@Close>Close</div>
+			</div>
+			<div class="body">
+				<div class="column orders">
+					<div class="heading">Orders to pack</div>
+					@if ( orders.Count == 0 )
+					{
+						<div class="empty">No accepted orders waiting.</div>
+					}
+					@foreach ( var order in orders )
+					{
+						var id = order.Id;
+						<div class="order @( id == selectedId ? "selected" : "" )" @onclick=@( () => Select( id ) )>
+							<div class="line">
+								<div class="handle">@order.Handle</div>
+								<div class="left">@InteractionSetup.Countdown( order.Deadline - WorldClock.Now ) left to send</div>
+							</div>
+							<div class="what">@order.Count x @ProductName( order.Kind ), asked quality @order.Asked+</div>
+						</div>
+					}
+				</div>
+				<div class="column batches">
+					<div class="heading">Choose a batch</div>
+					@if ( selected.Id is null )
+					{
+						<div class="empty">Pick an order on the left.</div>
+					}
+					else
+					{
+						var inventory = PlayerInventory.Local;
+						var found = 0;
+
+						@for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
+						{
+							var index = slot;
+							var item = inventory.At( index );
+
+							if ( item is not { IsBatch: true } || item.Kind != selected.Kind || item.Count < selected.Count )
+							{
+								continue;
+							}
+
+							found++;
+							var orderId = selected.Id;
+							var compare = Compare( item.Quality, selected.Asked );
+
+							<div class="batch">
+								<div class="info">
+									<div class="size">@item.Count x @item.Name, quality @item.Quality</div>
+									<div class="compare @compare.Class">@compare.Text</div>
+								</div>
+								<div class="button" @onclick=@( () => Pack( orderId, index ) )>Pack</div>
+							</div>
+						}
+
+						@if ( found == 0 )
+						{
+							<div class="empty">You have no batch of @selected.Count or more @ProductName( selected.Kind ).</div>
+						}
+					}
+				</div>
+			</div>
+			@if ( crime.ToldCount > toldAtOpen )
+			{
+				<div class="notice">@crime.LastTold</div>
+			}
+			<div class="hint">Any quality can be sent. The buyer rates what arrives.</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the panel is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static string selectedId = "";
+	static int toldAtOpen;
+
+	/// <summary>
+	/// Open the panel, from a packing table the player used. Does nothing with another menu open.
+	/// </summary>
+	public static void Open()
+	{
+		if ( IsOpen || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen || NaviInputCapture.Current is not null )
+			return;
+
+		selectedId = crime.PackableOrders().FirstOrDefault().Id ?? "";
+		toldAtOpen = crime.ToldCount;
+		IsOpen = true;
+		GameMenus.SetOpen( "packing", true );
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "packing", false );
+		selectedId = "";
+		FreeControls( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	static void Select( string id ) => selectedId = id;
+
+	/// <summary>
+	/// Ask the host to pack. Only the order id and the slot go; the host checks everything.
+	/// </summary>
+	static void Pack( string orderId, int slot ) => PlayerCrime.Local?.RequestPack( orderId, slot );
+
+	static string ProductName( string kind ) => ItemCatalog.Find( kind )?.Name ?? kind;
+
+	/// <summary>
+	/// How a batch compares with what the buyer asked, in words.
+	/// </summary>
+	static (string Text, string Class) Compare( int quality, int asked ) =>
+		quality > asked ? ($"Quality {quality}, asked {asked}+: above the ask", "above")
+		: quality == asked ? ($"Quality {quality}, asked {asked}+: meets the ask", "meets")
+		: ($"Quality {quality}, asked {asked}+: below the ask", "below");
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		// Leave if the player walked away, another menu took over, or Escape was pressed.
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || PlayerCrime.Local is null
+		     || !PackingTable.IsNear( Players.LocalController?.WorldPosition ?? default ) )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		FreeControls( false );
+
+		// Keep the pick while the order is still there; otherwise move to the first.
+		var orders = PlayerCrime.Local.PackableOrders();
+
+		if ( orders.All( x => x.Id != selectedId ) )
+			selectedId = orders.FirstOrDefault().Id ?? "";
+	}
+
+	protected override void OnDisabled() => Close();
+
+	/// <summary>
+	/// Take the look and move controls from the player while the panel is open, or give them back.
+	/// </summary>
+	static void FreeControls( bool allowed )
+	{
+		var controller = Players.LocalController;
+
+		if ( controller is null )
+			return;
+
+		controller.UseLookControls = allowed;
+		controller.UseInputControls = allowed;
+
+		// The controller keeps the last move it was given, so a held key would walk on: zero it.
+		if ( !allowed )
+			controller.WishVelocity = 0;
+	}
+
+	protected override int BuildHash() => System.HashCode.Combine(
+		IsOpen, selectedId, PlayerInventory.Local?.Version, PlayerCrime.Local?.Version, PlayerCrime.Local?.ToldCount,
+		WorldClock.Now );
+}

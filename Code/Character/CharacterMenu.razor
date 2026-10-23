@@ -31,7 +31,10 @@
 				<div class="name">@hovered.Name</div>
 				@if ( hovered.IsBatch )
 				{
-					<div class="description">@ItemCatalog.Describe( hovered )</div>
+					@foreach ( var line in ItemCatalog.DescribeLines( hovered ) )
+					{
+						<div class="description">@line</div>
+					}
 				}
 				@if ( !string.IsNullOrEmpty( hovered.Description ) )
 				{
@@ -90,7 +93,7 @@
 				Close();
 			}
 		}
-		else if ( Input.Pressed( "CharacterMenu" ) && NaviInputCapture.Current is null && !AbilityMenu.IsOpen )
+		else if ( Input.Pressed( "CharacterMenu" ) && NaviInputCapture.Current is null && !GameMenus.IsAnyOpen )
 		{
 			Open();
 		}
@@ -145,12 +148,14 @@
 		// Before the panel exists: a ScenePanel with no scene ticks the game scene, which holds this very menu.
 		scene ??= CreateScene();
 		IsOpen = true;
+		GameMenus.SetOpen( "character", true );
 		dragging = false;
 	}
 
 	void Close()
 	{
 		IsOpen = false;
+		GameMenus.SetOpen( "character", false );
 		dragging = false;
 		InventoryGrid.Cancel();
 		FreeControls( true );

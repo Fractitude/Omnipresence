@@ -3,8 +3,8 @@
 @namespace OmnipresenceApps
 
 @* The game's own system app, part of the OS: described by Assets/navi/system/hush.napp, so it is always installed and *@
-@* has root. A dark web market where NPC buyers post orders for Static. Orders and escrow pay in crypto; the Exchange tab *@
-@* changes crypto and dollars. It only works at home: in the Wired it has no signal. *@
+@* has root. A dark web market where NPC buyers post orders for Static and a shop sells supplies. Orders, escrow and the shop *@
+@* use crypto; the Exchange tab changes crypto and dollars. It only works at home: in the Wired it has no signal. *@
 @* It is shared: the host's copy takes the orders and moves the money, and every player sees the same window. Whoever *@
 @* acts is the player in the seat, worked out on the host, never from what the panel sends. *@
 
@@ -53,11 +53,23 @@
 			@if ( UiState.Tab == HushTab.Orders )
 			{
 				<div class="heading">Open orders</div>
+				<div class="filters">
+					@foreach ( var chip in UiState.Categories )
+					{
+						<div class="filter @( UiState.Category == chip.Key ? "active" : "" )"
+						     @onclick=@( () => Navi.Act( HushViewModel.CategoryAction, chip.Key == "" ? HushViewModel.AllKey : chip.Key ) )>
+							@chip.Label (@chip.Count)
+						</div>
+					}
+				</div>
 				@if ( UiState.Open.Count == 0 )
 				{
-					<div class="empty">No orders right now. Check back soon.</div>
+					<div class="empty">
+						@( UiState.Category == "" ? "No orders right now. Check back soon." : $"No open {UiState.Category} orders right now." )
+					</div>
 				}
 
+				<div class="cards">
 				@foreach ( var order in UiState.Open )
 				{
 					<div class="card">
@@ -65,7 +77,7 @@
 							<div class="handle">@order.Handle</div>
 							<div class="price">@order.Total crypto</div>
 						</div>
-						<div class="what">@order.Count x @order.Product, quality @order.MinQuality or better</div>
+						<div class="what">@order.Count x @order.Product, asked quality @order.MinQuality+</div>
 						<div class="note">"@order.Note"</div>
 						<div class="card-bottom">
 							<div class="meta">@order.PriceEach each. Leaves in @order.Expires</div>
@@ -78,15 +90,28 @@
 						</div>
 					</div>
 				}
+				</div>
 			}
 			else if ( UiState.Tab == HushTab.YourOrders )
 			{
 				<div class="heading">Your orders</div>
+				<div class="filters">
+					@foreach ( var chip in UiState.StatusChips )
+					{
+						<div class="filter @( UiState.StatusFilter == chip.Key ? "active" : "" )"
+						     @onclick=@( () => Navi.Act( HushViewModel.StatusAction, chip.Key == "" ? HushViewModel.AllKey : chip.Key ) )>
+							@chip.Label (@chip.Count)
+						</div>
+					}
+				</div>
 				@if ( UiState.Mine.Count == 0 )
 				{
-					<div class="empty">You have no orders.</div>
+					<div class="empty">
+						@( UiState.StatusFilter == "" ? "You have no orders." : "You have no orders in this status." )
+					</div>
 				}
 
+				<div class="cards">
 				@foreach ( var order in UiState.Mine )
 				{
 					<div class="card mine @order.Status.ToString().ToLower()">
@@ -94,16 +119,66 @@
 							<div class="handle">@order.Handle</div>
 							<div class="price">@order.Total crypto</div>
 						</div>
-						<div class="what">@order.Count x @order.Product, quality @order.MinQuality or better</div>
+						<div class="what">@order.Count x @order.Product, asked quality @order.MinQuality+</div>
 						<div class="card-bottom">
 							<div class="meta">@order.Detail</div>
 						</div>
 					</div>
 				}
+				</div>
+			}
+			else if ( UiState.Tab == HushTab.Shop )
+			{
+				<div class="heading">Shop</div>
+				<div class="meta">You have @UiState.Crypto crypto. Supplies come by mail to your mailbox.</div>
+				<div class="filters">
+					@foreach ( var quantity in UiState.ShopQuantities )
+					{
+						<div class="filter @( UiState.ShopQuantity == quantity ? "active" : "" )"
+						     @onclick=@( () => Navi.Act( HushViewModel.QuantityAction, quantity.ToString() ) )>
+							x@quantity
+						</div>
+					}
+				</div>
+
+				<div class="cards">
+					@foreach ( var item in UiState.Shop )
+					{
+						<div class="card">
+							<div class="card-top">
+								<div class="handle">@item.Name</div>
+								<div class="price">@item.PriceEach crypto each</div>
+							</div>
+							<div class="note">@item.Description</div>
+							<div class="meta">@item.Delivery</div>
+							<div class="card-bottom">
+								<div class="meta">@( item.CanBuy ? $"Total {item.Total} crypto" : item.Reason )</div>
+								<div class="button @( item.CanBuy ? "" : "disabled" )"
+								     @onclick=@( () => Navi.Act( HushViewModel.ShopAction, item.Id, UiState.ShopQuantity.ToString() ) )>
+									Buy x@UiState.ShopQuantity
+								</div>
+							</div>
+						</div>
+					}
+				</div>
 			}
 			else if ( UiState.Tab == HushTab.Shipments )
 			{
-				<div class="heading">Shipments</div>
+				<div class="heading">Incoming supplies</div>
+				@if ( UiState.Incoming.Count == 0 )
+				{
+					<div class="empty">Nothing ordered from the shop.</div>
+				}
+
+				@foreach ( var delivery in UiState.Incoming )
+				{
+					<div class="card">
+						<div class="handle">@delivery.Title</div>
+						<div class="meta">@delivery.Detail</div>
+					</div>
+				}
+
+				<div class="heading">Parcels you sent</div>
 				@if ( UiState.Shipments.Count == 0 )
 				{
 					<div class="empty">Nothing packed or sent yet.</div>
@@ -207,7 +282,8 @@
 
 @code
 {
-	static readonly HushTab[] Tabs = System.Enum.GetValues<HushTab>();
+	// A property, not a static field: a hot reload keeps a static array of the assembly's own enum, so a new tab would not show.
+	static HushTab[] Tabs => System.Enum.GetValues<HushTab>();
 	static readonly string[] SellAmounts = ["10", "50", "100", HushViewModel.AllAmount];
 	static readonly string[] BuyAmounts = ["10", "50", "100", HushViewModel.AllAmount];
 
@@ -226,7 +302,7 @@
 	/// <summary>
 	/// Accepted orders that wait for the player to pack them or take the parcel to the mailbox.
 	/// </summary>
-	int ToDo => UiState.Mine.Count( x => x.Status is MyOrderStatus.ToPack or MyOrderStatus.ToSend );
+	int ToDo => UiState.ToDo;
 
 	string TabLabel( HushTab tab ) => tab switch
 	{

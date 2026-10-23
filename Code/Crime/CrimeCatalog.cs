@@ -74,9 +74,6 @@ public static class CrimeCatalog
 	public const int OrderQualityMin = 30;
 	public const int OrderQualityMax = 70;
 
-	/// <summary>Picky buyers want at least this much more quality.</summary>
-	public const int PickyExtraQuality = 10;
-
 	/// <summary>The price range around an item's base price, in percent.</summary>
 	public const int PriceSpreadMin = 80;
 
@@ -94,6 +91,30 @@ public static class CrimeCatalog
 
 	/// <summary>The stars a buyer gives an order that never arrived.</summary>
 	public const int CancelStars = 1;
+
+	// The shop in Hush: supplies bought with crypto, delivered to the mailbox.
+
+	/// <summary>The most one purchase can hold.</summary>
+	public const int ShopMaxQuantity = 20;
+
+	/// <summary>Deliveries on their way at once.</summary>
+	public const int ShopMaxInTransit = 10;
+
+	/// <summary>The quantities the shop offers as chips.</summary>
+	public static readonly int[] ShopQuantities = [1, 5, 10];
+
+	/// <summary>One thing the shop sells. Quality 0 means none.</summary>
+	public sealed record ShopEntry( string Id, string Kind, int Quality, long Price, long DeliverSeconds );
+
+	static ShopEntry[] shop =>
+	[
+		new( "static_culture", ItemCatalog.StaticCulture, 0, 40, 120 ),
+	];
+
+	public static IReadOnlyList<ShopEntry> Shop => shop;
+
+	/// <summary>The entry with this id, or null: an action's item id is checked here.</summary>
+	public static ShopEntry ShopEntryOf( string id ) => shop.FirstOrDefault( x => x.Id == id );
 
 	// The Exchange. The base rate is fixed at one to one.
 
@@ -115,51 +136,219 @@ public static class CrimeCatalog
 		"quiet_harbor", "paper_wolf", "night_ledger", "low_orbit", "cold_antler", "mothbox",
 	];
 
-	static string[] honestNotes =
+	// Buyer personalities. The rating rule (see Stars): a buyer starts at BaseStars; the gap between the quality
+	// delivered and the quality asked moves it (a star per PointsPerStar points, as the personality weighs it); a
+	// parcel that arrives after the deadline loses stars by how late it is (see StarsLostForLateness); the result is
+	// rounded and kept between the personality's MinStars and MaxStars. The deadline only governs sending: a late parcel
+	// is still paid for, and only the rating suffers.
+
+	/// <summary>Stars for a batch exactly as good as the ask, delivered on time.</summary>
+	public const double BaseStars = 3.0;
+
+	/// <summary>Quality points that move an average buyer by one star, either way.</summary>
+	public const double PointsPerStar = 7.5;
+
+	/// <summary>A late parcel loses one star, and one more for every further this many seconds late.</summary>
+	public const long LateStepSeconds = 300;
+
+	/// <summary>The most stars an average buyer takes off for lateness.</summary>
+	public const int LateMaxStarsLost = 3;
+
+	/// <summary>An Impatient buyer's bonus applies when the parcel arrives within this part of the window.</summary>
+	public const double EarlyFraction = 0.25;
+
+	/// <summary>A buyer capped below five stars still gives five when the raw score reaches this.</summary>
+	public const double ExceptionalScore = 5.5;
+
+	/// <summary>
+	/// How one personality judges. Weight is how often the board shows it (relative). ExtraAsk and PriceBonus (percent
+	/// points of the price spread) make the buyer ask for more quality and pay more for it. Tolerance is the shortfall in
+	/// quality points that is not noticed; ShortfallPerStar the points past it that cost a star; ExcessWeight multiplies
+	/// the stars earned by quality above the ask; Bias moves every score; NoiseChance is the chance of one star more or
+	/// less at random; LateWeight multiplies the stars lost for lateness (rounded down); EarlyBonus is stars for a parcel
+	/// that arrives within EarlyFraction of the delivery window.
+	/// </summary>
+	public sealed record PersonalityRules(
+		int Weight, int ExtraAsk, int PriceBonus, double Tolerance, double ShortfallPerStar, double ExcessWeight,
+		double Bias, double NoiseChance, double LateWeight, double EarlyBonus, int MinStars, int MaxStars );
+
+	// These tables are properties that build their value on each call, not static fields: a hot reload keeps a static
+	// that holds the assembly's own type, so an edit to it would not show until the editor restarted.
+	static PersonalityRules layman => new( 35, 0, 0, 20, 15, 2.0, 0, 0.2, 1, 0, 1, 5 );
+	static PersonalityRules connoisseur => new( 20, 10, 15, 0, 8, 0.5, 0, 0, 1, 0, 1, 5 );
+	static PersonalityRules impatient => new( 15, 0, 0, 0, PointsPerStar, 1.0, 0, 0, 2, 1, 1, 5 );
+	static PersonalityRules easygoing => new( 15, 0, 0, 10, PointsPerStar, 1.0, 1, 0, 0.5, 0, 3, 5 );
+	static PersonalityRules skeptic => new( 15, 0, 0, 0, PointsPerStar, 1.0, -1, 0, 1, 0, 1, 4 );
+
+	public static PersonalityRules RulesOf( BuyerPersonality personality ) => personality switch
+	{
+		BuyerPersonality.Layman => layman,
+		BuyerPersonality.Connoisseur => connoisseur,
+		BuyerPersonality.Impatient => impatient,
+		BuyerPersonality.Easygoing => easygoing,
+		BuyerPersonality.Skeptic => skeptic,
+		_ => easygoing,
+	};
+
+	static BuyerPersonality[] personalities =>
 	[
-		"Need a batch for the weekend. Pay is clean, ship it quiet.",
-		"Regular buyer, small order. Send it when you can.",
-		"Looking for tabs, nothing fancy. Escrow is funded.",
-		"Friends are visiting. I pay on time, always.",
-		"First time ordering here. Be gentle.",
+		BuyerPersonality.Layman, BuyerPersonality.Connoisseur, BuyerPersonality.Impatient,
+		BuyerPersonality.Easygoing, BuyerPersonality.Skeptic,
 	];
 
-	static string[] pickyNotes =
+	/// <summary>A personality for a new order, by the weights.</summary>
+	public static BuyerPersonality PickPersonality( System.Random random )
+	{
+		var roll = random.Next( personalities.Sum( x => RulesOf( x ).Weight ) );
+
+		foreach ( var personality in personalities )
+		{
+			roll -= RulesOf( personality ).Weight;
+
+			if ( roll < 0 )
+				return personality;
+		}
+
+		return BuyerPersonality.Easygoing;
+	}
+
+	/// <summary>
+	/// The stars an average buyer takes off for a parcel that arrived this many seconds after the deadline: none on time,
+	/// one when late, one more for every further <see cref="LateStepSeconds"/>, at most <see cref="LateMaxStarsLost"/>.
+	/// </summary>
+	public static int StarsLostForLateness( long secondsLate ) =>
+		secondsLate <= 0 ? 0 : (int)System.Math.Min( LateMaxStarsLost, 1 + (secondsLate - 1) / LateStepSeconds );
+
+	/// <summary>
+	/// The stars a buyer gives a parcel that arrived. <paramref name="secondsLate"/> is how long after the deadline it
+	/// arrived (zero or less when on time); <paramref name="timeUsed"/> is the part of the delivery window (accept to
+	/// deadline) that had passed on arrival, 0 to 1, used only for an Impatient buyer's bonus for a quick delivery.
+	/// </summary>
+	public static int Stars(
+		BuyerPersonality personality, int asked, int delivered, long secondsLate, double timeUsed,
+		System.Random random )
+	{
+		var rules = RulesOf( personality );
+		var delta = delivered - asked;
+		var score = BaseStars + rules.Bias;
+
+		if ( delta < 0 )
+			score -= System.Math.Max( 0, -delta - rules.Tolerance ) / rules.ShortfallPerStar;
+		else
+			score += delta * rules.ExcessWeight / PointsPerStar;
+
+		if ( secondsLate > 0 )
+			score -= (int)System.Math.Floor( StarsLostForLateness( secondsLate ) * rules.LateWeight );
+		else if ( timeUsed <= EarlyFraction )
+			score += rules.EarlyBonus;
+
+		var stars = (int)System.Math.Floor( score + 0.5 );
+
+		if ( rules.NoiseChance > 0 && random.NextDouble() < rules.NoiseChance )
+			stars += random.Next( 2 ) == 0 ? 1 : -1;
+
+		if ( rules.MaxStars < 5 && score < ExceptionalScore )
+			stars = System.Math.Min( stars, rules.MaxStars );
+
+		return System.Math.Clamp( stars, System.Math.Max( rules.MinStars, 1 ), 5 );
+	}
+
+	// The buyers' notes: written by hand. A personality only shows in how the note sounds, never as a label.
+
+	static readonly string[] laymanNotes =
 	[
-		"Quality matters. Anything below what I ask for gets sent back.",
-		"I tested the last seller's batch. Never again. Pure or nothing.",
-		"Don't waste my time with cut product.",
-		"I read every review. Mine will be honest.",
-		"High standards, fair price. Deliver what the listing says.",
+		"hi, not sure what to look for tbh. a friend said this works? need some for the weekend",
+		"first time buying, hope this is the right thing. thanks!!",
+		"got told to ask for roughly this much. please be nice, i dont know much about it",
 	];
 
-	static string[] fiveStar =
+	static readonly string[] connoisseurNotes =
 	[
-		"Exactly as described. Fast and clean.",
-		"Better than the listing. Will order again.",
-		"Perfect. Seller knows the craft.",
+		"Specification is the quality in the listing. I check every batch. Deliver to the number.",
+		"Consistency matters to me. I know what a good batch looks like, and I will notice.",
+		"Precise count, stated quality, clean packing. Nothing else is needed.",
 	];
 
-	static string[] fourStar =
+	static readonly string[] impatientNotes =
 	[
-		"Good batch, arrived fine. Would buy again.",
-		"Solid. Nothing to complain about.",
-		"Does the job. Fair deal.",
+		"Need it ASAP. Ship it today, I am not waiting around.",
+		"Fast delivery or do not bother. I have other sellers.",
+		"Time matters more to me than anything. Send it the moment it is ready.",
 	];
 
-	static string[] threeStar =
+	static readonly string[] easygoingNotes =
 	[
-		"Okay. It matches the listing, barely.",
-		"Average. I expected a little more.",
+		"No rush, no stress. Send what you have when you can. Thanks, friend.",
+		"Small order for the weekend. Whatever you send will be fine, I am sure.",
+		"Happy to wait. Pay is in escrow. Take care.",
 	];
 
-	static string[] twoStar =
+	static readonly string[] skepticNotes =
 	[
-		"Right on the edge of what I asked. Not impressed.",
-		"Barely made the quality. Won't rush back.",
+		"Heard bad things about sellers here. Prove me wrong.",
+		"Escrow is funded. Do not make me regret it.",
+		"I have been burned before. Show me why you are different.",
 	];
 
-	static string[] oneStar =
+	// Reviews: written by hand, by personality and by how many stars (high is 4 and 5, mid is 3, low is 1 and 2).
+
+	static readonly string[] laymanHigh =
+	[
+		"wow this is amazing!! way better than i expected, thank you!!",
+		"so good! no idea how you do it. will buy again!",
+	];
+
+	static readonly string[] laymanMid = ["seems fine to me? thanks", "ok i guess, does what it says"];
+	static readonly string[] laymanLow = ["hmm not really what i hoped, sorry", "kind of disappointing, not sure why"];
+
+	static readonly string[] connoisseurHigh =
+	[
+		"Exceeds the specification. Noted for future orders.",
+		"Accurate and clean. This is how it is done.",
+	];
+
+	static readonly string[] connoisseurMid =
+		["To specification. Nothing more, nothing less.", "Acceptable. Meets the stated figure."];
+
+	static readonly string[] connoisseurLow =
+		["Below the stated quality. Unacceptable.", "Does not match the listing. I measured."];
+
+	static readonly string[] impatientHigh = ["Fast and good. Exactly how I like it.", "Quick. That is why I will be back."];
+	static readonly string[] impatientMid = ["It arrived. Could have been faster.", "Fine, but I have seen quicker."];
+
+	static readonly string[] impatientLow =
+		["Far too slow, or not good enough. Done with this seller.", "I waited for this? No."];
+
+	static readonly string[] easygoingHigh = ["Lovely, thank you so much! Great seller.", "Really nice. Thanks for everything!"];
+	static readonly string[] easygoingMid = ["All good, thanks. No complaints.", "Fine by me. Thanks!"];
+	static readonly string[] easygoingLow = ["Not quite what I hoped, but thanks anyway.", "A bit disappointing, to be honest."];
+
+	static readonly string[] skepticHigh =
+		["Okay. I was wrong about this one.", "Surprisingly good. Do not let it go to your head."];
+
+	static readonly string[] skepticMid = ["Adequate. I have seen better.", "Nothing special. It arrived."];
+	static readonly string[] skepticLow = ["As I expected. Not worth the price.", "Disappointing. Told you."];
+
+	// Reviews for a parcel that came after the deadline: they say it took too long, whatever the stars.
+
+	static readonly string[] laymanLate =
+		["it came really late, took forever. the stuff was ok i guess", "waited sooo long for this, kinda annoying"];
+
+	static readonly string[] connoisseurLate =
+		["Delivered after the agreed date. The delay is noted and counted against you.",
+			"Arrived late. Timekeeping is part of the trade."];
+
+	static readonly string[] impatientLate =
+		["Took far too long to arrive. I told you I had no time.", "Late. Very late. Do not expect a good score."];
+
+	static readonly string[] easygoingLate =
+		["It took a while to get here, but thanks anyway.", "A bit slow to arrive, no hard feelings."];
+
+	static readonly string[] skepticLate =
+		["Late, like I expected. It took too long to deliver.", "Took far too long to arrive. Typical."];
+
+	/// <summary>What the buyer writes when an order never arrived.</summary>
+	static readonly string[] cancelled =
 	[
 		"It never arrived in time. The order is dead.",
 		"Waited and waited. Nothing. Do not trust.",
@@ -167,25 +356,62 @@ public static class CrimeCatalog
 
 	public static string PickHandle( System.Random random ) => Handles[random.Next( Handles.Length )];
 
-	public static string PickNote( BuyerType type, System.Random random )
+	public static string PickNote( BuyerPersonality personality, System.Random random )
 	{
-		var pool = type == BuyerType.Picky ? pickyNotes : honestNotes;
-		return pool[random.Next( pool.Length )];
-	}
-
-	public static string PickReview( int stars, System.Random random )
-	{
-		var pool = stars switch
+		var pool = personality switch
 		{
-			>= 5 => fiveStar,
-			4 => fourStar,
-			3 => threeStar,
-			2 => twoStar,
-			_ => oneStar,
+			BuyerPersonality.Layman => laymanNotes,
+			BuyerPersonality.Connoisseur => connoisseurNotes,
+			BuyerPersonality.Impatient => impatientNotes,
+			BuyerPersonality.Skeptic => skepticNotes,
+			_ => easygoingNotes,
 		};
 
 		return pool[random.Next( pool.Length )];
 	}
+
+	/// <summary>
+	/// The review line for a delivered parcel: by the buyer's personality and the stars. A parcel that came after the
+	/// deadline gets a line that says it took too long.
+	/// </summary>
+	public static string PickReview( BuyerPersonality personality, int stars, bool late, System.Random random )
+	{
+		var pool = late
+			? personality switch
+			{
+				BuyerPersonality.Layman => laymanLate,
+				BuyerPersonality.Connoisseur => connoisseurLate,
+				BuyerPersonality.Impatient => impatientLate,
+				BuyerPersonality.Skeptic => skepticLate,
+				_ => easygoingLate,
+			}
+			: StarPool( personality, stars );
+
+		return pool[random.Next( pool.Length )];
+	}
+
+	static string[] StarPool( BuyerPersonality personality, int stars ) =>
+		(personality, stars >= 4 ? 2 : stars == 3 ? 1 : 0) switch
+		{
+			(BuyerPersonality.Layman, 2) => laymanHigh,
+			(BuyerPersonality.Layman, 1) => laymanMid,
+			(BuyerPersonality.Layman, _) => laymanLow,
+			(BuyerPersonality.Connoisseur, 2) => connoisseurHigh,
+			(BuyerPersonality.Connoisseur, 1) => connoisseurMid,
+			(BuyerPersonality.Connoisseur, _) => connoisseurLow,
+			(BuyerPersonality.Impatient, 2) => impatientHigh,
+			(BuyerPersonality.Impatient, 1) => impatientMid,
+			(BuyerPersonality.Impatient, _) => impatientLow,
+			(BuyerPersonality.Skeptic, 2) => skepticHigh,
+			(BuyerPersonality.Skeptic, 1) => skepticMid,
+			(BuyerPersonality.Skeptic, _) => skepticLow,
+			(_, 2) => easygoingHigh,
+			(_, 1) => easygoingMid,
+			_ => easygoingLow,
+		};
+
+	/// <summary>The review line for an order that never arrived.</summary>
+	public static string PickCancelReview( System.Random random ) => cancelled[random.Next( cancelled.Length )];
 
 	/// <summary>The fee percent a player pays on escrow, from their reputation.</summary>
 	public static int FeeFor( CrimeRecord crime ) => LevelOf( crime ) switch

@@ -59,7 +59,7 @@ A list of open buyer orders. Each row shows:
 | Field | Meaning |
 | --- | --- |
 | **Buyer name** | A handle (for example `Dex_44`) |
-| **Wants** | Product, amount and minimum quality tier |
+| **Wants** | Product, amount and an asked quality (a guide: any quality may be sent, the rating reflects it) |
 | **Pays** | Price each, and the total |
 | **Deadline** | Time left to ship |
 | **Buyer rating** | Stars and number of trades |
@@ -209,9 +209,11 @@ The mailbox is outside your home, so anyone can reach it.
 
 | Type | Behaviour |
 | --- | --- |
-| **Honest** | Pays, reviews fairly. |
-| **Picky** | Honest but rates hard. Reviews depend on exact quality. |
-| **Impatient** | Wants speed. Tends to leave low rating on slow shipping. |
+| **Layman** | Not an expert. Does not notice a small shortfall, and rates better-than-asked even higher. |
+| **Connoisseur** | Knows what they want. No tolerance for a shortfall, little extra for more. |
+| **Impatient** | Wants speed. Lateness costs double, a quick delivery earns a bonus. |
+| **Easygoing** | Generous. Tolerates some shortfall and rarely rates low. |
+| **Skeptic** | Stingy. Rates a star lower and hardly ever gives five. |
 | **Scammer** | Claims "not received" or "not as described" to get a refund. More likely with new accounts or big orders. |
 | **Sting** | An undercover officer. The package opens a case (see the sting section). |
 
@@ -256,15 +258,15 @@ A sting buyer is a postal inspector or an undercover cop. How evidence on the pa
 
 ## Reviews and prices
 
-Buyers leave a **rating (1 to 5)** and a short line chosen from templates.
+Buyers leave a **rating (1 to 5)** and a short line chosen from templates. The personality is hidden; it shows only in how the buyer writes. The first build (all but Scammer and Sting) is in [../crime.md](../crime.md), "The rating rule".
 
 | Factor | Weight |
 | --- | --- |
-| **Quality vs what was ordered** | Highest. Under the minimum is a low rating. Above it is a high one. |
+| **Quality vs what was ordered** | Highest. Under the ask is a lower rating (some buyers do not notice). Above it is a higher one. |
 | **Amount accuracy** | A short package is punished. |
-| **Speed** | Late means lower. |
+| **Speed** | Late means lower, and the review says it took too long. The deadline only governs sending: a late parcel is still paid. |
 | **Packaging and stealth** | A sloppy package gets a note. |
-| **Buyer type** | A Picky buyer rates harder. |
+| **Buyer personality** | Changes how each factor counts. |
 
 - **Reviews build reputation** and also a **price premium**: a highly rated vendor can charge more.
 - **Price per unit** = base price x quality multiplier x reputation premium x demand multiplier.

@@ -1,6 +1,7 @@
 Hush
 {
-	width: 380px;
+	// The default size. The window can be resized: the app then fills it.
+	width: 600px;
 	height: 460px;
 	flex-direction: column;
 	padding: 12px;
@@ -141,6 +142,53 @@ i
 {
 	color: #6f6a82;
 	flex-shrink: 0;
+}
+
+// The order cards: in columns when the window is wide, one when it is narrow.
+.cards
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+	flex-shrink: 0;
+
+	.card
+	{
+		flex-grow: 1;
+		flex-basis: 260px;
+		max-width: 100%;
+	}
+}
+
+.filters
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 4px;
+	flex-shrink: 0;
+
+	.filter
+	{
+		padding: 4px 10px;
+		border-radius: 12px;
+		background-color: #15131f;
+		border: 1px solid #25213a;
+		color: #8d88a3;
+		font-weight: 600;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #1d1a2b;
+		}
+
+		&.active
+		{
+			background-color: #3b2a66;
+			border-color: #b48cff;
+			color: white;
+		}
+	}
 }
 
 .card

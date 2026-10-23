@@ -42,6 +42,12 @@ public sealed class ItemData
 	public string OrderId { get; set; } = "";
 
 	/// <summary>
+	/// For a parcel: what is inside, one entry per batch packed. Empty for everything else, and for parcels from before
+	/// contents were kept.
+	/// </summary>
+	public List<ItemContent> Contents { get; set; } = new();
+
+	/// <summary>
 	/// Whether this is a batch from the <see cref="ItemCatalog"/> (the crime items).
 	/// </summary>
 	[System.Text.Json.Serialization.JsonIgnore]
@@ -57,6 +63,7 @@ public sealed class ItemData
 		Count = Count,
 		Quality = Quality,
 		OrderId = OrderId,
+		Contents = (Contents ?? []).Select( x => x with { } ).ToList(),
 	};
 
 	/// <summary>
@@ -81,3 +88,8 @@ public sealed class ItemData
 		ModelPath = item.ItemModel?.ResourcePath ?? "",
 	};
 }
+
+/// <summary>
+/// One batch inside a parcel: plain data, so it syncs and saves as JSON.
+/// </summary>
+public sealed record ItemContent( string Kind, int Count, int Quality );

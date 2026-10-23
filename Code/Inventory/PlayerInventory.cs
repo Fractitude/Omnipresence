@@ -150,6 +150,28 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
+	/// Take exactly this many from the batch in a slot and hand them back as a batch of their own (same kind and quality),
+	/// or null when the slot is not a batch of at least that many. Host only.
+	/// </summary>
+	public ItemData TakeFrom( int slot, int count )
+	{
+		if ( count < 1 || !CheckAuthority( nameof( TakeFrom ) ) || At( slot ) is not { IsBatch: true } batch
+		     || batch.Count < count )
+			return null;
+
+		var piece = batch.Clone();
+		piece.Count = count;
+
+		if ( count == batch.Count )
+			slots[slot] = null;
+		else
+			batch.Count -= count;
+
+		Changed();
+		return piece;
+	}
+
+	/// <summary>
 	/// Take the whole batch out of a slot, or null if it is empty or not a batch. Host only.
 	/// </summary>
 	public ItemData TakeBatch( int slot ) => At( slot ) is { IsBatch: true } ? Remove( slot ) : null;

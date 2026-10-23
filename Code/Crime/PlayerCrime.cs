@@ -20,12 +20,26 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	public string TrayView { get; private set; } = "";
 
 	/// <summary>
-	/// What the packing table should offer this player, as "status|handle|count|minQuality|have", set by the host for the
-	/// label of the table. Status is none (no accepted order), ok (the next order can be filled) or short (it cannot).
-	/// Only what the player already sees in Hush.
+	/// The orders this player can pack now (accepted, in time) as "id|handle|kind|count|asked|deadline;…", set by the
+	/// host for the packing table and its panel. Only what the player already sees in Hush: never a buyer's personality.
+	/// </summary>
+	[Sync( SyncFlags.FromHost ), Change( nameof( OnTrayViewChanged ) )]
+	public string PackOrders { get; private set; } = "";
+
+	/// <summary>
+	/// How many deliveries from the shop wait in the player's mailbox, for the label of its Collect option. Set by the
+	/// host.
 	/// </summary>
 	[Sync( SyncFlags.FromHost )]
-	public string PackView { get; private set; } = "none";
+	public int MailWaiting { get; private set; }
+
+	/// <summary>
+	/// The last result told to this player by <see cref="Tell"/>, with a counter that goes up each time, for the packing
+	/// panel. Set on the player's own machine.
+	/// </summary>
+	public string LastTold { get; private set; } = "";
+
+	public int ToldCount { get; private set; }
 
 	/// <summary>
 	/// Bumps whenever <see cref="TrayView"/> changes, on every machine.
@@ -61,6 +75,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	// Host-only views of the record, for the Hush app.
 	public IReadOnlyList<OrderRecord> Orders => Crime?.Orders ?? [];
 	public IReadOnlyList<ParcelRecord> Parcels => Crime?.Parcels ?? [];
+	public IReadOnlyList<DeliveryRecord> Deliveries => Crime?.Deliveries ?? [];
 	public IReadOnlyList<CashoutRecord> Cashouts => Crime?.Cashouts ?? [];
 	public IReadOnlyList<ReviewRecord> Reviews => Crime?.Reviews ?? [];
 	public int GoodTrades => Crime?.GoodTrades ?? 0;
@@ -107,7 +122,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return;
 
 		TrayView = string.Join( ';', crime.Trays.Select( x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt}" ) );
-		UpdatePackView();
+		UpdatePackOrders();
+		MailWaiting = crime.Deliveries.Count( x => x.State == DeliveryState.InMailbox );
 		Progress.NotifyChanged( ProgressChange.Crime );
 	}
 
@@ -148,7 +164,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return;
 
 		SaveItems();
-		UpdatePackView();
+		UpdatePackOrders();
 	}
 
 	/// <summary>
@@ -183,7 +199,12 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	[Rpc.Owner]
-	void Say( string text ) => Sandbox.Platform.Chat.AddText( text );
+	void Say( string text )
+	{
+		Sandbox.Platform.Chat.AddText( text );
+		LastTold = text;
+		ToldCount++;
+	}
 
 	// -- Growing and pressing ----------------------------------------------------------------------------------------
 
@@ -312,59 +333,180 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Send the first parcel the player carries from this mailbox. A mailbox is claimed by the first player who sends from
-	/// it, and stays theirs; nobody else can use it. Host only.
+	/// Why this player may not use this mailbox, or null if they may: it is another player's, or they already use another
+	/// one. A claim on a mailbox that is no longer in the scene is let go. Host only.
 	/// </summary>
-	public CrimeResult SendParcel( MailBox box )
+	string CheckMailbox( MailBox box, out ulong steamId )
+	{
+		steamId = Progress.Owner.SteamId;
+
+		if ( box.OwnerId != 0 && box.OwnerId != steamId )
+			return "This isn't your mailbox.";
+
+		if ( Crime.MailboxId != "" && Crime.MailboxId != box.BoxId && ClaimedMailBox() is not null )
+			return "You already use another mailbox.";
+
+		return null;
+	}
+
+	/// <summary>
+	/// Take what the shop delivered out of the mailbox, as much as the bag holds; the rest stays. The first of send or
+	/// collect to be used claims an unclaimed mailbox. Host only.
+	/// </summary>
+	public CrimeResult CollectParcels( MailBox box )
+	{
+		if ( !Ready || !box.IsValid() )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		if ( CheckMailbox( box, out var steamId ) is { } error )
+			return CrimeResult.Fail( error );
+
+		var crime = Crime;
+		var waiting = crime.Deliveries.Where( x => x.State == DeliveryState.InMailbox ).ToList();
+
+		if ( waiting.Count == 0 )
+			return CrimeResult.Fail( "Nothing waiting for you." );
+
+		box.OwnerId = steamId;
+		crime.MailboxId = box.BoxId;
+
+		var got = new List<string>();
+
+		foreach ( var delivery in waiting )
+		{
+			if ( !Inventory.AddItem( delivery.Kind, delivery.Count, delivery.Quality ) )
+				continue;
+
+			crime.Deliveries.Remove( delivery );
+			got.Add( $"{delivery.Count} {ItemCatalog.Find( delivery.Kind )?.Name ?? delivery.Kind}" );
+		}
+
+		Changed();
+		var left = waiting.Count - got.Count;
+
+		if ( got.Count == 0 )
+			return CrimeResult.Fail( "Your bag is full. Make room first." );
+
+		var text = $"Collected {string.Join( ", ", got )}.";
+		return CrimeResult.Success( left > 0 ? $"{text} Your bag is full: {Plural( left )} still waiting." : text );
+	}
+
+	/// <summary>
+	/// Buy from the Hush shop with crypto: an item id from the catalogue and a quantity. The price and the delivery time
+	/// come from <see cref="CrimeCatalog"/>, never from the caller. The goods go on their way to the mailbox. Host only.
+	/// </summary>
+	public CrimeResult BuyFromShop( string itemId, int quantity )
+	{
+		if ( !Ready || CrimeCatalog.ShopEntryOf( itemId ) is not { } entry
+		     || quantity < 1 || quantity > CrimeCatalog.ShopMaxQuantity )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		var crime = Crime;
+
+		if ( crime.Deliveries.Count( x => x.State == DeliveryState.InTransit ) >= CrimeCatalog.ShopMaxInTransit )
+			return CrimeResult.Fail( "Too many deliveries are on their way." );
+
+		if ( crime.Deliveries.Count >= CrimeRecord.MaxEntries )
+			return CrimeResult.Fail( "Your mailbox is full of deliveries. Collect them first." );
+
+		var total = entry.Price * quantity;
+
+		if ( !Wallet.TrySpendCrypto( total ) )
+			return CrimeResult.Fail( "Not enough crypto." );
+
+		var delivery = new DeliveryRecord
+		{
+			Id = $"d{crime.NextId++}",
+			Kind = entry.Kind,
+			Count = quantity,
+			Quality = entry.Quality,
+			State = DeliveryState.InTransit,
+			ArriveAt = WorldClock.Now + entry.DeliverSeconds,
+		};
+
+		crime.Deliveries.Add( delivery );
+		Changed();
+
+		var name = ItemCatalog.Find( entry.Kind )?.Name ?? entry.Kind;
+		return CrimeResult.Success(
+			$"Bought {quantity} {name} for {total:N0} crypto. It reaches your mailbox at {WorldClock.TimeOfDayOf( delivery.ArriveAt )}." );
+	}
+
+	/// <summary>
+	/// Send every parcel the player carries from this mailbox, until the post is full (<see cref="CrimeCatalog.MaxParcels"/>);
+	/// the rest stay in the bag. A mailbox is claimed by the first player who sends from it, and stays theirs; nobody else
+	/// can use it. Host only.
+	/// </summary>
+	public CrimeResult SendAllParcels( MailBox box )
 	{
 		if ( !Ready || !box.IsValid() )
 			return CrimeResult.Fail( "Nothing happens." );
 
 		var crime = Crime;
-		var steamId = Progress.Owner.SteamId;
 
-		if ( box.OwnerId != 0 && box.OwnerId != steamId )
-			return CrimeResult.Fail( "This isn't your mailbox." );
+		if ( CheckMailbox( box, out var steamId ) is { } error )
+			return CrimeResult.Fail( error );
 
-		// A claim on a mailbox that is no longer in the scene is let go.
-		if ( crime.MailboxId != "" && crime.MailboxId != box.BoxId && ClaimedMailBox() is not null )
-			return CrimeResult.Fail( "You already use another mailbox." );
+		var slots = new List<int>();
 
-		var slot = -1;
-
-		for ( var i = 0; i < Inventory.SlotCount && slot < 0; i++ )
+		for ( var i = 0; i < Inventory.SlotCount; i++ )
 		{
 			if ( Inventory.At( i ) is { Kind: ItemCatalog.Parcel } )
-				slot = i;
+				slots.Add( i );
 		}
 
-		if ( slot < 0 )
+		if ( slots.Count == 0 )
 			return CrimeResult.Fail( "You have no parcel to send." );
 
 		if ( PostalSystem.InPost( crime ) >= CrimeCatalog.MaxParcels )
 			return CrimeResult.Fail( "The post has too many of your parcels." );
 
-		var item = Inventory.TakeBatch( slot );
-		var order = crime.Orders.FirstOrDefault( x => x.Id == item.OrderId );
+		var sent = 0;
+		var firstCollect = long.MaxValue;
 
-		// A parcel for an order that is gone (cancelled) is only a box. One for an order in progress ships it.
-		if ( order is { State: OrderState.Packed } )
-			order.State = OrderState.Shipped;
+		foreach ( var slot in slots )
+		{
+			if ( PostalSystem.InPost( crime ) >= CrimeCatalog.MaxParcels )
+				break;
+
+			var item = Inventory.TakeBatch( slot );
+			var order = crime.Orders.FirstOrDefault( x => x.Id == item.OrderId );
+
+			// A parcel for an order that is gone (cancelled) is only a box. One for an order in progress ships it.
+			if ( order is { State: OrderState.Packed } )
+				order.State = OrderState.Shipped;
+
+			var parcel = PostalSystem.Send(
+				crime,
+				order?.Id ?? "",
+				order?.Kind ?? ItemCatalog.StaticTab,
+				order?.Count ?? item.Count,
+				item.Quality );
+
+			firstCollect = System.Math.Min( firstCollect, parcel.CollectAt );
+			sent++;
+		}
 
 		box.OwnerId = steamId;
 		crime.MailboxId = box.BoxId;
-
-		var parcel = PostalSystem.Send(
-			crime,
-			order?.Id ?? "",
-			order?.Kind ?? ItemCatalog.StaticTab,
-			order?.Count ?? item.Count,
-			item.Quality );
 		UpdateFlag();
 		Changed();
 
-		return CrimeResult.Success( $"The mailman comes at {WorldClock.TimeOfDayOf( parcel.CollectAt )}." );
+		var time = WorldClock.TimeOfDayOf( firstCollect );
+		var left = slots.Count - sent;
+
+		if ( left > 0 )
+		{
+			var verb = left == 1 ? "is" : "are";
+			return CrimeResult.Success( $"Sent {Plural( sent )}. The post is full: {Plural( left )} {verb} still in your bag." );
+		}
+
+		return CrimeResult.Success( sent == 1
+			? $"The mailman comes at {time}."
+			: $"Sent {sent} parcels. The mailman comes at {time}." );
 	}
+
+	static string Plural( int parcels ) => parcels == 1 ? "1 parcel" : $"{parcels} parcels";
 
 	/// <summary>
 	/// Put the flag of the player's mailbox up while a parcel waits for the mailman.
@@ -404,7 +546,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		{
 			Id = offer.Id,
 			Handle = offer.Handle,
-			Buyer = offer.Buyer,
+			Personality = offer.Personality,
 			Text = offer.Text,
 			Kind = offer.Kind,
 			Count = offer.Count,
@@ -422,117 +564,107 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// The accepted order, not past its deadline, that the inventory can fill now. The earliest deadline comes first.
-	/// Host only.
+	/// One order the player can pack, as the packing panel reads it from <see cref="PackOrders"/>.
 	/// </summary>
-	OrderRecord NextPackable()
-	{
-		var now = WorldClock.Now;
-
-		return Crime?.Orders
-			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline
-			                                            && Inventory.CountOf( x.Kind, x.MinQuality ) >= x.Count )
-			.OrderBy( x => x.Deadline )
-			.FirstOrDefault();
-	}
+	public readonly record struct PackOrder( string Id, string Handle, string Kind, int Count, int Asked, long Deadline );
 
 	/// <summary>
-	/// Refresh <see cref="PackView"/> for the packing table's label. Host only.
+	/// Refresh <see cref="PackOrders"/>: the accepted orders still in time, soonest deadline first. Host only.
 	/// </summary>
-	void UpdatePackView()
+	void UpdatePackOrders()
 	{
 		if ( !Ready )
 			return;
 
 		var now = WorldClock.Now;
 
-		var fillable = NextPackable();
-
-		var order = fillable ?? Crime.Orders
+		var view = string.Join( ';', Crime.Orders
 			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
 			.OrderBy( x => x.Deadline )
-			.FirstOrDefault();
+			.Select( x => $"{x.Id}|{x.Handle}|{x.Kind}|{x.Count}|{x.MinQuality}|{x.Deadline}" ) );
 
-		var view = order is null
-			? "none"
-			: $"{(fillable is null ? "short" : "ok")}|{order.Handle}|{order.Count}|{order.MinQuality}"
-			  + $"|{Inventory.CountOf( order.Kind, order.MinQuality )}";
-
-		if ( view != PackView )
-			PackView = view;
+		if ( view != PackOrders )
+			PackOrders = view;
 	}
 
 	/// <summary>
-	/// What the packing table offers, from the synced view so it works on a client too. Status is "none", "ok" or
-	/// "short".
+	/// The orders the player can pack, from the synced view so it works on a client too.
 	/// </summary>
-	public (string Status, string Handle, int Count, int MinQuality, int Have) PackOffer()
+	public IReadOnlyList<PackOrder> PackableOrders()
 	{
-		var fields = (PackView ?? "").Split( '|' );
+		var list = new List<PackOrder>();
 
-		return fields.Length == 5 && int.TryParse( fields[2], out var count )
-		       && int.TryParse( fields[3], out var quality ) && int.TryParse( fields[4], out var have )
-			? (fields[0], fields[1], count, quality, have)
-			: ("none", "", 0, 0, 0);
-	}
-
-	/// <summary>
-	/// Pack the next order the inventory can fill (the earliest deadline), for the packing table. The host decides
-	/// which one; the player sends nothing. Host only.
-	/// </summary>
-	public CrimeResult PackNext()
-	{
-		if ( !Ready )
-			return CrimeResult.Fail( "Nothing happens." );
-
-		if ( NextPackable() is { } order )
-			return Pack( order.Id );
-
-		var now = WorldClock.Now;
-
-		if ( Crime.Orders.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
-			    .OrderBy( x => x.Deadline )
-			    .FirstOrDefault() is { } waiting )
+		foreach ( var part in (PackOrders ?? "").Split( ';', System.StringSplitOptions.RemoveEmptyEntries ) )
 		{
-			var have = Inventory.CountOf( waiting.Kind, waiting.MinQuality );
+			var f = part.Split( '|' );
 
-			return CrimeResult.Fail(
-				$"{waiting.Handle} needs {waiting.Count} of quality {waiting.MinQuality} or better. You have {have}." );
+			if ( f.Length == 6 && int.TryParse( f[3], out var count ) && int.TryParse( f[4], out var asked )
+			     && long.TryParse( f[5], out var deadline ) )
+				list.Add( new( f[0], f[1], f[2], count, asked, deadline ) );
 		}
 
-		return CrimeResult.Fail( "You have no accepted orders to pack." );
+		return list;
 	}
 
 	/// <summary>
-	/// Pack an accepted order: the host checks the inventory has enough of the right kind and quality, takes it, and gives a
-	/// parcel that remembers the order. Host only.
+	/// The player asks to pack an order with the batch in an inventory slot. The host takes the player from the network
+	/// (<c>Rpc.Caller</c>), never from the message, checks the player is at a packing table, and runs <see cref="Pack"/>,
+	/// which checks the rest. Only ids and a slot index are sent.
 	/// </summary>
-	public CrimeResult Pack( string orderId )
+	[Rpc.Host]
+	public void RequestPack( string orderId, int slot )
+	{
+		var caller = Rpc.Caller;
+
+		if ( caller is not null && caller != Network.Owner )
+			return;
+
+		if ( !PackingTable.IsNear( WorldPosition ) )
+		{
+			Tell( CrimeResult.Fail( "Go to a packing table." ) );
+			return;
+		}
+
+		Tell( Pack( orderId, slot ) );
+	}
+
+	/// <summary>
+	/// Pack an accepted order with the batch in an inventory slot. The host checks the player owns the order, that it is
+	/// accepted and in time, and that the slot holds a batch of the order's kind with at least the ordered count. It takes
+	/// exactly the ordered count from that batch and gives a parcel that remembers the order and the batch's quality.
+	/// The quality may be below what the buyer asked: the buyer rates it. Host only.
+	/// </summary>
+	public CrimeResult Pack( string orderId, int slot )
 	{
 		if ( !Ready || !IsId( orderId ) || Crime.Orders.FirstOrDefault( x => x.Id == orderId ) is not { } order )
 			return CrimeResult.Fail( "Nothing happens." );
 
 		if ( order.State != OrderState.Accepted )
-			return CrimeResult.Fail( "That order is already packed." );
+			return CrimeResult.Fail(
+				order.State == OrderState.Packed ? "That order is already packed." : "That order can't be packed." );
 
 		if ( WorldClock.Now > order.Deadline )
 			return CrimeResult.Fail( "That order has run out of time." );
 
-		if ( Inventory.CountOf( order.Kind, order.MinQuality ) < order.Count )
-			return CrimeResult.Fail( $"You need {order.Count} of quality {order.MinQuality} or better." );
+		if ( Inventory.At( slot ) is not { IsBatch: true } batch || batch.Kind != order.Kind )
+			return CrimeResult.Fail( "That is not the right product for this order." );
 
-		if ( Inventory.FreeSlots < 1 )
+		if ( batch.Count < order.Count )
+			return CrimeResult.Fail( $"That batch holds {batch.Count}. The order needs {order.Count}." );
+
+		// A parcel needs a slot, unless the batch is used up and frees its own.
+		if ( batch.Count != order.Count && Inventory.FreeSlots < 1 )
 			return CrimeResult.Fail( "Your inventory is full." );
 
-		if ( !Inventory.TryTake( order.Kind, order.Count, out var taken, order.MinQuality ) )
-			return CrimeResult.Fail( "You don't have enough." );
+		if ( Inventory.TakeFrom( slot, order.Count ) is not { } taken )
+			return CrimeResult.Fail( "Nothing happens." );
 
-		var quality = AverageQuality( taken );
-
-		Inventory.AddItem( ItemCatalog.Parcel, 1, quality, order.Id );
+		var parcel = ItemCatalog.Make( ItemCatalog.Parcel, 1, taken.Quality, order.Id );
+		parcel.Contents.Add( new( taken.Kind, taken.Count, taken.Quality ) );
+		Inventory.Add( parcel );
 
 		order.State = OrderState.Packed;
-		order.PackedQuality = quality;
+		order.PackedQuality = taken.Quality;
 		Changed();
 		return CrimeResult.Success( "Packed. Take the parcel to your mailbox." );
 	}
@@ -577,10 +709,11 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	void Tick()
 	{
 		var crime = Crime;
-		UpdatePackView();
+		UpdatePackOrders();
 
 		var changed = PostalSystem.Tick( crime, OnParcelDelivered );
 
+		changed |= PostalSystem.TickDeliveries( crime );
 		changed |= CheckOrders( crime );
 		changed |= Exchange.Settle( Wallet, crime );
 
@@ -602,29 +735,19 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( order is not { State: OrderState.Shipped } )
 			return;
 
-		if ( parcel.DeliverAt > order.Deadline )
-		{
-			Cancel( order, "Your parcel came too late. The buyer left." );
-			return;
-		}
-
 		order.State = OrderState.Delivered;
 		order.ReleaseAt = WorldClock.Now + CrimeCatalog.EscrowSeconds;
 
-		var stars = Stars( order );
-		AddReview( order, stars, CrimeCatalog.PickReview( stars, random ) );
-	}
+		// The part of the delivery window the parcel took, from accepting to arriving.
+		var window = (double)CrimeCatalog.DeliverWindowSeconds;
+		var timeUsed = System.Math.Clamp( (parcel.DeliverAt - (order.Deadline - window)) / window, 0, 1 );
 
-	/// <summary>
-	/// What the buyer thinks of the batch: how far above the quality they asked for it was. A picky buyer is harder.
-	/// </summary>
-	static int Stars( OrderRecord order )
-	{
-		var surplus = order.PackedQuality - order.MinQuality;
+		// The deadline only governs sending: a parcel that comes after it is still paid for, and rated lower.
+		var secondsLate = parcel.DeliverAt - order.Deadline;
+		var stars = CrimeCatalog.Stars(
+			order.Personality, order.MinQuality, order.PackedQuality, secondsLate, timeUsed, random );
 
-		return order.Buyer == BuyerType.Picky
-			? surplus >= 20 ? 5 : surplus >= 10 ? 4 : surplus >= 5 ? 3 : 2
-			: surplus >= 15 ? 5 : surplus >= 5 ? 4 : 3;
+		AddReview( order, stars, CrimeCatalog.PickReview( order.Personality, stars, secondsLate > 0, random ) );
 	}
 
 	void AddReview( OrderRecord order, int stars, string text )
@@ -652,7 +775,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		{
 			if ( order.State == OrderState.Delivered && now >= order.ReleaseAt )
 				changed |= Release( crime, order );
-			else if ( now > order.Deadline && order.State is OrderState.Accepted or OrderState.Packed or OrderState.Shipped )
+			else if ( now > order.Deadline && (order.State == OrderState.Accepted || order.State == OrderState.Packed) )
 			{
 				Cancel( order, "The deadline passed. The buyer cancelled the order." );
 				changed = true;
@@ -691,7 +814,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		order.State = OrderState.Cancelled;
 		crime.BadTrades++;
-		AddReview( order, CrimeCatalog.CancelStars, CrimeCatalog.PickReview( CrimeCatalog.CancelStars, random ) );
+		AddReview( order, CrimeCatalog.CancelStars, CrimeCatalog.PickCancelReview( random ) );
 		Log.Info( $"PlayerCrime: order {order.Id} cancelled: {reason}" );
 
 		for ( var i = 0; i < Inventory.SlotCount; i++ )
@@ -712,6 +835,22 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	{
 		if ( IsDebugCaller() && Ready )
 			Inventory.AddItem( kind, count, quality );
+	}
+
+	/// <summary>
+	/// Testing only: every delivery from the shop has reached the mailbox now.
+	/// </summary>
+	[Rpc.Host]
+	public void DebugDeliverNow()
+	{
+		if ( !IsDebugCaller() || !Ready )
+			return;
+
+		foreach ( var delivery in Crime.Deliveries )
+			delivery.ArriveAt = System.Math.Min( delivery.ArriveAt, WorldClock.Now );
+
+		PostalSystem.TickDeliveries( Crime );
+		Changed();
 	}
 
 	/// <summary>

@@ -24,6 +24,9 @@ public static class CrimeCommands
 	[ConCmd( "crime_postal_now" )]
 	public static void PostalNow() => PlayerCrime.Local?.DebugPostalNow();
 
+	[ConCmd( "crime_deliver_now" )]
+	public static void DeliverNow() => PlayerCrime.Local?.DebugDeliverNow();
+
 	[ConCmd( "crime_orders" )]
 	public static void Orders( int count = 3 ) => PlayerCrime.Local?.DebugOrders( count );
 }

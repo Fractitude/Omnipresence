@@ -40,6 +40,9 @@ public sealed class CrimeRecord
 	/// <summary>Parcels sent, newest last.</summary>
 	public List<ParcelRecord> Parcels { get; set; } = new();
 
+	/// <summary>Supplies bought in the Hush shop, on their way or waiting in the mailbox. Newest last.</summary>
+	public List<DeliveryRecord> Deliveries { get; set; } = new();
+
 	/// <summary>Crypto cashed out into dollars that has not arrived yet.</summary>
 	public List<CashoutRecord> Cashouts { get; set; } = new();
 
@@ -71,6 +74,11 @@ public sealed class CrimeRecord
 		Items.RemoveAll( x => x is null || ItemCatalog.Find( x.Kind ) is null || x.Count < 1 );
 		Items = Items
 			.Select( x => ItemCatalog.Make( x.Kind, x.Count, x.Quality, Clean( x.OrderId ) ) )
+			.Select( ( made, i ) =>
+			{
+				made.Contents = CleanContents( Items[i].Contents );
+				return made;
+			} )
 			.Take( 200 )
 			.ToList();
 
@@ -89,11 +97,32 @@ public sealed class CrimeRecord
 			order.Count = System.Math.Clamp( order.Count, 1, ItemCatalog.MaxCount );
 			order.MinQuality = System.Math.Clamp( order.MinQuality, 0, 100 );
 			order.PriceEach = System.Math.Clamp( order.PriceEach, 0, 1_000_000 );
+			order.PackedQuality = System.Math.Clamp( order.PackedQuality, 0, 100 );
+
+			// An old save has only the old buyer type: an honest buyer is easygoing, a picky one a connoisseur.
+			if ( !System.Enum.IsDefined( order.Personality ) || order.Personality == BuyerPersonality.None )
+			{
+				order.Personality = order.Buyer == BuyerType.Picky
+					? BuyerPersonality.Connoisseur
+					: BuyerPersonality.Easygoing;
+			}
 		}
 
 		Parcels ??= new();
 		Parcels.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
 		Parcels = Parcels.TakeLast( MaxEntries ).ToList();
+
+		Deliveries ??= new();
+		Deliveries.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
+		Deliveries = Deliveries.TakeLast( MaxEntries ).ToList();
+
+		foreach ( var delivery in Deliveries )
+		{
+			delivery.Id = Clean( delivery.Id );
+			delivery.Count = System.Math.Clamp( delivery.Count, 1, ItemCatalog.MaxCount );
+			delivery.Quality = System.Math.Clamp( delivery.Quality, 0, 100 );
+			delivery.State = System.Enum.IsDefined( delivery.State ) ? delivery.State : DeliveryState.InMailbox;
+		}
 
 		Cashouts ??= new();
 		Cashouts.RemoveAll( x => x is null || x.Cash <= 0 );
@@ -117,6 +146,20 @@ public sealed class CrimeRecord
 		NextId = System.Math.Max( NextId, 1 );
 	}
 
+	/// <summary>The most entries a parcel's contents keep.</summary>
+	public const int MaxContents = 20;
+
+	/// <summary>
+	/// A parcel's contents from a file: capped, counts and qualities clamped. An unknown kind is kept as stored (it shows
+	/// by its stored name); an empty one is dropped.
+	/// </summary>
+	static List<ItemContent> CleanContents( List<ItemContent> contents ) => (contents ?? [])
+		.Where( x => x is not null && !string.IsNullOrWhiteSpace( x.Kind ) )
+		.Take( MaxContents )
+		.Select( x => new ItemContent( Clean( x.Kind ), System.Math.Clamp( x.Count, 1, ItemCatalog.MaxCount ),
+			System.Math.Clamp( x.Quality, 0, 100 ) ) )
+		.ToList();
+
 	static string Clean( string text, int max = MaxIdLength ) =>
 		string.IsNullOrWhiteSpace( text ) ? "" : text.Length > max ? text[..max] : text;
 }
@@ -138,13 +181,38 @@ public sealed class TrayRecord
 	public int Quality { get; set; }
 }
 
+/// <summary>
+/// The old hidden buyer type. Only read from old saves, which are moved to a <see cref="BuyerPersonality"/> when loaded.
+/// </summary>
 public enum BuyerType
 {
-	/// <summary>Pays what was agreed and reviews fairly.</summary>
 	Honest,
-
-	/// <summary>Wants the quality asked for, and marks anything short of it down hard.</summary>
 	Picky,
+}
+
+/// <summary>
+/// How a buyer judges what they get. Hidden: it is never in the Hush state, the packing panel or anything synced. The
+/// numbers are in <see cref="CrimeCatalog"/>.
+/// </summary>
+public enum BuyerPersonality
+{
+	/// <summary>Not set. Only an old order that has not been moved yet.</summary>
+	None,
+
+	/// <summary>Not an expert: doesn't notice a small shortfall, and is delighted by more than was asked.</summary>
+	Layman,
+
+	/// <summary>Knows exactly what they want: no tolerance, little extra for excess.</summary>
+	Connoisseur,
+
+	/// <summary>Cares about speed: lateness costs double and early delivery earns a bonus.</summary>
+	Impatient,
+
+	/// <summary>Generous: tolerates some shortfall and rarely rates low.</summary>
+	Easygoing,
+
+	/// <summary>Stingy: rates lower and hardly ever gives five stars.</summary>
+	Skeptic,
 }
 
 public enum OrderState
@@ -175,13 +243,20 @@ public sealed class OrderRecord
 {
 	public string Id { get; set; } = "";
 	public string Handle { get; set; } = "";
+
+	/// <summary>The old buyer type. Read only to move an old save to a <see cref="Personality"/> (see Sanitize).</summary>
 	public BuyerType Buyer { get; set; }
+
+	/// <summary>How the buyer rates. Host only; never shown to the player.</summary>
+	public BuyerPersonality Personality { get; set; }
 
 	/// <summary>The buyer's note when the order was posted.</summary>
 	public string Text { get; set; } = "";
 
 	public string Kind { get; set; } = "";
 	public int Count { get; set; }
+
+	/// <summary>The quality the buyer asked for. A guide for the rating, not a requirement. (Saved as MinQuality.)</summary>
 	public int MinQuality { get; set; }
 
 	/// <summary>Crypto per item.</summary>
@@ -192,7 +267,7 @@ public sealed class OrderRecord
 
 	public OrderState State { get; set; }
 
-	/// <summary>The quality of what was packed, set when packing.</summary>
+	/// <summary>The quality of the batch that was packed, set when packing. The review is judged on it.</summary>
 	public int PackedQuality { get; set; }
 
 	/// <summary>Game seconds when escrow releases, after delivery.</summary>
@@ -213,6 +288,31 @@ public enum ParcelState
 	InTransit,
 
 	Delivered,
+}
+
+public enum DeliveryState
+{
+	/// <summary>Bought, on its way to the mailbox.</summary>
+	InTransit,
+
+	/// <summary>Arrived. Waits in the mailbox until the player collects it.</summary>
+	InMailbox,
+}
+
+/// <summary>
+/// Something the player bought in the Hush shop. It travels, then waits in their mailbox; collecting it puts it in the bag.
+/// </summary>
+public sealed class DeliveryRecord
+{
+	public string Id { get; set; } = "";
+	public string Kind { get; set; } = "";
+	public int Count { get; set; }
+	public int Quality { get; set; }
+
+	public DeliveryState State { get; set; }
+
+	/// <summary>Game seconds when it reaches the mailbox.</summary>
+	public long ArriveAt { get; set; }
 }
 
 public sealed class ParcelRecord

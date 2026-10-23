@@ -16,6 +16,13 @@ public sealed class HushViewModel
 {
 	public const string TabAction = "tab";
 	public const string AcceptAction = "accept";
+	public const string CategoryAction = "category";
+	public const string StatusAction = "status";
+	public const string ShopAction = "shop";
+	public const string QuantityAction = "quantity";
+
+	/// <summary>The chip that means no filter.</summary>
+	public const string AllKey = "all";
 	public const string SellAction = "sell";
 	public const string BuyAction = "buy";
 
@@ -26,6 +33,9 @@ public sealed class HushViewModel
 	readonly Func<NaviComputer> getComputer;
 
 	HushTab tab;
+	string category = "";
+	string statusFilter = "";
+	int shopQuantity = 1;
 	string notice = "";
 	Guid lastSeatId;
 	string signature;
@@ -51,6 +61,9 @@ public sealed class HushViewModel
 		{
 			lastSeatId = seat?.Id ?? default;
 			tab = HushTab.Orders;
+			category = "";
+			statusFilter = "";
+			shopQuantity = 1;
 			notice = "";
 		}
 
@@ -70,6 +83,26 @@ public sealed class HushViewModel
 				case TabAction when args.Length > 0 && Enum.TryParse<HushTab>( args[0], true, out var next ):
 					tab = next;
 					notice = "";
+					break;
+
+				// Only a category the catalog knows is taken; anything else changes nothing.
+				case CategoryAction when args.Length > 0 && CategoryOf( args[0] ) is { } chosen:
+					category = chosen;
+					break;
+
+				case StatusAction when args.Length > 0 && StatusOf( args[0] ) is { } chosenStatus:
+					statusFilter = chosenStatus;
+					break;
+
+				// Only a quantity the shop offers as a chip is taken.
+				case QuantityAction when args.Length > 0 && int.TryParse( args[0], out var quantity )
+				                                         && CrimeCatalog.ShopQuantities.Contains( quantity ):
+					shopQuantity = quantity;
+					break;
+
+				// An item id and a quantity: the host checks both against the catalogue, and takes the price from it.
+				case ShopAction when args.Length > 1 && int.TryParse( args[1], out var wanted ):
+					notice = crime.BuyFromShop( args[0], wanted ).Message;
 					break;
 
 				case AcceptAction when args.Length > 0:
@@ -104,6 +137,20 @@ public sealed class HushViewModel
 		seat is not null && WiredTravel.PlaceOf( seat ) == WiredPlace.Home && GameAppNetwork.IsOnline( getComputer() );
 
 	/// <summary>
+	/// A category from an action: empty for All, the catalog's own spelling of a known one, or null for anything else.
+	/// </summary>
+	static string CategoryOf( string text ) =>
+		text == AllKey ? ""
+		: ItemCatalog.Items.Select( x => x.Category ).FirstOrDefault( x => x != "" && x == text );
+
+	/// <summary>
+	/// A status from an action: empty for All, a <see cref="MyOrderStatus"/> name, or null for anything else.
+	/// </summary>
+	static string StatusOf( string text ) =>
+		text == AllKey ? ""
+		: Enum.TryParse<MyOrderStatus>( text, true, out var status ) && Enum.IsDefined( status ) ? status.ToString() : null;
+
+	/// <summary>
 	/// An amount from an action: digits, or "all". Anything else is nothing.
 	/// </summary>
 	static long AmountOf( string text, long all ) =>
@@ -115,8 +162,7 @@ public sealed class HushViewModel
 			(PlayerProgress.For( seat )?.Version, PlayerWallet.For( seat )?.Version),
 			GameAppNetwork.IsOnline( getComputer() ),
 			seat is null ? default : WiredTravel.PlaceOf( seat ),
-			tab,
-			notice,
+			(tab, category, statusFilter, notice, shopQuantity),
 			// Countdowns redraw once a second.
 			WorldClock.Now,
 			MarketSystem.Current?.Open.Count ).ToString();
@@ -129,7 +175,10 @@ public sealed class HushViewModel
 
 		signature = Signature( seat );
 
-		var state = new HushUiState { Revision = ++revision, Tab = tab, Notice = notice };
+		var state = new HushUiState
+		{
+			Revision = ++revision, Tab = tab, Notice = notice, Category = category, StatusFilter = statusFilter,
+		};
 
 		if ( !GameAppNetwork.IsOnline( getComputer() ) )
 			return state with { OfflineHint = GameAppNetwork.OfflineHint( getComputer() ) };
@@ -153,8 +202,15 @@ public sealed class HushViewModel
 			Trades = $"{crime.GoodTrades} good, {crime.BadTrades} bad",
 			FeeText = $"{crime.FeePercent}% fee on payouts",
 			Escrow = $"{crime.Orders.Where( IsHeld ).Sum( x => x.Total ):N0} held in escrow",
-			Open = BuildOpen( crime ),
-			Mine = BuildMine( crime ),
+			Open = BuildOpen( crime, category ),
+			Categories = BuildCategories( category ),
+			Mine = BuildMine( crime, statusFilter ),
+			Shop = BuildShop( crime, wallet, shopQuantity ),
+			ShopQuantity = shopQuantity,
+			ShopQuantities = CrimeCatalog.ShopQuantities,
+			Incoming = BuildIncoming( crime ),
+			StatusChips = BuildStatusChips( crime ),
+			ToDo = crime.Orders.Count( x => x.State is OrderState.Accepted or OrderState.Packed ),
 			Shipments = BuildShipments( crime ),
 			Reviews = crime.Reviews.Reverse().Select( ToReviewRow ).ToList(),
 			Cashouts = crime.Cashouts
@@ -171,7 +227,89 @@ public sealed class HushViewModel
 
 	static string ProductName( string kind ) => ItemCatalog.Find( kind )?.Name ?? kind;
 
-	static IReadOnlyList<OpenOrderRow> BuildOpen( PlayerCrime crime )
+	static string CategoryOfKind( string kind ) => ItemCatalog.Find( kind )?.Category ?? "";
+
+	/// <summary>
+	/// All, then one chip per category that has an order on the board, each with its count. A chosen category with no
+	/// orders left keeps its chip, so the filter can be undone from where it is.
+	/// </summary>
+	static IReadOnlyList<FilterChip> BuildCategories( string selected )
+	{
+		var open = MarketSystem.Current?.Open ?? new List<MarketOrder>();
+		var names = open.Select( x => CategoryOfKind( x.Kind ) ).Where( x => x != "" ).Append( selected )
+			.Where( x => x != "" ).Distinct().OrderBy( x => x );
+
+		var chips = new List<FilterChip> { new( "", "All", open.Count ) };
+		chips.AddRange( names.Select( x => new FilterChip( x, x, open.Count( y => CategoryOfKind( y.Kind ) == x ) ) ) );
+		return chips;
+	}
+
+	static IReadOnlyList<HushShopRow> BuildShop( PlayerCrime crime, PlayerWallet wallet, int quantity )
+	{
+		var inTransit = crime.Deliveries.Count( x => x.State == DeliveryState.InTransit );
+
+		return CrimeCatalog.Shop.Select( x =>
+		{
+			var total = x.Price * quantity;
+			var item = ItemCatalog.Find( x.Kind );
+
+			var reason = inTransit >= CrimeCatalog.ShopMaxInTransit ? "Too many deliveries are on their way."
+				: wallet.Crypto < total ? "Not enough crypto."
+				: "";
+
+			return new HushShopRow(
+				x.Id,
+				item?.Name ?? x.Kind,
+				item?.Description ?? "",
+				$"{x.Price:N0}",
+				$"{total:N0}",
+				$"Arrives in your mailbox in {InteractionSetup.Countdown( x.DeliverSeconds )}",
+				reason == "",
+				reason );
+		} ).ToList();
+	}
+
+	static IReadOnlyList<HushShipmentRow> BuildIncoming( PlayerCrime crime ) => crime.Deliveries
+		.Reverse()
+		.Select( x => new HushShipmentRow(
+			$"{ProductName( x.Kind )} x{x.Count}",
+			x.State == DeliveryState.InTransit
+				? $"On its way, arrives {Clock( x.ArriveAt )}"
+				: "Waiting in your mailbox",
+			x.State == DeliveryState.InMailbox ) )
+		.ToList();
+
+	static IReadOnlyList<FilterChip> BuildStatusChips( PlayerCrime crime )
+	{
+		var chips = new List<FilterChip> { new( "", "All", crime.Orders.Count ) };
+
+		foreach ( var status in Enum.GetValues<MyOrderStatus>() )
+		{
+			var count = crime.Orders.Count( x => StatusOfOrder( x ) == status );
+			chips.Add( new( status.ToString(), StatusLabel( status ), count ) );
+		}
+
+		return chips;
+	}
+
+	static string StatusLabel( MyOrderStatus status ) => status switch
+	{
+		MyOrderStatus.ToPack => "To pack",
+		MyOrderStatus.ToSend => "To send",
+		_ => status.ToString(),
+	};
+
+	static MyOrderStatus StatusOfOrder( OrderRecord order ) => order.State switch
+	{
+		OrderState.Accepted => MyOrderStatus.ToPack,
+		OrderState.Packed => MyOrderStatus.ToSend,
+		OrderState.Shipped => MyOrderStatus.Shipped,
+		OrderState.Delivered => MyOrderStatus.Escrow,
+		OrderState.Released => MyOrderStatus.Paid,
+		_ => MyOrderStatus.Cancelled,
+	};
+
+	static IReadOnlyList<OpenOrderRow> BuildOpen( PlayerCrime crime, string category )
 	{
 		var now = WorldClock.Now;
 		var full = crime.Orders.Where( IsHeld ).Count() >= CrimeCatalog.MaxActiveOrders;
@@ -180,6 +318,9 @@ public sealed class HushViewModel
 
 		foreach ( var x in MarketSystem.Current?.Open ?? new List<MarketOrder>() )
 		{
+			if ( category != "" && CategoryOfKind( x.Kind ) != category )
+				continue;
+
 			rows.Add( new OpenOrderRow(
 				x.Id,
 				x.Handle,
@@ -196,12 +337,13 @@ public sealed class HushViewModel
 		return rows;
 	}
 
-	static IReadOnlyList<MyOrderRow> BuildMine( PlayerCrime crime )
+	static IReadOnlyList<MyOrderRow> BuildMine( PlayerCrime crime, string status )
 	{
 		var now = WorldClock.Now;
 
 		return crime.Orders
 			.Reverse()
+			.Where( x => status == "" || StatusOfOrder( x ).ToString() == status )
 			.Select( x => ToMyRow( x, now ) )
 			.ToList();
 	}
@@ -213,9 +355,10 @@ public sealed class HushViewModel
 		var (status, detail) = order.State switch
 		{
 			OrderState.Accepted => (MyOrderStatus.ToPack,
-				$"Pack it at the packing table at home. Deliver within {left}"),
-			OrderState.Packed => (MyOrderStatus.ToSend, $"Take the parcel to your mailbox. {left} left"),
-			OrderState.Shipped => (MyOrderStatus.Shipped, $"On its way. {left} left"),
+				$"Pack it at the packing table at home. Send within {left}"),
+			OrderState.Packed => (MyOrderStatus.ToSend,
+				$"Parcel quality {order.PackedQuality}. Take it to your mailbox. {left} left to send"),
+			OrderState.Shipped => (MyOrderStatus.Shipped, $"On its way. Due {Clock( order.Deadline )}"),
 			OrderState.Delivered => (MyOrderStatus.Escrow,
 				$"Delivered. Escrow releases in {InteractionSetup.Countdown( order.ReleaseAt - now )}"),
 			OrderState.Released => (MyOrderStatus.Paid, $"Paid {order.Paid:N0} after the fee"),

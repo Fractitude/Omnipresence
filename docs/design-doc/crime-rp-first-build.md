@@ -88,13 +88,13 @@ Sizes are rough: **S** about 30 minutes, **M** about an hour or two, **L** a few
 
 **Host side**
 
-- `MarketSystem` (a host `GameObjectSystem`): keeps a list of open **orders** from NPC buyers: handle, product, count, minimum quality, price each, deadline, buyer type (honest, picky). It refills a few at a time. It is not saved.
+- `MarketSystem` (a host `GameObjectSystem`): keeps a list of open **orders** from NPC buyers: handle, product, count, asked quality, price each, deadline, buyer personality (Layman, Connoisseur, Impatient, Easygoing, Skeptic: hidden, drives the rating). It refills a few at a time. It is not saved.
 - `CrimeRecord`: `Reputation` (good trades, rating sum), `Orders` accepted (id, buyer, terms, escrow state), `Reviews` (last few).
 - Host rules, all inside `PlayerProgress`-style calls (`TryAcceptOrder`, `TryPackOrder`, release on delivery):
   - **Accept:** the order is reserved for this player, escrow marked held.
-  - **Pack:** done at the packing table in the house, not in Hush. The host checks the inventory has enough of the right kind and quality, takes them, and gives a `parcel` item that remembers the order.
+  - **Pack:** done at the packing table in the house, not in Hush, with a panel where the player picks the order and the batch. Any quality may be packed; the host checks the batch is of the right kind and count, takes exactly the ordered count, and gives a `parcel` item that remembers the order.
   - **Delivery:** when a parcel reaches `DeliverAt`, the order is marked delivered; the **buyer reviews** (rating from quality against what was asked, amount, speed) and escrow **releases** after a short timer. The player gets **crypto** (`AddCrypto`, new, host only) minus the fee. Cashing out to dollars is the Exchange tab.
-  - **Deadline:** an order not delivered in time is cancelled and costs reputation.
+  - **Deadline:** an order not sent in time is cancelled and costs reputation. A parcel that arrives late is still paid, and rated lower.
 - Reputation levels (Newcomer, Known, Trusted) change the fee. Fees and prices come from one catalogue.
 
 **App side** (three files, copied from the Hardware Store pattern)
@@ -159,7 +159,7 @@ Written after building steps 1 to 4 and the Exchange. The as-built description i
 - **One option per object.** The tray and bench have one option each; the label changes (Plant, Growing, Harvest). The mailbox gets a second option in code (`InteractionSetup.EnsureOption`), so the scene object needed no edit.
 - **Mailbox ownership** is the first claimant, remembered in the save by the box's object id; a claim on a box that no longer exists is let go.
 - **A harvest also returns a culture,** and a new player starts with 2 (answers open question 3 for now).
-- **Orders.** Open orders last 30 game minutes on the board; after accepting there is 1 game hour to deliver. Buyers are honest (two in three) or picky. Prices are in crypto; the tab base price is 10.
+- **Orders.** Open orders last 30 game minutes on the board; after accepting there is 1 game hour to deliver. Buyers have a hidden personality (see crime.md, "The rating rule"). The deadline only governs sending. Prices are in crypto; the tab base price is 10.
 - **Times are short for testing:** tray 2 minutes, mailman every 5 minutes, transit 3, escrow 1, cash-out 2.
 - **Not done from the plan:** buyer texts through the Messages app (`NaviNpc`), the "Hot" flag, a tutorial order, sounds and the HUD parcel hint (all Step 5). Reviews and notes are plain text from small hand-written pools in `CrimeCatalog`.
 
