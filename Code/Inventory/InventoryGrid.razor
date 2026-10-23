@@ -18,6 +18,10 @@
 					@if ( item is not null )
 					{
 						<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath/>
+						@if ( item.IsBatch )
+						{
+							<div class="count">x@item.Count</div>
+						}
 					}
 				</div>
 			}

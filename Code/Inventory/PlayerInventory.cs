@@ -63,6 +63,18 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
+	/// How many slots are free.
+	/// </summary>
+	public int FreeSlots
+	{
+		get
+		{
+			Resize();
+			return slots.Count( x => x is null );
+		}
+	}
+
+	/// <summary>
 	/// Put an item in the first free slot. The caller removes the item from the world when this returns true. Host only.
 	/// </summary>
 	public bool Add( IItem item ) => item is not null && Add( ItemData.From( item ) );
@@ -85,6 +97,62 @@ public sealed class PlayerInventory : Component
 		Changed();
 		return true;
 	}
+
+	/// <summary>
+	/// Put a new batch of a catalog kind in the first free slot. Returns false when there is no room, no such kind or
+	/// nothing to add. Host only.
+	/// </summary>
+	public bool AddItem( string kind, int count, int quality, string orderId = "" ) =>
+		ItemCatalog.Make( kind, count, quality, orderId ) is { } batch && Add( batch );
+
+	/// <summary>
+	/// How many of a kind the player has in batches of at least this quality. Works on every machine.
+	/// </summary>
+	public int CountOf( string kind, int minQuality = 0 )
+	{
+		Resize();
+		return slots.Where( x => x is not null && x.Kind == kind && x.Quality >= minQuality ).Sum( x => x.Count );
+	}
+
+	/// <summary>
+	/// Take this many of a kind from the first matching batches (of at least this quality), emptying a batch before the
+	/// next. All or nothing: false, and nothing taken, when there are fewer. <paramref name="taken"/> is what came out, one
+	/// entry per batch touched, so the caller can work out the quality. Host only.
+	/// </summary>
+	public bool TryTake( string kind, int count, out List<ItemData> taken, int minQuality = 0 )
+	{
+		taken = [];
+
+		if ( count < 1 || !CheckAuthority( nameof( TryTake ) ) || CountOf( kind, minQuality ) < count )
+			return false;
+
+		var left = count;
+
+		for ( var i = 0; i < slots.Length && left > 0; i++ )
+		{
+			if ( slots[i] is not { } batch || batch.Kind != kind || batch.Quality < minQuality )
+				continue;
+
+			var part = System.Math.Min( batch.Count, left );
+			var piece = batch.Clone();
+			piece.Count = part;
+			taken.Add( piece );
+			left -= part;
+
+			if ( part == batch.Count )
+				slots[i] = null;
+			else
+				batch.Count -= part;
+		}
+
+		Changed();
+		return true;
+	}
+
+	/// <summary>
+	/// Take the whole batch out of a slot, or null if it is empty or not a batch. Host only.
+	/// </summary>
+	public ItemData TakeBatch( int slot ) => At( slot ) is { IsBatch: true } ? Remove( slot ) : null;
 
 	/// <summary>
 	/// Take the item out of a slot and hand it back, or null if it is empty. Host only.
@@ -162,6 +230,10 @@ public sealed class PlayerInventory : Component
 
 	void DoDrop( int slot )
 	{
+		// A parcel stays with its owner until it is sent: nothing puts a dropped item back in the world yet.
+		if ( At( slot ) is { IsBatch: true } batch && ItemCatalog.Find( batch.Kind ) is { CanDrop: false } )
+			return;
+
 		var item = Remove( slot );
 
 		if ( item is null )

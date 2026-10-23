@@ -29,6 +29,10 @@
 			var position = Mouse.Position * Panel.ScaleFromScreen;
 			<div class="details" style="left: @( position.x + 18 )px; top: @( position.y + 18 )px">
 				<div class="name">@hovered.Name</div>
+				@if ( hovered.IsBatch )
+				{
+					<div class="description">@ItemCatalog.Describe( hovered )</div>
+				}
 				@if ( !string.IsNullOrEmpty( hovered.Description ) )
 				{
 					<div class="description">@hovered.Description</div>

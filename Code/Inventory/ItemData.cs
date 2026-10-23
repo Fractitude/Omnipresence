@@ -21,6 +21,45 @@ public sealed class ItemData
 	public string ModelPath { get; set; } = "";
 
 	/// <summary>
+	/// The id of the <see cref="ItemCatalog"/> entry this is a batch of, or empty for an ordinary item (something picked up
+	/// from the world). Items from before batches load with no kind.
+	/// </summary>
+	public string Kind { get; set; } = "";
+
+	/// <summary>
+	/// How many are in this batch. A batch is the unit: one slot holds "40 tabs, quality 72".
+	/// </summary>
+	public int Count { get; set; } = 1;
+
+	/// <summary>
+	/// How good the batch is, 0 to 100. Only batches of a kind have one.
+	/// </summary>
+	public int Quality { get; set; }
+
+	/// <summary>
+	/// For a parcel: the id of the order it was packed for. Empty for everything else.
+	/// </summary>
+	public string OrderId { get; set; } = "";
+
+	/// <summary>
+	/// Whether this is a batch from the <see cref="ItemCatalog"/> (the crime items).
+	/// </summary>
+	[System.Text.Json.Serialization.JsonIgnore]
+	public bool IsBatch => !string.IsNullOrEmpty( Kind );
+
+	public ItemData Clone() => new()
+	{
+		Name = Name,
+		Description = Description,
+		PrefabPath = PrefabPath,
+		ModelPath = ModelPath,
+		Kind = Kind,
+		Count = Count,
+		Quality = Quality,
+		OrderId = OrderId,
+	};
+
+	/// <summary>
 	/// The prefab the object was made from: its own, else the nearest parent's. Empty if it is not from a prefab.
 	/// </summary>
 	public static string NearestPrefab( GameObject go )
