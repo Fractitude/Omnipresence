@@ -437,6 +437,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		box.OwnerId = steamId;
 		crime.MailboxId = box.BoxId;
+		MailboxRegistry.Claim( box.BoxId, steamId );
 
 		var got = new List<string>();
 
@@ -559,6 +560,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		box.OwnerId = steamId;
 		crime.MailboxId = box.BoxId;
+		MailboxRegistry.Claim( box.BoxId, steamId );
 		UpdateFlag();
 		Changed();
 

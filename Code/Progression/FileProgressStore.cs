@@ -101,9 +101,14 @@ public sealed class FileProgressStore : IProgressStore
 		return Task.CompletedTask;
 	}
 
-	static void WriteSafely( BaseFileSystem data, string folder, string path, string text )
+	/// <summary>
+	/// Write a text file so that a write cut short leaves the previous copy as <c>.bak</c>. Also used for the other
+	/// small files the host keeps.
+	/// </summary>
+	internal static void WriteSafely( BaseFileSystem data, string folder, string path, string text )
 	{
-		data.CreateDirectory( folder );
+		if ( !string.IsNullOrEmpty( folder ) )
+			data.CreateDirectory( folder );
 
 		if ( data.FileExists( path ) )
 		{
@@ -128,6 +133,13 @@ public sealed class FileProgressStore : IProgressStore
 			return false;
 		}
 	}
+
+	/// <summary>
+	/// Read a file written by <see cref="WriteSafely"/>: the file, or its backup when the file is damaged. Null when
+	/// neither can be read.
+	/// </summary>
+	internal static T TryReadSafely<T>( BaseFileSystem data, string path ) where T : class =>
+		TryRead<T>( data, path ) ?? TryRead<T>( data, path + BackupSuffix );
 
 	static T TryRead<T>( BaseFileSystem data, string path ) where T : class
 	{

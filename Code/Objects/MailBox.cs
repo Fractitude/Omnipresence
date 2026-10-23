@@ -30,6 +30,10 @@ public sealed class MailBox : Component, Component.ExecuteInEditor, IInteraction
 
 	protected override void OnStart()
 	{
+		// A restart forgets who a box belongs to; the host reads it back, so a player who is away keeps theirs.
+		if ( Networking.IsHost && Game.IsPlaying && OwnerId == 0 )
+			OwnerId = MailboxRegistry.OwnerOf( BoxId );
+
 		InteractionSetup.EnsureOption(
 			this, SendId, "Send all parcels", "local_shipping", "Puts every parcel you carry in the mailbox." );
 
