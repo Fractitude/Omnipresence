@@ -19,7 +19,7 @@ Part of [crime-rp.md](crime-rp.md), after [crime-rp-first-product.md](crime-rp-f
 | Delivery of seeds | 120 s | **180 s** |
 | Order size on the board | 10 to 30 tabs (steps of 5) | **3 to 10 vials** (steps of 1) |
 | Category (Hush filter) | Static | **Haze** |
-| Icons (Material) | biotech, grain, medication | **spa**, **eco**, **water_drop** |
+| Icons (Material) | biotech, grain, medication | **spa**, **eco**, **opacity** (a drop; `water_drop` is not in the game's icon font, so it was swapped) |
 | Colours | green, teal, cyan | **lavender, pale violet, lilac** |
 
 Different numbers on every axis is on purpose: it shows whether any rule still hides an assumption about Static (for example "one raw makes four tabs" or "orders are for tabs").
@@ -39,18 +39,18 @@ A product definition holds: id and name, the seed item, the raw item, the produc
 - Using an empty tray opens a **small planting panel** (like the packing panel, registered with `GameMenus`): one row per product the player can grow, showing its name, the seeds in the bag, the grow time and what a harvest yields, with a Plant button (disabled with a reason when there are no seeds).
 - A planted tray's prompt names the product ("Growing Haze, 0:25 left" / "Harvest Haze"). The world text above the tray names it too.
 - Harvest yields the planted product's raw, plus its seed back.
-- The panel sends only a product id; the host checks the seed is in the bag and the product exists.
+- The panel sends the tray id and a product id (the host cannot guess which tray the panel was opened on when two stand side by side); the host checks the player is within reach of that tray, the product exists, the tray is empty and the seed is in the bag. An empty tray shows one row, Plant (local, opens the panel); a planted tray shows the growing/harvest row (host). A tray with an unknown or missing product loads as Static.
 
 ### 3. Press Bench: choose what to press
 - The bench no longer presses "all raw Static". Using it opens a **small pressing panel** listing each raw item the player carries (name, count, quality, how many products it makes, and its ratio), with a Press button per row.
-- Pressing a row takes all of that raw (or only a multiple of the ratio: 8 raw for Haze makes 4 vials; an odd leftover raw stays in the bag) and gives one batch of the product with the placeholder quality rule.
+- Pressing a row takes all of that raw batch (or only a multiple of the ratio: 8 raw for Haze makes 4 vials; an odd leftover raw stays in the bag) and gives one batch of the product with the placeholder quality rule (the batch's quality nudged by up to 10). A row is one inventory slot, so raw of different quality is pressed batch by batch (before, all raw Static was pressed into one batch at the average quality).
 - The panel sends the inventory slot only; the host checks it holds a raw item of a known product.
 - Later, the Tuning minigame goes here; the panel is the natural place for it.
 
 ### 4. Market and orders (Hush)
 - The board generates orders for **any product**, by weights in the catalogue (start with about 60 percent Static and 40 percent Haze), using that product's count range, ask range and base price. **Haze orders therefore appear in the Hush Orders tab**, next to Static orders.
 - Order cards show the product name and unit ("5 x Haze vials").
-- The category chips on Orders show All, Haze and Static with counts; the filter by category works for both.
+- The category chips on Orders show All, Haze and Static (alphabetical, one per drug in the catalogue, even with no order on the board) with counts; the filter by category works for both.
 - Buyer notes are generic; a product can add its own flavour lines later.
 - Accept, Pack, Send, review, escrow and fees are unchanged and work from the order's kind.
 
