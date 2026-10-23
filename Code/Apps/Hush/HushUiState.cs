@@ -3,6 +3,7 @@ namespace OmnipresenceApps;
 public enum HushTab
 {
 	Orders,
+	YourOrders,
 	Shipments,
 	Wallet,
 	Reviews,

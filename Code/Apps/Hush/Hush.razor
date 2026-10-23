@@ -39,7 +39,7 @@
 			@foreach ( var tab in Tabs )
 			{
 				<div class="tab @( UiState.Tab == tab ? "active" : "" )" @onclick=@( () => Navi.Act( HushViewModel.TabAction, tab.ToString() ) )>
-					@tab
+					@TabLabel( tab )
 				</div>
 			}
 		</div>
@@ -78,7 +78,9 @@
 						</div>
 					</div>
 				}
-
+			}
+			else if ( UiState.Tab == HushTab.YourOrders )
+			{
 				<div class="heading">Your orders</div>
 				@if ( UiState.Mine.Count == 0 )
 				{
@@ -227,6 +229,17 @@
 	Connection GetSeat() => GameAppSeat.UserOf( this );
 
 	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	/// <summary>
+	/// Accepted orders that wait for the player to pack them or take the parcel to the mailbox.
+	/// </summary>
+	int ToDo => UiState.Mine.Count( x => x.Status is MyOrderStatus.ToPack or MyOrderStatus.ToSend );
+
+	string TabLabel( HushTab tab ) => tab switch
+	{
+		HushTab.YourOrders => ToDo > 0 ? $"Your orders ({ToDo})" : "Your orders",
+		_ => tab.ToString(),
+	};
 
 	static string Stars( int count ) => new string( '*', count ) + new string( '-', 5 - count );
 

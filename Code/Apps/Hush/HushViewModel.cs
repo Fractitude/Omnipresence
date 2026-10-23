@@ -74,8 +74,16 @@ public sealed class HushViewModel
 					break;
 
 				case AcceptAction when args.Length > 0:
-					notice = crime.Accept( args[0] ).Message;
+				{
+					var accepted = crime.Accept( args[0] );
+					notice = accepted.Message;
+
+					// Packing and sending happen under Your orders.
+					if ( accepted.Ok )
+						tab = HushTab.YourOrders;
+
 					break;
+				}
 
 				case PackAction when args.Length > 0:
 					notice = crime.Pack( args[0] ).Message;
