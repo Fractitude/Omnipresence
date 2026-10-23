@@ -9,28 +9,29 @@ namespace Sandbox;
 /// </summary>
 /// <remarks>
 /// <see cref="PlayerProgress"/> creates this component on the host if the player prefab doesn't have it, and refreshes
-/// the network object so clients get it. Clients only read <see cref="TrayView"/>, to label the grow trays.
+/// the network object so clients get it. The views below (<see cref="TrayView"/>, <see cref="PackOrders"/>,
+/// <see cref="MailWaiting"/>) are not synced to everyone: the host keeps them, and sends them to the owning player alone
+/// (<see cref="RefreshViews"/>), so another player's client never holds a player's trays, orders or deliveries.
 /// </remarks>
 public sealed class PlayerCrime : Component, Global.IInventoryEvents
 {
 	/// <summary>
-	/// This player's trays as "id,planted,readyAt;…", set by the host, for the labels of the trays in the world.
+	/// This player's trays as "id,planted,readyAt;…", for the labels of the trays in the world. Held by the host and by
+	/// this player's own client only.
 	/// </summary>
-	[Sync( SyncFlags.FromHost ), Change( nameof( OnTrayViewChanged ) )]
 	public string TrayView { get; private set; } = "";
 
 	/// <summary>
-	/// The orders this player can pack now (accepted, in time) as "id|handle|kind|count|asked|deadline;…", set by the
-	/// host for the packing table and its panel. Only what the player already sees in Hush: never a buyer's personality.
+	/// The orders this player can pack now (accepted, in time) as "id|handle|kind|count|asked|deadline;…", for the packing
+	/// table and its panel. Only what the player already sees in Hush: never a buyer's personality. Held by the host and
+	/// by this player's own client only.
 	/// </summary>
-	[Sync( SyncFlags.FromHost ), Change( nameof( OnTrayViewChanged ) )]
 	public string PackOrders { get; private set; } = "";
 
 	/// <summary>
-	/// How many deliveries from the shop wait in the player's mailbox, for the label of its Collect option. Set by the
-	/// host.
+	/// How many deliveries from the shop wait in the player's mailbox, for the label of its Collect option. Held by the
+	/// host and by this player's own client only.
 	/// </summary>
-	[Sync( SyncFlags.FromHost )]
 	public int MailWaiting { get; private set; }
 
 	/// <summary>
@@ -42,7 +43,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	public int ToldCount { get; private set; }
 
 	/// <summary>
-	/// Bumps whenever <see cref="TrayView"/> changes, on every machine.
+	/// Bumps whenever one of the views changes, on every machine that holds them.
 	/// </summary>
 	public int Version { get; private set; }
 
@@ -94,7 +95,76 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	bool restored;
 	bool restoring;
 
-	void OnTrayViewChanged( string oldValue, string newValue ) => Version++;
+	protected override void OnStart()
+	{
+		// A client that arrives (or respawns) asks the host for its views; the host sends them when they change.
+		if ( !Networking.IsHost && !IsProxy )
+			RequestViews();
+	}
+
+	/// <summary>
+	/// Take new views here, and bump <see cref="Version"/> so panels redraw.
+	/// </summary>
+	void ApplyViews( string trays, string packOrders, int mailWaiting )
+	{
+		TrayView = trays ?? "";
+		PackOrders = packOrders ?? "";
+		MailWaiting = mailWaiting;
+		Version++;
+	}
+
+	/// <summary>
+	/// The host's views reach the owning player here, and nobody else.
+	/// </summary>
+	[Rpc.Owner]
+	void SendViews( string trays, string packOrders, int mailWaiting )
+	{
+		if ( Rpc.Caller is { IsHost: false } )
+			return;
+
+		ApplyViews( trays, packOrders, mailWaiting );
+	}
+
+	/// <summary>
+	/// The owning player's client asks for its views, once when it arrives. The host answers the caller alone, and only if
+	/// the caller is the owner.
+	/// </summary>
+	[Rpc.Host]
+	void RequestViews()
+	{
+		if ( Rpc.Caller is { } caller && caller == Network.Owner && caller != Connection.Local )
+			SendViews( TrayView, PackOrders, MailWaiting );
+	}
+
+	/// <summary>
+	/// Work out the views from the record. If they changed, keep them here (the host reads them too) and send them to the
+	/// owning player when that is another machine. Host only.
+	/// </summary>
+	void RefreshViews()
+	{
+		if ( !Ready )
+			return;
+
+		var crime = Crime;
+		var now = WorldClock.Now;
+
+		var trays = string.Join( ';', crime.Trays.Select( x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt}" ) );
+
+		var packOrders = string.Join( ';', crime.Orders
+			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
+			.OrderBy( x => x.Deadline )
+			.Select( x => $"{x.Id}|{x.Handle}|{x.Kind}|{x.Count}|{x.MinQuality}|{x.Deadline}" ) );
+
+		var mailWaiting = crime.Deliveries.Count( x => x.State == DeliveryState.InMailbox );
+
+		if ( trays == TrayView && packOrders == PackOrders && mailWaiting == MailWaiting )
+			return;
+
+		ApplyViews( trays, packOrders, mailWaiting );
+
+		if ( Network.Owner is { } owner && owner != Connection.Local )
+			SendViews( trays, packOrders, mailWaiting );
+	}
 
 	protected override void OnUpdate()
 	{
@@ -121,9 +191,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( crime is null )
 			return;
 
-		TrayView = string.Join( ';', crime.Trays.Select( x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt}" ) );
-		UpdatePackOrders();
-		MailWaiting = crime.Deliveries.Count( x => x.State == DeliveryState.InMailbox );
+		RefreshViews();
 		Progress.NotifyChanged( ProgressChange.Crime );
 	}
 
@@ -164,7 +232,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return;
 
 		SaveItems();
-		UpdatePackOrders();
+		RefreshViews();
 	}
 
 	/// <summary>
@@ -214,7 +282,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	TrayRecord TrayAt( string id ) => Crime?.Trays.FirstOrDefault( x => x.Id == id );
 
 	/// <summary>
-	/// What a tray holds for this player, from the synced view, so it works on a client too: whether it is planted, and
+	/// What a tray holds for this player, from the view the host sent, so it works on a client too: whether it is planted, and
 	/// the game time it is ready.
 	/// </summary>
 	public (bool Planted, long ReadyAt) TrayState( string id )
@@ -569,26 +637,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	public readonly record struct PackOrder( string Id, string Handle, string Kind, int Count, int Asked, long Deadline );
 
 	/// <summary>
-	/// Refresh <see cref="PackOrders"/>: the accepted orders still in time, soonest deadline first. Host only.
-	/// </summary>
-	void UpdatePackOrders()
-	{
-		if ( !Ready )
-			return;
-
-		var now = WorldClock.Now;
-
-		var view = string.Join( ';', Crime.Orders
-			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
-			.OrderBy( x => x.Deadline )
-			.Select( x => $"{x.Id}|{x.Handle}|{x.Kind}|{x.Count}|{x.MinQuality}|{x.Deadline}" ) );
-
-		if ( view != PackOrders )
-			PackOrders = view;
-	}
-
-	/// <summary>
-	/// The orders the player can pack, from the synced view so it works on a client too.
+	/// The orders the player can pack, from the view the host sent, so it works on a client too.
 	/// </summary>
 	public IReadOnlyList<PackOrder> PackableOrders()
 	{
@@ -709,7 +758,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	void Tick()
 	{
 		var crime = Crime;
-		UpdatePackOrders();
+		RefreshViews();
 
 		var changed = PostalSystem.Tick( crime, OnParcelDelivered );
 
