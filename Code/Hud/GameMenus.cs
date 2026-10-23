@@ -2,9 +2,9 @@ namespace Sandbox;
 
 /// <summary>
 /// Which full-screen windows (menus that take the mouse) are open on this computer. The crosshair, the interaction
-/// prompts and the Interactable's wheel and press all stand down while any is open. A new window registers when it opens
-/// (<see cref="SetOpen"/> with true) and unregisters every way it can close: its Close, OnDisabled, and the player
-/// leaving.
+/// prompts and the Interactable's wheel and press all stand down while any is open. A new window registers when it
+/// opens (<see cref="SetOpen"/> with true) and unregisters every way it can close: its Close, OnDisabled, and the
+/// player leaving.
 /// </summary>
 public static class GameMenus
 {

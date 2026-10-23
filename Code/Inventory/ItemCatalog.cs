@@ -8,8 +8,8 @@ namespace Sandbox;
 /// <param name="CanDrop">False for items that must never leave the inventory except through their own rules.</param>
 /// <param name="Icon">The icon glyph drawn in the inventory for an item with no model.</param>
 /// <param name="Color">The icon's colour, like "#8be28b", or empty for the default.</param>
-/// <param name="Category">The kind of product, like "Static", for the filters of the Hush orders. Empty for an item that
-/// is not sold (a parcel).</param>
+/// <param name="Category">The kind of product, like "Static", for the filters of the Hush orders. Empty for an item
+/// that is not sold (a parcel).</param>
 public sealed record ItemDef(
 	string Id,
 	string Name,
@@ -34,8 +34,8 @@ public static class ItemCatalog
 	/// <summary>The most one batch holds.</summary>
 	public const int MaxCount = 9999;
 
-	// Cached by HotReloadCache, not held in a static field: a hot reload keeps a static holding the assembly's own record
-	// type, so an edit to the table would never show until the editor restarted.
+	// Cached by HotReloadCache, not held in a static field: a hot reload keeps a static holding the assembly's own
+	// record type, so an edit to the table would never show until the editor restarted.
 	static ItemDef[] items => HotReloadCache.Get( "ItemCatalog.items", BuildItems );
 
 	static ItemDef[] BuildItems() =>
@@ -84,8 +84,9 @@ public static class ItemCatalog
 	}
 
 	/// <summary>
-	/// The details of a batch, one line each. An ordinary batch has one: "x40, quality 72". A parcel lists what is inside
-	/// by name, like "Static tabs x10, quality 66", and has no line of its own (its count and quality mean nothing).
+	/// The details of a batch, one line each. An ordinary batch has one: "x40, quality 72". A parcel lists what is
+	/// inside by name, like "Static tabs x10, quality 66", and has no line of its own (its count and quality mean
+	/// nothing).
 	/// </summary>
 	public static IReadOnlyList<string> DescribeLines( ItemData item )
 	{
@@ -93,7 +94,8 @@ public static class ItemCatalog
 			return [item.Quality > 0 ? $"x{item.Count}, quality {item.Quality}" : $"x{item.Count}"];
 
 		return (item.Contents ?? [])
-			.Select( x => $"{Find( x.Kind )?.Name ?? x.Kind} x{x.Count}" + (x.Quality > 0 ? $", quality {x.Quality}" : "") )
+			.Select( x => $"{Find( x.Kind )?.Name ?? x.Kind} x{x.Count}"
+			              + (x.Quality > 0 ? $", quality {x.Quality}" : "") )
 			.ToList();
 	}
 

@@ -148,7 +148,9 @@ public sealed class HushViewModel
 	/// </summary>
 	static string StatusOf( string text ) =>
 		text == AllKey ? ""
-		: Enum.TryParse<MyOrderStatus>( text, true, out var status ) && Enum.IsDefined( status ) ? status.ToString() : null;
+		: Enum.TryParse<MyOrderStatus>( text, true, out var status ) && Enum.IsDefined( status )
+			? status.ToString()
+			: null;
 
 	/// <summary>
 	/// An amount from an action: digits, or "all". Anything else is nothing.

@@ -10,8 +10,8 @@ namespace Sandbox;
 /// <remarks>
 /// <see cref="PlayerProgress"/> creates this component on the host if the player prefab doesn't have it, and refreshes
 /// the network object so clients get it. The views below (<see cref="TrayView"/>, <see cref="PackOrders"/>,
-/// <see cref="MailWaiting"/>) are not synced to everyone: the host keeps them, and sends them to the owning player alone
-/// (<see cref="RefreshViews"/>), so another player's client never holds a player's trays, orders or deliveries.
+/// <see cref="MailWaiting"/>) are not synced to everyone: the host keeps them, and sends them to the owning player
+/// alone (<see cref="RefreshViews"/>), so another player's client never holds a player's trays, orders or deliveries.
 /// </remarks>
 public sealed class PlayerCrime : Component, Global.IInventoryEvents
 {
@@ -22,9 +22,9 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	public string TrayView { get; private set; } = "";
 
 	/// <summary>
-	/// The orders this player can pack now (accepted, in time) as "id|handle|kind|count|asked|deadline;…", for the packing
-	/// table and its panel. Only what the player already sees in Hush: never a buyer's personality. Held by the host and
-	/// by this player's own client only.
+	/// The orders this player can pack now (accepted, in time) as "id|handle|kind|count|asked|deadline;…", for the
+	/// packing table and its panel. Only what the player already sees in Hush: never a buyer's personality. Held by the
+	/// host and by this player's own client only.
 	/// </summary>
 	public string PackOrders { get; private set; } = "";
 
@@ -35,8 +35,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	public int MailWaiting { get; private set; }
 
 	/// <summary>
-	/// The last result told to this player by <see cref="Tell"/>, with a counter that goes up each time, for the packing
-	/// panel. Set on the player's own machine.
+	/// The last result told to this player by <see cref="Tell"/>, with a counter that goes up each time, for the
+	/// packing panel. Set on the player's own machine.
 	/// </summary>
 	public string LastTold { get; private set; } = "";
 
@@ -126,8 +126,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// The owning player's client asks for its views, once when it arrives. The host answers the caller alone, and only if
-	/// the caller is the owner.
+	/// The owning player's client asks for its views, once when it arrives. The host answers the caller alone, and only
+	/// if the caller is the owner.
 	/// </summary>
 	[Rpc.Host]
 	void RequestViews()
@@ -137,8 +137,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Work out the views from the record. If they changed, keep them here (the host reads them too) and send them to the
-	/// owning player when that is another machine. Host only.
+	/// Work out the views from the record. If they changed, keep them here (the host reads them too) and send them to
+	/// the owning player when that is another machine. Host only.
 	/// </summary>
 	void RefreshViews()
 	{
@@ -282,8 +282,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	TrayRecord TrayAt( string id ) => Crime?.Trays.FirstOrDefault( x => x.Id == id );
 
 	/// <summary>
-	/// What a tray holds for this player, from the view the host sent, so it works on a client too: whether it is planted, and
-	/// the game time it is ready.
+	/// What a tray holds for this player, from the view the host sent, so it works on a client too: whether it is
+	/// planted, and the game time it is ready.
 	/// </summary>
 	public (bool Planted, long ReadyAt) TrayState( string id )
 	{
@@ -401,8 +401,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Why this player may not use this mailbox, or null if they may: it is another player's, or they already use another
-	/// one. A claim on a mailbox that is no longer in the scene is let go. Host only.
+	/// Why this player may not use this mailbox, or null if they may: it is another player's, or they already use
+	/// another one. A claim on a mailbox that is no longer in the scene is let go. Host only.
 	/// </summary>
 	string CheckMailbox( MailBox box, out ulong steamId )
 	{
@@ -460,8 +460,9 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Buy from the Hush shop with crypto: an item id from the catalogue and a quantity. The price and the delivery time
-	/// come from <see cref="CrimeCatalog"/>, never from the caller. The goods go on their way to the mailbox. Host only.
+	/// Buy from the Hush shop with crypto: an item id from the catalogue and a quantity. The price and the delivery
+	/// time come from <see cref="CrimeCatalog"/>, never from the caller. The goods go on their way to the mailbox. Host
+	/// only.
 	/// </summary>
 	public CrimeResult BuyFromShop( string itemId, int quantity )
 	{
@@ -497,13 +498,14 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		var name = ItemCatalog.Find( entry.Kind )?.Name ?? entry.Kind;
 		return CrimeResult.Success(
-			$"Bought {quantity} {name} for {total:N0} crypto. It reaches your mailbox at {WorldClock.TimeOfDayOf( delivery.ArriveAt )}." );
+			$"Bought {quantity} {name} for {total:N0} crypto. "
+			+ $"It reaches your mailbox at {WorldClock.TimeOfDayOf( delivery.ArriveAt )}." );
 	}
 
 	/// <summary>
-	/// Send every parcel the player carries from this mailbox, until the post is full (<see cref="CrimeCatalog.MaxParcels"/>);
-	/// the rest stay in the bag. A mailbox is claimed by the first player who sends from it, and stays theirs; nobody else
-	/// can use it. Host only.
+	/// Send every parcel the player carries from this mailbox, until the post is full (<see
+	/// cref="CrimeCatalog.MaxParcels"/>); the rest stay in the bag. A mailbox is claimed by the first player who sends
+	/// from it, and stays theirs; nobody else can use it. Host only.
 	/// </summary>
 	public CrimeResult SendAllParcels( MailBox box )
 	{
@@ -566,7 +568,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( left > 0 )
 		{
 			var verb = left == 1 ? "is" : "are";
-			return CrimeResult.Success( $"Sent {Plural( sent )}. The post is full: {Plural( left )} {verb} still in your bag." );
+			return CrimeResult.Success(
+				$"Sent {Plural( sent )}. The post is full: {Plural( left )} {verb} still in your bag." );
 		}
 
 		return CrimeResult.Success( sent == 1
@@ -634,7 +637,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	/// <summary>
 	/// One order the player can pack, as the packing panel reads it from <see cref="PackOrders"/>.
 	/// </summary>
-	public readonly record struct PackOrder( string Id, string Handle, string Kind, int Count, int Asked, long Deadline );
+	public readonly record struct PackOrder(
+		string Id, string Handle, string Kind, int Count, int Asked, long Deadline );
 
 	/// <summary>
 	/// The orders the player can pack, from the view the host sent, so it works on a client too.
@@ -665,8 +669,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 	/// <summary>
 	/// The player asks to pack an order with the batch in an inventory slot. The host takes the player from the network
-	/// (<c>Rpc.Caller</c>), never from the message, checks the player is at a packing table, and runs <see cref="Pack"/>,
-	/// which checks the rest. Only ids and a slot index are sent.
+	/// (<c>Rpc.Caller</c>), never from the message, checks the player is at a packing table, and runs <see
+	/// cref="Pack"/>, which checks the rest. Only ids and a slot index are sent.
 	/// </summary>
 	[Rpc.Host]
 	public void RequestPack( string orderId, int slot )
@@ -686,10 +690,10 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Pack an accepted order with the batch in an inventory slot. The host checks the player owns the order, that it is
-	/// accepted and in time, and that the slot holds a batch of the order's kind with at least the ordered count. It takes
-	/// exactly the ordered count from that batch and gives a parcel that remembers the order and the batch's quality.
-	/// The quality may be below what the buyer asked: the buyer rates it. Host only.
+	/// Pack an accepted order with the batch in an inventory slot. The host checks the player owns the order, that it
+	/// is accepted and in time, and that the slot holds a batch of the order's kind with at least the ordered count. It
+	/// takes exactly the ordered count from that batch and gives a parcel that remembers the order and the batch's
+	/// quality. The quality may be below what the buyer asked: the buyer rates it. Host only.
 	/// </summary>
 	public CrimeResult Pack( string orderId, int slot )
 	{
@@ -713,7 +717,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( batch.Count != order.Count && Inventory.FreeSlots < 1 )
 			return CrimeResult.Fail( "Your inventory is full." );
 
-		// All or nothing: build the parcel first, and if it cannot be added the batch goes back and the order is untouched.
+		// All or nothing: build the parcel first, and if it cannot be added the batch goes back and the order is
+		// untouched.
 		var parcel = ItemCatalog.Make( ItemCatalog.Parcel, 1, batch.Quality, order.Id );
 
 		if ( parcel is null || Inventory.TakeFrom( slot, order.Count ) is not { } taken )
@@ -854,10 +859,10 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// A sent order is never cancelled by the clock for being late, but one whose parcel is gone, or never completes, would
-	/// stay sent forever and block a slot. A missing parcel, or one that waited too long past the deadline, is lost in the
-	/// post (no penalty: it is not the player's fault); a parcel that is delivered while its order was missed is completed
-	/// through the normal path, once.
+	/// A sent order is never cancelled by the clock for being late, but one whose parcel is gone, or never completes,
+	/// would stay sent forever and block a slot. A missing parcel, or one that waited too long past the deadline, is
+	/// lost in the post (no penalty: it is not the player's fault); a parcel that is delivered while its order was
+	/// missed is completed through the normal path, once.
 	/// </summary>
 	bool CheckShipped( CrimeRecord crime, OrderRecord order, long now )
 	{

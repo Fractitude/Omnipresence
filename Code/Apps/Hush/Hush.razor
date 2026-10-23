@@ -3,8 +3,9 @@
 @namespace OmnipresenceApps
 
 @* The game's own system app, part of the OS: described by Assets/navi/system/hush.napp, so it is always installed and *@
-@* has root. A dark web market where NPC buyers post orders for Static and a shop sells supplies. Orders, escrow and the shop *@
-@* use crypto; the Exchange tab changes crypto and dollars. It only works at home: in the Wired it has no signal. *@
+@* has root. A dark web market where NPC buyers post orders for Static and a shop sells supplies. Orders, escrow and *@
+@* the shop use crypto; the Exchange tab changes crypto and dollars. It only works at home: in the Wired it has no *@
+@* signal. *@
 @* It is shared: the host's copy takes the orders and moves the money, and every player sees the same window. Whoever *@
 @* acts is the player in the seat, worked out on the host, never from what the panel sends. *@
 
@@ -57,7 +58,7 @@
 					@foreach ( var chip in UiState.Categories )
 					{
 						<div class="filter @( UiState.Category == chip.Key ? "active" : "" )"
-						     @onclick=@( () => Navi.Act( HushViewModel.CategoryAction, chip.Key == "" ? HushViewModel.AllKey : chip.Key ) )>
+						     @onclick=@( () => PickCategory( chip.Key ) )>
 							@chip.Label (@chip.Count)
 						</div>
 					}
@@ -65,7 +66,9 @@
 				@if ( UiState.Open.Count == 0 )
 				{
 					<div class="empty">
-						@( UiState.Category == "" ? "No orders right now. Check back soon." : $"No open {UiState.Category} orders right now." )
+						@( UiState.Category == ""
+							? "No orders right now. Check back soon."
+							: $"No open {UiState.Category} orders right now." )
 					</div>
 				}
 
@@ -99,7 +102,7 @@
 					@foreach ( var chip in UiState.StatusChips )
 					{
 						<div class="filter @( UiState.StatusFilter == chip.Key ? "active" : "" )"
-						     @onclick=@( () => Navi.Act( HushViewModel.StatusAction, chip.Key == "" ? HushViewModel.AllKey : chip.Key ) )>
+						     @onclick=@( () => PickStatus( chip.Key ) )>
 							@chip.Label (@chip.Count)
 						</div>
 					}
@@ -154,7 +157,7 @@
 							<div class="card-bottom">
 								<div class="meta">@( item.CanBuy ? $"Total {item.Total} crypto" : item.Reason )</div>
 								<div class="button @( item.CanBuy ? "" : "disabled" )"
-								     @onclick=@( () => Navi.Act( HushViewModel.ShopAction, item.Id, UiState.ShopQuantity.ToString() ) )>
+								     @onclick=@( () => Buy( item.Id ) )>
 									Buy x@UiState.ShopQuantity
 								</div>
 							</div>
@@ -282,7 +285,8 @@
 
 @code
 {
-	// A property, not a static field: a hot reload keeps a static array of the assembly's own enum, so a new tab would not show.
+	// A property, not a static field: a hot reload keeps a static array of the assembly's own enum, so a new tab would
+	// not show.
 	static HushTab[] Tabs => System.Enum.GetValues<HushTab>();
 	static readonly string[] SellAmounts = ["10", "50", "100", HushViewModel.AllAmount];
 	static readonly string[] BuyAmounts = ["10", "50", "100", HushViewModel.AllAmount];
@@ -298,6 +302,17 @@
 	Connection GetSeat() => GameAppSeat.UserOf( this );
 
 	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	// The chips send the category or status name, or "all"; the host checks it.
+	void PickCategory( string key ) =>
+		Navi.Act( HushViewModel.CategoryAction, key == "" ? HushViewModel.AllKey : key );
+
+	void PickStatus( string key ) =>
+		Navi.Act( HushViewModel.StatusAction, key == "" ? HushViewModel.AllKey : key );
+
+	// Only the item id and the quantity go; the host takes the price from its catalogue.
+	void Buy( string itemId ) =>
+		Navi.Act( HushViewModel.ShopAction, itemId, UiState.ShopQuantity.ToString() );
 
 	/// <summary>
 	/// Accepted orders that wait for the player to pack them or take the parcel to the mailbox.

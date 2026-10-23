@@ -63,8 +63,9 @@ public static class CrimeCatalog
 	public const long DeliverWindowSeconds = 3600;
 
 	/// <summary>
-	/// Seconds after the deadline that a Shipped order may wait for its parcel before it counts as lost in the post. A late
-	/// parcel is still paid for; this only cleans up an order whose parcel never completes (a lost or damaged save).
+	/// Seconds after the deadline that a Shipped order may wait for its parcel before it counts as lost in the post. A
+	/// late parcel is still paid for; this only cleans up an order whose parcel never completes (a lost or damaged
+	/// save).
 	/// </summary>
 	public const long ShippedMaxSeconds = 7200;
 
@@ -148,8 +149,8 @@ public static class CrimeCatalog
 	// Buyer personalities. The rating rule (see Stars): a buyer starts at BaseStars; the gap between the quality
 	// delivered and the quality asked moves it (a star per PointsPerStar points, as the personality weighs it); a
 	// parcel that arrives after the deadline loses stars by how late it is (see StarsLostForLateness); the result is
-	// rounded and kept between the personality's MinStars and MaxStars. The deadline only governs sending: a late parcel
-	// is still paid for, and only the rating suffers.
+	// rounded and kept between the personality's MinStars and MaxStars. The deadline only governs sending: a late
+	// parcel is still paid for, and only the rating suffers.
 
 	/// <summary>Stars for a batch exactly as good as the ask, delivered on time.</summary>
 	public const double BaseStars = 3.0;
@@ -171,11 +172,11 @@ public static class CrimeCatalog
 
 	/// <summary>
 	/// How one personality judges. Weight is how often the board shows it (relative). ExtraAsk and PriceBonus (percent
-	/// points of the price spread) make the buyer ask for more quality and pay more for it. Tolerance is the shortfall in
-	/// quality points that is not noticed; ShortfallPerStar the points past it that cost a star; ExcessWeight multiplies
-	/// the stars earned by quality above the ask; Bias moves every score; NoiseChance is the chance of one star more or
-	/// less at random; LateWeight multiplies the stars lost for lateness (rounded down); EarlyBonus is stars for a parcel
-	/// that arrives within EarlyFraction of the delivery window.
+	/// points of the price spread) make the buyer ask for more quality and pay more for it. Tolerance is the shortfall
+	/// in quality points that is not noticed; ShortfallPerStar the points past it that cost a star; ExcessWeight
+	/// multiplies the stars earned by quality above the ask; Bias moves every score; NoiseChance is the chance of one
+	/// star more or less at random; LateWeight multiplies the stars lost for lateness (rounded down); EarlyBonus is
+	/// stars for a parcel that arrives within EarlyFraction of the delivery window.
 	/// </summary>
 	public sealed record PersonalityRules(
 		int Weight, int ExtraAsk, int PriceBonus, double Tolerance, double ShortfallPerStar, double ExcessWeight,
@@ -216,8 +217,9 @@ public static class CrimeCatalog
 	}
 
 	/// <summary>
-	/// The stars an average buyer takes off for a parcel that arrived this many seconds after the deadline: none on time,
-	/// one when late, one more for every further <see cref="LateStepSeconds"/>, at most <see cref="LateMaxStarsLost"/>.
+	/// The stars an average buyer takes off for a parcel that arrived this many seconds after the deadline: none on
+	/// time, one when late, one more for every further <see cref="LateStepSeconds"/>, at most <see
+	/// cref="LateMaxStarsLost"/>.
 	/// </summary>
 	public static int StarsLostForLateness( long secondsLate ) =>
 		secondsLate <= 0 ? 0 : (int)System.Math.Min( LateMaxStarsLost, 1 + (secondsLate - 1) / LateStepSeconds );
@@ -316,15 +318,18 @@ public static class CrimeCatalog
 	static readonly string[] connoisseurLow =
 		["Below the stated quality. Unacceptable.", "Does not match the listing. I measured."];
 
-	static readonly string[] impatientHigh = ["Fast and good. Exactly how I like it.", "Quick. That is why I will be back."];
+	static readonly string[] impatientHigh =
+		["Fast and good. Exactly how I like it.", "Quick. That is why I will be back."];
 	static readonly string[] impatientMid = ["It arrived. Could have been faster.", "Fine, but I have seen quicker."];
 
 	static readonly string[] impatientLow =
 		["Far too slow, or not good enough. Done with this seller.", "I waited for this? No."];
 
-	static readonly string[] easygoingHigh = ["Lovely, thank you so much! Great seller.", "Really nice. Thanks for everything!"];
+	static readonly string[] easygoingHigh =
+		["Lovely, thank you so much! Great seller.", "Really nice. Thanks for everything!"];
 	static readonly string[] easygoingMid = ["All good, thanks. No complaints.", "Fine by me. Thanks!"];
-	static readonly string[] easygoingLow = ["Not quite what I hoped, but thanks anyway.", "A bit disappointing, to be honest."];
+	static readonly string[] easygoingLow =
+		["Not quite what I hoped, but thanks anyway.", "A bit disappointing, to be honest."];
 
 	static readonly string[] skepticHigh =
 		["Okay. I was wrong about this one.", "Surprisingly good. Do not let it go to your head."];

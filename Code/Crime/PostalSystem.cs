@@ -55,7 +55,8 @@ public static class PostalSystem
 		var now = WorldClock.Now;
 		var changed = false;
 
-		foreach ( var delivery in crime.Deliveries.Where( x => x.State == DeliveryState.InTransit && now >= x.ArriveAt ) )
+		foreach ( var delivery in crime.Deliveries
+			         .Where( x => x.State == DeliveryState.InTransit && now >= x.ArriveAt ) )
 		{
 			delivery.State = DeliveryState.InMailbox;
 			changed = true;

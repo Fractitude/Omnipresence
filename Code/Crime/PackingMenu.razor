@@ -26,9 +26,13 @@
 						<div class="order @( id == selectedId ? "selected" : "" )" @onclick=@( () => Select( id ) )>
 							<div class="line">
 								<div class="handle">@order.Handle</div>
-								<div class="left">@InteractionSetup.Countdown( order.Deadline - WorldClock.Now ) left to send</div>
+								<div class="left">
+									@InteractionSetup.Countdown( order.Deadline - WorldClock.Now ) left to send
+								</div>
 							</div>
-							<div class="what">@order.Count x @ProductName( order.Kind ), asked quality @order.Asked+</div>
+							<div class="what">
+								@order.Count x @ProductName( order.Kind ), asked quality @order.Asked+
+							</div>
 						</div>
 					}
 				</div>
@@ -48,7 +52,8 @@
 							var index = slot;
 							var item = inventory.At( index );
 
-							if ( item is not { IsBatch: true } || item.Kind != selected.Kind || item.Count < selected.Count )
+							if ( item is not { IsBatch: true } || item.Kind != selected.Kind
+							     || item.Count < selected.Count )
 							{
 								continue;
 							}
@@ -68,7 +73,9 @@
 
 						@if ( found == 0 )
 						{
-							<div class="empty">You have no batch of @selected.Count or more @ProductName( selected.Kind ).</div>
+							<div class="empty">
+								You have no batch of @selected.Count or more @ProductName( selected.Kind ).
+							</div>
 						}
 					}
 				</div>
@@ -98,7 +105,8 @@
 	/// </summary>
 	public static void Open()
 	{
-		if ( IsOpen || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen || NaviInputCapture.Current is not null )
+		if ( IsOpen || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen
+		     || NaviInputCapture.Current is not null )
 			return;
 
 		selectedId = crime.PackableOrders().FirstOrDefault().Id ?? "";

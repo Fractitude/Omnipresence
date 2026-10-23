@@ -124,7 +124,8 @@ public sealed class CrimeRecord
 		Parcels = Parcels.Where( p => inFlight.Contains( p ) || others.Contains( p ) ).ToList();
 
 		Deliveries ??= new();
-		Deliveries.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
+		Deliveries.RemoveAll(
+			x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
 		Deliveries = Deliveries.TakeLast( MaxEntries ).ToList();
 
 		foreach ( var delivery in Deliveries )
@@ -161,8 +162,8 @@ public sealed class CrimeRecord
 	public const int MaxContents = 20;
 
 	/// <summary>
-	/// A parcel's contents from a file: capped, counts and qualities clamped. An unknown kind is kept as stored (it shows
-	/// by its stored name); an empty one is dropped.
+	/// A parcel's contents from a file: capped, counts and qualities clamped. An unknown kind is kept as stored (it
+	/// shows by its stored name); an empty one is dropped.
 	/// </summary>
 	static List<ItemContent> CleanContents( List<ItemContent> contents ) => (contents ?? [])
 		.Where( x => x is not null && !string.IsNullOrWhiteSpace( x.Kind ) )
@@ -193,7 +194,8 @@ public sealed class TrayRecord
 }
 
 /// <summary>
-/// The old hidden buyer type. Only read from old saves, which are moved to a <see cref="BuyerPersonality"/> when loaded.
+/// The old hidden buyer type. Only read from old saves, which are moved to a <see cref="BuyerPersonality"/> when
+/// loaded.
 /// </summary>
 public enum BuyerType
 {
@@ -255,7 +257,7 @@ public sealed class OrderRecord
 	public string Id { get; set; } = "";
 	public string Handle { get; set; } = "";
 
-	/// <summary>The old buyer type. Read only to move an old save to a <see cref="Personality"/> (see Sanitize).</summary>
+	/// <summary>The old buyer type. Read only to move an old save to a <see cref="Personality"/> in Sanitize.</summary>
 	public BuyerType Buyer { get; set; }
 
 	/// <summary>How the buyer rates. Host only; never shown to the player.</summary>
@@ -267,7 +269,8 @@ public sealed class OrderRecord
 	public string Kind { get; set; } = "";
 	public int Count { get; set; }
 
-	/// <summary>The quality the buyer asked for. A guide for the rating, not a requirement. (Saved as MinQuality.)</summary>
+	/// <summary>The quality the buyer asked for: a guide for the rating, not a requirement. Saved as MinQuality.
+	/// </summary>
 	public int MinQuality { get; set; }
 
 	/// <summary>Crypto per item.</summary>
@@ -311,7 +314,8 @@ public enum DeliveryState
 }
 
 /// <summary>
-/// Something the player bought in the Hush shop. It travels, then waits in their mailbox; collecting it puts it in the bag.
+/// Something the player bought in the Hush shop. It travels, then waits in their mailbox; collecting it puts it in the
+/// bag.
 /// </summary>
 public sealed class DeliveryRecord
 {

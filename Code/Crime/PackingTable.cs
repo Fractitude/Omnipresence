@@ -2,10 +2,10 @@ namespace Sandbox;
 
 /// <summary>
 /// A packing table. Using it opens the packing panel (<see cref="PackingMenu"/>) on the player's own screen, where they
-/// pick which accepted order to pack and with which batch of their bag. The press itself changes nothing: the option runs
-/// on the pressing player's client (<see cref="InteractionSide.Local"/>) and only the panel's Pack button asks the host
-/// (<see cref="PlayerCrime.RequestPack"/>). The label comes from <see cref="PlayerCrime.PackOrders"/>, which the host
-/// syncs. Put it with an <see cref="Interactable"/> and a collider.
+/// pick which accepted order to pack and with which batch of their bag. The press itself changes nothing: the option
+/// runs on the pressing player's client (<see cref="InteractionSide.Local"/>) and only the panel's Pack button asks the
+/// host (<see cref="PlayerCrime.RequestPack"/>). The label comes from <see cref="PlayerCrime.PackOrders"/>, which the
+/// host syncs. Put it with an <see cref="Interactable"/> and a collider.
 /// </summary>
 public sealed class PackingTable : Component, IInteractionHandler
 {

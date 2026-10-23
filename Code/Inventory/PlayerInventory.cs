@@ -150,8 +150,8 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
-	/// Take exactly this many from the batch in a slot and hand them back as a batch of their own (same kind and quality),
-	/// or null when the slot is not a batch of at least that many. Host only.
+	/// Take exactly this many from the batch in a slot and hand them back as a batch of their own (same kind and
+	/// quality), or null when the slot is not a batch of at least that many. Host only.
 	/// </summary>
 	public ItemData TakeFrom( int slot, int count )
 	{

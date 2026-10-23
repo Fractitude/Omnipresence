@@ -2,10 +2,11 @@ using Sandbox;
 
 /// <summary>
 /// A mailbox whose flag shows whether it has mail to send. It has two options, added in code to the
-/// <see cref="Interactable"/>: "Send all parcels" and "Collect parcels" (what the Hush shop delivered). Any other option the
-/// object was set up with is removed, so the flag can't be moved by hand. The flag is for outgoing parcels only. A mailbox belongs to the first player who sends from it (<see cref="OwnerId"/>, remembered in
-/// their save by <see cref="BoxId"/>), and nobody else can use it. The flag goes up by itself while a parcel waits for the
-/// mailman (<see cref="PostalSystem"/>), which sets <see cref="HasMail"/> on the host and syncs it to everyone else.
+/// <see cref="Interactable"/>: "Send all parcels" and "Collect parcels" (what the Hush shop delivered). Any other
+/// option the object was set up with is removed, so the flag can't be moved by hand. The flag is for outgoing parcels
+/// only. A mailbox belongs to the first player who sends from it (<see cref="OwnerId"/>, remembered in their save by
+/// <see cref="BoxId"/>), and nobody else can use it. The flag goes up by itself while a parcel waits for the mailman
+/// (<see cref="PostalSystem"/>), which sets <see cref="HasMail"/> on the host and syncs it to everyone else.
 /// </summary>
 public sealed class MailBox : Component, Component.ExecuteInEditor, IInteractionHandler
 {
@@ -35,8 +36,8 @@ public sealed class MailBox : Component, Component.ExecuteInEditor, IInteraction
 		InteractionSetup.EnsureOption(
 			this, CollectId, "Collect parcels", "inventory_2", "Takes what you ordered out of the mailbox." );
 
-		// Sending and collecting are the only things to do here, in this order. Run the same way on every machine: the host
-		// takes an option as its place in the list. Not in the editor, so the scene is not changed by it.
+		// Sending and collecting are the only things to do here, in this order. Run the same way on every machine: the
+		// host takes an option as its place in the list. Not in the editor, so the scene is not changed by it.
 		if ( Game.IsPlaying && Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
 		{
 			interactable.Options = interactable.Options
