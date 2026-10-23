@@ -225,6 +225,8 @@ Hacking already works as puzzles with alerts and grades (Intrusion, Operations).
 
 ### Heat, police and law
 
+Detailed in [crime-rp-police-forensics.md](crime-rp-police-forensics.md): undercover cop buyers, physical evidence (fingerprints, DNA, handwriting, printer marks), optional precaution gear, the forensic lab, and a four-category case file. The short version follows.
+
 Two linked meters, one investigation.
 
 | Meter | What raises it | What it causes |

@@ -245,7 +245,7 @@ This makes **packaging discipline** a real tradeoff: more evidence costs time an
 
 ### Stings
 
-A sting buyer is a postal inspector or an undercover cop. Without a meeting, the sting works through the mail:
+A sting buyer is a postal inspector or an undercover cop. How evidence on the package is read (fingerprints, DNA, handwriting, printer marks) and how the case file grows is in [crime-rp-police-forensics.md](crime-rp-police-forensics.md). Wearing gloves, printing the label and using other precautions are **optional**: they cost time and money and cut the risk. Without a meeting, the sting works through the mail:
 
 - The package arrives and the **case file** gains your label, handwriting, mailing location and the order.
 - You are not arrested on the spot. A **controlled-delivery** raid is scheduled based on the evidence.
