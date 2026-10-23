@@ -12,10 +12,97 @@ A persistent crime roleplay server with no jobs: grow and cook drugs, hack for m
 
 1. **Do what you want, nobody gives you a job.** Crime is the main way to earn, but nothing is forced.
 2. **The computer is the crime tool.** The dark web, VPNs, traces, smart locks and hacking are the thing this game has that DarkRP and Rust do not.
-3. **The world is staffed by NPCs.** Buyers, cops, workers, shopkeepers, so no player ever has to do a boring job.
+3. **The world is staffed by NPCs, and you can do anything they do.** Buyers, cops, workers, shopkeepers and service providers exist so no player has to do a boring job, but a player can always do the same thing themselves, at a different risk.
 4. **Everything leaves a trace.** Real-world actions raise heat, digital actions leave logs, and both lead to the same investigation.
 5. **Two worlds, two kinds of power, one reality.** In the real world you rely on guns, cars and cash. In the Wired you rely on powers and levels. Wired power reaches into the real world through its networked systems, and the Wired leaks into it.
 6. **Players make the stories.** Rivalries, betrayals, raids, takeovers.
+
+## Design principle: do it yourself, or use the public service
+
+**Decided 2026-10-23, and a big part of the game.** For almost everything, the player can do it **themselves**, and there is a **public NPC-provided equivalent**. Choosing between them changes the **risk profile** of the operation. The aim is a deep, vibrant simulation with many ways to play, where no single path is forced.
+
+### The ladder
+
+For each need there are three rungs.
+
+| Rung | What it is | Usually |
+| --- | --- | --- |
+| **Public (NPC)** | The easy, visible, legal-looking service. Always there. | Cheap in effort, but records are kept and shared with the authorities, and prices are fixed. |
+| **Grey (other players or the dark web)** | Buy from or rent from other players, or from dark-web sellers. | More private, more variable, can be scammed or traced through the seller. |
+| **Own** | Build or run it yourself. | Costs time, money and skill up front, then gives control, scale and low visibility. |
+
+Players climb the ladder as they grow: they start on public services, move to grey ones, build their own, and eventually become the provider others rely on.
+
+### Examples across the game
+
+| Need | Public (NPC) | Grey (players, dark web) | Own |
+| --- | --- | --- | --- |
+| **Website hosting** | NPC hosting provider: cheap, reliable, logs everything, cooperates with police | Player-run or bulletproof hosting | Your own server in your base: ties the site to your address, can be raided |
+| **Ingredients** | Pharmacy: cheap, ID needed, purchase record, daily limit, reported when odd | Dark web or other players | Craft them yourself: needs recipes, a bench, time, and has tells |
+| **Shipping** | Post office, mailbox | Courier (NPC or player) | Your own driver, vehicle, dead drops |
+| **Cashing out crypto** | Online exchange: fee, account link, financial evidence | Mixers, player brokers | A laundering front you run: a shop, a site |
+| **Money storage** | A bank: insured, reported | Stashes with trusted players | A safe, a hidden room |
+| **Privacy (VPN)** | NPC VPN provider: cheap, keeps logs | A player-run "no logs" VPN (or a honeypot) | Your own relay chain through hacked nodes |
+| **Security** | NPC security firm: alarms, monitoring, reports to police | Hired player guards | Your own guards, turrets, smart systems |
+| **Space** | Rented storage unit or flat: inspected | Rent from a player | A building with a hidden room |
+| **Power** | The grid: bills spike with heavy use | A generator from a player | Solar, batteries, generator |
+| **Transport** | Taxi, bus, rental | A used car from a player | Your own garage and modified car |
+| **Legal help** | NPC lawyer | A player fixer | Your own bribed officials |
+| **Information** | News and NPC rumours | A player info market, a forum | Your own surveillance and hacks |
+| **Staff** | NPC temp agency | Recruit players into a crew | Train your own |
+| **Marketplace** | Hush (the NPC market) | Player-run markets | Your own storefront site |
+| **Medical** | NPC clinic: reports gunshot wounds | A player doctor | Your own med bay |
+| **Weapons** | Licensed gun shop: record kept | Black market | Craft or modify |
+| **Hardware** | The Hardware Store | Trade, rerouting | Build with blueprints |
+
+### What changes between rungs
+
+Every choice moves some of these:
+
+| Axis | Public | Grey | Own |
+| --- | --- | --- | --- |
+| **Cost up front** | Low | Medium | High |
+| **Cost per use** | Medium | Variable | Low |
+| **Visibility** (records, traces, who is told) | High | Medium, depends on who | Low if done right |
+| **Reliability** | High | Variable, scams possible | Depends on you |
+| **Control** | Low | Medium | High |
+| **Scale** | Capped | Moderate | Highest |
+| **Skill needed** | None | Some | A lot |
+
+Neither the public nor the own option is simply better. Public is a **safe floor** for new players, an empty server, and an emergency. Own is the **ceiling** for the players who invest.
+
+### Simulation rules
+
+1. **NPC providers follow the same rules as players.** They have capacity, stock, prices, records and a bottom line. A pharmacy that runs out of stock stays out. A hosting provider that is raided goes down.
+2. **Every service leaves records, and who holds them matters.** The pharmacy's log, the host's visitor log, the exchange's account link: each is held by someone, can be requested by police, and can be hacked or bribed.
+3. **The public option is always available and never the best.** It is easy and safe in effort and worse in risk or margin once you scale.
+4. **Players can compete with or replace NPC providers.** Undercut the pharmacy on the street, host sites better than the NPC host, run a courier service. Taking over an NPC role is a business.
+5. **Climbing is earned.** Recipes, blueprints, skills, hardware and reputation unlock the own rung. You learn to manufacture as you grow.
+6. **Systems are connected.** A crackdown on the pharmacy raises demand on the dark web, raises prices, and makes crafting worthwhile. A host raid takes sites offline and shifts traffic. Effects ripple.
+7. **Information is a resource.** Logs, records, rumours and leaks have value and can be stolen, sold and used.
+8. **No special-case scripts.** The same rules and tools make the missions. Players find the story in the consequences.
+9. **Time passes without you.** NPCs, markets and police keep working while you are away, within sensible limits.
+
+### How it is built
+
+Treat each need as a **service** with a common shape, and give it two kinds of provider.
+
+- A **Provider** has a service type, capacity, price, terms, a **records policy** (what it logs and who it tells), a reliability, and an owner (an NPC organisation or a player).
+- The consumer (a player or an NPC) picks a provider. The contract (the request and the result) is the same either way.
+- **NPC providers** are built first for each service, because they make the game work on an empty server.
+- A **player provider** is the same thing with a player as the owner and player-set price and terms.
+- Adding a service means: define the contract, write the NPC provider, then open it to players.
+
+### Scope strategy (the honest part)
+
+A deep simulation is the biggest risk in the whole project. To keep it buildable:
+
+1. **Build the service shape once** (the provider contract), then add services one at a time.
+2. **Always ship the NPC version first.** The player version comes after the NPC one works.
+3. **Pick a few services to make deep** (hosting, ingredients, shipping, cashing out) before spreading wide.
+4. **Keep each service's rules small and visible,** so players can learn and exploit them.
+5. **Test emergent chains early** with two or three connected services, not many shallow ones.
+6. **Every service gets a record policy** from day one, because that is where the risk profile comes from.
 
 ## In short: Rust, but the fight is business
 
@@ -653,6 +740,7 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 | 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
 | 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
 | 10 | **First product** | **Static** (placeholder name): a glowing culture grown in the dark, pressed into tabs. Fictional and abstract. Two minigames: **Climate** (growing) and **Tuning** (pressing, like tuning a radio). See [crime-rp-first-product.md](crime-rp-first-product.md). |
+| 16 | **Do it yourself or use the public service** | A core principle: for almost every need there is a public NPC equivalent and a way to do it yourself (and grey options from other players). The choice changes the risk profile. NPC providers follow the same rules as players. Built as a common provider shape, NPC version first. See "Design principle: do it yourself, or use the public service". |
 | 15 | **Player-made websites** | Players can build any kind of site, including scam sites and credential-stealing phishing pages, and send phishing emails. Everything is in-game: game-issued logins, game-drawn pages (no scripts, no real browser engine), capture keeps only real in-game matches, host authority. Comes after the first loop. See [crime-rp-websites.md](crime-rp-websites.md). |
 | 12 | **Currencies** | **Three:** Cash (dollars), Credits (the Wired) and Crypto (the dark web). Credits never convert. Crypto and cash convert through an exchange with fees and evidence. The dark web pays crypto. See "Three currencies". |
 | 13 | **Consumables** | Products can be **used** for temporary effects (pain tolerance, speed, less need for sleep, hacking focus), with crashes, tolerance and overdose. See "Consumables". |
