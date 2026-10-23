@@ -313,7 +313,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( box.OwnerId != 0 && box.OwnerId != steamId )
 			return CrimeResult.Fail( "This isn't your mailbox." );
 
-		if ( crime.MailboxId != "" && crime.MailboxId != box.BoxId )
+		// A claim on a mailbox that is no longer in the scene is let go.
+		if ( crime.MailboxId != "" && crime.MailboxId != box.BoxId && ClaimedMailBox() is not null )
 			return CrimeResult.Fail( "You already use another mailbox." );
 
 		var slot = -1;

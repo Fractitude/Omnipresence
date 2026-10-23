@@ -1,0 +1,91 @@
+{
+  "RootObject": {
+    "__guid": "3ec32ba9-4c8d-4312-954c-2787639c319e",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "GrowTray",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "Sandbox.GrowTray",
+        "__guid": "37aa03f9-853e-41e6-9b27-feb23b415d77",
+        "__enabled": true,
+        "Flags": 0
+      },
+      {
+        "__type": "Sandbox.Interactable",
+        "__guid": "2c44a7c4-83a8-45e8-b794-a2d9c6e933e7",
+        "__enabled": true,
+        "Flags": 0,
+        "HandlerObject": null,
+        "Range": 200,
+        "Options": [
+          {
+            "Id": "tray",
+            "Label": "Grow tray",
+            "Icon": "grass",
+            "Description": "Grow Static in a tray.",
+            "Available": true,
+            "RunOn": "Host",
+            "Cooldown": 0,
+            "OnInteract": null
+          }
+        ]
+      }
+    ],
+    "Children": [
+      {
+        "__guid": "77697bc6-0384-441e-90b1-2339a3825564",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Model",
+        "Position": "0,0,7.5",
+        "Rotation": "0,0,0,1",
+        "Scale": "1.5,1,0.3",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 0,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.ModelRenderer",
+            "__guid": "e5bde876-691a-465a-9a11-efb2b34aad63",
+            "__enabled": true,
+            "Flags": 0,
+            "Model": {
+              "Id": "8a84e5a0-01f8-0000-f0db-b088f8010000",
+              "Path": "models/dev/box.vmdl"
+            },
+            "Tint": "0.2,0.55,0.2,1",
+            "RenderType": "On"
+          },
+          {
+            "__type": "Sandbox.BoxCollider",
+            "__guid": "943672b5-e810-43c3-afff-e03dc366a57b",
+            "__enabled": true,
+            "Flags": 0,
+            "Center": "0,0,0",
+            "Scale": "50,50,50",
+            "Static": true
+          }
+        ],
+        "Children": []
+      }
+    ]
+  },
+  "ResourceVersion": 1,
+  "__references": [],
+  "__version": 2
+}
