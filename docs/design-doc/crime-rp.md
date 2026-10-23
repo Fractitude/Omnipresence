@@ -388,6 +388,89 @@ This is Rust's "AFK is vulnerable" idea, made fun and tied to the Wired.
 
 The big idea: **the computer is the crime tool, and the same case file connects hacking, drugs, bases and the police.**
 
+## Three currencies
+
+**Decided 2026-10-23.** The game has three, each tied to a place and a risk. Cash and Credits exist in code today. Crypto is planned.
+
+| Currency | Earned | Spent | Note |
+| --- | --- | --- | --- |
+| **Cash** (dollars, `$`) | Street sales, jobs, bank hacks, selling to NPCs and players in person, cashing out crypto | Real-world things: hardware, rent, houses, cars, pharmacy, guns, bribes | Physical, can be stolen or seized, leaves a financial trail when it is large |
+| **Credits** | The Wired: dead servers, minigames, arena | Wired things: powers, cosmetics, Wired gear | Never converts. Not counted in net worth. |
+| **Crypto** (placeholder name **Cipher**) | The dark web: Hush orders, selling data | Dark-web goods (ingredients, equipment, culture), market fees, exchange to cash | Digital, can be hacked, seized with a computer, and traced through the exchange |
+
+**Rules**
+
+1. **Credits never convert.** As before: no way to turn them into cash or crypto.
+2. **Crypto and cash convert through an exchange, at a cost.** This is the laundering mechanic and the main source of cash risk.
+3. **The dark web pays crypto, not cash.** Hush orders, escrow, the market fee and the Shop are all in crypto.
+4. **Street trade pays cash** (see "Street sales").
+5. **Every game cost is in exactly one currency** so players always know what a price means.
+
+### The exchange (crypto to cash and back)
+
+| Method | Fee | Speed | Risk |
+| --- | --- | --- | --- |
+| **Online exchange** | 8 percent | A few game minutes | Linked to an account. Adds **Financial** evidence in proportion to the amount. Large cash-outs are flagged. |
+| **Crypto ATM** | 12 percent | Instant | A camera at the machine. Adds **Witness** evidence. |
+| **Mixer** | 15 to 20 percent | Slow | Cuts the Financial evidence by most of it. Can be hacked or run off with the funds. |
+| **Cash into crypto** | 4 percent | Quick | Needed to pay for dark-web supplies. A purchase record. |
+
+- **Exchange rate:** fixed in version 1. Later, it moves with events (a crackdown, an exchange hack) for volatility.
+- **Daily limits** on the online exchange, with bigger sums needing more steps or a mixer.
+- **Net worth** counts crypto at the exchange rate minus the exchange fee. Credits do not count.
+- **Why three:** it splits risk and place. Crypto is quick and digital but lives on a computer that can be hacked or seized. Cash is physical and spendable but loud. Credits are the safe, separate Wired game.
+
+## Street sales
+
+**Later, not in the first build.** Selling in person, directly, on the street.
+
+- **Buyers:** NPC street buyers at corners, by time of day, and other players.
+- **Pay:** cash, instant, no escrow, no fee, no review.
+- **Price:** haggled. A fair price, or better if the buyer is desperate. Players set their own price with other players.
+- **Risk is higher:**
+  - Witnesses and cameras on the street.
+  - Patrols and **buy-busts** (an undercover officer posing as a buyer).
+  - **Robbery:** a buyer, a passer-by or a rival can rob you.
+  - Carrying product is what police search for.
+- **Reading buyers** works like in Hush: tells for informers and stings (twitchy, odd questions, too eager).
+- **Street rep:** separate from market reputation. It opens better corners and higher-volume buyers.
+- **Turf:** corners can be held by crews. This is where players compete in person without needing to shoot.
+- **Why it is needed:** the dark web pays in crypto, so street sales are the main source of **cash**. Both are needed.
+
+## Consumables (using the product)
+
+**Decided 2026-10-23.** Players can **use the drugs** for temporary effects. This also makes players a real source of demand.
+
+### How use works
+
+- **Use** an item from the inventory to consume one dose. A dose gives an **effect** for a duration.
+- **Quality scales it:** Rough is weak and short with a bigger side effect, Pure is strong and long with a milder crash.
+- **A crash** follows each effect: a smaller penalty for a while.
+- **Tolerance:** each dose in the last 24 hours reduces the next effect by about 10 percent and lengthens the crash.
+- **Stacking:** one effect per product at a time (a new dose refreshes it). Up to two different products at once. A third causes an **overdose**.
+- **Overdose:** blurred vision and a 20-second collapse. Not death. Vulnerable while it lasts.
+- **No addiction in version 1.** A "craving" system may come later.
+- **Police:** possession is an offence, a **drug test** after arrest is evidence of use, and some effects are visible (pupils, jitter, a glow).
+
+### Draft effects (placeholders)
+
+| Product | Effect | Side effect (crash) |
+| --- | --- | --- |
+| **Static** | **Focus:** +1 attempt and 1 wrong word removed in hacking puzzles, clearer Wired visuals. Less need for sleep. | Light sensitivity, blur and 10 percent slower for 2 minutes. A faint glow in the eyes (a tell). |
+| **Frost** | **Rush:** +15 percent move speed, stamina that lasts, quicker interactions. | Jitters: aim sway, a loud heartbeat, noisier movement. |
+| **Haze** | **Numb:** take 25 percent less damage, no pain flinch. | Slow: -10 percent speed, delayed reactions. |
+| **Pulse** | **Wake:** pauses the sleep need for several hours. | A heavy crash that can force you to sleep. |
+
+### What this needs
+
+- A host-authoritative **status effects** system on the player: a list of effects with strength and end time, synced to the player. It hooks:
+  - Damage taken (`PlayerHealth.OnDamage`) for Numb.
+  - Movement speed (`PlayerController`) for Rush and Slow.
+  - Hacking puzzles (attempts and removed words) for Focus.
+  - A **fatigue (sleep) need**: a new system. Sleep is not in the game today. Without it, the "less sleep" effects wait.
+- Effects must not be bought for power in a way that decides fights. They are short and costly, and a crash follows.
+- Consumables are **also a market for players**: buyers want Haze before a raid, Frost before a chase, Static before a hack. This feeds street sales and player trade.
+
 ## Seasons, rankings and titles
 
 **Decided 2026-10-23.** A season ends with **rankings** in three areas, and **titles** for the winners. This is the goal that gives the business competition a point, in place of Rust's kill count.
@@ -570,6 +653,9 @@ Recorded 2026-10-23. Numbers are starting guesses to tune in playtests.
 | 8 | **Server size** | Design and tune for **32 players**, even though the engine allows 64. |
 | 9 | **The dark web** | One shared dark web for everyone, including player-run markets. Interaction and abuse are accepted for the drama. |
 | 10 | **First product** | **Static** (placeholder name): a glowing culture grown in the dark, pressed into tabs. Fictional and abstract. Two minigames: **Climate** (growing) and **Tuning** (pressing, like tuning a radio). See [crime-rp-first-product.md](crime-rp-first-product.md). |
+| 12 | **Currencies** | **Three:** Cash (dollars), Credits (the Wired) and Crypto (the dark web). Credits never convert. Crypto and cash convert through an exchange with fees and evidence. The dark web pays crypto. See "Three currencies". |
+| 13 | **Consumables** | Products can be **used** for temporary effects (pain tolerance, speed, less need for sleep, hacking focus), with crashes, tolerance and overdose. See "Consumables". |
+| 14 | **Street sales** | Selling directly to NPCs and players for cash is planned for later and is riskier than the dark web. See "Street sales". |
 | 11 | **Season goal** | Seasons end with rankings by **net worth**, **market share** (NPC purchases only) and **reputation**, plus a combined **Season Kingpin** score and a set of titles and cosmetic badges. Net worth is private; market share and reputation are public. Measured by hourly snapshots on the host. See "Seasons, rankings and titles". |
 
 ## Open questions

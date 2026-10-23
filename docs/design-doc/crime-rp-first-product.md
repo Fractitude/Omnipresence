@@ -97,6 +97,18 @@ Buyers can tell. A cut batch sold as pure is a **scam** and costs your reputatio
 | **Clean** | 70 to 89 | 1.8 | Dark-web orders with a floor |
 | **Pure** | 90 to 100 | 3.2 | Rare high-paying orders, brand building |
 
+## Using Static (a consumable)
+
+Players can take a tab for a temporary effect (see "Consumables" in [crime-rp.md](crime-rp.md)).
+
+| | |
+| --- | --- |
+| **Effect: Focus** | +1 attempt and 1 wrong word removed in hacking puzzles, clearer Wired visuals, and less need for sleep. |
+| **Duration** | About 8 minutes at Street purity. Rough is shorter, Pure is longer (about 1.6 times). |
+| **Crash** | Light sensitivity, blur and 10 percent slower for 2 minutes. A faint glow in the eyes, a tell for police. |
+| **Tolerance** | Each dose in the last 24 hours cuts the effect by about 10 percent. |
+| **Why players want it** | A hacker takes one before a heist. It ties Static to the hacking game and gives it steady player demand. |
+
 ## Tells that attract police
 
 Each runs while the lab operates and adds **Heat** per minute. Each has a fix.

@@ -4,6 +4,8 @@ Part of [crime-rp.md](crime-rp.md). Pairs with [crime-rp-first-product.md](crime
 
 **Revised 2026-10-23:** goods are **shipped by mail** (post office, mailbox or street box), not handed over in person. Buyers leave **reviews** based on quality, can **scam** (claim non-delivery), and **demand shifts** over time so one product is not enough. Ingredients come from the pharmacy, the dark web, or crafting.
 
+**Currency (updated 2026-10-23):** Hush trades in **crypto**, not cash. Orders, escrow, the market fee, the Shop and the Wallet are all in crypto. To spend earnings on real-world things the player **cashes out through an exchange** (fees, a delay, and financial evidence), and to buy dark-web supplies they may convert cash into crypto. See "Three currencies" in [crime-rp.md](crime-rp.md). In this document, "$" amounts mean crypto unless stated; the exchange is an extra tab in the app.
+
 ## What version 1 is
 
 **One market, run by the game** (placeholder name **Hush**), with NPC buyers and NPC sellers. It is the only market at first, so the economy works on day one. Player-run markets come later and plug into the same app (see "Later").
