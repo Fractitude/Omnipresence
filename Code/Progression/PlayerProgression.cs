@@ -17,6 +17,17 @@ public static class PlayerProgression
 	/// </summary>
 	public static IProgressStore Store { get; set; } = new FileProgressStore();
 
+	/// <summary>
+	/// Use another store from now on, and forget every record read from the old one. For tests; call it before any
+	/// player has loaded.
+	/// </summary>
+	public static void UseStore( IProgressStore store )
+	{
+		Store = store;
+		records.Clear();
+		loading.Clear();
+	}
+
 	static Dictionary<ulong, ProgressRecord> records = new();
 	static Dictionary<ulong, Task<ProgressRecord>> loading = new();
 

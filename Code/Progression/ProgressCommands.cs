@@ -36,6 +36,26 @@ public static class ProgressCommands
 		          + $"${wallet?.Cash}, {wallet?.Credits} credits, {wallet?.Crypto} crypto" );
 	}
 
+	/// <summary>
+	/// <c>progress_test_data on</c> keeps progress in <c>progress_test/</c> and the clock in <c>world_test.json</c>, so
+	/// a test never touches the real save; <c>off</c> goes back. Editor only, and only before a player has spawned.
+	/// </summary>
+	[ConCmd( "progress_test_data" )]
+	public static void TestData( string mode = "on" )
+	{
+		if ( !Application.IsEditor || !Networking.IsHost || Players.Local<PlayerProgress>() is not null )
+		{
+			Log.Info( "Only in the editor, before the player has spawned" );
+			return;
+		}
+
+		var test = mode != "off";
+
+		PlayerProgression.UseStore( new FileProgressStore( test ? "progress_test" : FileProgressStore.DefaultFolder ) );
+		WorldClock.UseFile( test ? "world_test.json" : "world.json" );
+		Log.Info( test ? "Test data: progress_test/ and world_test.json" : "Real data: progress/ and world.json" );
+	}
+
 	[ConCmd( "world_time_show" )]
 	public static void ShowTime() => Log.Info( $"{WorldClock.TimeOfDay}, {WorldClock.Day}" );
 

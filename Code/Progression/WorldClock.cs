@@ -28,6 +28,18 @@ public static class WorldClock
 	const double SaveInterval = 10;
 	const double FollowTolerance = 1.5;
 
+	/// <summary>
+	/// The file in the data folder that keeps the time. A test uses another one (<see cref="UseFile"/>) so it never
+	/// moves the real clock.
+	/// </summary>
+	public static string FileName => string.IsNullOrEmpty( fileName ) ? "world.json" : fileName;
+
+	/// <summary>
+	/// Whether the saved time has been read, so <see cref="Now"/> is the world's and not the default 12:00. Host only.
+	/// </summary>
+	public static bool IsLoaded => loaded;
+
+	static string fileName;
 	static double anchorGame = StartSeconds;
 	static long anchorTicks = System.DateTime.UtcNow.Ticks;
 	static bool loaded;
@@ -73,6 +85,19 @@ public static class WorldClock
 	}
 
 	/// <summary>
+	/// Keep the time in another file from now on, and read it at the next <see cref="TickHost"/> (the time stays as it
+	/// is when that file does not exist yet). For tests. Host only.
+	/// </summary>
+	public static void UseFile( string fileName )
+	{
+		if ( !Networking.IsHost )
+			return;
+
+		WorldClock.fileName = fileName;
+		loaded = false;
+	}
+
+	/// <summary>
 	/// Load the saved world time the first time, then save it now and then. Call every frame on the host.
 	/// </summary>
 	public static void TickHost()
@@ -113,16 +138,16 @@ public static class WorldClock
 	{
 		try
 		{
-			if ( FileSystem.Data is { } data && data.FileExists( "world.json" ) )
+			if ( FileSystem.Data is { } data && data.FileExists( FileName ) )
 			{
-				var saved = Json.Deserialize<SavedClock>( data.ReadAllText( "world.json" ) );
+				var saved = Json.Deserialize<SavedClock>( data.ReadAllText( FileName ) );
 				if ( saved is not null )
 					Anchor( System.Math.Max( saved.Seconds, 0 ) );
 			}
 		}
 		catch ( System.Exception e )
 		{
-			Log.Warning( $"Couldn't read world.json, starting at 12:00: {e.Message}" );
+			Log.Warning( $"Couldn't read {FileName}, starting at 12:00: {e.Message}" );
 		}
 	}
 
@@ -136,11 +161,11 @@ public static class WorldClock
 
 		try
 		{
-			data.WriteAllText( "world.json", Json.Serialize( new SavedClock { Seconds = Now } ) );
+			data.WriteAllText( FileName, Json.Serialize( new SavedClock { Seconds = Now } ) );
 		}
 		catch ( System.Exception e )
 		{
-			Log.Warning( $"Couldn't save world.json: {e.Message}" );
+			Log.Warning( $"Couldn't save {FileName}: {e.Message}" );
 		}
 	}
 
