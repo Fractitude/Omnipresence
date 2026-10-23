@@ -148,3 +148,18 @@ Street sales (cash, riskier), consumable drugs and the status-effects system, a 
 3. **Starting stock.** How does a new player get their first culture and first money? (Suggest: one free culture and $300 at the start, or a tutorial order that pays up front.)
 4. **Order pacing.** How many orders at once, how often they refill, and how long they last.
 5. **Do you want `docs/crime.md`** (a short as-built doc like `hardware.md`) written alongside Step 4, so the code and the doc stay together?
+
+## As built
+
+Written after building steps 1 to 4 and the Exchange. The as-built description is [../crime.md](../crime.md); where it differs from the plan above:
+
+- **Wallet first.** Before the loop, all balances moved into one `PlayerWallet` component (cash, credits, new crypto), see [../currency.md](../currency.md). `PlayerProgress` no longer has any currency code.
+- **Inventory is now partly saved.** The inventory was not persisted at all. Step 8 of the script ("restart, the state is still there") needed it, so the crime batches (Static, tabs, parcels) are copied into `CrimeRecord.Items` and restored; ordinary items are still lost on restart.
+- **Production state is one component on the player.** `PlayerCrime` (made by `PlayerProgress` like the wallet) holds all the rules; `GrowTray`, `PressBench` and `MailBox` only ask it. Trays are keyed by their object's id. The tray and bench labels read a small synced `TrayView` string and the synced inventory.
+- **One option per object.** The tray and bench have one option each; the label changes (Plant, Growing, Harvest). The mailbox gets a second option in code (`InteractionSetup.EnsureOption`), so the scene object needed no edit.
+- **Mailbox ownership** is the first claimant, remembered in the save by the box's object id; a claim on a box that no longer exists is let go.
+- **A harvest also returns a culture,** and a new player starts with 2 (answers open question 3 for now).
+- **Orders.** Open orders last 30 game minutes on the board; after accepting there is 1 game hour to deliver. Buyers are honest (two in three) or picky. Prices are in crypto; the tab base price is 10.
+- **Times are short for testing:** tray 2 minutes, mailman every 5 minutes, transit 3, escrow 1, cash-out 2.
+- **Not done from the plan:** buyer texts through the Messages app (`NaviNpc`), the "Hot" flag, a tutorial order, sounds and the HUD parcel hint (all Step 5). Reviews and notes are plain text from small hand-written pools in `CrimeCatalog`.
+
