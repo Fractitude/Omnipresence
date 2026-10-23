@@ -131,13 +131,13 @@ public sealed class PlayerProgress : Component
 
 			started = true;
 			steamId = owner.SteamId;
-			EnsureWallet();
+			EnsureParts();
 			Load();
 		}
-		else if ( Wallet is null )
+		else if ( Wallet is null || Components.Get<PlayerCrime>() is null )
 		{
 			// A player who was already in the game when this code was added.
-			EnsureWallet();
+			EnsureParts();
 		}
 
 		if ( Loaded && record is not null && sinceDeliveryCheck > 1 )
@@ -439,18 +439,22 @@ public sealed class PlayerProgress : Component
 	internal PlayerWallet Wallet => field ??= Components.Get<PlayerWallet>();
 
 	/// <summary>
-	/// Make sure the player has a <see cref="PlayerWallet"/>, so an existing player prefab needs no edit. A component
-	/// added at run time reaches the clients only after a network refresh. Host only.
+	/// Make sure the player has a <see cref="PlayerWallet"/> and a <see cref="PlayerCrime"/>, so an existing player prefab
+	/// needs no edit. A component added at run time reaches the clients only after a network refresh. Host only.
 	/// </summary>
-	void EnsureWallet()
+	void EnsureParts()
 	{
-		if ( Wallet is not null )
-			return;
+		if ( Wallet is null )
+			Refreshed( Components.Create<PlayerWallet>() );
 
-		var wallet = Components.Create<PlayerWallet>();
+		if ( Components.Get<PlayerCrime>() is null )
+			Refreshed( Components.Create<PlayerCrime>() );
+	}
 
+	void Refreshed( Component component )
+	{
 		if ( GameObject.Network.Active )
-			GameObject.Network.Refresh( wallet );
+			GameObject.Network.Refresh( component );
 	}
 
 	/// <summary>

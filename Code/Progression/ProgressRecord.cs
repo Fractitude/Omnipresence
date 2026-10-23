@@ -90,6 +90,11 @@ public sealed class ProgressRecord
 	public List<PaymentRecord> Payments { get; set; } = new();
 
 	/// <summary>
+	/// The crime game's state. Kept in its own section so a season wipe can reset it alone. Added in version 3.
+	/// </summary>
+	public CrimeRecord Crime { get; set; } = new();
+
+	/// <summary>
 	/// Make a loaded record safe: a file or a backend is outside input, and can hold anything.
 	/// </summary>
 	public void Sanitize()
@@ -143,6 +148,9 @@ public sealed class ProgressRecord
 
 		foreach ( var payment in Payments.Where( x => resetTimes || x.At > WorldClock.LegacyLimit ) )
 			payment.At = 0;
+
+		Crime ??= new();
+		Crime.Sanitize();
 
 		Version = CurrentVersion;
 

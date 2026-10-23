@@ -26,7 +26,10 @@ public enum ProgressChange
 	/// <summary>Dollars, credits or crypto, in the player's <see cref="PlayerWallet"/>.</summary>
 	Wallet = 1 << 5,
 
-	All = Stats | Payments | Intrusions | Operations | Hardware | Wallet,
+	/// <summary>The crime state: trays, orders, parcels, reviews, reputation.</summary>
+	Crime = 1 << 6,
+
+	All = Stats | Payments | Intrusions | Operations | Hardware | Wallet | Crime,
 }
 
 public static partial class Global

@@ -17,6 +17,17 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_crypto <amount>` | Give yourself crypto. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
 
+## Crime
+
+Testing only, for the grow, press, post and Hush loop. They ask the host, which refuses unless it is the editor (`PlayerCrime`). Code: `Code/Crime/CrimeCommands.cs`. Skipping time works too (`world_time_skip_minutes`).
+
+| Command | What it does |
+| --- | --- |
+| `crime_give <kind> [count] [quality]` | Give yourself a batch: kind is `static_culture`, `static_raw`, `static_tab` or `parcel`. Count defaults to 1, quality to 50. |
+| `crime_tray_ready` | Every tray you planted is ready to harvest now. |
+| `crime_postal_now` | The mailman, the escrow release and the Exchange cash-outs are all due now. |
+| `crime_orders [count]` | Put more orders on the Hush board (up to 10). |
+
 ## Health
 
 Code: `Code/Health/`.
