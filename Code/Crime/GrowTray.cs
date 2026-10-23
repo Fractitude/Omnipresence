@@ -15,6 +15,16 @@ public sealed class GrowTray : Component, IInteractionHandler
 {
 	const string OptionId = "tray";
 
+	/// <summary>How close, in world units, a player must be to a tray for the host to plant in it.</summary>
+	public const float Reach = 300f;
+
+	/// <summary>
+	/// Whether the tray with this id stands within <see cref="Reach"/> of this position.
+	/// </summary>
+	public static bool IsNear( string trayId, Vector3 position ) =>
+		Game.ActiveScene?.GetAllComponents<GrowTray>()
+			.Any( x => x.TrayId == trayId && x.WorldPosition.Distance( position ) <= Reach ) ?? false;
+
 	/// <summary>How far the camera can be, in world units, for the progress text to show.</summary>
 	const float LabelRange = 250f;
 
@@ -45,15 +55,13 @@ public sealed class GrowTray : Component, IInteractionHandler
 		if ( crime is null )
 			return new( "Grow tray", "grass", "", false );
 
-		var (planted, readyAt) = crime.TrayState( TrayId );
+		var (planted, readyAt, _) = crime.TrayState( TrayId );
 
 		if ( !planted )
 		{
-			var has = inventory?.CountOf( ItemCatalog.StaticCulture ) > 0;
+			var has = ProductCatalog.Products.Any( x => inventory?.CountOf( x.Seed.Id ) > 0 );
 
-			var hint = has ? "Uses one culture." : "You need a Static culture.";
-
-			return new( "Plant a Static culture", "grass", hint, has );
+			return new( "Plant", "grass", has ? "Uses one seed." : "You need a seed.", has );
 		}
 
 		var left = readyAt - WorldClock.Now;
@@ -72,7 +80,9 @@ public sealed class GrowTray : Component, IInteractionHandler
 			return;
 
 		var planted = crime.TrayState( TrayId ).Planted;
-		crime.Tell( planted ? crime.Harvest( TrayId ) : crime.Plant( TrayId ) );
+		var inventory = e.Interactor.Components.Get<PlayerInventory>();
+		var seeded = ProductCatalog.Products.FirstOrDefault( x => inventory?.CountOf( x.Seed.Id ) > 0 );
+		crime.Tell( planted ? crime.Harvest( TrayId ) : crime.Plant( TrayId, seeded?.Id ) );
 	}
 
 	protected override void OnUpdate()
@@ -138,7 +148,7 @@ public sealed class GrowTray : Component, IInteractionHandler
 		if ( !crime.IsValid() )
 			crime = PlayerCrime.Local;
 
-		var (planted, readyAt) = crime.IsValid() ? crime.TrayState( TrayId ) : (false, 0);
+		var (planted, readyAt, kind) = crime.IsValid() ? crime.TrayState( TrayId ) : (false, 0, "");
 
 		if ( !planted )
 		{
@@ -156,7 +166,8 @@ public sealed class GrowTray : Component, IInteractionHandler
 
 		if ( left > 0 )
 		{
-			var percent = System.Math.Clamp( (CrimeCatalog.GrowSeconds - left) * 100 / CrimeCatalog.GrowSeconds, 0, 99 );
+			var grow = ProductCatalog.OfTray( kind ).GrowSeconds;
+			var percent = System.Math.Clamp( (grow - left) * 100 / grow, 0, 99 );
 			label.Text = $"Growing {percent}%  {InteractionSetup.Countdown( left )}";
 			label.Color = new Color( 0.85f, 0.8f, 0.55f, 0.75f );
 		}

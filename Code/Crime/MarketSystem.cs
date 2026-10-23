@@ -110,25 +110,27 @@ public sealed class MarketSystem : GameObjectSystem<MarketSystem>
 	}
 
 	/// <summary>
-	/// A new order from a buyer with a personality picked by the weights in <see cref="CrimeCatalog"/>. Some ask for
-	/// more quality and pay a little more for it.
+	/// A new order for a drug picked by the weights in <see cref="ProductCatalog"/>, from a buyer with a personality
+	/// picked by the weights in <see cref="CrimeCatalog"/>. The count, the ask and the price come from the drug. Some
+	/// buyers ask for more quality and pay a little more for it.
 	/// </summary>
 	MarketOrder Generate()
 	{
 		var personality = CrimeCatalog.PickPersonality( random );
 		var rules = CrimeCatalog.RulesOf( personality );
-		var kind = ItemCatalog.StaticTab;
-		var steps = (CrimeCatalog.OrderCountMax - CrimeCatalog.OrderCountMin) / CrimeCatalog.OrderCountStep;
-		var count = CrimeCatalog.OrderCountMin + random.Next( steps + 1 ) * CrimeCatalog.OrderCountStep;
+		var product = ProductCatalog.Pick( random );
+		var kind = product.Product.Id;
+		var step = System.Math.Max( product.OrderCountStep, 1 );
+		var steps = System.Math.Max( product.OrderCountMax - product.OrderCountMin, 0 ) / step;
+		var count = product.OrderCountMin + random.Next( steps + 1 ) * step;
 
-		var quality = random.Next( CrimeCatalog.OrderQualityMin, CrimeCatalog.OrderQualityMax + 1 );
-		var spread = random.Next( CrimeCatalog.PriceSpreadMin, CrimeCatalog.PriceSpreadMax + 1 );
+		var quality = random.Next( product.OrderQualityMin, product.OrderQualityMax + 1 );
+		var spread = random.Next( product.PriceSpreadMin, product.PriceSpreadMax + 1 );
 
 		quality = System.Math.Min( quality + rules.ExtraAsk, 95 );
 		spread += rules.PriceBonus;
 
-		var basePrice = ItemCatalog.Find( kind )?.BasePrice ?? 1;
-		var price = System.Math.Max( 1, basePrice * spread / 100 );
+		var price = System.Math.Max( 1, product.Product.BasePrice * spread / 100 );
 
 		return new MarketOrder
 		{

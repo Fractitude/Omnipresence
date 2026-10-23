@@ -16,8 +16,8 @@ namespace Sandbox;
 public sealed class PlayerCrime : Component, Global.IInventoryEvents
 {
 	/// <summary>
-	/// This player's trays as "id,planted,readyAt;…", for the labels of the trays in the world. Held by the host and by
-	/// this player's own client only.
+	/// This player's trays as "id,planted,readyAt,product;…", for the labels of the trays in the world. Held by the
+	/// host and by this player's own client only.
 	/// </summary>
 	public string TrayView { get; private set; } = "";
 
@@ -148,7 +148,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		var crime = Crime;
 		var now = WorldClock.Now;
 
-		var trays = string.Join( ';', crime.Trays.Select( x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt}" ) );
+		var trays = string.Join( ';', crime.Trays.Select(
+			x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt},{ProductCatalog.OfTray( x.Kind ).Id}" ) );
 
 		var packOrders = string.Join( ';', crime.Orders
 			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
@@ -214,7 +215,9 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			if ( !crime.Started )
 			{
 				crime.Started = true;
-				Inventory.AddItem( ItemCatalog.StaticCulture, CrimeCatalog.StartCultures, 50 );
+
+				foreach ( var product in ProductCatalog.Products.Where( x => x.StartSeeds > 0 ) )
+					Inventory.AddItem( product.Seed.Id, product.StartSeeds, 50 );
 			}
 		}
 		finally
@@ -283,28 +286,51 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 	/// <summary>
 	/// What a tray holds for this player, from the view the host sent, so it works on a client too: whether it is
-	/// planted, and the game time it is ready.
+	/// planted, the game time it is ready, and the drug planted (<see cref="ProductDef.Id"/>; Static for a tray with
+	/// none).
 	/// </summary>
-	public (bool Planted, long ReadyAt) TrayState( string id )
+	public (bool Planted, long ReadyAt, string Kind) TrayState( string id )
 	{
 		foreach ( var part in (TrayView ?? "").Split( ';', System.StringSplitOptions.RemoveEmptyEntries ) )
 		{
 			var fields = part.Split( ',' );
 
-			if ( fields.Length == 3 && fields[0] == id && long.TryParse( fields[2], out var readyAt ) )
-				return (fields[1] == "1", readyAt);
+			if ( fields.Length is 3 or 4 && fields[0] == id && long.TryParse( fields[2], out var readyAt ) )
+				return (fields[1] == "1", readyAt, ProductCatalog.OfTray( fields.Length == 4 ? fields[3] : "" ).Id);
 		}
 
-		return (false, 0);
+		return (false, 0, "");
 	}
 
 	/// <summary>
-	/// Plant a culture in a tray: takes one <c>static_culture</c> from the inventory. The tray is ready after
-	/// <see cref="CrimeCatalog.GrowSeconds"/>. Host only.
+	/// The player asks to plant a drug in a tray. The host takes the player from the network (<c>Rpc.Caller</c>),
+	/// checks the player is within reach of that tray, and runs <see cref="Plant"/>, which checks the rest. Only the
+	/// ids of the tray and the drug are sent.
 	/// </summary>
-	public CrimeResult Plant( string trayId )
+	[Rpc.Host]
+	public void RequestPlant( string trayId, string productId )
 	{
-		if ( !Ready || !IsId( trayId ) )
+		var caller = Rpc.Caller;
+
+		if ( caller is not null && caller != Network.Owner )
+			return;
+
+		if ( !GrowTray.IsNear( trayId, WorldPosition ) )
+		{
+			Tell( CrimeResult.Fail( "Go to the grow tray." ) );
+			return;
+		}
+
+		Tell( Plant( trayId, productId ) );
+	}
+
+	/// <summary>
+	/// Plant a drug in a tray: takes one of its seeds from the inventory. The tray is ready after the drug's grow time.
+	/// The host checks the drug exists, the tray is empty and the seed is in the bag. Host only.
+	/// </summary>
+	public CrimeResult Plant( string trayId, string productId )
+	{
+		if ( !Ready || !IsId( trayId ) || ProductCatalog.Find( productId ) is not { } product )
 			return CrimeResult.Fail( "Nothing happens." );
 
 		var crime = Crime;
@@ -316,22 +342,23 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( tray is null && crime.Trays.Count >= CrimeRecord.MaxTrays )
 			return CrimeResult.Fail( "You have too many trays." );
 
-		if ( !Inventory.TryTake( ItemCatalog.StaticCulture, 1, out _ ) )
-			return CrimeResult.Fail( "You need a Static culture." );
+		if ( !Inventory.TryTake( product.Seed.Id, 1, out _ ) )
+			return CrimeResult.Fail( $"You need a {product.Seed.Name}." );
 
 		if ( tray is null )
 			crime.Trays.Add( tray = new() { Id = trayId } );
 
+		tray.Kind = product.Id;
 		tray.Planted = true;
-		tray.ReadyAt = WorldClock.Now + CrimeCatalog.GrowSeconds;
-		tray.Quality = random.Next( CrimeCatalog.GrowQualityMin, CrimeCatalog.GrowQualityMax + 1 );
+		tray.ReadyAt = WorldClock.Now + product.GrowSeconds;
+		tray.Quality = random.Next( product.CropQualityMin, product.CropQualityMax + 1 );
 
 		Changed();
-		return CrimeResult.Success( "Planted." );
+		return CrimeResult.Success( $"Planted {product.Name}." );
 	}
 
 	/// <summary>
-	/// Harvest a ready tray: gives <c>static_raw</c> (and a culture back). Host only.
+	/// Harvest a ready tray: gives the planted drug's raw (and its seed back). Host only.
 	/// </summary>
 	public CrimeResult Harvest( string trayId )
 	{
@@ -344,46 +371,76 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( Inventory.FreeSlots < 2 )
 			return CrimeResult.Fail( "Your inventory is full." );
 
-		Inventory.AddItem( ItemCatalog.StaticRaw, CrimeCatalog.HarvestRaw, tray.Quality );
-		Inventory.AddItem( ItemCatalog.StaticCulture, CrimeCatalog.HarvestCultures, 50 );
+		var product = ProductCatalog.OfTray( tray.Kind );
+
+		Inventory.AddItem( product.Raw.Id, product.HarvestRaw, tray.Quality );
+		Inventory.AddItem( product.Seed.Id, product.HarvestSeeds, 50 );
 		tray.Planted = false;
 
 		Changed();
-		return CrimeResult.Success( $"Harvested {CrimeCatalog.HarvestRaw} raw Static." );
+		return CrimeResult.Success( $"Harvested {product.HarvestRaw} {product.Raw.Name}." );
 	}
 
 	/// <summary>
-	/// Press all the raw Static the player carries into tabs. The quality is a placeholder: the average of the raw, nudged
-	/// at random (the Tuning minigame replaces it later). Host only.
+	/// The player asks to press the raw in an inventory slot. The host takes the player from the network
+	/// (<c>Rpc.Caller</c>), checks the player is at a press bench, and runs <see cref="Press"/>, which checks the rest.
+	/// Only the slot index is sent.
 	/// </summary>
-	public CrimeResult Press()
+	[Rpc.Host]
+	public void RequestPress( int slot )
+	{
+		var caller = Rpc.Caller;
+
+		if ( caller is not null && caller != Network.Owner )
+			return;
+
+		if ( !PressBench.IsNear( WorldPosition ) )
+		{
+			Tell( CrimeResult.Fail( "Go to a press bench." ) );
+			return;
+		}
+
+		Tell( Press( slot ) );
+	}
+
+	/// <summary>
+	/// Press the raw in an inventory slot into its drug's product: as many products as the batch holds whole multiples
+	/// of the drug's raw per product (an odd leftover raw stays in the bag). The quality is a placeholder: the batch's,
+	/// nudged at random (the Tuning minigame replaces it later). The host checks the slot holds raw of a known drug.
+	/// Host only.
+	/// </summary>
+	public CrimeResult Press( int slot )
 	{
 		if ( !Ready )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		var raw = Inventory.CountOf( ItemCatalog.StaticRaw );
+		if ( Inventory.At( slot ) is not { IsBatch: true } batch
+		     || ProductCatalog.OfRaw( batch.Kind ) is not { } product )
+			return CrimeResult.Fail( "That can't be pressed." );
 
-		if ( raw < 1 )
-			return CrimeResult.Fail( "You have no raw Static to press." );
+		var made = batch.Count / product.RawPerProduct;
 
-		if ( Inventory.FreeSlots < 1 )
+		if ( made < 1 )
+		{
+			return CrimeResult.Fail(
+				$"You need {product.RawPerProduct} {product.Raw.Name} for one {product.Product.Name}." );
+		}
+
+		var used = made * product.RawPerProduct;
+
+		// The product needs a slot, unless the raw is used up and frees its own.
+		if ( used != batch.Count && Inventory.FreeSlots < 1 )
 			return CrimeResult.Fail( "Your inventory is full." );
 
-		Inventory.TryTake( ItemCatalog.StaticRaw, raw, out var taken );
+		if ( Inventory.TakeFrom( slot, used ) is not { } taken )
+			return CrimeResult.Fail( "Nothing happens." );
 
-		var spread = CrimeCatalog.PressQualitySpread;
-		var quality = AverageQuality( taken ) + random.Next( -spread, spread + 1 );
-		var tabs = raw * CrimeCatalog.TabsPerRaw;
+		var spread = product.PressQualitySpread;
+		var quality = taken.Quality + random.Next( -spread, spread + 1 );
 
-		Inventory.AddItem( ItemCatalog.StaticTab, tabs, quality );
+		Inventory.AddItem( product.Product.Id, made, quality );
 		Changed();
-		return CrimeResult.Success( $"Pressed {tabs} tabs." );
-	}
-
-	static int AverageQuality( List<ItemData> batches )
-	{
-		var total = batches.Sum( x => x.Count );
-		return total == 0 ? 0 : (int)System.Math.Round( batches.Sum( x => (double)x.Quality * x.Count ) / total );
+		return CrimeResult.Success( $"Pressed {made} {product.Product.Name}." );
 	}
 
 	// -- Mailbox ------------------------------------------------------------------------------------------------------
@@ -547,11 +604,14 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			if ( order is { State: OrderState.Packed } )
 				order.State = OrderState.Shipped;
 
+			// A parcel with no order shows what is inside; only a parcel with no contents either falls back to Static.
+			var inside = (item.Contents ?? []).FirstOrDefault();
+
 			var parcel = PostalSystem.Send(
 				crime,
 				order?.Id ?? "",
-				order?.Kind ?? ItemCatalog.StaticTab,
-				order?.Count ?? item.Count,
+				order?.Kind ?? inside?.Kind ?? ProductCatalog.Default.Product.Id,
+				order?.Count ?? inside?.Count ?? item.Count,
 				item.Quality );
 
 			firstCollect = System.Math.Min( firstCollect, parcel.CollectAt );

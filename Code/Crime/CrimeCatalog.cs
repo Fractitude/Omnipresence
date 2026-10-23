@@ -7,30 +7,8 @@ namespace Sandbox;
 /// </summary>
 public static class CrimeCatalog
 {
-	// Growing and pressing (placeholder gameplay: the minigames come later).
-
-	/// <summary>Seconds a planted tray takes to be ready.</summary>
-	public const long GrowSeconds = 10;
-
-	/// <summary>Raw Static one tray gives.</summary>
-	public const int HarvestRaw = 12;
-
-	/// <summary>Cultures a harvest gives back, so the loop can go on.</summary>
-	public const int HarvestCultures = 1;
-
-	/// <summary>Cultures a new player starts with.</summary>
-	public const int StartCultures = 2;
-
-	/// <summary>Placeholder crop quality, picked when planting.</summary>
-	public const int GrowQualityMin = 40;
-
-	public const int GrowQualityMax = 85;
-
-	/// <summary>Tabs one raw makes at the press bench.</summary>
-	public const int TabsPerRaw = 1;
-
-	/// <summary>Most the press moves the quality either way.</summary>
-	public const int PressQualitySpread = 10;
+	// Growing and pressing are tuned per drug, in the ProductCatalog (grow time, harvest, raw per product, crop
+	// quality, press spread, starting seeds).
 
 	// The mailman and the postal clock.
 
@@ -72,19 +50,8 @@ public static class CrimeCatalog
 	/// <summary>Orders a player can have in progress at once.</summary>
 	public const int MaxActiveOrders = 5;
 
-	/// <summary>An order asks for a multiple of this many.</summary>
-	public const int OrderCountStep = 5;
-
-	public const int OrderCountMin = 10;
-	public const int OrderCountMax = 30;
-
-	public const int OrderQualityMin = 30;
-	public const int OrderQualityMax = 70;
-
-	/// <summary>The price range around an item's base price, in percent.</summary>
-	public const int PriceSpreadMin = 80;
-
-	public const int PriceSpreadMax = 130;
+	// What buyers ask for (count, quality, price spread, how often a drug is asked for) is tuned per drug, in the
+	// ProductCatalog.
 
 	// Reputation. The fee is a percent of what escrow pays.
 
@@ -116,10 +83,10 @@ public static class CrimeCatalog
 	// Cached by HotReloadCache: see ItemCatalog.
 	static ShopEntry[] shop => HotReloadCache.Get( "CrimeCatalog.shop", BuildShop );
 
-	static ShopEntry[] BuildShop() =>
-	[
-		new( "static_culture", ItemCatalog.StaticCulture, 0, 40, 120 ),
-	];
+	/// <summary>One entry per drug's seed. The id is the seed's item kind.</summary>
+	static ShopEntry[] BuildShop() => ProductCatalog.Products
+		.Select( x => new ShopEntry( x.Seed.Id, x.Seed.Id, 0, x.SeedPrice, x.SeedDeliverSeconds ) )
+		.ToArray();
 
 	public static IReadOnlyList<ShopEntry> Shop => shop;
 

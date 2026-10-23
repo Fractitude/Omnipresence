@@ -140,8 +140,7 @@ public sealed class HushViewModel
 	/// A category from an action: empty for All, the catalog's own spelling of a known one, or null for anything else.
 	/// </summary>
 	static string CategoryOf( string text ) =>
-		text == AllKey ? ""
-		: ItemCatalog.Items.Select( x => x.Category ).FirstOrDefault( x => x != "" && x == text );
+		text == AllKey ? "" : ProductCatalog.OfCategory( text )?.Name;
 
 	/// <summary>
 	/// A status from an action: empty for All, a <see cref="MyOrderStatus"/> name, or null for anything else.
@@ -205,7 +204,7 @@ public sealed class HushViewModel
 			FeeText = $"{crime.FeePercent}% fee on payouts",
 			Escrow = $"{crime.Orders.Where( IsHeld ).Sum( x => x.Total ):N0} held in escrow",
 			Open = BuildOpen( crime, category ),
-			Categories = BuildCategories( category ),
+			Categories = BuildCategories(),
 			Mine = BuildMine( crime, statusFilter ),
 			Shop = BuildShop( crime, wallet, shopQuantity ),
 			ShopQuantity = shopQuantity,
@@ -232,14 +231,13 @@ public sealed class HushViewModel
 	static string CategoryOfKind( string kind ) => ItemCatalog.Find( kind )?.Category ?? "";
 
 	/// <summary>
-	/// All, then one chip per category that has an order on the board, each with its count. A chosen category with no
-	/// orders left keeps its chip, so the filter can be undone from where it is.
+	/// All, then one chip per drug (by name), each with how many of its orders are on the board, even none, so the
+	/// filter can be undone from where it is.
 	/// </summary>
-	static IReadOnlyList<FilterChip> BuildCategories( string selected )
+	static IReadOnlyList<FilterChip> BuildCategories()
 	{
 		var open = MarketSystem.Current?.Open ?? new List<MarketOrder>();
-		var names = open.Select( x => CategoryOfKind( x.Kind ) ).Where( x => x != "" ).Append( selected )
-			.Where( x => x != "" ).Distinct().OrderBy( x => x );
+		var names = ProductCatalog.Products.Select( x => x.Name ).OrderBy( x => x );
 
 		var chips = new List<FilterChip> { new( "", "All", open.Count ) };
 		chips.AddRange( names.Select( x => new FilterChip( x, x, open.Count( y => CategoryOfKind( y.Kind ) == x ) ) ) );

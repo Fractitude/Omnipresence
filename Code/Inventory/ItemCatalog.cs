@@ -21,14 +21,18 @@ public sealed record ItemDef(
 	string Category = "" );
 
 /// <summary>
-/// The crime items: batches with a kind, a count and a quality (see <see cref="ItemData"/>). The first build has the
-/// Static chain and the parcel. Names and texts live here, so a saved batch needs only its kind.
+/// The crime items: batches with a kind, a count and a quality (see <see cref="ItemData"/>). The three items of each
+/// drug come from the <see cref="ProductCatalog"/>; the parcel is here. Names and texts live in the definitions, so a
+/// saved batch needs only its kind.
 /// </summary>
 public static class ItemCatalog
 {
 	public const string StaticCulture = "static_culture";
 	public const string StaticRaw = "static_raw";
 	public const string StaticTab = "static_tab";
+	public const string HazeSeed = "haze_seed";
+	public const string HazeRaw = "haze_raw";
+	public const string HazeVial = "haze_vial";
 	public const string Parcel = "parcel";
 
 	/// <summary>The most one batch holds.</summary>
@@ -40,12 +44,7 @@ public static class ItemCatalog
 
 	static ItemDef[] BuildItems() =>
 	[
-		new( StaticCulture, "Static culture", "A living culture, ready to plant in a grow tray.", 0,
-			Icon: "biotech", Color: "#8be28b", Category: "Static" ),
-		new( StaticRaw, "Static (raw)", "Freshly harvested. Press it into tabs at a press bench.", 0,
-			Icon: "grain", Color: "#5fcfb4", Category: "Static" ),
-		new( StaticTab, "Static tabs", "Pressed tabs of Static.", 10,
-			Icon: "medication", Color: "#7fd1ff", Category: "Static" ),
+		.. ProductCatalog.Items,
 		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox.", 0,
 			CanDrop: false, Icon: "redeem", Color: "#c9a27a" ),
 	];

@@ -28,7 +28,7 @@ public sealed class CrimeRecord
 
 	/// <summary>
 	/// The crime items in the player's inventory (batches with a kind), as they were the last time the inventory changed.
-	/// The inventory itself isn't saved, so this is how Static, tabs and parcels survive a restart.
+	/// The inventory itself isn't saved, so this is how seeds, raw, products and parcels survive a restart.
 	/// </summary>
 	public List<ItemData> Items { get; set; } = new();
 
@@ -85,6 +85,10 @@ public sealed class CrimeRecord
 		Trays ??= new();
 		Trays.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || x.Id.Length > MaxIdLength );
 		Trays = Trays.GroupBy( x => x.Id ).Select( x => x.First() ).Take( MaxTrays ).ToList();
+
+		// A tray saved before there were two drugs has no product: it holds Static. An unknown one does too.
+		foreach ( var tray in Trays )
+			tray.Kind = ProductCatalog.OfTray( tray.Kind ).Id;
 
 		Orders ??= new();
 		Orders.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
@@ -182,6 +186,12 @@ public sealed class CrimeRecord
 public sealed class TrayRecord
 {
 	public string Id { get; set; } = "";
+
+	/// <summary>
+	/// The id of the drug planted (<see cref="ProductDef.Id"/>). Empty in a tray saved before there were two drugs:
+	/// that is Static (<see cref="ProductCatalog.OfTray"/>, and <see cref="CrimeRecord.Sanitize"/> fills it in).
+	/// </summary>
+	public string Kind { get; set; } = "";
 
 	/// <summary>False when empty. A planted tray is growing until <see cref="ReadyAt"/>, then ready to harvest.</summary>
 	public bool Planted { get; set; }
