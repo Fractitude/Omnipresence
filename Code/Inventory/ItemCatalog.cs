@@ -34,9 +34,11 @@ public static class ItemCatalog
 	/// <summary>The most one batch holds.</summary>
 	public const int MaxCount = 9999;
 
-	// A property that builds the table on each call, not a static field: a hot reload keeps a static holding the
-	// assembly's own record type, so an edit to the table would never show until the editor restarted. Cheap: a few records.
-	static ItemDef[] items =>
+	// Cached by HotReloadCache, not held in a static field: a hot reload keeps a static holding the assembly's own record
+	// type, so an edit to the table would never show until the editor restarted.
+	static ItemDef[] items => HotReloadCache.Get( "ItemCatalog.items", BuildItems );
+
+	static ItemDef[] BuildItems() =>
 	[
 		new( StaticCulture, "Static culture", "A living culture, ready to plant in a grow tray.", 0,
 			Icon: "biotech", Color: "#8be28b", Category: "Static" ),

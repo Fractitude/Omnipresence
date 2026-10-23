@@ -112,7 +112,10 @@ public static class CrimeCatalog
 	/// <summary>One thing the shop sells. Quality 0 means none.</summary>
 	public sealed record ShopEntry( string Id, string Kind, int Quality, long Price, long DeliverSeconds );
 
-	static ShopEntry[] shop =>
+	// Cached by HotReloadCache: see ItemCatalog.
+	static ShopEntry[] shop => HotReloadCache.Get( "CrimeCatalog.shop", BuildShop );
+
+	static ShopEntry[] BuildShop() =>
 	[
 		new( "static_culture", ItemCatalog.StaticCulture, 0, 40, 120 ),
 	];
@@ -178,29 +181,23 @@ public static class CrimeCatalog
 		int Weight, int ExtraAsk, int PriceBonus, double Tolerance, double ShortfallPerStar, double ExcessWeight,
 		double Bias, double NoiseChance, double LateWeight, double EarlyBonus, int MinStars, int MaxStars );
 
-	// These tables are properties that build their value on each call, not static fields: a hot reload keeps a static
-	// that holds the assembly's own type, so an edit to it would not show until the editor restarted.
-	static PersonalityRules layman => new( 35, 0, 0, 20, 15, 2.0, 0, 0.2, 1, 0, 1, 5 );
-	static PersonalityRules connoisseur => new( 20, 10, 15, 0, 8, 0.5, 0, 0, 1, 0, 1, 5 );
-	static PersonalityRules impatient => new( 15, 0, 0, 0, PointsPerStar, 1.0, 0, 0, 2, 1, 1, 5 );
-	static PersonalityRules easygoing => new( 15, 0, 0, 10, PointsPerStar, 1.0, 1, 0, 0.5, 0, 3, 5 );
-	static PersonalityRules skeptic => new( 15, 0, 0, 0, PointsPerStar, 1.0, -1, 0, 1, 0, 1, 4 );
+	// Cached by HotReloadCache: see ItemCatalog. The order of the table is the order of the board's weights.
+	static Dictionary<BuyerPersonality, PersonalityRules> ruleTable =>
+		HotReloadCache.Get( "CrimeCatalog.rules", BuildRules );
 
-	public static PersonalityRules RulesOf( BuyerPersonality personality ) => personality switch
+	static Dictionary<BuyerPersonality, PersonalityRules> BuildRules() => new()
 	{
-		BuyerPersonality.Layman => layman,
-		BuyerPersonality.Connoisseur => connoisseur,
-		BuyerPersonality.Impatient => impatient,
-		BuyerPersonality.Easygoing => easygoing,
-		BuyerPersonality.Skeptic => skeptic,
-		_ => easygoing,
+		[BuyerPersonality.Layman] = new( 35, 0, 0, 20, 15, 2.0, 0, 0.2, 1, 0, 1, 5 ),
+		[BuyerPersonality.Connoisseur] = new( 20, 10, 15, 0, 8, 0.5, 0, 0, 1, 0, 1, 5 ),
+		[BuyerPersonality.Impatient] = new( 15, 0, 0, 0, PointsPerStar, 1.0, 0, 0, 2, 1, 1, 5 ),
+		[BuyerPersonality.Easygoing] = new( 15, 0, 0, 10, PointsPerStar, 1.0, 1, 0, 0.5, 0, 3, 5 ),
+		[BuyerPersonality.Skeptic] = new( 15, 0, 0, 0, PointsPerStar, 1.0, -1, 0, 1, 0, 1, 4 ),
 	};
 
-	static BuyerPersonality[] personalities =>
-	[
-		BuyerPersonality.Layman, BuyerPersonality.Connoisseur, BuyerPersonality.Impatient,
-		BuyerPersonality.Easygoing, BuyerPersonality.Skeptic,
-	];
+	public static PersonalityRules RulesOf( BuyerPersonality personality ) =>
+		ruleTable.TryGetValue( personality, out var rules ) ? rules : ruleTable[BuyerPersonality.Easygoing];
+
+	static IEnumerable<BuyerPersonality> personalities => ruleTable.Keys;
 
 	/// <summary>A personality for a new order, by the weights.</summary>
 	public static BuyerPersonality PickPersonality( System.Random random )
