@@ -59,7 +59,7 @@
 					{
 						<div class="filter @( UiState.Category == chip.Key ? "active" : "" )"
 						     @onclick=@( () => PickCategory( chip.Key ) )>
-							@chip.Label (@chip.Count)
+							@( $"{chip.Label} ({chip.Count})" )
 						</div>
 					}
 				</div>
@@ -103,7 +103,7 @@
 					{
 						<div class="filter @( UiState.StatusFilter == chip.Key ? "active" : "" )"
 						     @onclick=@( () => PickStatus( chip.Key ) )>
-							@chip.Label (@chip.Count)
+							@( $"{chip.Label} ({chip.Count})" )
 						</div>
 					}
 				</div>
