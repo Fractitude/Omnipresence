@@ -98,7 +98,7 @@ Buyers are NPCs, so players never stand in a shop all day.
 
 ### The dark web
 
-A Navi app and a browser site. This is the game's central marketplace and where the computer matters.
+A Navi app and a browser site. This is the game's central marketplace and where the computer matters. The first version (one NPC-run market called Hush) is designed in [crime-rp-dark-web-app.md](crime-rp-dark-web-app.md).
 
 - **Storefronts and listings:** list goods with photos, price and quality claim.
 - **Orders:** NPC buyers and players place and take orders.
