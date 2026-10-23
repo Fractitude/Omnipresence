@@ -1,0 +1,137 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( IsOpen ? "open" : "" )">
+	@if ( IsOpen && PlayerCrime.Local is { } crime )
+	{
+		var inventory = PlayerInventory.Local;
+		var found = 0;
+
+		<div class="window">
+			<div class="header">
+				<div class="title">Press bench</div>
+				<div class="close" @onclick=@Close>Close</div>
+			</div>
+			<div class="heading">
+				Choose a batch to press. Only whole multiples are pressed; the rest stays in your bag.
+			</div>
+			@for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
+			{
+				var index = slot;
+				var item = inventory.At( index );
+
+				if ( item is not { IsBatch: true } || ProductCatalog.OfRaw( item.Kind ) is not { } product )
+					continue;
+
+				found++;
+				var made = item.Count / product.RawPerProduct;
+				var left = item.Count - made * product.RawPerProduct;
+				var makes = made > 0
+					? $"Makes {made} {product.Product.Name}" + (left > 0 ? $", {left} raw stays in your bag" : "")
+					: $"Needs {product.RawPerProduct} for one {product.Product.Name}";
+
+				<div class="batch @( made > 0 ? "" : "unavailable" )">
+					<div class="icon">
+						<ItemIcon Icon=@product.Raw.Icon Color=@product.Raw.Color/>
+					</div>
+					<div class="info">
+						<div class="size">@( $"{item.Count} x {item.Name}, quality {item.Quality}" )</div>
+						<div class="detail">@makes</div>
+						<div class="detail">@( $"Ratio: {product.RawPerProduct}:1" )</div>
+					</div>
+					<div class="button @( made > 0 ? "" : "disabled" )" @onclick=@( () => Press( index ) )>
+						Press
+					</div>
+				</div>
+			}
+			@if ( found == 0 )
+			{
+				<div class="empty">@NothingToPress</div>
+			}
+			@if ( crime.ToldCount > toldAtOpen )
+			{
+				<div class="notice">@crime.LastTold</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the panel is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static int toldAtOpen;
+
+	/// <summary>
+	/// What the panel says when the bag holds no raw of any drug.
+	/// </summary>
+	public static string NothingToPress =>
+		$"You have no raw {string.Join( " or ", ProductCatalog.Products.Select( x => x.Name ) )} to press.";
+
+	/// <summary>
+	/// Open the panel, from a press bench the player used. Does nothing with another menu open.
+	/// </summary>
+	public static void Open()
+	{
+		if ( IsOpen || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen
+		     || NaviInputCapture.Current is not null )
+			return;
+
+		toldAtOpen = crime.ToldCount;
+		IsOpen = true;
+		GameMenus.SetOpen( "press", true );
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "press", false );
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Ask the host to press. Only the inventory slot goes; the host checks the bench, the slot and the raw.
+	/// </summary>
+	static void Press( int slot )
+	{
+		var item = PlayerInventory.Local?.At( slot );
+
+		if ( item is null || ProductCatalog.OfRaw( item.Kind ) is not { } product
+		     || item.Count < product.RawPerProduct )
+			return;
+
+		PlayerCrime.Local?.RequestPress( slot );
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		// Leave if the player walked away, another menu took over, or Escape was pressed.
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || PlayerCrime.Local is null
+		     || !PressBench.IsNear( Players.LocalController?.WorldPosition ?? default ) )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() => System.HashCode.Combine(
+		IsOpen, PlayerInventory.Local?.Version, PlayerCrime.Local?.Version, PlayerCrime.Local?.ToldCount );
+}

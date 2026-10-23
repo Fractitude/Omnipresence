@@ -1,9 +1,12 @@
 namespace Sandbox;
 
 /// <summary>
-/// A press bench. Press turns the raw Static the player carries into tabs, with a placeholder quality (the average of the
-/// raw, nudged at random; the Tuning minigame replaces it later). Put it with an <see cref="Interactable"/> (network mode
-/// Object) and a collider.
+/// A press bench. Using it opens the pressing panel (<see cref="PressMenu"/>) on the player's own screen, which lists
+/// the raw of every drug the player carries, with a Press button for each. The press itself changes nothing: the
+/// option runs on the player's own client (<see cref="InteractionSide.Local"/>) and only the panel's Press button asks
+/// the host (<see cref="PlayerCrime.RequestPress"/>, with the inventory slot). Pressing turns raw into the drug's
+/// product with a placeholder quality (the batch's, nudged at random; the Tuning minigame replaces it later). Put it
+/// with an <see cref="Interactable"/> and a collider.
 /// </summary>
 public sealed class PressBench : Component, IInteractionHandler
 {
@@ -19,8 +22,15 @@ public sealed class PressBench : Component, IInteractionHandler
 		Game.ActiveScene?.GetAllComponents<PressBench>().Any( x => x.WorldPosition.Distance( position ) <= Reach )
 		?? false;
 
-	protected override void OnStart() =>
-		InteractionSetup.EnsureOption( this, OptionId, "Press bench", "compress", "Press raw Static into tabs." );
+	protected override void OnStart()
+	{
+		var option = InteractionSetup.EnsureOption(
+			this, OptionId, "Press bench", "compress", "Press raw into its product." );
+
+		// The press only opens the panel on the player's own screen.
+		if ( option is not null )
+			option.RunOn = InteractionSide.Local;
+	}
 
 	InteractionInfo? IInteractionHandler.Describe( InteractionEvent e )
 	{
@@ -31,20 +41,13 @@ public sealed class PressBench : Component, IInteractionHandler
 		var raw = ProductCatalog.Products.Sum( x => inventory?.CountOf( x.Raw.Id ) ?? 0 );
 
 		return raw > 0
-			? new( "Press", "compress", "Turns raw into product." )
-			: new( "Press bench", "compress", "You have nothing to press.", false );
+			? new( "Press", "compress", "Choose what to press." )
+			: new( "Press bench", "compress", PressMenu.NothingToPress, false );
 	}
 
 	void IInteractionHandler.OnInteract( InteractionEvent e )
 	{
-		if ( e.Option?.Id != OptionId || !Networking.IsHost || e.Interactor is null )
-			return;
-
-		var inventory = e.Interactor.Components.Get<PlayerInventory>();
-		var slot = Enumerable.Range( 0, inventory?.SlotCount ?? 0 )
-			.FirstOrDefault( x => ProductCatalog.OfRaw( inventory.At( x )?.Kind ) is not null, -1 );
-
-		if ( e.Interactor.Components.Get<PlayerCrime>() is { } crime )
-			crime.Tell( crime.Press( slot ) );
+		if ( e.Option?.Id == OptionId && !Application.IsHeadless )
+			PressMenu.Open();
 	}
 }
