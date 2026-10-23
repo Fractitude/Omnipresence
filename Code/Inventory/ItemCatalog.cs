@@ -26,7 +26,7 @@ public static class ItemCatalog
 	[
 		new( StaticCulture, "Static culture", "A living culture, ready to plant in a grow tray.", 0 ),
 		new( StaticRaw, "Static (raw)", "Freshly harvested. Press it into tabs at a press bench.", 0 ),
-		new( StaticTab, "Static tabs", "Pressed tabs. The quality is how pure the batch is.", 10 ),
+		new( StaticTab, "Static tabs", "Pressed tabs of Static.", 10 ),
 		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox. It can't be dropped.", 0, CanDrop: false ),
 	];
 
