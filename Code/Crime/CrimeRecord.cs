@@ -110,7 +110,18 @@ public sealed class CrimeRecord
 
 		Parcels ??= new();
 		Parcels.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
-		Parcels = Parcels.TakeLast( MaxEntries ).ToList();
+
+		// Parcels of orders still on their way are the last thing dropped when the list is trimmed.
+		var inFlight = Parcels
+			.Where( p => Orders.Any( o => o.Id == p.OrderId && o.State == OrderState.Shipped ) )
+			.ToList();
+
+		var others = Parcels
+			.Except( inFlight )
+			.TakeLast( System.Math.Max( 0, MaxEntries - inFlight.Count ) )
+			.ToList();
+
+		Parcels = Parcels.Where( p => inFlight.Contains( p ) || others.Contains( p ) ).ToList();
 
 		Deliveries ??= new();
 		Deliveries.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );

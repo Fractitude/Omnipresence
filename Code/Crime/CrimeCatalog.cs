@@ -62,6 +62,12 @@ public static class CrimeCatalog
 	/// <summary>Seconds a player has to deliver after accepting.</summary>
 	public const long DeliverWindowSeconds = 3600;
 
+	/// <summary>
+	/// Seconds after the deadline that a Shipped order may wait for its parcel before it counts as lost in the post. A late
+	/// parcel is still paid for; this only cleans up an order whose parcel never completes (a lost or damaged save).
+	/// </summary>
+	public const long ShippedMaxSeconds = 7200;
+
 	/// <summary>Orders a player can have in progress at once.</summary>
 	public const int MaxActiveOrders = 5;
 

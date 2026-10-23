@@ -780,9 +780,38 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 				Cancel( order, "The deadline passed. The buyer cancelled the order." );
 				changed = true;
 			}
+			else if ( order.State == OrderState.Shipped )
+			{
+				changed |= CheckShipped( crime, order, now );
+			}
 		}
 
 		return changed;
+	}
+
+	/// <summary>
+	/// A sent order is never cancelled by the clock for being late, but one whose parcel is gone, or never completes, would
+	/// stay sent forever and block a slot. A missing parcel, or one that waited too long past the deadline, is lost in the
+	/// post (no penalty: it is not the player's fault); a parcel that is delivered while its order was missed is completed
+	/// through the normal path, once.
+	/// </summary>
+	bool CheckShipped( CrimeRecord crime, OrderRecord order, long now )
+	{
+		var parcel = crime.Parcels.FirstOrDefault( x => x.OrderId == order.Id );
+
+		if ( parcel is { State: ParcelState.Delivered } )
+		{
+			OnParcelDelivered( parcel );
+			return true;
+		}
+
+		if ( parcel is not null && now <= order.Deadline + CrimeCatalog.ShippedMaxSeconds )
+			return false;
+
+		order.State = OrderState.Cancelled;
+		Log.Info( $"PlayerCrime: order {order.Id} lost in the post" );
+		Tell( CrimeResult.Fail( "Your parcel was lost in the post. The order is cancelled." ) );
+		return true;
 	}
 
 	/// <summary>
