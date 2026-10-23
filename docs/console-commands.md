@@ -16,7 +16,7 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_give_crypto <amount>` | Give yourself crypto. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
-| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json` and the mailbox claims in `mailboxes_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
+| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json` the mailbox claims in `mailboxes_test.json` and the storage claims in `storage_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
 
 ## Crime
 
