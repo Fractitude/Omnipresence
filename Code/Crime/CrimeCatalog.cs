@@ -10,7 +10,7 @@ public static class CrimeCatalog
 	// Growing and pressing (placeholder gameplay: the minigames come later).
 
 	/// <summary>Seconds a planted tray takes to be ready.</summary>
-	public const long GrowSeconds = 120;
+	public const long GrowSeconds = 10;
 
 	/// <summary>Raw Static one tray gives.</summary>
 	public const int HarvestRaw = 12;
