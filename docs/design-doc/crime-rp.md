@@ -109,6 +109,82 @@ A Navi app and a browser site. This is the game's central marketplace and where 
 - **Safety:** a VPN hides where you list from. Careless listing leaves a trace to your IP and your home.
 - **Sabotage tools:** defacing a rival's store, leaking their customer list, posting fake bad reviews, tipping the police. All cost effort and leave traces.
 
+### Player-run markets
+
+Players can **run their own dark-web markets**, charge fees, and fight over customers. The game starts with one weak NPC market so the economy works on day one. Player markets compete with it and with each other.
+
+**Setting one up**
+
+- A market is a **server** running on hardware the operator owns, in their base or a rented host. Its size depends on the hardware: bandwidth sets how many users it can serve, storage sets how many listings.
+- The operator buys an **address** (the market's name in the dark web directory), picks a **skin** from a small set of lo-fi templates, and sets the rules.
+- The market software is **the game's own system app**. The operator configures it. They do not write code for it, so money and listings can't be forged (see Security).
+
+**What the operator controls**
+
+| Setting | Effect |
+| --- | --- |
+| **Transaction fee** (percent) | Operator income. High fees push vendors and buyers to rivals. |
+| **Listing fee, vendor bond** | Income and a barrier to scammers. |
+| **Categories allowed** | Drugs, data, weapons, services. Narrow markets earn trust in one niche. |
+| **Entry rules** | Open, invite only, vouched by a member, or paid. |
+| **Escrow** | On (safer for buyers, the operator holds funds) or off. |
+| **Logging** | On (easier dispute handling, but evidence if seized) or off. |
+| **Moderators and staff** | NPC or player staff for disputes and support, for a wage. |
+
+**How a market grows (the fight for customers)**
+
+NPC buyers pick a market by weighing:
+
+- **Selection:** how many listings fit what they want.
+- **Price and fees.**
+- **Trust:** the market's reputation, scam rate and uptime.
+- **Safety:** has it been busted or hacked lately.
+- **Reach:** how easy it is to find (directory rank, ads, referrals).
+
+Market **size** is the number of customers and the volume of trade. It shows in the directory ranking, so everyone can see who is winning. Player buyers and vendors also choose among markets.
+
+**Competing, clean**
+
+- Lower fees, run promotions, offer better vendor terms.
+- Invest in uptime and security.
+- Win vendors with exclusive access and bonds.
+- Pay directories and ads for visibility.
+
+**Competing, dirty** (each one is a hack or action with traces)
+
+- **Take the rival down:** DDoS their server for a while, using hacked machines.
+- **Deface or leak:** break in and publish their user list or vendor list, hurting trust.
+- **Steal the escrow:** hack the vault and take the funds held for trades.
+- **Infiltrate:** sign up as a vendor or moderator and scam from inside.
+- **Poach:** buy off their vendors.
+- **Smear:** fake reviews and rumors.
+- **Tip off the police:** push a rival market onto the case list.
+
+**Risks of being an operator**
+
+- **Big means hot.** A market's case file grows with traffic and volume. A large market draws a **takedown raid** on its server and its operator.
+- **Logs are evidence.** Logging helps you settle disputes and sinks you if seized.
+- **Escrow is a target.** Holding user funds makes you a hacking target. If the funds are stolen you must repay or lose your name.
+- **Exit scam.** An operator can empty the escrow and vanish. It pays well once, and ends their reputation for the season. It is a deliberate emergent story.
+- **Staff can betray you.** A moderator can leak or steal.
+- **You must keep hardware alive.** A powered-off or raided server means a dead market.
+
+**Why it works**
+
+- It gives players a **business to build**, not just a shop.
+- Competition is **visible** (directory rank) and **personal**.
+- It uses the hacking, hardware, traces and base-raiding systems you already plan, so nothing here needs a new subsystem.
+- It makes the **dark web a player-run place** with politics and drama.
+
+**Numbers to tune (guesses)**
+
+- NPC market fee: 10 percent. Player markets typically run 3 to 12 percent.
+- Server capacity grows with hardware tiers.
+- Customer allocation by weighted scoring, with a floor so small markets can survive.
+- A takedown risk that scales with size and logging.
+
+**Slice note:** not in the first test. The first slice has one NPC market. Player-run markets are the second test (see build order).
+
 ### Hacking (the existing system, extended)
 
 Hacking already works as puzzles with alerts and grades (Intrusion, Operations). In this game it **steals things that matter**.
@@ -237,7 +313,7 @@ The big idea: **the computer is the crime tool, and the same case file connects 
 
 ### Out (for now)
 
-Multiple products, laundering, staff NPCs, brands, the zombie and shooter modes, laws that change, helicopters, seasons, clans, base building beyond placing devices, abilities beyond a couple.
+Player-run markets (the second test), multiple products, laundering, staff NPCs, brands, the zombie and shooter modes, laws that change, helicopters, seasons, clans, base building beyond placing devices, abilities beyond a couple.
 
 ### Build order
 
@@ -248,6 +324,7 @@ Multiple products, laundering, staff NPCs, brands, the zombie and shooter modes,
 5. **Cars and a chase.**
 6. **The Wired as a break:** one mode and powers.
 7. **Playtest with 6 to 12 friends** before adding anything.
+8. **Second test: player-run markets.** One player sets up a market, charges a fee, and competes with the NPC market for customers. Does anyone want to run one, and does the rivalry matter?
 
 ### Questions the slice answers
 
@@ -270,3 +347,10 @@ Multiple products, laundering, staff NPCs, brands, the zombie and shooter modes,
 10. **What is the first product and its theme?** A fictional substance keeps it clear of real recipes.
 11. **Mature-content policy.** Does the platform allow it, and what rating?
 12. **Relationship to the earlier pitches.** Are the Lain story, mystery and social features parked, merged as flavour, or dropped?
+13. **Market hosting.** Do markets run on a physical computer in the base (raidable, can be unplugged), or in a rented hosting service (safer but a recurring cost and a different target)?
+14. **How many markets can exist** on a 32-player server? A cap, or whoever can afford it.
+15. **How is escrow money stored?** On the market's server (stealable) or by the game (safe)? Stealing it is a core fantasy, so the first.
+16. **Can players tax each other?** A market fee is one. Are protection rackets or regional monopolies in scope?
+17. **Can one operator run several markets?** Cartels and market mergers add depth and risk.
+18. **Is there a hard rule against real-world payment or trading?** No real-money tie. State it.
+19. **Market security.** The market software must be game code, with host-authoritative money and listings, so a Store app cannot forge anything. See AGENTS.md on untrusted apps.
