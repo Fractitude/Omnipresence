@@ -17,7 +17,7 @@
 				     @onmouseout=@( () => { if ( Hovered == slot ) Hovered = -1; } )>
 					@if ( item is not null )
 					{
-						<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath/>
+						<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath Icon=@ItemCatalog.IconFor( item ) Color=@ItemCatalog.ColorFor( item )/>
 						@if ( item.IsBatch )
 						{
 							<div class="count">x@item.Count</div>

@@ -10,7 +10,7 @@
 	}
 	else
 	{
-		<i>inventory_2</i>
+		<i style="@( string.IsNullOrEmpty( Color ) ? "" : $"color: {Color}" )">@( string.IsNullOrEmpty( Icon ) ? "inventory_2" : Icon )</i>
 	}
 </root>
 
@@ -26,5 +26,15 @@
 	/// </summary>
 	public string ModelPath { get; set; }
 
-	protected override int BuildHash() => System.HashCode.Combine( PrefabPath, ModelPath );
+	/// <summary>
+	/// The glyph drawn when there is no prefab or model. Empty draws a plain box.
+	/// </summary>
+	public string Icon { get; set; }
+
+	/// <summary>
+	/// The glyph's colour, like "#8be28b", or empty for the default.
+	/// </summary>
+	public string Color { get; set; }
+
+	protected override int BuildHash() => System.HashCode.Combine( PrefabPath, ModelPath, Icon, Color );
 }

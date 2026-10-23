@@ -6,7 +6,16 @@ namespace Sandbox;
 /// <param name="Id">The saved id. Never rename one.</param>
 /// <param name="BasePrice">What a buyer pays for one at quality 50, in crypto. Zero if it isn't sold.</param>
 /// <param name="CanDrop">False for items that must never leave the inventory except through their own rules.</param>
-public sealed record ItemDef( string Id, string Name, string Description, long BasePrice, bool CanDrop = true );
+/// <param name="Icon">The icon glyph drawn in the inventory for an item with no model.</param>
+/// <param name="Color">The icon's colour, like "#8be28b", or empty for the default.</param>
+public sealed record ItemDef(
+	string Id,
+	string Name,
+	string Description,
+	long BasePrice,
+	bool CanDrop = true,
+	string Icon = "inventory_2",
+	string Color = "" );
 
 /// <summary>
 /// The crime items: batches with a kind, a count and a quality (see <see cref="ItemData"/>). The first build has the
@@ -24,15 +33,28 @@ public static class ItemCatalog
 
 	static ItemDef[] items =
 	[
-		new( StaticCulture, "Static culture", "A living culture, ready to plant in a grow tray.", 0 ),
-		new( StaticRaw, "Static (raw)", "Freshly harvested. Press it into tabs at a press bench.", 0 ),
-		new( StaticTab, "Static tabs", "Pressed tabs of Static.", 10 ),
-		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox. It can't be dropped.", 0, CanDrop: false ),
+		new( StaticCulture, "Static culture", "A living culture, ready to plant in a grow tray.", 0,
+			Icon: "biotech", Color: "#8be28b" ),
+		new( StaticRaw, "Static (raw)", "Freshly harvested. Press it into tabs at a press bench.", 0,
+			Icon: "grain", Color: "#5fcfb4" ),
+		new( StaticTab, "Static tabs", "Pressed tabs of Static.", 10, Icon: "medication", Color: "#7fd1ff" ),
+		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox. It can't be dropped.", 0,
+			CanDrop: false, Icon: "redeem", Color: "#c9a27a" ),
 	];
 
 	public static IReadOnlyList<ItemDef> Items => items;
 
 	public static ItemDef Find( string id ) => items.FirstOrDefault( x => x.Id == id );
+
+	/// <summary>
+	/// The icon glyph for an item with no model: its kind's icon, or the plain box for an ordinary item.
+	/// </summary>
+	public static string IconFor( ItemData item ) => Find( item?.Kind )?.Icon ?? "inventory_2";
+
+	/// <summary>
+	/// The icon colour for an item, or empty for the default.
+	/// </summary>
+	public static string ColorFor( ItemData item ) => Find( item?.Kind )?.Color ?? "";
 
 	/// <summary>
 	/// A batch of a kind, or null for a kind that doesn't exist or a count below one. Count and quality are clamped.

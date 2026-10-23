@@ -20,7 +20,7 @@
 		{
 			var position = Mouse.Position * Panel.ScaleFromScreen;
 			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px">
-				<ItemIcon PrefabPath=@dragged.PrefabPath ModelPath=@dragged.ModelPath/>
+				<ItemIcon PrefabPath=@dragged.PrefabPath ModelPath=@dragged.ModelPath Icon=@ItemCatalog.IconFor( dragged ) Color=@ItemCatalog.ColorFor( dragged )/>
 			</div>
 		}
 		else if ( InventoryGrid.HoveredItem is { } hovered )
