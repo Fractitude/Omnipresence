@@ -1,19 +1,24 @@
 namespace Sandbox;
 
 /// <summary>
-/// A grow tray. Plant a Static culture, wait for the game clock, harvest raw Static. What is in a tray belongs to the
-/// player who planted it (<see cref="PlayerCrime"/>, saved in their <see cref="CrimeRecord"/> by <see cref="TrayId"/>), so
-/// two players see their own tray in the same place. The tray has one option whose label follows the player's own state:
-/// "Plant", "Growing, 1:30 left", "Harvest". Put it with an <see cref="Interactable"/> (network mode Object) and a collider.
+/// A grow tray. Plant a drug (the player chooses which in the planting panel, <see cref="PlantingMenu"/>), wait for the
+/// game clock, harvest its raw. A tray holds one drug at a time. What is in a tray belongs to the player who planted it
+/// (<see cref="PlayerCrime"/>, saved in their <see cref="CrimeRecord"/> by <see cref="TrayId"/>), so two players see
+/// their own tray in the same place. The tray has two options, of which one shows at a time, following the player's
+/// own state: "Plant" while it is empty (it runs on the player's own client and only opens the panel; the panel's
+/// Plant button asks the host with <see cref="PlayerCrime.RequestPlant"/>), and "Growing Haze, 0:25 left" then "Harvest
+/// Haze" once planted (this one runs on the host). Put it with an <see cref="Interactable"/> (network mode Object) and
+/// a collider.
 /// <para>
-/// Above the tray floats a text with the local player's own tray: "Growing 62%  0:46", or "Ready to harvest". It is made
-/// in code on each machine while the game runs, is never networked or saved, and shows nothing while the tray is empty or
-/// the player is far from it.
+/// Above the tray floats a text with the local player's own tray: "Growing Haze 62%  0:46", or "Haze ready to
+/// harvest". It is made in code on each machine while the game runs, is never networked or saved, and shows nothing
+/// while the tray is empty or the player is far from it.
 /// </para>
 /// </summary>
 public sealed class GrowTray : Component, IInteractionHandler
 {
 	const string OptionId = "tray";
+	const string PlantId = "plant";
 
 	/// <summary>How close, in world units, a player must be to a tray for the host to plant in it.</summary>
 	public const float Reach = 300f;
@@ -34,55 +39,80 @@ public sealed class GrowTray : Component, IInteractionHandler
 	TextRenderer label;
 	PlayerCrime crime;
 	TimeUntil nextRefresh;
-	long shownKey = long.MinValue;
+	string shownKey = "";
 
 	/// <summary>
 	/// The tray's id in the save: its object's id, which is stable in the scene.
 	/// </summary>
 	public string TrayId => GameObject.Id.ToString();
 
-	protected override void OnStart() =>
-		InteractionSetup.EnsureOption( this, OptionId, "Grow tray", "grass", "Grow Static in a tray." );
+	protected override void OnStart()
+	{
+		InteractionSetup.EnsureOption( this, OptionId, "Grow tray", "grass", "Harvest what grows in the tray." );
+		var plant = InteractionSetup.EnsureOption( this, PlantId, "Plant", "grass", "Choose what to plant." );
+
+		// The press only opens the panel on the player's own screen.
+		if ( plant is not null )
+			plant.RunOn = InteractionSide.Local;
+	}
 
 	InteractionInfo? IInteractionHandler.Describe( InteractionEvent e )
 	{
-		if ( e.Option?.Id != OptionId )
+		if ( e.Option?.Id is not (OptionId or PlantId) )
 			return null;
 
 		var crime = (e.Interactor?.Components.Get<PlayerCrime>()) ?? PlayerCrime.Local;
 		var inventory = e.Interactor?.Components.Get<PlayerInventory>() ?? PlayerInventory.Local;
 
 		if ( crime is null )
-			return new( "Grow tray", "grass", "", false );
+			return new( e.Option.Id == OptionId ? "" : "Grow tray", "grass", "", false );
 
-		var (planted, readyAt, _) = crime.TrayState( TrayId );
+		var (planted, readyAt, kind) = crime.TrayState( TrayId );
 
-		if ( !planted )
+		// One row at a time: Plant while the tray is empty, the growing and harvest row once it is planted. An empty
+		// label hides a row.
+		if ( e.Option.Id == PlantId )
 		{
+			if ( planted )
+				return new( "" );
+
 			var has = ProductCatalog.Products.Any( x => inventory?.CountOf( x.Seed.Id ) > 0 );
 
-			return new( "Plant", "grass", has ? "Uses one seed." : "You need a seed.", has );
+			return has
+				? new( "Plant", "grass", "Choose what to plant." )
+				: new( "Plant", "grass", "You have no seeds. Buy some in Hush.", false );
 		}
 
+		if ( !planted )
+			return new( "" );
+
+		var product = ProductCatalog.OfTray( kind );
 		var left = readyAt - WorldClock.Now;
 
 		return left > 0
-			? new( $"Growing, {InteractionSetup.Countdown( left )} left", "hourglass_top", "", false )
-			: new( "Harvest", "agriculture", "Gives raw Static." );
+			? new( $"Growing {product.Name}, {InteractionSetup.Countdown( left )} left", "hourglass_top", "", false )
+			: new( $"Harvest {product.Name}", "agriculture", $"Gives {product.HarvestRaw} {product.Raw.Name}." );
 	}
 
 	void IInteractionHandler.OnInteract( InteractionEvent e )
 	{
+		// Planting only opens the panel, on the player's own screen. The panel's button asks the host.
+		if ( e.Option?.Id == PlantId )
+		{
+			if ( !Application.IsHeadless )
+				PlantingMenu.Open( this );
+
+			return;
+		}
+
 		if ( e.Option?.Id != OptionId || !Networking.IsHost )
 			return;
 
 		if ( e.Interactor?.Components.Get<PlayerCrime>() is not { } crime )
 			return;
 
-		var planted = crime.TrayState( TrayId ).Planted;
-		var inventory = e.Interactor.Components.Get<PlayerInventory>();
-		var seeded = ProductCatalog.Products.FirstOrDefault( x => inventory?.CountOf( x.Seed.Id ) > 0 );
-		crime.Tell( planted ? crime.Harvest( TrayId ) : crime.Plant( TrayId, seeded?.Id ) );
+		if ( crime.TrayState( TrayId ).Planted )
+			crime.Tell( crime.Harvest( TrayId ) );
 	}
 
 	protected override void OnUpdate()
@@ -99,7 +129,7 @@ public sealed class GrowTray : Component, IInteractionHandler
 		if ( !near )
 		{
 			label.Enabled = false;
-			shownKey = long.MinValue;
+			shownKey = "";
 			return;
 		}
 
@@ -153,27 +183,29 @@ public sealed class GrowTray : Component, IInteractionHandler
 		if ( !planted )
 		{
 			label.Enabled = false;
-			shownKey = long.MinValue;
+			shownKey = "";
 			return;
 		}
 
 		var left = System.Math.Max( readyAt - WorldClock.Now, 0 );
+		var key = $"{kind}/{left}";
 
-		if ( label.Enabled && left == shownKey )
+		if ( label.Enabled && key == shownKey )
 			return;
 
-		shownKey = left;
+		shownKey = key;
+
+		var product = ProductCatalog.OfTray( kind );
 
 		if ( left > 0 )
 		{
-			var grow = ProductCatalog.OfTray( kind ).GrowSeconds;
-			var percent = System.Math.Clamp( (grow - left) * 100 / grow, 0, 99 );
-			label.Text = $"Growing {percent}%  {InteractionSetup.Countdown( left )}";
+			var percent = System.Math.Clamp( (product.GrowSeconds - left) * 100 / product.GrowSeconds, 0, 99 );
+			label.Text = $"Growing {product.Name} {percent}%  {InteractionSetup.Countdown( left )}";
 			label.Color = new Color( 0.85f, 0.8f, 0.55f, 0.75f );
 		}
 		else
 		{
-			label.Text = "Ready to harvest";
+			label.Text = $"{product.Name} ready to harvest";
 			label.Color = new Color( 0.55f, 1f, 0.6f, 1f );
 		}
 

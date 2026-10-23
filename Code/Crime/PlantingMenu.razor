@@ -1,0 +1,129 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="@( IsOpen ? "open" : "" )">
+	@if ( IsOpen && PlayerCrime.Local is { } crime )
+	{
+		var inventory = PlayerInventory.Local;
+
+		<div class="window">
+			<div class="header">
+				<div class="title">Grow tray</div>
+				<div class="close" @onclick=@Close>Close</div>
+			</div>
+			<div class="heading">Choose what to plant. A tray grows one thing at a time.</div>
+			@foreach ( var product in ProductCatalog.Products )
+			{
+				var id = product.Id;
+				var seeds = inventory?.CountOf( product.Seed.Id ) ?? 0;
+				var can = seeds > 0;
+				var grows = $"Grows in {InteractionSetup.Countdown( product.GrowSeconds )}, "
+				            + $"gives {product.HarvestRaw} {product.Raw.Name}";
+
+				<div class="product @( can ? "" : "unavailable" )">
+					<div class="icon">
+						<ItemIcon Icon=@product.Seed.Icon Color=@product.Seed.Color/>
+					</div>
+					<div class="info">
+						<div class="name">@product.Name</div>
+						<div class="detail">@( $"{product.Seed.Name}: {seeds} in your bag" )</div>
+						<div class="detail">@grows</div>
+						@if ( !can )
+						{
+							<div class="reason">@( $"You have no {product.Seed.Name}. Buy one in Hush." )</div>
+						}
+					</div>
+					<div class="button @( can ? "" : "disabled" )" @onclick=@( () => Plant( id ) )>
+						Plant
+					</div>
+				</div>
+			}
+			@if ( crime.ToldCount > toldAtOpen )
+			{
+				<div class="notice">@crime.LastTold</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the panel is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static GrowTray target;
+	static int toldAtOpen;
+
+	/// <summary>
+	/// Open the panel, from an empty grow tray the player used. Does nothing with another menu open.
+	/// </summary>
+	public static void Open( GrowTray tray )
+	{
+		if ( IsOpen || !tray.IsValid() || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen
+		     || NaviInputCapture.Current is not null )
+			return;
+
+		target = tray;
+		toldAtOpen = crime.ToldCount;
+		IsOpen = true;
+		GameMenus.SetOpen( "planting", true );
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "planting", false );
+		target = null;
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Ask the host to plant. Only the tray's id and the drug's id go; the host checks the reach, tray and seed.
+	/// </summary>
+	static void Plant( string productId )
+	{
+		if ( !target.IsValid() || PlayerCrime.Local is not { } crime )
+			return;
+
+		var product = ProductCatalog.Find( productId );
+
+		if ( product is null || (PlayerInventory.Local?.CountOf( product.Seed.Id ) ?? 0) < 1 )
+			return;
+
+		crime.RequestPlant( target.TrayId, productId );
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		var crime = PlayerCrime.Local;
+
+		// Leave if the player walked away, the tray is taken, another menu took over, or Escape was pressed.
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || crime is null || !target.IsValid()
+		     || crime.TrayState( target.TrayId ).Planted
+		     || target.WorldPosition.Distance( Players.LocalController?.WorldPosition ?? default ) > GrowTray.Reach )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() => System.HashCode.Combine(
+		IsOpen, PlayerInventory.Local?.Version, PlayerCrime.Local?.Version, PlayerCrime.Local?.ToldCount );
+}
