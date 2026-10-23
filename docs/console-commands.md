@@ -6,7 +6,7 @@ Keep this list current: add a row here when you add a `[ConCmd]`.
 
 ## Progression
 
-Testing only. They ask the host, which refuses unless it is the editor (`PlayerProgress.DebugGrant`, `DebugSetTime`). Code: `Code/Progression/ProgressCommands.cs`.
+Testing only. They ask the host, which refuses unless it is the editor (`PlayerProgress.DebugGrant`, `DebugSetTime`, `PlayerWallet.DebugGrant`). Code: `Code/Progression/ProgressCommands.cs`.
 
 | Command | What it does |
 |---|---|
@@ -14,7 +14,8 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_hack_xp <amount>` | Give yourself hacking XP. |
 | `progress_give_money <amount>` | Give yourself dollars. |
 | `progress_give_credits <amount>` | Give yourself credits. |
-| `progress_show` | Log your level, XP, hacking level and XP, dollars and credits. |
+| `progress_give_crypto <amount>` | Give yourself crypto. |
+| `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
 
 ## Health
 

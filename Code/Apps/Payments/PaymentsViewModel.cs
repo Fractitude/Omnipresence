@@ -146,9 +146,9 @@ public sealed class PaymentsViewModel
 			notice = "Enter an amount.";
 		else if ( value > MaxPayment )
 			notice = $"At most ${MaxPayment:N0} at a time.";
-		else if ( value > from.Money )
+		else if ( PlayerWallet.For( seat ) is not { } wallet || value > wallet.Cash )
 			notice = "Not enough money.";
-		else if ( PlayerProgress.For( to ) is not { Loaded: true } target || !from.TryPay( target, value ) )
+		else if ( PlayerWallet.For( to ) is not { } target || !wallet.TryPayCash( target, value ) )
 			notice = "That payment can't be made.";
 		else
 		{
@@ -165,7 +165,7 @@ public sealed class PaymentsViewModel
 			seat?.Id,
 			GameAppNetwork.IsOnline( getComputer() ),
 			getComputer()?.HasNetworkCard,
-			progress?.Version,
+			(progress?.Version, PlayerWallet.For( seat )?.Version),
 			screen,
 			targetId,
 			notice,
@@ -212,7 +212,7 @@ public sealed class PaymentsViewModel
 		{
 			HasAccount = true,
 			Owner = seat.DisplayName,
-			Balance = $"${progress.Money:N0}",
+			Balance = $"${PlayerWallet.For( seat )?.Cash:N0}",
 			Payees = rows,
 			History = progress.Payments.Reverse().Select( ToRow ).ToList(),
 			Target = target,

@@ -6,9 +6,10 @@ namespace Sandbox;
 /// </summary>
 public sealed class ProgressRecord
 {
-	public const int CurrentVersion = 2;
+	public const int CurrentVersion = 3;
 	public const long MaxMoney = 1_000_000_000_000;
 	public const long MaxCredits = 1_000_000_000_000;
+	public const long MaxCrypto = 1_000_000_000_000;
 
 	/// <summary>
 	/// The shape of this record, for migrating old saves.
@@ -41,6 +42,12 @@ public sealed class ProgressRecord
 	/// What the player spends in the Wired. Not convertible to <see cref="Money"/>.
 	/// </summary>
 	public long Credits { get; set; }
+
+	/// <summary>
+	/// What the player spends on the dark web. Changes to <see cref="Money"/> and back only through the Exchange. Added in
+	/// version 3: older saves have none.
+	/// </summary>
+	public long Crypto { get; set; }
 
 	/// <summary>
 	/// Ids of the dead servers the player has breached. The reward of a server is paid once.
@@ -91,6 +98,7 @@ public sealed class ProgressRecord
 		HackXp = System.Math.Clamp( HackXp, 0, HackingCurve.MaxXp );
 		Money = System.Math.Clamp( Money, 0, MaxMoney );
 		Credits = System.Math.Clamp( Credits, 0, MaxCredits );
+		Crypto = System.Math.Clamp( Crypto, 0, MaxCrypto );
 		Revision = System.Math.Max( Revision, 0 );
 
 		Cleared = CleanIds( Cleared );

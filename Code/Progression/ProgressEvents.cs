@@ -8,7 +8,7 @@ public enum ProgressChange
 {
 	None = 0,
 
-	/// <summary>XP, hacking XP, dollars or credits.</summary>
+	/// <summary>XP or hacking XP.</summary>
 	Stats = 1 << 0,
 
 	/// <summary>A payment was added to the history.</summary>
@@ -23,7 +23,10 @@ public enum ProgressChange
 	/// <summary>The hardware inventory, the installed hardware or the shipments.</summary>
 	Hardware = 1 << 4,
 
-	All = Stats | Payments | Intrusions | Operations | Hardware,
+	/// <summary>Dollars, credits or crypto, in the player's <see cref="PlayerWallet"/>.</summary>
+	Wallet = 1 << 5,
+
+	All = Stats | Payments | Intrusions | Operations | Hardware | Wallet,
 }
 
 public static partial class Global

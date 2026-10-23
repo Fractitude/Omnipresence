@@ -7,7 +7,8 @@ namespace Sandbox;
 public sealed record OperationPayout( long HackXp, long Credits, long GhostBonus, bool First );
 
 /// <summary>
-/// A player's level, XP, hacking level, dollars and credits, on the player object. The host's <see cref="PlayerProgression"/> holds the real
+/// A player's level, XP, hacking level and everything else saved with them, on the player object. Money is in
+/// the <see cref="PlayerWallet"/>. The host's <see cref="PlayerProgression"/> holds the real
 /// record; this shows it to everyone through <c>[Sync]</c> and is the only way to change it. Clients can't: every
 /// method that changes a value does nothing off the host.
 /// </summary>
@@ -19,16 +20,6 @@ public sealed class PlayerProgress : Component
 	[Sync( SyncFlags.FromHost )] public bool Loaded { get; private set; }
 
 	[Sync( SyncFlags.FromHost )] public long Xp { get; private set; }
-
-	/// <summary>
-	/// Dollars, for the real world.
-	/// </summary>
-	[Sync( SyncFlags.FromHost )] public long Money { get; private set; }
-
-	/// <summary>
-	/// Credits, for the Wired.
-	/// </summary>
-	[Sync( SyncFlags.FromHost )] public long Credits { get; private set; }
 
 	/// <summary>
 	/// The host's <see cref="WorldClock.Now"/>, for clients to follow.
@@ -140,7 +131,13 @@ public sealed class PlayerProgress : Component
 
 			started = true;
 			steamId = owner.SteamId;
+			EnsureWallet();
 			Load();
+		}
+		else if ( Wallet is null )
+		{
+			// A player who was already in the game when this code was added.
+			EnsureWallet();
 		}
 
 		if ( Loaded && record is not null && sinceDeliveryCheck > 1 )
@@ -245,80 +242,6 @@ public sealed class PlayerProgress : Component
 	}
 
 	/// <summary>
-	/// Give dollars. Host only.
-	/// </summary>
-	public void AddMoney( long amount )
-	{
-		if ( !CanChange || amount <= 0 )
-			return;
-
-		record.Money = System.Math.Min( record.Money + amount, ProgressRecord.MaxMoney );
-		Changed( ProgressChange.Stats );
-	}
-
-	/// <summary>
-	/// Take dollars if there are enough. Host only. Returns whether they were taken.
-	/// </summary>
-	public bool TrySpendMoney( long amount )
-	{
-		if ( !CanChange || amount <= 0 || record.Money < amount )
-			return false;
-
-		record.Money -= amount;
-		Changed( ProgressChange.Stats );
-		return true;
-	}
-
-	/// <summary>
-	/// Give credits. Host only.
-	/// </summary>
-	public void AddCredits( long amount )
-	{
-		if ( !CanChange || amount <= 0 )
-			return;
-
-		record.Credits = System.Math.Min( record.Credits + amount, ProgressRecord.MaxCredits );
-		Changed( ProgressChange.Stats );
-	}
-
-	/// <summary>
-	/// Take credits if there are enough. Host only. Returns whether they were taken.
-	/// </summary>
-	public bool TrySpendCredits( long amount )
-	{
-		if ( !CanChange || amount <= 0 || record.Credits < amount )
-			return false;
-
-		record.Credits -= amount;
-		Changed( ProgressChange.Stats );
-		return true;
-	}
-
-	/// <summary>
-	/// Move money from this player to another, and write it in both histories. Host only. Returns whether it was moved:
-	/// not to oneself, not more than there is, not past the most the other can hold.
-	/// </summary>
-	public bool TryPay( PlayerProgress to, long amount )
-	{
-		if ( !CanChange || to is null || to == this || !to.CanChange || amount <= 0 )
-			return false;
-
-		if ( record.Money < amount || to.record.Money + amount > ProgressRecord.MaxMoney )
-			return false;
-
-		var at = WorldClock.Now;
-		var from = Owner;
-		var target = to.Owner;
-
-		record.Money -= amount;
-		to.record.Money += amount;
-
-		AddPayment( new() { At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount } );
-		to.AddPayment( new() { At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount } );
-		return true;
-	}
-
-	/// <summary>
 	/// Pay out the reward of a dead server the first time it is breached: hacking XP, credits and a blueprint. Host only.
 	/// Returns whether it was paid, which is false when the player already breached that server.
 	/// </summary>
@@ -335,9 +258,7 @@ public sealed class PlayerProgress : Component
 		if ( hackXp > 0 )
 			record.HackXp = System.Math.Min( record.HackXp + hackXp, HackingCurve.MaxXp );
 
-		if ( credits > 0 )
-			record.Credits = System.Math.Min( record.Credits + credits, ProgressRecord.MaxCredits );
-
+		Wallet?.AddCredits( credits );
 		Changed( ProgressChange.Intrusions );
 		return true;
 	}
@@ -370,25 +291,24 @@ public sealed class PlayerProgress : Component
 		var paidBonus = ghosted ? ghostBonus : 0;
 
 		record.HackXp = System.Math.Min( record.HackXp + System.Math.Max( hackXp, 0 ), HackingCurve.MaxXp );
-		record.Credits = System.Math.Min( record.Credits + paidCredits + paidBonus, ProgressRecord.MaxCredits );
+		Wallet?.AddCredits( paidCredits + paidBonus );
 
 		Changed( ProgressChange.Operations );
 		return new OperationPayout( hackXp, paidCredits, paidBonus, first );
 	}
 
 	/// <summary>
-	/// Buy a piece of hardware: take the dollars and put a package on its way. Host only. Returns whether it was
-	/// ordered: not without the money, not with too many packages already on the way.
+	/// Buy a piece of hardware: take the dollars (from the <see cref="PlayerWallet"/>) and put a package on its way.
+	/// Host only. Returns whether it was ordered: not without the money, not with too many packages already on the way.
 	/// </summary>
 	public bool TryOrder( string itemId, long price, long deliverySeconds )
 	{
-		if ( !CanChange || string.IsNullOrWhiteSpace( itemId ) || price <= 0 || record.Money < price )
+		if ( !CanChange || string.IsNullOrWhiteSpace( itemId ) || price <= 0 || Wallet is not { } wallet )
 			return false;
 
-		if ( record.Shipments.Count >= ShipmentRecord.MaxKept )
+		if ( record.Shipments.Count >= ShipmentRecord.MaxKept || !wallet.TrySpendCash( price ) )
 			return false;
 
-		record.Money -= price;
 		AddShipment( itemId, deliverySeconds, "order" );
 		return true;
 	}
@@ -468,7 +388,7 @@ public sealed class PlayerProgress : Component
 		Changed( ProgressChange.Hardware );
 	}
 
-	void AddPayment( PaymentRecord payment )
+	internal void AddPayment( PaymentRecord payment )
 	{
 		record.Payments.Add( payment );
 
@@ -480,14 +400,16 @@ public sealed class PlayerProgress : Component
 
 	/// <summary>
 	/// The record changed: show it, save it soon, and tell the scene. <paramref name="change"/> names what changed
-	/// besides the stats, which are compared here.
+	/// besides the stats and the wallet, which are compared here.
 	/// </summary>
 	void Changed( ProgressChange change )
 	{
-		if ( Xp != record.Xp || HackXp != record.HackXp || Money != record.Money || Credits != record.Credits )
+		if ( Xp != record.Xp || HackXp != record.HackXp )
 			change |= ProgressChange.Stats;
 
-		ShowStats();
+		if ( ShowStats() )
+			change |= ProgressChange.Wallet;
+
 		Version++;
 		dirty = true;
 		sinceChange = 0;
@@ -495,28 +417,64 @@ public sealed class PlayerProgress : Component
 		Global.IProgressEvents.Post( x => x.OnProgressChanged( this, change ) );
 	}
 
-	void ShowStats()
+	/// <summary>
+	/// Something else on the player (the <see cref="PlayerWallet"/>, the crime state) changed the record: show it, save it
+	/// soon and tell the scene. Host only.
+	/// </summary>
+	internal void NotifyChanged( ProgressChange change )
 	{
-		Xp = record.Xp;
-		HackXp = record.HackXp;
-		Money = record.Money;
-		Credits = record.Credits;
+		if ( CanChange )
+			Changed( change );
 	}
 
 	/// <summary>
-	/// Testing only: the player asks the host for XP, hacking XP, dollars and credits. The host refuses unless it is the
-	/// editor, and unless the caller is this player.
+	/// The record, for the parts of the player that keep their state in it. Host only: null anywhere else, and before it
+	/// has loaded. Whoever changes it checks <see cref="Loaded"/> first.
+	/// </summary>
+	internal ProgressRecord Record => Networking.IsHost ? record : null;
+
+	/// <summary>
+	/// The wallet that shows and changes the balances in the record. Made on the host if the player doesn't have one.
+	/// </summary>
+	internal PlayerWallet Wallet => field ??= Components.Get<PlayerWallet>();
+
+	/// <summary>
+	/// Make sure the player has a <see cref="PlayerWallet"/>, so an existing player prefab needs no edit. A component
+	/// added at run time reaches the clients only after a network refresh. Host only.
+	/// </summary>
+	void EnsureWallet()
+	{
+		if ( Wallet is not null )
+			return;
+
+		var wallet = Components.Create<PlayerWallet>();
+
+		if ( GameObject.Network.Active )
+			GameObject.Network.Refresh( wallet );
+	}
+
+	/// <summary>
+	/// Show the record's stats and balances. Returns whether a balance changed.
+	/// </summary>
+	bool ShowStats()
+	{
+		Xp = record.Xp;
+		HackXp = record.HackXp;
+		return Wallet?.Refresh() == true;
+	}
+
+	/// <summary>
+	/// Testing only: the player asks the host for XP and hacking XP. The host refuses unless it is the editor, and
+	/// unless the caller is this player. Money is <see cref="PlayerWallet.DebugGrant"/>.
 	/// </summary>
 	[Rpc.Host]
-	public void DebugGrant( long xp, long hackXp, long money, long credits )
+	public void DebugGrant( long xp, long hackXp )
 	{
 		if ( !Application.IsEditor || Rpc.Caller != (Network.Owner ?? Connection.Local) )
 			return;
 
 		AddXp( xp );
 		AddHackXp( hackXp );
-		AddMoney( money );
-		AddCredits( credits );
 	}
 
 	/// <summary>

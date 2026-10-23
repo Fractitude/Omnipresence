@@ -14,8 +14,12 @@
 		<div class="bar hack">
 			<div class="fill" style="width: @( HackingCurve.Fraction( progress.HackXp ) * 100f )%"></div>
 		</div>
-		<div class="money">$@progress.Money.ToString( "N0" )</div>
-		<div class="credits">@progress.Credits.ToString( "N0" ) credits</div>
+		@if ( PlayerWallet.Local is { } wallet )
+		{
+			<div class="money">$@wallet.Cash.ToString( "N0" )</div>
+			<div class="credits">@wallet.Credits.ToString( "N0" ) credits</div>
+			<div class="crypto">@wallet.Crypto.ToString( "N0" ) crypto</div>
+		}
 	}
 </root>
 
@@ -27,7 +31,7 @@
 		var clock = (WorldClock.TimeOfDay, WorldClock.Day, NaviInputCapture.Current is not null);
 
 		return progress is { Loaded: true }
-			? System.HashCode.Combine( progress.Xp, progress.HackXp, progress.Money, progress.Credits, clock )
+			? System.HashCode.Combine( progress.Xp, progress.HackXp, PlayerWallet.Local?.Version, clock )
 			: System.HashCode.Combine( clock );
 	}
 }

@@ -230,7 +230,7 @@ public sealed class HardwareStoreViewModel
 
 		if ( item.Blueprint != "" && !progress.Blueprints.Contains( item.Blueprint ) )
 			notice = "You need its blueprint.";
-		else if ( progress.Money < price )
+		else if ( PlayerWallet.For( seat ) is not { } wallet || wallet.Cash < price )
 			notice = "Not enough money.";
 		else if ( progress.TryOrder( item.Id, price, HardwareCatalog.OrderDeliverySeconds ) )
 			notice = $"Ordered {item.Name}. It arrives in {Duration( HardwareCatalog.OrderDeliverySeconds )}.";
@@ -263,6 +263,7 @@ public sealed class HardwareStoreViewModel
 		HashCode.Combine(
 			seat?.Id,
 			progress?.Version,
+			PlayerWallet.For( seat )?.Version,
 			atStoreTerminal(),
 			screen,
 			notice,
@@ -302,7 +303,7 @@ public sealed class HardwareStoreViewModel
 		return state with
 		{
 			HasAccess = true,
-			Balance = $"${progress.Money:N0}",
+			Balance = $"${PlayerWallet.For( seat )?.Cash:N0}",
 			StaffOpen = staffOpen,
 			StaffRemaining = staffOpen ? Duration( StoreAccess.UnlockedFor( seat.SteamId ) ) : "",
 			Shop = HardwareCatalog.Items
@@ -333,7 +334,7 @@ public sealed class HardwareStoreViewModel
 		var blueprint = item.Blueprint == "" ? null : IntrusionCatalog.FindBlueprint( item.Blueprint );
 
 		var status = item.Blueprint != "" && !progress.Blueprints.Contains( item.Blueprint ) ? ShopStatus.NeedsBlueprint
-			: progress.Money >= price ? ShopStatus.Buy
+			: (PlayerWallet.For( seat )?.Cash ?? 0) >= price ? ShopStatus.Buy
 			: ShopStatus.TooExpensive;
 
 		return new ShopRow(

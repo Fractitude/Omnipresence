@@ -2,21 +2,24 @@ namespace Sandbox;
 
 /// <summary>
 /// Console commands for testing progression and the world clock. They only ask: the host decides (see
-/// <see cref="PlayerProgress.DebugGrant"/>) and refuses outside the editor.
+/// <see cref="PlayerProgress.DebugGrant"/>, <see cref="PlayerWallet.DebugGrant"/>) and refuse outside the editor.
 /// </summary>
 public static class ProgressCommands
 {
 	[ConCmd( "progress_give_xp" )]
-	public static void GiveXp( long amount ) => Grant( amount, 0, 0, 0 );
+	public static void GiveXp( long amount ) => Grant( amount, 0 );
 
 	[ConCmd( "progress_give_hack_xp" )]
-	public static void GiveHackXp( long amount ) => Grant( 0, amount, 0, 0 );
+	public static void GiveHackXp( long amount ) => Grant( 0, amount );
 
 	[ConCmd( "progress_give_money" )]
-	public static void GiveMoney( long amount ) => Grant( 0, 0, amount, 0 );
+	public static void GiveMoney( long amount ) => GrantWallet( amount, 0, 0 );
 
 	[ConCmd( "progress_give_credits" )]
-	public static void GiveCredits( long amount ) => Grant( 0, 0, 0, amount );
+	public static void GiveCredits( long amount ) => GrantWallet( 0, amount, 0 );
+
+	[ConCmd( "progress_give_crypto" )]
+	public static void GiveCrypto( long amount ) => GrantWallet( 0, 0, amount );
 
 	[ConCmd( "progress_show" )]
 	public static void Show()
@@ -27,8 +30,10 @@ public static class ProgressCommands
 			return;
 		}
 
+		var wallet = PlayerWallet.Local;
+
 		Log.Info( $"Level {progress.Level}, {progress.Xp} XP, hacking level {progress.HackLevel}, {progress.HackXp} hacking XP, "
-		          + $"${progress.Money}, {progress.Credits} credits" );
+		          + $"${wallet?.Cash}, {wallet?.Credits} credits, {wallet?.Crypto} crypto" );
 	}
 
 	[ConCmd( "world_time_show" )]
@@ -75,7 +80,18 @@ public static class ProgressCommands
 		progress.DebugSetTime( seconds, relative );
 	}
 
-	static void Grant( long xp, long hackXp, long money, long credits )
+	static void GrantWallet( long cash, long credits, long crypto )
+	{
+		if ( PlayerWallet.Local is not { } wallet )
+		{
+			Log.Info( "No wallet yet" );
+			return;
+		}
+
+		wallet.DebugGrant( cash, credits, crypto );
+	}
+
+	static void Grant( long xp, long hackXp )
 	{
 		if ( PlayerProgress.Local is not { Loaded: true } progress )
 		{
@@ -83,6 +99,6 @@ public static class ProgressCommands
 			return;
 		}
 
-		progress.DebugGrant( xp, hackXp, money, credits );
+		progress.DebugGrant( xp, hackXp );
 	}
 }
