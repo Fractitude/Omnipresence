@@ -18,7 +18,7 @@ escrow pays crypto (minus a fee by reputation) ──► Hush Exchange: crypto �
 | **Items** | `Code/Inventory/ItemData.cs`, `ItemCatalog.cs`, `PlayerInventory.cs` | A batch has `Kind`, `Count`, `Quality`, `OrderId`. Kinds: `static_culture`, `static_raw`, `static_tab`, `parcel`. Host helpers: `AddItem`, `CountOf`, `TryTake`, `TakeBatch`. A parcel cannot be dropped. |
 | **Crime state** | `Code/Crime/CrimeRecord.cs` | One section of `ProgressRecord.Crime`. Wipe it alone for a season. |
 | **Rules** | `Code/Crime/PlayerCrime.cs` | A component on the player (made by `PlayerProgress` like the wallet). Every action runs on the host. |
-| **Grow tray** | `Code/Crime/GrowTray.cs`, `Assets/crime/grow_tray.prefab` | One option; its label follows the looking player's own tray: Plant, Growing (countdown), Harvest. |
+| **Grow tray** | `Code/Crime/GrowTray.cs`, `Assets/crime/grow_tray.prefab` | One option; its label follows the looking player's own tray: Plant, Growing (countdown), Harvest. A world text above it (a local `TextRenderer` child made in code, never networked or saved) shows `Growing 62%  0:46` or `Ready to harvest` for the local player's own tray, only within 250 units. |
 | **Press bench** | `Code/Crime/PressBench.cs`, `Assets/crime/press_bench.prefab` | Presses all the raw Static carried into one batch of tabs. |
 | **Mailbox** | `Code/Objects/MailBox.cs` | Gets a "Send parcel" option in code. Claimed by the first player who sends from it. The flag goes up while a parcel waits. |
 | **Post** | `Code/Crime/PostalSystem.cs` | The mailman collects at every multiple of 5 game minutes; transit takes 3. |
