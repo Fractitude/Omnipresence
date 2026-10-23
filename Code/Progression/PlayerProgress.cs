@@ -98,12 +98,19 @@ public sealed class PlayerProgress : Component
 
 	const float SaveDelay = 2f;
 
+	/// <summary>
+	/// The longest a change waits to be saved, however often the record keeps changing.
+	/// </summary>
+	const float MaxSaveWait = 10f;
+
 	ProgressRecord record;
 	ulong steamId;
 	bool started;
 	bool dirty;
 	bool saving;
+	bool attached;
 	RealTimeSince sinceChange;
+	RealTimeSince sinceDirty;
 	RealTimeSince sinceDeliveryCheck;
 	RealTimeSince sinceClockSync;
 
@@ -140,13 +147,17 @@ public sealed class PlayerProgress : Component
 			EnsureParts();
 		}
 
+		// Also here and not only in Load, so it holds for an object that was already running when this code was loaded.
+		if ( Loaded && record is not null )
+			AttachRecord();
+
 		if ( Loaded && record is not null && sinceDeliveryCheck > 1 )
 		{
 			sinceDeliveryCheck = 0;
 			Deliver();
 		}
 
-		if ( dirty && sinceChange > SaveDelay )
+		if ( dirty && (sinceChange > SaveDelay || sinceDirty > MaxSaveWait) )
 			Save();
 	}
 
@@ -161,6 +172,7 @@ public sealed class PlayerProgress : Component
 		try
 		{
 			record = await PlayerProgression.LoadAsync( steamId );
+			AttachRecord();
 			ShowStats();
 			Loaded = true;
 			Version++;
@@ -207,12 +219,36 @@ public sealed class PlayerProgress : Component
 		try
 		{
 			await PlayerProgression.SaveAsync( steamId );
+			Detach();
 			PlayerProgression.Release( steamId );
 		}
 		catch ( System.Exception e )
 		{
+			// The record stays in memory, and unattached, so the offline processor can still carry on with it.
+			Detach();
 			Log.Warning( e, $"PlayerProgress: couldn't save progress for {steamId}: {e.Message}" );
 		}
+	}
+
+	/// <summary>
+	/// From the moment the record is here this object changes it, and the offline processor leaves it alone.
+	/// </summary>
+	void AttachRecord()
+	{
+		if ( attached )
+			return;
+
+		attached = true;
+		PlayerProgression.Attach( steamId );
+	}
+
+	void Detach()
+	{
+		if ( !attached )
+			return;
+
+		attached = false;
+		PlayerProgression.Detach( steamId );
 	}
 
 	bool CanChange => Networking.IsHost && Loaded && record is not null;
@@ -398,6 +434,10 @@ public sealed class PlayerProgress : Component
 			change |= ProgressChange.Wallet;
 
 		Version++;
+
+		if ( !dirty )
+			sinceDirty = 0;
+
 		dirty = true;
 		sinceChange = 0;
 

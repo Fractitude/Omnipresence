@@ -14,4 +14,17 @@ public interface IProgressStore
 	Task<ProgressRecord> LoadAsync( ulong steamId );
 
 	Task SaveAsync( ulong steamId, ProgressRecord record );
+
+	/// <summary>
+	/// The Steam id of every player that has a record. For finding the ones that have work waiting when the index of
+	/// those (<see cref="LoadPendingAsync"/>) is missing.
+	/// </summary>
+	Task<IReadOnlyList<ulong>> ListAsync();
+
+	/// <summary>
+	/// The ids that had work waiting on the clock when the index was last saved, or null when there is no index (yet).
+	/// </summary>
+	Task<IReadOnlyList<ulong>> LoadPendingAsync();
+
+	Task SavePendingAsync( IReadOnlyCollection<ulong> steamIds );
 }
