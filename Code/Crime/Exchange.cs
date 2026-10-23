@@ -30,7 +30,8 @@ public static class Exchange
 			return CrimeResult.Fail( "Not enough crypto." );
 
 		crime.Cashouts.Add( new() { Cash = cash, ReadyAt = WorldClock.Now + CrimeCatalog.CashoutDelaySeconds } );
-		return CrimeResult.Success( $"Cashing out {crypto:N0} crypto. ${cash:N0} arrives in {CrimeCatalog.CashoutDelaySeconds / 60f:0.#} min." );
+		var minutes = CrimeCatalog.CashoutDelaySeconds / 60f;
+		return CrimeResult.Success( $"Cashing out {crypto:N0} crypto. ${cash:N0} arrives in {minutes:0.#} min." );
 	}
 
 	/// <summary>

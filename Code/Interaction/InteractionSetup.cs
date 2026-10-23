@@ -12,9 +12,13 @@ public static class InteractionSetup
 	/// the same way on every machine (e.g. from <c>OnStart</c>): the host takes an option as its place in the list. Does
 	/// nothing in the editor, so the scene is not changed by it.
 	/// </summary>
-	public static InteractionOption EnsureOption( Component handler, string id, string label, string icon, string description = "" )
+	public static InteractionOption EnsureOption(
+		Component handler, string id, string label, string icon, string description = "" )
 	{
-		if ( !Game.IsPlaying || handler.Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants ) is not { } interactable )
+		if ( !Game.IsPlaying )
+			return null;
+
+		if ( handler.Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants ) is not { } interactable )
 			return null;
 
 		if ( interactable.Options.FirstOrDefault( x => x?.Id == id ) is { } existing )
@@ -29,7 +33,7 @@ public static class InteractionSetup
 			RunOn = InteractionSide.Host,
 		};
 
-		var untouched = interactable.Options.Count == 1 && interactable.Options[0] is { Id: "", Label: "Use", OnInteract: null };
+		var untouched = interactable.Options is [{ Id: "", Label: "Use", OnInteract: null }];
 
 		interactable.Options = untouched ? [option] : [.. interactable.Options, option];
 		return option;

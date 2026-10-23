@@ -270,7 +270,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		Inventory.TryTake( ItemCatalog.StaticRaw, raw, out var taken );
 
-		var quality = AverageQuality( taken ) + random.Next( -CrimeCatalog.PressQualitySpread, CrimeCatalog.PressQualitySpread + 1 );
+		var spread = CrimeCatalog.PressQualitySpread;
+		var quality = AverageQuality( taken ) + random.Next( -spread, spread + 1 );
 		var tabs = raw * CrimeCatalog.TabsPerRaw;
 
 		Inventory.AddItem( ItemCatalog.StaticTab, tabs, quality );
@@ -341,7 +342,12 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		box.OwnerId = steamId;
 		crime.MailboxId = box.BoxId;
 
-		var parcel = PostalSystem.Send( crime, order?.Id ?? "", order?.Kind ?? ItemCatalog.StaticTab, order?.Count ?? item.Count, item.Quality );
+		var parcel = PostalSystem.Send(
+			crime,
+			order?.Id ?? "",
+			order?.Kind ?? ItemCatalog.StaticTab,
+			order?.Count ?? item.Count,
+			item.Quality );
 		UpdateFlag();
 		Changed();
 
@@ -550,7 +556,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		{
 			if ( order.State == OrderState.Delivered && now >= order.ReleaseAt )
 				changed |= Release( crime, order );
-			else if ( order.State is OrderState.Accepted or OrderState.Packed or OrderState.Shipped && now > order.Deadline )
+			else if ( now > order.Deadline && order.State is OrderState.Accepted or OrderState.Packed or OrderState.Shipped )
 			{
 				Cancel( order, "The deadline passed. The buyer cancelled the order." );
 				changed = true;

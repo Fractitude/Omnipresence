@@ -35,7 +35,9 @@ public sealed class GrowTray : Component, IInteractionHandler
 		{
 			var has = inventory?.CountOf( ItemCatalog.StaticCulture ) > 0;
 
-			return new( "Plant a Static culture", "grass", has ? "Uses one culture." : "You need a Static culture.", has );
+			var hint = has ? "Uses one culture." : "You need a Static culture.";
+
+			return new( "Plant a Static culture", "grass", hint, has );
 		}
 
 		var left = readyAt - WorldClock.Now;
@@ -47,7 +49,10 @@ public sealed class GrowTray : Component, IInteractionHandler
 
 	void IInteractionHandler.OnInteract( InteractionEvent e )
 	{
-		if ( e.Option?.Id != OptionId || !Networking.IsHost || e.Interactor?.Components.Get<PlayerCrime>() is not { } crime )
+		if ( e.Option?.Id != OptionId || !Networking.IsHost )
+			return;
+
+		if ( e.Interactor?.Components.Get<PlayerCrime>() is not { } crime )
 			return;
 
 		var planted = crime.TrayState( TrayId ).Planted;

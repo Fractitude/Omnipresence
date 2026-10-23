@@ -249,9 +249,9 @@ public sealed class HushViewModel
 
 			var detail = parcel.State switch
 			{
-				ParcelState.Waiting => $"In the mailbox. The mailman comes at {WorldClock.TimeOfDayOf( parcel.CollectAt )}",
-				ParcelState.InTransit => $"Collected. In transit, arrives in {InteractionSetup.Countdown( parcel.DeliverAt - now )}",
-				_ => $"Delivered at {WorldClock.TimeOfDayOf( parcel.DeliverAt )}",
+				ParcelState.Waiting => $"In the mailbox. The mailman comes at {Clock( parcel.CollectAt )}",
+				ParcelState.InTransit => $"Collected. In transit, arrives in {Left( parcel.DeliverAt, now )}",
+				_ => $"Delivered at {Clock( parcel.DeliverAt )}",
 			};
 
 			rows.Add( new( title, detail, parcel.State == ParcelState.Delivered ) );
@@ -259,6 +259,10 @@ public sealed class HushViewModel
 
 		return rows;
 	}
+
+	static string Clock( long seconds ) => WorldClock.TimeOfDayOf( seconds );
+
+	static string Left( long until, long now ) => InteractionSetup.Countdown( until - now );
 
 	static ReviewRow ToReviewRow( ReviewRecord review ) =>
 		new( review.Handle, review.Stars, review.Text, WorldClock.Format( review.At ) );
