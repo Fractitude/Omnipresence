@@ -49,7 +49,14 @@ public sealed class ProgressCache
 		if ( loading.TryGetValue( steamId, out var inFlight ) )
 			return inFlight;
 
-		return loading[steamId] = Fetch( steamId );
+		var load = Fetch( steamId );
+
+		// A store that answers at once is done before this line, and Fetch has already taken its entry out: adding it now
+		// would leave a finished load behind that hands the same record out again after Release, detached from the cache.
+		if ( !load.IsCompleted )
+			loading[steamId] = load;
+
+		return load;
 	}
 
 	async Task<ProgressRecord> Fetch( ulong steamId )
