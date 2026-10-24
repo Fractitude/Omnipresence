@@ -78,13 +78,10 @@ public sealed class CrimeRecord
 
 		Items ??= new();
 		Items.RemoveAll( x => x is null || ItemCatalog.Find( x.Kind ) is null || x.Count < 1 );
+
+		// A batch above its kind's stack size becomes several stacks, so nothing saved before the cap is lost.
 		Items = Items
-			.Select( x => ItemCatalog.Make( x.Kind, x.Count, x.Quality, Clean( x.OrderId ) ) )
-			.Select( ( made, i ) =>
-			{
-				made.Contents = CleanContents( Items[i].Contents );
-				return made;
-			} )
+			.SelectMany( x => StorageRules.CleanStacks( x ) )
 			.Take( 200 )
 			.ToList();
 

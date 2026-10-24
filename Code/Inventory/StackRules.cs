@@ -23,10 +23,11 @@ public enum StackMode
 /// no inventory, no box.
 /// The bag (<see cref="PlayerInventory.Stack"/>) and the storage boxes (<see cref="StorageRules.Stack"/>) both plan
 /// a move here, check it fully, and only then write the result, so the total is kept exactly and nothing is doubled.
-/// Only the batches of drugs and their raw materials stack (<see cref="ItemCatalog.IsCombinable"/>).
+/// Only the kinds whose <see cref="ItemDef.MaxStack"/> is above one stack (<see cref="ItemCatalog.IsCombinable"/>), and
+/// a stack never grows past its kind's maximum.
 /// <list type="bullet">
 /// <item>Combine: both stacks are the same kind. The dragged one is added to the one under it, up to
-/// <see cref="ItemCatalog.MaxCount"/>; what does not fit stays in the dragged slot. The quality is the average of the
+/// kind's maximum stack; what does not fit stays in the dragged slot. The quality is the average of the
 /// two weighted by how many each one adds, rounded to the nearest (halves up).</item>
 /// <item>Split: the dragged stack gives <c>Count / 2</c> (rounded down) to an empty slot, with the same kind and
 /// quality, and keeps the rest. A stack of one cannot be split.</item>
@@ -39,7 +40,7 @@ public static class StackRules
 	/// <summary>Whether a value is one a client may send: Combine, Split, or both.</summary>
 	public static bool IsMode( int mode ) => mode is >= 1 and <= 3;
 
-	/// <summary>Whether an item is a batch that can be combined and split.</summary>
+	/// <summary>Whether an item is a batch of a kind that stacks, so it can be combined and split.</summary>
 	public static bool IsStackable( ItemData item ) =>
 		item is { IsBatch: true } && ItemCatalog.IsCombinable( item.Kind );
 
@@ -79,7 +80,7 @@ public static class StackRules
 
 		if ( !IsStackable( from ) )
 		{
-			error = "Only drugs and their raw materials can be stacked.";
+			error = "That does not stack.";
 			return false;
 		}
 
@@ -116,11 +117,12 @@ public static class StackRules
 		}
 
 		var offered = split ? HalfOf( from.Count ) : from.Count;
-		var moved = System.Math.Min( offered, ItemCatalog.MaxCount - to.Count );
+		var cap = ItemCatalog.MaxStackOf( from.Kind );
+		var moved = System.Math.Min( offered, cap - to.Count );
 
 		if ( moved < 1 )
 		{
-			error = "That stack is full.";
+			error = $"That stack is full. A stack holds at most {cap}.";
 			return false;
 		}
 

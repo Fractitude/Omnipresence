@@ -80,7 +80,9 @@ public sealed class PlayerInventory : Component
 	public bool Add( IItem item ) => item is not null && Add( ItemData.From( item ) );
 
 	/// <summary>
-	/// Put an item in the first free slot. Returns false when there is none. Host only.
+	/// Put an item in the first free slot. Returns false when there is none. A batch above its kind's stack size takes
+	/// as many slots as it needs, all or nothing: <paramref name="data"/> itself becomes the first, full stack and the
+	/// rest are copies. Host only.
 	/// </summary>
 	public bool Add( ItemData data )
 	{
@@ -88,22 +90,44 @@ public sealed class PlayerInventory : Component
 			return false;
 
 		Resize();
-		var free = System.Array.FindIndex( slots, x => x is null );
+		var cap = data.IsBatch ? data.MaxStack : int.MaxValue;
+		var needed = data.IsBatch ? ItemCatalog.SlotsFor( data.Kind, data.Count ) : 1;
 
-		if ( free < 0 )
+		if ( needed < 1 || FreeSlots < needed )
 			return false;
 
-		slots[free] = data;
+		var left = data.Count;
+		data.Count = System.Math.Min( left, cap );
+		left -= data.Count;
+		slots[System.Array.FindIndex( slots, x => x is null )] = data;
+
+		while ( left > 0 )
+		{
+			var part = data.Clone();
+			part.Count = System.Math.Min( left, cap );
+			left -= part.Count;
+			slots[System.Array.FindIndex( slots, x => x is null )] = part;
+		}
+
 		Changed();
 		return true;
 	}
 
 	/// <summary>
-	/// Put a new batch of a catalog kind in the first free slot. Returns false when there is no room, no such kind or
-	/// nothing to add. Host only.
+	/// Put a new batch of a catalog kind in the free slots: as many full stacks (the kind's
+	/// <see cref="ItemDef.MaxStack"/>) as the count needs, then the remainder, all of the same quality. All or nothing:
+	/// false, and nothing added, when there is no room for all of it, no such kind or nothing to add. Host only.
 	/// </summary>
-	public bool AddItem( string kind, int count, int quality, string orderId = "" ) =>
-		ItemCatalog.Make( kind, count, quality, orderId ) is { } batch && Add( batch );
+	public bool AddItem( string kind, int count, int quality, string orderId = "" )
+	{
+		if ( ItemCatalog.Find( kind ) is null || count < 1 || ItemCatalog.SlotsFor( kind, count ) > FreeSlots )
+			return false;
+
+		// The catalogue's cap on a saved total is for records; a count asked for here is added in full.
+		var first = ItemCatalog.Make( kind, ItemCatalog.MaxStackOf( kind ), quality, orderId );
+		first.Count = count;
+		return Add( first );
+	}
 
 	/// <summary>
 	/// How many of a kind the player has in batches of at least this quality. Works on every machine.
@@ -180,7 +204,8 @@ public sealed class PlayerInventory : Component
 		if ( piece is null || !CheckAuthority( nameof( Return ) ) )
 			return false;
 
-		if ( At( slot ) is { } there && there.Kind == piece.Kind && there.Quality == piece.Quality )
+		if ( At( slot ) is { } there && there.Kind == piece.Kind && there.Quality == piece.Quality
+		     && there.Count + piece.Count <= there.MaxStack )
 		{
 			there.Count += piece.Count;
 			Changed();

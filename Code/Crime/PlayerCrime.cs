@@ -209,8 +209,26 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		try
 		{
+			// A stack above its kind's size (an old save) goes into as many slots as it takes, one stack at a time so
+			// that what fits is kept when the bag is too small for all of it.
 			foreach ( var item in crime.Items.ToList() )
-				Inventory.Add( item.Clone() );
+			{
+				var left = item.Count;
+
+				while ( left > 0 )
+				{
+					var piece = item.Clone();
+					piece.Count = System.Math.Min( left, item.MaxStack );
+
+					if ( !Inventory.Add( piece ) )
+						break;
+
+					left -= piece.Count;
+				}
+
+				if ( left > 0 )
+					Log.Warning( $"PlayerCrime: no room in the bag to restore {left} x {item.Kind}." );
+			}
 
 			if ( !crime.Started )
 			{
@@ -368,10 +386,11 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( WorldClock.Now < tray.ReadyAt )
 			return CrimeResult.Fail( "It isn't ready yet." );
 
-		if ( Inventory.FreeSlots < 2 )
-			return CrimeResult.Fail( "Your inventory is full." );
-
 		var product = ProductCatalog.OfTray( tray.Kind );
+
+		if ( Inventory.FreeSlots < ItemCatalog.SlotsFor( product.Raw.Id, product.HarvestRaw )
+		     + ItemCatalog.SlotsFor( product.Seed.Id, product.HarvestSeeds ) )
+			return CrimeResult.Fail( "Your inventory is full." );
 
 		Inventory.AddItem( product.Raw.Id, product.HarvestRaw, tray.Quality );
 		Inventory.AddItem( product.Seed.Id, product.HarvestSeeds, 50 );
@@ -428,8 +447,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		var used = made * product.RawPerProduct;
 
-		// The product needs a slot, unless the raw is used up and frees its own.
-		if ( used != batch.Count && Inventory.FreeSlots < 1 )
+		// The product needs its slots, one more of them free if the raw is used up and frees its own.
+		if ( Inventory.FreeSlots + (used == batch.Count ? 1 : 0) < ItemCatalog.SlotsFor( product.Product.Id, made ) )
 			return CrimeResult.Fail( "Your inventory is full." );
 
 		if ( Inventory.TakeFrom( slot, used ) is not { } taken )
@@ -878,8 +897,11 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	[Rpc.Host]
 	public void DebugGive( string kind, int count, int quality )
 	{
-		if ( IsDebugCaller() && Ready )
-			Inventory.AddItem( kind, count, quality );
+		if ( !IsDebugCaller() || !Ready )
+			return;
+
+		if ( !Inventory.AddItem( kind, count, quality ) )
+			Tell( CrimeResult.Fail( "Not enough room in the bag for all of it." ) );
 	}
 
 	/// <summary>

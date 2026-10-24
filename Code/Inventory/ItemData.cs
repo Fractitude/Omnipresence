@@ -53,6 +53,12 @@ public sealed class ItemData
 	[System.Text.Json.Serialization.JsonIgnore]
 	public bool IsBatch => !string.IsNullOrEmpty( Kind );
 
+	/// <summary>
+	/// The most one stack of this item holds: its kind's <see cref="ItemDef.MaxStack"/>, and 1 for an ordinary item.
+	/// </summary>
+	[System.Text.Json.Serialization.JsonIgnore]
+	public int MaxStack => ItemCatalog.MaxStackOf( Kind );
+
 	public ItemData Clone() => new()
 	{
 		Name = Name,

@@ -362,11 +362,33 @@ public static class StorageRules
 		foreach ( var box in unique )
 		{
 			var clean = new StorageBoxRecord { Id = box.Id };
+			var extra = new List<ItemData>();
 
 			foreach ( var entry in (box.Slots ?? []).Where( x => x is not null && x.Slot is >= 0 and < MaxSlots ) )
 			{
-				if ( clean.Slots.All( x => x.Slot != entry.Slot ) && CleanItem( entry.Item ) is { } item )
-					clean.Slots.Add( new StorageSlotRecord { Slot = entry.Slot, Item = item } );
+				if ( clean.Slots.Any( x => x.Slot == entry.Slot ) )
+					continue;
+
+				var stacks = CleanStacks( entry.Item );
+
+				if ( stacks.Count == 0 )
+					continue;
+
+				clean.Slots.Add( new StorageSlotRecord { Slot = entry.Slot, Item = stacks[0] } );
+				extra.AddRange( stacks.Skip( 1 ) );
+			}
+
+			// The rest of a stack above its kind's size goes into free slots of the same box, beyond its visible size
+			// if need be (they stay reachable). Only a box with no slot left at all (96) loses it, and says so.
+			foreach ( var item in extra )
+			{
+				var free = Enumerable.Range( 0, MaxSlots ).FirstOrDefault(
+					i => clean.Slots.All( x => x.Slot != i ), -1 );
+
+				if ( free < 0 )
+					Log.Warning( $"StorageRules: no free slot in box {box.Id} for {item.Count} x {item.Kind}." );
+				else
+					clean.Slots.Add( new StorageSlotRecord { Slot = free, Item = item } );
 			}
 
 			clean.Slots.Sort( ( a, b ) => a.Slot.CompareTo( b.Slot ) );
@@ -382,9 +404,30 @@ public static class StorageRules
 	}
 
 	/// <summary>
-	/// An item from a file, made safe: a batch of a known kind is rebuilt from the catalogue (count and quality
-	/// clamped, a parcel's contents capped); an ordinary item keeps its text, cut short, and a count of at least one.
-	/// An unknown kind, or nothing, gives null.
+	/// An item from a file, made safe, as the stacks it becomes: a batch of a known kind is rebuilt from the catalogue
+	/// (quality clamped, a parcel's contents capped) as full stacks of its kind's size and a remainder, so a stack
+	/// saved above the size loses nothing (the total is cut to <see cref="ItemCatalog.MaxCount"/>); an ordinary item
+	/// keeps its text, cut short, and a count of at least one. An unknown kind, or nothing, gives none.
+	/// </summary>
+	public static List<ItemData> CleanStacks( ItemData item )
+	{
+		if ( item is null )
+			return [];
+
+		if ( string.IsNullOrEmpty( item.Kind ) )
+			return CleanItem( item ) is { } plain ? [plain] : [];
+
+		var order = Cut( item.OrderId, CrimeRecord.MaxIdLength );
+		var stacks = ItemCatalog.MakeStacks( item.Kind, item.Count, item.Quality, order );
+
+		foreach ( var stack in stacks )
+			stack.Contents = stack.Kind == ItemCatalog.Parcel ? CrimeRecord.CleanContents( item.Contents ) : new();
+
+		return stacks;
+	}
+
+	/// <summary>
+	/// An item from a file, made safe, as one item: the first stack of <see cref="CleanStacks"/>, or null.
 	/// </summary>
 	public static ItemData CleanItem( ItemData item )
 	{
@@ -392,15 +435,7 @@ public static class StorageRules
 			return null;
 
 		if ( !string.IsNullOrEmpty( item.Kind ) )
-		{
-			var order = Cut( item.OrderId, CrimeRecord.MaxIdLength );
-
-			if ( ItemCatalog.Make( item.Kind, item.Count, item.Quality, order ) is not { } batch )
-				return null;
-
-			batch.Contents = batch.Kind == ItemCatalog.Parcel ? CrimeRecord.CleanContents( item.Contents ) : new();
-			return batch;
-		}
+			return CleanStacks( item ).FirstOrDefault();
 
 		return new ItemData
 		{

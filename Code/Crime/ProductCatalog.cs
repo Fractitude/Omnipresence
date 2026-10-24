@@ -155,14 +155,21 @@ public static class ProductCatalog
 	];
 
 	/// <summary>
-	/// The entry with its three items put in its category (the drug's name), so the two can never disagree.
+	/// The entry with its three items put in its category (the drug's name), so the two can never disagree, and given
+	/// the stack size.
 	/// </summary>
 	static ProductDef With( ProductDef product ) => product with
 	{
-		Seed = product.Seed with { Category = product.Name },
-		Raw = product.Raw with { Category = product.Name },
-		Product = product.Product with { Category = product.Name },
+		Seed = product.Seed with { Category = product.Name, MaxStack = StackSize },
+		Raw = product.Raw with { Category = product.Name, MaxStack = StackSize },
+		Product = product.Product with { Category = product.Name, MaxStack = StackSize },
 	};
+
+	/// <summary>
+	/// How many of a drug's seed, raw and product one stack holds. Set on every drug's items by <see cref="With"/>, so
+	/// a new drug inherits it.
+	/// </summary>
+	public const int StackSize = 256;
 
 	/// <summary>Every drug, in the order of the table.</summary>
 	public static IReadOnlyList<ProductDef> Products => products;
