@@ -3,13 +3,14 @@ using System;
 namespace OmnipresenceApps;
 
 /// <summary>
-/// Everything Payments does: shows the account of the player in the seat, and walks them from choosing a player, to
-/// choosing an amount, to the money being sent. Runs in the host's copy only (the app is shared), because the money is
-/// the host's.
+/// Everything Payments does: shows the account of the player in the seat, walks them from choosing a player to the
+/// money being sent (in dollars or in crypto), and changes dollars and crypto at the Government Exchange. Runs in the
+/// host's copy only (the app is shared), because the money is the host's.
 /// </summary>
 /// <remarks>
 /// Who is paying is always the player in the seat, worked out from the computer. Nothing an action carries says so, and
-/// the recipient is looked up among the players in the game, so an action can't pay from or to anyone else's say-so.
+/// the recipient is looked up among the players in the game, so an action can't pay from or to anyone else's say-so. An
+/// amount is digits or "all"; the exchange's terms are read from <see cref="ExchangeCatalog"/>, never from the panel.
 /// </remarks>
 public sealed class PaymentsViewModel
 {
@@ -17,6 +18,13 @@ public sealed class PaymentsViewModel
 	public const string BackAction = "back";
 	public const string AmountAction = "amount";
 	public const string SendAction = "send";
+	public const string CurrencyAction = "currency";
+	public const string ExchangeAction = "exchange";
+	public const string SellAction = "sell";
+	public const string BuyAction = "buy";
+
+	/// <summary>The amount that means everything the player has in the currency being spent.</summary>
+	public const string AllAmount = "all";
 
 	/// <summary>The most one payment can be, so a typo can't empty an account.</summary>
 	public const long MaxPayment = 1_000_000_000;
@@ -26,10 +34,14 @@ public sealed class PaymentsViewModel
 
 	const int MaxDigits = 12;
 
+	/// <summary>The exchange the app deals with: the Government's, which asks less than the darknet's.</summary>
+	static ExchangeVenue Venue => ExchangeCatalog.GovernmentVenue;
+
 	readonly Func<Connection> getSeat;
 	readonly Func<NaviComputer> getComputer;
 
 	PaymentsScreen screen;
+	PaymentsCurrency currency;
 	string targetId = "";
 	string amount = "";
 	string sentAmount = "";
@@ -66,8 +78,8 @@ public sealed class PaymentsViewModel
 		if ( screen == PaymentsScreen.Success && sinceSuccess > SuccessSeconds )
 			GoHome( "" );
 
-		// Payments need the network: a payment being chosen is dropped when it goes down.
-		if ( screen == PaymentsScreen.Send && !GameAppNetwork.IsOnline( getComputer() ) )
+		// The app needs the network: anything being chosen is dropped when it goes down.
+		if ( screen != PaymentsScreen.Home && !GameAppNetwork.IsOnline( getComputer() ) )
 			GoHome( "" );
 
 		if ( Signature( seat, PlayerProgress.For( seat ), Payees( seat ) ) != signature )
@@ -93,6 +105,25 @@ public sealed class PaymentsViewModel
 			case SendAction:
 				Send();
 				break;
+
+			case CurrencyAction when args.Length > 0
+			                         && Enum.TryParse<PaymentsCurrency>( args[0], true, out var picked )
+			                         && Enum.IsDefined( picked ):
+				currency = picked;
+				notice = "";
+				break;
+
+			case ExchangeAction:
+				OpenExchange();
+				break;
+
+			case SellAction when args.Length > 0:
+				Sell( args[0] );
+				break;
+
+			case BuyAction when args.Length > 0:
+				Buy( args[0] );
+				break;
 		}
 
 		Tick();
@@ -108,12 +139,23 @@ public sealed class PaymentsViewModel
 
 	void Choose( string id )
 	{
-		if ( screen != PaymentsScreen.Home || !GameAppNetwork.IsOnline( getComputer() ) || Payees( getSeat() ).All( x => x.SteamId.ToString() != id ) )
+		if ( screen != PaymentsScreen.Home || !GameAppNetwork.IsOnline( getComputer() )
+		                                 || Payees( getSeat() ).All( x => x.SteamId.ToString() != id ) )
 			return;
 
 		screen = PaymentsScreen.Send;
 		targetId = id;
 		amount = "";
+		notice = "";
+	}
+
+	void OpenExchange()
+	{
+		if ( screen != PaymentsScreen.Home || !GameAppNetwork.IsOnline( getComputer() )
+		                                 || PlayerProgress.For( getSeat() ) is not { Loaded: true } )
+			return;
+
+		screen = PaymentsScreen.Exchange;
 		notice = "";
 	}
 
@@ -125,7 +167,7 @@ public sealed class PaymentsViewModel
 		if ( screen != PaymentsScreen.Send )
 			return;
 
-		amount = new string( (text ?? "").Where( char.IsAsciiDigit ).Take( MaxDigits ).ToArray() ).TrimStart( '0' );
+		amount = Digits( text );
 		UiState = UiState with { Amount = amount };
 	}
 
@@ -145,31 +187,118 @@ public sealed class PaymentsViewModel
 		else if ( !long.TryParse( amount, out var value ) || value <= 0 )
 			notice = "Enter an amount.";
 		else if ( value > MaxPayment )
-			notice = $"At most ${MaxPayment:N0} at a time.";
-		else if ( PlayerWallet.For( seat ) is not { } wallet || value > wallet.Cash )
-			notice = "Not enough money.";
-		else if ( PlayerWallet.For( to ) is not { } target || !wallet.TryPayCash( target, value ) )
+			notice = $"At most {MostText()} at a time.";
+		else if ( PlayerWallet.For( seat ) is not { } wallet || PlayerWallet.For( to ) is not { } target )
 			notice = "That payment can't be made.";
+		else if ( currency == PaymentsCurrency.Crypto )
+			SendCrypto( wallet, target, to, value );
 		else
-		{
-			screen = PaymentsScreen.Success;
-			sentAmount = $"${value:N0}";
-			sentTo = to.DisplayName;
-			sinceSuccess = 0;
-			notice = "";
-		}
+			SendCash( wallet, target, to, value );
 	}
 
-	string Signature( Connection seat, PlayerProgress progress, List<Connection> payees ) =>
-		HashCode.Combine(
+	void SendCash( PlayerWallet wallet, PlayerWallet target, Connection to, long value )
+	{
+		if ( value > wallet.Cash )
+			notice = "Not enough money.";
+		else if ( !wallet.TryPayCash( target, value ) )
+			notice = "That payment can't be made.";
+		else
+			Succeeded( $"${value:N0}", to.DisplayName );
+	}
+
+	void SendCrypto( PlayerWallet wallet, PlayerWallet target, Connection to, long value )
+	{
+		if ( value > wallet.Crypto )
+			notice = "Not enough crypto.";
+		else if ( !wallet.TryPayCrypto( target, value ) )
+			notice = "That payment can't be made.";
+		else
+			Succeeded( $"{value:N0} crypto", to.DisplayName );
+	}
+
+	void Succeeded( string amountText, string name )
+	{
+		screen = PaymentsScreen.Success;
+		sentAmount = amountText;
+		sentTo = name;
+		sinceSuccess = 0;
+		notice = "";
+	}
+
+	/// <summary>
+	/// Sell crypto for dollars at the Government Exchange: everything for "all", otherwise the digits.
+	/// </summary>
+	void Sell( string text )
+	{
+		if ( screen != PaymentsScreen.Exchange || !GameAppNetwork.IsOnline( getComputer() ) )
+			return;
+
+		var seat = getSeat();
+		var progress = PlayerProgress.For( seat );
+		var wallet = PlayerWallet.For( seat );
+
+		if ( progress is not { Loaded: true } || wallet is null )
+		{
+			notice = "No account.";
+			return;
+		}
+
+		var crypto = AmountOf( text, wallet.Crypto );
+		notice = Exchange.TrySell( wallet, progress.Record?.Crime, Venue, crypto ).Message;
+	}
+
+	/// <summary>
+	/// Buy crypto with dollars at the Government Exchange.
+	/// </summary>
+	void Buy( string text )
+	{
+		if ( screen != PaymentsScreen.Exchange || !GameAppNetwork.IsOnline( getComputer() ) )
+			return;
+
+		var seat = getSeat();
+		var wallet = PlayerWallet.For( seat );
+
+		if ( PlayerProgress.For( seat ) is not { Loaded: true } || wallet is null )
+		{
+			notice = "No account.";
+			return;
+		}
+
+		var cash = AmountOf( text, wallet.Cash );
+		notice = Exchange.TryBuy( wallet, Venue, cash ).Message;
+	}
+
+	/// <summary>The most this screen takes at once, in the currency it is set to.</summary>
+	string MostText() => currency == PaymentsCurrency.Crypto ? $"{MaxPayment:N0} crypto" : $"${MaxPayment:N0}";
+
+	/// <summary>When selling at the Exchange delivers the dollars.</summary>
+	static string PayoutText() => Venue.PaysAtOnce
+		? "the dollars arrive at once."
+		: $"the dollars arrive after {Venue.CashoutDelaySeconds / 60f:0.#} min.";
+
+	/// <summary>
+	/// An amount from an action: digits, or "all" for everything the player has. Anything else is nothing, which the
+	/// exchange refuses.
+	/// </summary>
+	static long AmountOf( string text, long all ) =>
+		text == AllAmount ? all : long.TryParse( Digits( text ), out var value ) ? value : 0;
+
+	static string Digits( string text ) =>
+		new string( (text ?? "").Where( char.IsAsciiDigit ).Take( MaxDigits ).ToArray() ).TrimStart( '0' );
+
+	string Signature( Connection seat, PlayerProgress progress, List<Connection> payees )
+	{
+		var me = HashCode.Combine(
 			seat?.Id,
 			GameAppNetwork.IsOnline( getComputer() ),
 			getComputer()?.HasNetworkCard,
 			(progress?.Version, PlayerWallet.For( seat )?.Version),
 			screen,
-			targetId,
-			notice,
-			string.Join( ',', payees.Select( x => $"{x.Id}:{x.DisplayName}" ) ) ).ToString();
+			currency );
+
+		return HashCode.Combine(
+			me, targetId, notice, string.Join( ',', payees.Select( x => $"{x.Id}:{x.DisplayName}" ) ) ).ToString();
+	}
 
 	/// <summary>
 	/// The other players in the game: the ones with money that can be paid.
@@ -192,7 +321,7 @@ public sealed class PaymentsViewModel
 
 		signature = Signature( seat, progress, payees );
 
-		var state = new PaymentsUiState { Revision = ++revision, Screen = screen, Notice = notice };
+		var state = new PaymentsUiState { Revision = ++revision, Screen = screen, Notice = notice, Currency = currency };
 
 		if ( !GameAppNetwork.IsOnline( getComputer() ) )
 			return state with { Screen = PaymentsScreen.Home, OfflineHint = GameAppNetwork.OfflineHint( getComputer() ) };
@@ -203,6 +332,7 @@ public sealed class PaymentsViewModel
 		if ( progress is not { Loaded: true } )
 			return state with { Screen = PaymentsScreen.Home, Message = "Loading your account..." };
 
+		var wallet = PlayerWallet.For( seat );
 		var rows = payees.Select( x => new PayeeRow( x.SteamId.ToString(), x.DisplayName ) ).ToList();
 		var target = screen == PaymentsScreen.Send
 			? rows.FirstOrDefault( x => x.Id == targetId )
@@ -212,12 +342,17 @@ public sealed class PaymentsViewModel
 		{
 			HasAccount = true,
 			Owner = seat.DisplayName,
-			Balance = $"${PlayerWallet.For( seat )?.Cash:N0}",
+			Balance = $"${wallet?.Cash:N0}",
+			Crypto = $"{wallet?.Crypto:N0}",
 			Payees = rows,
 			History = progress.Payments.Reverse().Select( ToRow ).ToList(),
 			Target = target,
 			Amount = amount,
 			SentAmount = sentAmount,
+			ExchangeName = Venue.Name,
+			ExchangeTagline = Venue.Tagline,
+			SellRate = $"1 to 1, minus {Venue.SellFeePercent}%; {PayoutText()}",
+			BuyRate = $"1 to 1, minus {Venue.BuyFeePercent}%; the crypto arrives at once.",
 		};
 	}
 
@@ -225,7 +360,10 @@ public sealed class PaymentsViewModel
 	{
 		var incoming = payment.Amount > 0;
 		var when = WorldClock.Format( payment.At );
-		var amount = $"{(incoming ? "+" : "-")}${Math.Abs( payment.Amount ):N0}";
+
+		var amount = payment.Currency == PaymentCurrency.Crypto
+			? $"{(incoming ? "+" : "-")}{Math.Abs( payment.Amount ):N0} crypto"
+			: $"{(incoming ? "+" : "-")}${Math.Abs( payment.Amount ):N0}";
 
 		return new PaymentRow( payment.PeerName, amount, when, incoming );
 	}

@@ -106,19 +106,8 @@ public static class CrimeCatalog
 	/// <summary>The entry with this id, or null: an action's item id is checked here.</summary>
 	public static ShopEntry ShopEntryOf( string id ) => shop.FirstOrDefault( x => x.Id == id );
 
-	// The Exchange. The base rate is fixed at one to one.
-
-	/// <summary>Percent kept by the Exchange when crypto is sold for dollars.</summary>
-	public const int SellFeePercent = 8;
-
-	/// <summary>Percent kept by the Exchange when dollars are changed into crypto.</summary>
-	public const int BuyFeePercent = 4;
-
-	/// <summary>Seconds before cashed-out dollars arrive.</summary>
-	public const long CashoutDelaySeconds = 120;
-
-	/// <summary>The most one Exchange request moves.</summary>
-	public const long MaxExchange = 1_000_000;
+	// The Exchange's terms are per venue, in the ExchangeCatalog (government and darknet): fees, the cash-out delay and
+	// the most one request moves. Nothing about the rate lives here.
 
 	public static readonly string[] Handles =
 	[
@@ -421,12 +410,6 @@ public static class CrimeCatalog
 
 	/// <summary>The next time the mailman comes, after <paramref name="now"/>.</summary>
 	public static long NextCollection( long now ) => (now / CollectPeriod + 1) * CollectPeriod;
-
-	/// <summary>A player's dollars after selling this much crypto at the Exchange.</summary>
-	public static long CashFor( long crypto ) => crypto * (100 - SellFeePercent) / 100;
-
-	/// <summary>The crypto after changing this many dollars at the Exchange.</summary>
-	public static long CryptoFor( long cash ) => cash * (100 - BuyFeePercent) / 100;
 }
 
 public enum ReputationLevel

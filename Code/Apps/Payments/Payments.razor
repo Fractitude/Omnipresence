@@ -37,25 +37,45 @@
 	{
 		<div class="topbar">
 			<div class="back" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )><i>arrow_back</i></div>
-			<div class="title">Send money</div>
+			<div class="title">Send @( UiState.Currency == PaymentsCurrency.Crypto ? "crypto" : "money" )</div>
 		</div>
 
 		<div class="recipient">
 			<div class="avatar big">@target.Initial</div>
 			<div class="recipient-name">@target.Name</div>
-			<div class="recipient-hint">Available: @UiState.Balance</div>
+			<div class="recipient-hint">
+				@( UiState.Currency == PaymentsCurrency.Crypto
+					? $"Available: {UiState.Crypto} crypto"
+					: $"Available: {UiState.Balance}" )
+			</div>
+		</div>
+
+		<div class="quick">
+			@foreach ( var option in SendCurrencies )
+			{
+				<div class="chip @( UiState.Currency == option ? "on" : "" )"
+				     @onclick=@( () => Navi.Act( PaymentsViewModel.CurrencyAction, option.ToString() ) )>
+					@( option == PaymentsCurrency.Crypto ? "Crypto" : "Dollars" )
+				</div>
+			}
 		</div>
 
 		<div class="send">
-			<div class="currency">$</div>
+			<div class="currency">@( UiState.Currency == PaymentsCurrency.Crypto ? "" : "$" )</div>
 			<TextEntry @ref=AmountEntry class="amount" Value=@( UiState.Amount ) Placeholder="0" MaxLength=@( 12 )
 			           OnTextEdited=@AmountEdited/>
+			@if ( UiState.Currency == PaymentsCurrency.Crypto )
+			{
+				<div class="unit">crypto</div>
+			}
 		</div>
 
 		<div class="quick">
 			@foreach ( var value in QuickAmounts )
 			{
-				<div class="chip" @onclick=@( () => SetAmount( value ) )>$@value</div>
+				<div class="chip" @onclick=@( () => SetAmount( value ) )>
+					@( UiState.Currency == PaymentsCurrency.Crypto ? value : $"${value}" )
+				</div>
 			}
 		</div>
 
@@ -64,7 +84,66 @@
 			<div class="notice">@UiState.Notice</div>
 		}
 
-		<div class="button confirm" @onclick=@( () => Navi.Act( PaymentsViewModel.SendAction ) )>Confirm and send</div>
+		<div class="button confirm" @onclick=@( () => Navi.Act( PaymentsViewModel.SendAction ) )>
+			@( UiState.Currency == PaymentsCurrency.Crypto ? "Confirm and send crypto" : "Confirm and send" )
+		</div>
+	}
+	else if ( UiState.Screen == PaymentsScreen.Exchange )
+	{
+		<div class="topbar">
+			<div class="back" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )><i>arrow_back</i></div>
+			<div class="title">Exchange</div>
+		</div>
+
+		<div class="exchange-card">
+			<div class="exchange-top">
+				<div class="exchange-name">@UiState.ExchangeName</div>
+				<div class="exchange-badge">Regulated</div>
+			</div>
+			<div class="exchange-tagline">@UiState.ExchangeTagline</div>
+		</div>
+
+		<div class="holdings">
+			<div class="holding">
+				<div class="holding-label">Dollars</div>
+				<div class="holding-value">@UiState.Balance</div>
+			</div>
+			<div class="holding">
+				<div class="holding-label">Crypto</div>
+				<div class="holding-value">@UiState.Crypto</div>
+			</div>
+		</div>
+
+		<div class="section">
+			<div class="heading">Buy crypto</div>
+			<div class="rate-line">@UiState.BuyRate</div>
+			<div class="quick">
+				@foreach ( var value in BuyAmounts )
+				{
+					<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.BuyAction, value ) )>
+						@( value == PaymentsViewModel.AllAmount ? "All" : $"${value}" )
+					</div>
+				}
+			</div>
+		</div>
+
+		<div class="section">
+			<div class="heading">Sell crypto</div>
+			<div class="rate-line">@UiState.SellRate</div>
+			<div class="quick">
+				@foreach ( var value in SellAmounts )
+				{
+					<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.SellAction, value ) )>
+						@( value == PaymentsViewModel.AllAmount ? "All" : value )
+					</div>
+				}
+			</div>
+		</div>
+
+		@if ( UiState.Notice != "" )
+		{
+			<div class="notice ok">@UiState.Notice</div>
+		}
 	}
 	else
 	{
@@ -74,6 +153,16 @@
 				<div class="card-owner">@UiState.Owner</div>
 			</div>
 			<div class="balance">@UiState.Balance</div>
+			<div class="card-crypto">@UiState.Crypto crypto</div>
+		</div>
+
+		<div class="action-row" @onclick=@( () => Navi.Act( PaymentsViewModel.ExchangeAction ) )>
+			<div class="icon"><i>swap_horiz</i></div>
+			<div class="details">
+				<div class="peer">Exchange</div>
+				<div class="when">Buy or sell crypto</div>
+			</div>
+			<i class="go">chevron_right</i>
 		</div>
 
 		<div class="section">
@@ -126,6 +215,11 @@
 @code
 {
 	static readonly string[] QuickAmounts = ["10", "50", "100", "500"];
+	static readonly string[] BuyAmounts = ["10", "50", "100", PaymentsViewModel.AllAmount];
+	static readonly string[] SellAmounts = ["10", "50", "100", PaymentsViewModel.AllAmount];
+
+	/// <summary>A property, not a static field: a hot reload keeps a static array of the assembly's own enum.</summary>
+	static PaymentsCurrency[] SendCurrencies => System.Enum.GetValues<PaymentsCurrency>();
 
 	/// <summary>
 	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window

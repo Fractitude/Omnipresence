@@ -86,6 +86,156 @@ i
 		font-weight: 700;
 		color: white;
 	}
+
+	.card-crypto
+	{
+		font-size: 11px;
+		color: rgba( 255, 255, 255, 0.8 );
+	}
+}
+
+// The way into the Exchange, under the card.
+.action-row
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background-color: #141a24;
+	border: 1px solid #202a3a;
+	flex-shrink: 0;
+	cursor: pointer;
+	transition: all 0.12s ease;
+
+	.icon
+	{
+		width: 24px;
+		height: 24px;
+		justify-content: center;
+		align-items: center;
+		border-radius: 12px;
+		background-color: rgba( 61, 214, 140, 0.16 );
+		color: #3dd68c;
+		font-size: 15px;
+	}
+
+	.details
+	{
+		flex-direction: column;
+		flex-grow: 1;
+	}
+
+	.peer
+	{
+		font-weight: 600;
+	}
+
+	.when
+	{
+		font-size: 10px;
+		color: #6f7a8c;
+	}
+
+	.go
+	{
+		color: #6f7a8c;
+		font-size: 18px;
+	}
+
+	&:hover
+	{
+		background-color: #1b2331;
+		border-color: #3dd68c;
+
+		.go
+		{
+			color: #3dd68c;
+		}
+	}
+}
+
+// The Exchange screen.
+.exchange-card
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+	padding: 12px 14px;
+	border-radius: 12px;
+	background-image: linear-gradient( 135deg, #1f6f5c 0%, #1b4a7a 60%, #3a2f7a 100% );
+	box-shadow: 0px 6px 18px rgba( 0, 0, 0, 0.45 );
+
+	.exchange-top
+	{
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.exchange-name
+	{
+		font-size: 14px;
+		font-weight: 700;
+		color: white;
+	}
+
+	.exchange-badge
+	{
+		padding: 2px 6px;
+		border-radius: 6px;
+		background-color: rgba( 255, 255, 255, 0.16 );
+		font-size: 9px;
+		font-weight: 700;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: white;
+	}
+
+	.exchange-tagline
+	{
+		font-size: 11px;
+		color: rgba( 255, 255, 255, 0.78 );
+	}
+}
+
+.holdings
+{
+	flex-direction: row;
+	gap: 8px;
+	flex-shrink: 0;
+
+	.holding
+	{
+		flex-direction: column;
+		flex-grow: 1;
+		gap: 2px;
+		padding: 8px 10px;
+		border-radius: 10px;
+		background-color: #141a24;
+		border: 1px solid #202a3a;
+	}
+
+	.holding-label
+	{
+		font-size: 10px;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: #6f7a8c;
+	}
+
+	.holding-value
+	{
+		font-size: 15px;
+		font-weight: 700;
+		color: white;
+	}
+}
+
+.rate-line
+{
+	font-size: 11px;
+	color: #6f7a8c;
 }
 
 .section
@@ -267,6 +417,12 @@ i
 		font-weight: 700;
 		color: white;
 	}
+
+	.unit
+	{
+		font-size: 12px;
+		color: #6f7a8c;
+	}
 }
 
 .quick
@@ -290,6 +446,13 @@ i
 		{
 			background-color: rgba( 61, 214, 140, 0.14 );
 			border-color: #3dd68c;
+		}
+
+		&.on
+		{
+			background-color: rgba( 61, 214, 140, 0.18 );
+			border-color: #3dd68c;
+			color: #6ee7a9;
 		}
 	}
 }
@@ -330,6 +493,13 @@ i
 	background-color: rgba( 255, 107, 107, 0.12 );
 	color: #ff7b7b;
 	flex-shrink: 0;
+
+	// The Exchange answers with the deal it made, not only with refusals.
+	&.ok
+	{
+		background-color: rgba( 61, 214, 140, 0.12 );
+		color: #6ee7a9;
+	}
 }
 
 .history

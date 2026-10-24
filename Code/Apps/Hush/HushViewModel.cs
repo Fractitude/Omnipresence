@@ -166,6 +166,7 @@ public sealed class HushViewModel
 		var seat = getSeat();
 		var crime = PlayerCrime.For( seat );
 		var wallet = PlayerWallet.For( seat );
+		var venue = ExchangeCatalog.DarknetVenue;
 
 		signature = Signature( seat );
 
@@ -210,9 +211,11 @@ public sealed class HushViewModel
 			Cashouts = crime.Cashouts
 				.Select( x => $"${x.Cash:N0} arrives in {InteractionSetup.Countdown( x.ReadyAt - WorldClock.Now )}" )
 				.ToList(),
-			SellRate = $"Crypto to dollars: 1 to 1, minus {CrimeCatalog.SellFeePercent}%, "
-			           + $"paid after {CrimeCatalog.CashoutDelaySeconds / 60f:0.#} min.",
-			BuyRate = $"Dollars to crypto: 1 to 1, minus {CrimeCatalog.BuyFeePercent}%, at once.",
+			SellRate = $"Crypto to dollars: 1 to 1, minus {venue.SellFeePercent}%, "
+			           + (venue.PaysAtOnce
+				           ? "paid at once."
+				           : $"paid after {venue.CashoutDelaySeconds / 60f:0.#} min."),
+			BuyRate = $"Dollars to crypto: 1 to 1, minus {venue.BuyFeePercent}%, at once.",
 		};
 	}
 

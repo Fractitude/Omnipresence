@@ -14,13 +14,14 @@ The game has three currencies. Each belongs to a place, and credits never mix wi
 2. **Activity in the real world earns cash**, and **dark web trades (Hush orders) pay crypto**.
 3. **Each currency is spent in its own world.** Cash buys real-world things (hardware, mail, posters). Credits buy Wired things. Crypto buys dark web things.
 4. **Credits never convert to anything.** No code path turns credits into cash or crypto, or the other way round.
-5. **Crypto and cash convert only through the Exchange** (the Hush app's Exchange tab, `Code/Crime/Exchange.cs`): crypto to cash with an 8 percent fee and a delay, cash to crypto with a 4 percent fee. The Payments app moves cash only.
-6. **XP is separate.** XP and level come from either world and are not a currency. Hacking XP and hacking level are a second skill that only hacking puzzles feed.
+5. **Crypto and cash convert only through an exchange** (`Exchange`, `Code/Crime/Exchange.cs`), and which exchange you use is what it costs: the **Government Exchange**, in the Payments app, asks 2 percent to buy crypto and 5 percent to sell it, and pays at once; the **darknet Exchange**, in Hush, asks 4 and 8 and makes the dollars wait 2 minutes. The rate is one to one everywhere, and getting there and back always loses money. The terms are per venue in **`ExchangeCatalog`** (`Code/Wallet/ExchangeVenue.cs`); adding an exchange is one line there.
+6. **The Payments app moves dollars and crypto** between players, and changes either into the other at the Government Exchange. Hush changes money only at the darknet's.
+7. **XP is separate.** XP and level come from either world and are not a currency. Hacking XP and hacking level are a second skill that only hacking puzzles feed.
 
 ## In code
 
 - Read a balance with `PlayerWallet.Local` (the player on this computer) or `PlayerWallet.For( connection )`. The values are `[Sync]` from the host, so clients can draw them. `Version` goes up on every change on every machine; a panel hashes it.
-- Change a balance only on the host: `AddCash` / `TrySpendCash`, `AddCredits` / `TrySpendCredits`, `AddCrypto` / `TrySpendCrypto`, each capped by `ProgressRecord` (`MaxMoney`, `MaxCredits`, `MaxCrypto`). `TryPayCash` moves cash between two players and writes both payment histories.
+- Change a balance only on the host: `AddCash` / `TrySpendCash`, `AddCredits` / `TrySpendCredits`, `AddCrypto` / `TrySpendCrypto`, each capped by `ProgressRecord` (`MaxMoney`, `MaxCredits`, `MaxCrypto`). `TryPayCash` and `TryPayCrypto` move money between two players and write both payment histories (`PaymentRecord.Currency` says which of the two moved).
 - A change bumps the wallet and `PlayerProgress` versions, saves soon, and posts `Global.IProgressEvents.OnProgressChanged` with `ProgressChange.Wallet`.
 - A reward from the Wired calls `AddCredits` (or `PlayerProgress.CompleteIntrusion` / `FinishOperation`, which pay credits through the wallet). A reward from the real world calls `AddCash`; Hush calls `AddCrypto`.
 - The caps and the arithmetic of a balance live on the record (`ProgressRecord.AddCash`, `AddCrypto`, `AddCredits`, `CanHoldCash`, `CanHoldCrypto`); `PlayerWallet` delegates to them and then shows and saves the change. The crime rules (`CrimeRules`, `Exchange.Settle`) change the record directly for a player who is away: escrow pays crypto and a cash-out pays dollars with no player object, under the same caps.

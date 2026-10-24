@@ -2,14 +2,27 @@ namespace OmnipresenceApps;
 
 public enum PaymentsScreen
 {
-	/// <summary>The account, the players to pay and the history.</summary>
+	/// <summary>The account, the players to pay, the exchange and the history.</summary>
 	Home,
 
-	/// <summary>Choosing the amount for the player picked on Home.</summary>
+	/// <summary>Choosing the amount, and the currency, for the player picked on Home.</summary>
 	Send,
+
+	/// <summary>Changing dollars and crypto at the Government Exchange.</summary>
+	Exchange,
 
 	/// <summary>The payment went through.</summary>
 	Success,
+}
+
+/// <summary>What a payment to another player carries.</summary>
+public enum PaymentsCurrency
+{
+	/// <summary>Dollars.</summary>
+	Dollars,
+
+	/// <summary>The dark web's crypto.</summary>
+	Crypto,
 }
 
 /// <summary>
@@ -35,7 +48,12 @@ public sealed record PaymentsUiState
 	public string OfflineHint { get; init; }
 
 	public string Owner { get; init; } = "";
+
+	/// <summary>Dollars, already formatted with the sign.</summary>
 	public string Balance { get; init; } = "";
+
+	/// <summary>Crypto, already formatted.</summary>
+	public string Crypto { get; init; } = "";
 
 	/// <summary>The players that can be paid.</summary>
 	public IReadOnlyList<PayeeRow> Payees { get; init; } = [];
@@ -46,14 +64,27 @@ public sealed record PaymentsUiState
 	/// <summary>The player being paid, on the Send and Success screens.</summary>
 	public PayeeRow Target { get; init; }
 
+	/// <summary>What the Send screen is about to send.</summary>
+	public PaymentsCurrency Currency { get; init; }
+
 	/// <summary>The digits typed so far. Changing it doesn't redraw, so typing keeps the caret.</summary>
 	public string Amount { get; init; } = "";
 
 	/// <summary>What was sent, already formatted, on the Success screen.</summary>
 	public string SentAmount { get; init; } = "";
 
-	/// <summary>What went wrong with the last attempt.</summary>
+	/// <summary>What went wrong, or right, with the last attempt.</summary>
 	public string Notice { get; init; } = "";
+
+	/// <summary>The exchange the Exchange screen deals with.</summary>
+	public string ExchangeName { get; init; } = "";
+
+	public string ExchangeTagline { get; init; } = "";
+
+	/// <summary>What selling and buying at that exchange cost, in a sentence.</summary>
+	public string SellRate { get; init; } = "";
+
+	public string BuyRate { get; init; } = "";
 
 	/// <summary>The first letter of a name, for its avatar.</summary>
 	public static string InitialOf( string name ) =>

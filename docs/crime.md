@@ -46,7 +46,7 @@ escrow pays crypto (minus a fee by reputation) ──► Hush Exchange: crypto �
 7. **Send.** Use **Send all parcels** at the mailbox: every parcel in the bag goes in one use, up to `MaxParcels` in the post at once (the rest stay in the bag, and the message says so). Any player can post any parcel they carry; the sender who packed it is the one delivered for and paid (see "Parcels: who posts, who is paid"). A parcel that cannot be posted stays in the bag and the poster is told why. The first sender or collector claims the box (remembered in the save). The flag goes up. At the next collection time the mailman takes them (Shipments: "Collected, in transit"), and `TransitSeconds` later they are delivered.
 8. **Review and escrow.** On delivery the buyer rates the batch (1 to 5 stars, see "The rating rule") and escrow releases `EscrowSeconds` after the parcel arrived (also when you were away at the time). The agreed price is always paid in full; only the rating (and so reputation and the fee level) changes with quality and lateness. You get the price minus a fee by reputation (10 percent Newcomer, 7 Known after 3 good trades, 4 Trusted after 10 good trades and a rating of 4 or more). A good trade counts.
 9. **Late.** The deadline only governs **sending**. An order still Accepted or Packed (not yet in the mailbox) at its deadline is cancelled: a bad trade, a 1-star review, and a parcel still in your bag is taken. Once sent it is never cancelled by the clock; a parcel that arrives after the deadline is still paid for, but the buyer rates it lower and says in the review that it took too long.
-10. **Exchange.** Sell crypto for dollars at 1 to 1 minus 8 percent; the dollars arrive `CashoutDelaySeconds` later. Buy crypto with dollars at 1 to 1 minus 4 percent, at once.
+10. **Exchange.** Hush changes money at the darknet Exchange: sell crypto for dollars at 1 to 1 minus 8 percent and the dollars arrive 2 minutes later; buy crypto with dollars at 1 to 1 minus 4 percent, at once. The Government Exchange (the Payments app) is cheaper and pays at once; see [currency.md](currency.md).
 
 ## The rating rule
 
@@ -83,7 +83,7 @@ All in `Code/Crime/CrimeCatalog.cs`. Times are game seconds (1 real second each)
 | `MaxParcels` | 10 | Parcels in the post at once. |
 | `MinOpenOrders` / `MaxOpenOrders` / `RefillSeconds` | 3 / 5 / 30 | Board size and refill. |
 | `FeeNewcomer` / `FeeKnown` / `FeeTrusted` | 10 / 7 / 4 | Percent kept from escrow. |
-| `SellFeePercent` / `BuyFeePercent` / `CashoutDelaySeconds` | 8 / 4 / 120 | The Exchange. |
+| `ExchangeCatalog.DarknetVenue` (`Code/Wallet/ExchangeVenue.cs`) | 8 / 4 / 120 | The darknet Exchange: sell fee, buy fee, cash-out delay. |
 
 ## The products
 

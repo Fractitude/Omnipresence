@@ -966,14 +966,14 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	// -- The Exchange -------------------------------------------------------------------------------------------------
 
 	/// <summary>
-	/// Sell crypto for dollars through the <see cref="Exchange"/>. Host only.
+	/// Sell crypto for dollars at the darknet Exchange, the one Hush deals with. Host only.
 	/// </summary>
 	public CrimeResult SellCrypto( long crypto )
 	{
 		if ( !Ready )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		var result = Exchange.TrySell( Wallet, Crime, crypto );
+		var result = Exchange.TrySell( Wallet, Crime, ExchangeCatalog.DarknetVenue, crypto );
 
 		if ( result.Ok )
 			Changed();
@@ -982,14 +982,14 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Buy crypto with dollars through the <see cref="Exchange"/>. Host only.
+	/// Buy crypto with dollars at the darknet Exchange, the one Hush deals with. Host only.
 	/// </summary>
 	public CrimeResult BuyCrypto( long cash )
 	{
 		if ( !Ready )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		return Exchange.TryBuy( Wallet, cash );
+		return Exchange.TryBuy( Wallet, ExchangeCatalog.DarknetVenue, cash );
 	}
 
 	// -- Time ---------------------------------------------------------------------------------------------------------

@@ -197,6 +197,42 @@ public sealed class PlayerWallet : Component
 	}
 
 	/// <summary>
+	/// Move crypto from this player to another, and write it in both payment histories (the Payments app). Host only.
+	/// Returns whether it was moved: not to oneself, not more than there is, not past the most the other can hold.
+	/// </summary>
+	public bool TryPayCrypto( PlayerWallet to, long amount )
+	{
+		if ( !CanChange || to is null || to == this || !to.CanChange || amount <= 0 )
+			return false;
+
+		if ( Record.Crypto < amount || to.Record.Crypto + amount > ProgressRecord.MaxCrypto )
+			return false;
+
+		var at = WorldClock.Now;
+		var from = Progress.Owner;
+		var target = to.Progress.Owner;
+
+		Record.Crypto -= amount;
+		to.Record.Crypto += amount;
+
+		Progress.AddPayment( new()
+		{
+			At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount,
+			Currency = PaymentCurrency.Crypto,
+		} );
+
+		to.Progress.AddPayment( new()
+		{
+			At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount,
+			Currency = PaymentCurrency.Crypto,
+		} );
+
+		Changed();
+		to.Changed();
+		return true;
+	}
+
+	/// <summary>
 	/// Testing only: the player asks the host for dollars, credits and crypto. The host refuses unless it is the editor,
 	/// and unless the caller is this player.
 	/// </summary>

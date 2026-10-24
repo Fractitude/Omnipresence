@@ -149,6 +149,9 @@ public sealed class ProgressRecord
 		foreach ( var payment in Payments.Where( x => resetTimes || x.At > WorldClock.LegacyLimit ) )
 			payment.At = 0;
 
+		foreach ( var payment in Payments )
+			payment.Currency = System.Enum.IsDefined( payment.Currency ) ? payment.Currency : PaymentCurrency.Cash;
+
 		Crime ??= new();
 		Crime.Sanitize();
 
@@ -267,6 +270,20 @@ public sealed class PaymentRecord
 	/// Positive when the player received it, negative when they sent it.
 	/// </summary>
 	public long Amount { get; set; }
+
+	/// <summary>
+	/// The currency <see cref="Amount"/> is in: dollars, or crypto (the Payments app sends both).
+	/// </summary>
+	public PaymentCurrency Currency { get; set; } = PaymentCurrency.Cash;
+}
+
+public enum PaymentCurrency
+{
+	/// <summary>Dollars.</summary>
+	Cash,
+
+	/// <summary>The dark web's crypto.</summary>
+	Crypto,
 }
 
 /// <summary>
