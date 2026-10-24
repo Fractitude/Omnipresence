@@ -25,7 +25,7 @@
         "IsStatic": false,
         "MaterialGroup": null,
         "Model": {
-          "Id": "e80f3255-bba5-4b92-9e4d-8ad0003545a8",
+          "Id": "8c9db451-2d4f-44f1-bc17-37813b07728b",
           "Path": "vehicles/buggy/buggy_rigged.vmdl"
         },
         "OnComponentDestroy": null,
@@ -56,7 +56,7 @@
         "MaterialOverride": null,
         "Materials": null,
         "Model": {
-          "Id": "e80f3255-bba5-4b92-9e4d-8ad0003545a8",
+          "Id": "8c9db451-2d4f-44f1-bc17-37813b07728b",
           "Path": "vehicles/buggy/buggy_rigged.vmdl"
         },
         "Morphs": {},
@@ -93,7 +93,7 @@
         "Friction": null,
         "IsTrigger": false,
         "Model": {
-          "Id": "e80f3255-bba5-4b92-9e4d-8ad0003545a8",
+          "Id": "8c9db451-2d4f-44f1-bc17-37813b07728b",
           "Path": "vehicles/buggy/buggy_rigged.vmdl"
         },
         "OnComponentDestroy": null,
@@ -164,7 +164,6 @@
         "Boost": {
           "Action": "Run"
         },
-        "DrawDebug": false,
         "Engine": {
           "Horsepower": 350,
           "MaxRpm": 4200,
@@ -208,9 +207,12 @@
           "BrakeFactor": 0.4
         },
         "Gravity": 600,
+        "HandAngle": 25,
         "Handbrake": {
           "Action": "Jump"
         },
+        "HandRadius": 6.5,
+        "HandRotation": "0,0,0",
         "Left": {
           "Action": "Left"
         },
@@ -239,6 +241,7 @@
         "Right": {
           "Action": "Right"
         },
+        "RightHandRotation": "0,0,0",
         "Seat": {
           "_type": "component",
           "component_id": "ed9bb092-2170-409f-aa65-9a2d1e84591d",
@@ -344,7 +347,7 @@
           "prefab": "vehicles/buggy/buggy_backfire.prefab"
         },
         "BackfireSound": {
-          "Id": "fde16a87-ec9b-4d9c-80a1-af55db1d818f",
+          "Id": "30b5e1f7-eadf-4939-8be7-3212ae22741a",
           "Path": "sounds/vehicles/buggy/backfire.sound"
         },
         "CrackleRate": 6,
@@ -423,7 +426,7 @@
           {
             "State": "Idle",
             "Sound": {
-              "Id": "f306d38d-3024-4edc-9a6d-e13df29fb2ab",
+              "Id": "c9377910-d9ce-4b50-beaa-1da1d01b16b0",
               "Path": "sounds/vehicles/hl2_v8/engine_idle.sound"
             },
             "MinTime": 0
@@ -447,7 +450,7 @@
           {
             "State": "Gear0Resume",
             "Sound": {
-              "Id": "f306d38d-3024-4edc-9a6d-e13df29fb2ab",
+              "Id": "c9377910-d9ce-4b50-beaa-1da1d01b16b0",
               "Path": "sounds/vehicles/hl2_v8/engine_idle.sound"
             },
             "MinTime": 0.75
@@ -503,7 +506,7 @@
           {
             "State": "Gear4",
             "Sound": {
-              "Id": "a12a8d82-f53b-4a23-af83-f2e8db5bb111",
+              "Id": "ac45a888-c04c-452c-986a-e62b663c2fa4",
               "Path": "sounds/vehicles/hl2_v8/fourthgear.sound"
             },
             "MinTime": 0.5
@@ -605,9 +608,7 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Switch": {
-          "Action": "Flashlight"
-        },
+        "SwitchAction": "Flashlight",
         "SwitchOffSound": {
           "Id": "f50ca98a-6e4e-48e5-9b70-f21a7661e54b",
           "Path": "sounds/flashlight/flashlight-off.sound"
@@ -755,6 +756,95 @@
         ]
       },
       {
+        "__guid": "2072c1c1-9f3c-4361-bdb4-eba21a068649",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "cargo_bed",
+        "Position": "-64.8648758,0,38.9509277",
+        "Rotation": "0,-0.130526274,0,0.991444886",
+        "Scale": "0.903475165,0.868209481,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.VehicleCargo",
+            "__guid": "af9bda62-3008-4320-9d08-577bd0936f15",
+            "__enabled": true,
+            "Flags": 0,
+            "Columns": 6,
+            "LoadReach": 50,
+            "MaxBigObjects": 3,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Rows": 4,
+            "TypeName": "Buggy",
+            "UnloadMargin": 6
+          },
+          {
+            "__type": "Sandbox.BoxCollider",
+            "__guid": "8cc8e9d8-5163-4206-9911-913d08008f06",
+            "__enabled": true,
+            "Flags": 0,
+            "Center": "0,0,0",
+            "ColliderFlags": 0,
+            "Elasticity": null,
+            "Friction": null,
+            "IsTrigger": true,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnObjectTriggerEnter": null,
+            "OnObjectTriggerExit": null,
+            "OnTriggerEnter": null,
+            "OnTriggerExit": null,
+            "RollingResistance": null,
+            "Scale": "52,70,44",
+            "Static": false,
+            "Surface": null,
+            "SurfaceVelocity": "0,0,0"
+          },
+          {
+            "__type": "Sandbox.Interactable",
+            "__guid": "0a580d9a-eeb1-4a82-8947-205ebc5b3d10",
+            "__enabled": true,
+            "Flags": 0,
+            "HandlerObject": null,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Options": [
+              {
+                "Id": "",
+                "Label": "Use",
+                "Icon": "",
+                "Description": "",
+                "Available": true,
+                "RunOn": "Host",
+                "Cooldown": 0,
+                "OnInteract": null
+              }
+            ],
+            "Range": 200
+          }
+        ],
+        "Children": []
+      },
+      {
         "__guid": "07d59a99-16b6-45c3-81a0-ef2228ec35f9",
         "__version": 2,
         "Flags": 0,
@@ -794,7 +884,6 @@
             "__enabled": false,
             "Flags": 0,
             "Attenuation": 1,
-            "BakeLightIndex": -1,
             "ConeInner": 15,
             "ConeOuter": 45,
             "Contribution": "Diffuse, Specular, Transmissive",
@@ -802,7 +891,6 @@
             "FogMode": "Enabled",
             "FogStrength": 1,
             "LightColor": "0.91373,0.98039,1,1",
-            "MixedShadows": false,
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
@@ -839,7 +927,6 @@
             "__enabled": false,
             "Flags": 0,
             "Attenuation": 1,
-            "BakeLightIndex": -1,
             "ConeInner": 15,
             "ConeOuter": 45,
             "Contribution": "Diffuse, Specular, Transmissive",
@@ -847,7 +934,6 @@
             "FogMode": "Enabled",
             "FogStrength": 1,
             "LightColor": "0.91373,0.98039,1,1",
-            "MixedShadows": false,
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
@@ -884,7 +970,6 @@
             "__enabled": false,
             "Flags": 0,
             "Attenuation": 1,
-            "BakeLightIndex": -1,
             "ConeInner": 15,
             "ConeOuter": 45,
             "Contribution": "Diffuse, Specular, Transmissive",
@@ -892,7 +977,6 @@
             "FogMode": "Enabled",
             "FogStrength": 1,
             "LightColor": "0.91373,0.98039,1,1",
-            "MixedShadows": false,
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
@@ -929,7 +1013,6 @@
             "__enabled": false,
             "Flags": 0,
             "Attenuation": 1,
-            "BakeLightIndex": -1,
             "ConeInner": 15,
             "ConeOuter": 45,
             "Contribution": "Diffuse, Specular, Transmissive",
@@ -937,7 +1020,6 @@
             "FogMode": "Enabled",
             "FogStrength": 1,
             "LightColor": "0.91373,0.98039,1,1",
-            "MixedShadows": false,
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
@@ -1174,67 +1256,6 @@
             ]
           }
         ]
-      },
-      {
-        "__guid": "2072c1c1-9f3c-4361-bdb4-eba21a068649",
-        "__version": 2,
-        "Flags": 0,
-        "Name": "Cargo bed",
-        "Position": "-62,0,36",
-        "Rotation": "0,0,0,1",
-        "Scale": "1,1,1",
-        "Tags": "",
-        "Enabled": true,
-        "NetworkMode": 2,
-        "NetworkFlags": 0,
-        "NetworkOrphaned": 0,
-        "NetworkTransmit": true,
-        "OwnerTransfer": 1,
-        "Components": [
-          {
-            "__type": "Sandbox.BoxCollider",
-            "__guid": "8cc8e9d8-5163-4206-9911-913d08008f06",
-            "__enabled": true,
-            "Flags": 0,
-            "Center": "0,0,0",
-            "IsTrigger": true,
-            "Scale": "52,70,44",
-            "Static": false
-          },
-          {
-            "__type": "Sandbox.Interactable",
-            "__guid": "0a580d9a-eeb1-4a82-8947-205ebc5b3d10",
-            "__enabled": true,
-            "Flags": 0,
-            "HandlerObject": null,
-            "Range": 250,
-            "Options": [
-              {
-                "Id": "",
-                "Label": "Use",
-                "Icon": "",
-                "Description": "",
-                "Available": true,
-                "RunOn": "Host",
-                "Cooldown": 0,
-                "OnInteract": null
-              }
-            ]
-          },
-          {
-            "__type": "Sandbox.VehicleCargo",
-            "__guid": "af9bda62-3008-4320-9d08-577bd0936f15",
-            "__enabled": true,
-            "Flags": 0,
-            "TypeName": "Buggy",
-            "Columns": 6,
-            "Rows": 4,
-            "MaxBigObjects": 3,
-            "LoadReach": 50,
-            "UnloadMargin": 6
-          }
-        ],
-        "Children": []
       }
     ],
     "__properties": {
@@ -1265,11 +1286,6 @@
   "MenuPath": null,
   "MenuIcon": null,
   "DontBreakAsTemplate": false,
-  "__references": [
-    "facepunch.tractorwheel",
-    "facepunch.carseat",
-    "facepunch.beer_keg_a1",
-    "facepunch.tyre"
-  ],
+  "__references": [],
   "__version": 2
 }
