@@ -36,7 +36,7 @@ exists on every client, so every client can draw it.
 `Broken` is one flag for both ways a camera stops working — destroyed, or with no signal — because the app and the player
 see the same thing either way.
 
-- **The host sets it** when the camera takes `Toughness` damage (20 by default): `SecurityCamera` implements
+- **The host sets it** when the camera takes `Health` damage (20 by default): `SecurityCamera` implements
   `Component.IDamageable`, so bullets and explosions count. `[Property, Sync]` takes it to every client, and setting it in
   the inspector makes a camera that never worked.
 - **It stops looking at the world.** `OnPreRender` never calls `RenderToTexture` again.
@@ -66,15 +66,15 @@ installed on every computer with root), and **shared**: the host's copy decides,
 register: the app scans the scene, so dropping the prefab in the world is all it takes to add a camera, and a camera
 that is removed or switched off leaves the list within half a second.
 
-**Clicking a camera enlarges it** and puts the other cameras in a scrolling panel on its left; clicking one of those
-switches to it, and "All cameras" goes back to the grid. Clicks are actions (`Navi.Act`), so the host's copy of the app
-decides and every client's window draws the same thing.
+**Clicking a camera enlarges it** and puts the other cameras in a scrolling panel on its left, each row a live preview of
+that camera beside its name; clicking one of those switches to it, and "All cameras" goes back to the grid. Clicks are
+actions (`Navi.Act`), so the host's copy of the app decides and every client's window draws the same thing.
 
 **The pictures are each client's own.** The state carries only the camera's object id, which is the same on every
 machine; `SecurityFeeds` on each client looks that camera up in its own scene and asks it for its picture. The panel
-asks for the pictures every frame in `Tick` — that is what keeps the feeds moving, and closing the window is what stops
-them. `Feeds.Revision` bumps when a picture appears or goes away, so the panel redraws when the first frame of a feed
-arrives rather than showing an empty cell until something else changes.
+asks for the pictures of every camera it shows, previews included, every frame in `Tick` — that is what keeps the feeds
+moving, and closing the window is what stops them. `Feeds.Revision` bumps when a picture appears or goes away, so the
+panel redraws when the first frame of a feed arrives rather than showing an empty cell until something else changes.
 
 A viewer's copy of the app (a client that isn't the host) has no view model: it draws the host's state and its own
 pictures, which is why the split between `UiState` and `SecurityFeeds` matters.

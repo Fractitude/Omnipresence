@@ -45,7 +45,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	/// How much damage the camera takes before it is <see cref="Broken"/>. A couple of bullets is enough.
 	/// </summary>
 	[Property, Range( 1f, 500f )]
-	public float Toughness { get; set; } = 20f;
+	public float Health { get; set; } = 20f;
 
 	/// <summary>
 	/// The size every picture is drawn at, in pixels: 16 by 9. Every screen scales it, the grid's cells and the enlarged
@@ -188,7 +188,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 
 		damageTaken += damage.Damage;
 
-		if ( damageTaken >= Toughness )
+		if ( damageTaken >= Health )
 			Broken = true;
 	}
 

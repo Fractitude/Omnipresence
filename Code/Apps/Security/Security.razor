@@ -35,8 +35,19 @@
 				@foreach ( var other in UiState.Others )
 				{
 					<div class="row" @onclick=@( () => Navi.Act( SecurityViewModel.SelectAction, other.Id ) )>
-						<div class="row-name">@other.Name</div>
-						<div class="row-detail">@other.Detail</div>
+						@if ( Feeds.Picture( other.Id ) is { } thumb )
+						{
+							<Image class="thumb" Texture=@thumb/>
+						}
+						else
+						{
+							<div class="thumb"></div>
+						}
+
+						<div class="row-text">
+							<div class="row-name">@other.Name</div>
+							<div class="row-detail">@other.Detail</div>
+						</div>
 					</div>
 				}
 			</div>

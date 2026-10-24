@@ -33,23 +33,17 @@ public sealed class SecurityFeeds
 
 	/// <summary>
 	/// Ask for the pictures the state shows, every frame. This is what keeps the feeds moving: a camera draws for a
-	/// second after the last ask, so stopping the asks is what turns it off.
+	/// second after the last ask, so stopping the asks is what turns it off. Every camera in the list is asked, not just
+	/// the enlarged one, because the list beside it shows each of them as a preview.
 	/// </summary>
 	public void Keep( SecurityUiState uiState )
 	{
 		var missing = 0;
 
-		if ( uiState.Selected is { } selected )
+		foreach ( var row in uiState.Cameras )
 		{
-			missing = Picture( selected.Id ) is null ? 1 : 0;
-		}
-		else
-		{
-			foreach ( var row in uiState.Cameras )
-			{
-				if ( Picture( row.Id ) is null )
-					missing++;
-			}
+			if ( Picture( row.Id ) is null )
+				missing++;
 		}
 
 		if ( missing == lastMissing )

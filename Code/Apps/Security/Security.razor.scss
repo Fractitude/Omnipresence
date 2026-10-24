@@ -153,7 +153,7 @@ i
 
 .side
 {
-	width: 196px;
+	width: 224px;
 	flex-direction: column;
 	flex-shrink: 0;
 	align-self: stretch;
@@ -161,25 +161,46 @@ i
 	overflow-y: scroll;
 }
 
+// A camera beside the enlarged one: its picture at a glance, then its name. The preview is 16 by 9, like the feed.
 .row
 {
-	flex-direction: column;
+	flex-direction: row;
+	align-items: center;
 	flex-shrink: 0;
-	gap: 1px;
-	padding: 6px 8px;
+	gap: 8px;
+	padding: 4px;
 	border: 1px solid #14322e;
 	background-color: #08120f;
 	cursor: pointer;
 
+	.thumb
+	{
+		width: 96px;
+		height: 54px;
+		flex-shrink: 0;
+		background-color: #000;
+	}
+
+	.row-text
+	{
+		flex-direction: column;
+		flex-grow: 1;
+		min-width: 0;
+		gap: 1px;
+	}
+
 	.row-name
 	{
 		font-weight: 700;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 
 	.row-detail
 	{
 		color: #4e7a72;
 		font-size: 10px;
+		white-space: nowrap;
 	}
 
 	&:hover
