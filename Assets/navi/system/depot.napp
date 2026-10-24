@@ -1,0 +1,16 @@
+{
+  "Title": "Depot",
+  "Description": "Furniture and equipment, delivered to your door. Storage boxes, grow trays, benches.",
+  "Icon": "warehouse",
+  "Color": "#b8741a",
+  "PanelType": "OmnipresenceApps.Depot",
+  "CanMinimize": true,
+  "CanMaximize": true,
+  "CanResize": true,
+  "MinSize": "360,300",
+  "Shared": true,
+  "Permissions": [],
+  "IsSystem": true,
+  "__references": [],
+  "__version": 0
+}

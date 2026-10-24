@@ -1,0 +1,177 @@
+Depot
+{
+	// The default size. The window can be resized: the app then fills it.
+	width: 520px;
+	height: 460px;
+	flex-direction: column;
+	padding: 12px;
+	gap: 8px;
+	background-color: #14110b;
+	color: #efe6d4;
+	font-size: 12px;
+}
+
+i
+{
+	font-family: Material Icons;
+}
+
+.offline
+{
+	flex-grow: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	text-align: center;
+
+	i
+	{
+		font-size: 40px;
+		color: #7d725c;
+	}
+
+	.offline-heading
+	{
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	.offline-hint
+	{
+		color: #7d725c;
+	}
+}
+
+.header
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.logo
+	{
+		font-size: 20px;
+		font-weight: 700;
+		letter-spacing: 3px;
+		color: #f0a63a;
+	}
+
+	.cash
+	{
+		font-size: 15px;
+		font-weight: 700;
+		color: #8ee08e;
+	}
+}
+
+.notice
+{
+	padding: 6px 10px;
+	border-radius: 8px;
+	background-color: rgba( 240, 166, 58, 0.16 );
+	color: #ffd79a;
+	flex-shrink: 0;
+}
+
+.body
+{
+	flex-direction: column;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+	gap: 6px;
+}
+
+.heading
+{
+	margin-top: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #7d725c;
+	flex-shrink: 0;
+}
+
+.meta
+{
+	color: #7d725c;
+	flex-shrink: 0;
+}
+
+.cards
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+}
+
+.card
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background-color: #1f1a10;
+	border: 1px solid #3a3020;
+
+	.card-top, .card-bottom
+	{
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.name
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 6px;
+		font-size: 14px;
+		font-weight: 700;
+
+		i
+		{
+			font-size: 18px;
+			color: #f0a63a;
+		}
+	}
+
+	.price
+	{
+		font-weight: 700;
+		color: #8ee08e;
+	}
+
+	.note
+	{
+		color: #cfc4ad;
+	}
+}
+
+.button
+{
+	padding: 5px 16px;
+	border-radius: 8px;
+	background-color: #f0a63a;
+	color: #14110b;
+	font-weight: 700;
+	cursor: pointer;
+	flex-shrink: 0;
+
+	&:hover
+	{
+		background-color: #ffbd5c;
+	}
+
+	&.disabled
+	{
+		background-color: #3a3020;
+		color: #7d725c;
+		cursor: default;
+	}
+}

@@ -36,6 +36,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `docs/ui.md` is how the HUD and the menu windows are built: one HUD GameObject that `HudSystem` puts every runtime piece on (`hud.Attach<T>()`, one line each, ordered by CSS `z-index`), and `MenuWindow`, the one window every menu uses (size cap, ability bar clearance, scrolling lists, rows that don't shrink). Read it before adding a menu or a HUD piece.
 - `docs/world-items.md` is how an item is dropped into the world and picked up again (`WorldItem`, `PickupRules`, the merge rule `StackRules.CanMerge`). Read it before changing the inventory's add, drop or stack code.
 - `docs/organizations.md` is how organizations work: teammates grouped in the Organizations Navi app, with roles, shares and invitations, and `OrgPayouts.Distribute`, the one function a revenue source calls to share a payment. Read it before adding a source of money.
+- `docs/depot.md` is how big objects (storage box, grow tray, press bench, packing table) are bought in the Depot app, delivered and kept between sessions (`Code/Placeables/`, `PlacedObject` ids). Read it before adding something the player places in the world.
 - `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 
 ## Vehicles

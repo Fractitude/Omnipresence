@@ -40,9 +40,10 @@ public sealed class StorageBox : Component, IInteractionHandler
 	public ulong OwnerId { get; set; }
 
 	/// <summary>
-	/// The id a player's save uses for this box: its object's id, which is stable in the scene.
+	/// The id a player's save uses for this box: a bought box's permanent <see cref="PlacedObject.ObjectId"/>, else its
+	/// object's id, which is stable in the scene.
 	/// </summary>
-	public string BoxId => GameObject.Id.ToString();
+	public string BoxId => PlacedObject.IdOf( this );
 
 	// -- What this machine knows of the contents: only the player who asked is sent them ------------------------------
 

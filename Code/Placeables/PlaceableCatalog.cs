@@ -37,7 +37,7 @@ public static class PlaceableCatalog
 		new( "press_bench", "Press Bench", "Press raw harvest into tabs and vials.",
 			"precision_manufacturing", 600, "crime/press_bench.prefab", 300 ),
 		new( "packing_table", "Packing Table", "Pack an order into a parcel ready for the mailbox.",
-			"deployed_code", 350, "crime/packing_table.prefab", 180 ),
+			"local_shipping", 350, "crime/packing_table.prefab", 180 ),
 	];
 
 	/// <summary>

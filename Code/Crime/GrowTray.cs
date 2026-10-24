@@ -42,9 +42,10 @@ public sealed class GrowTray : Component, IInteractionHandler
 	string shownKey = "";
 
 	/// <summary>
-	/// The tray's id in the save: its object's id, which is stable in the scene.
+	/// The tray's id in the save: a bought tray's permanent <see cref="PlacedObject.ObjectId"/>, else its object's
+	/// id, which is stable in the scene.
 	/// </summary>
-	public string TrayId => GameObject.Id.ToString();
+	public string TrayId => PlacedObject.IdOf( this );
 
 	protected override void OnStart()
 	{

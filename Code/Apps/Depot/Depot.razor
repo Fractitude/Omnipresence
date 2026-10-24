@@ -1,0 +1,108 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/depot.napp, so it is always installed and *@
+@* has root. A store for the big objects a player places in the world (storage box, grow tray, press bench, packing *@
+@* table), paid in cash and delivered after a wait. It only works at home. *@
+@* It is shared: the host's copy takes the order and the money, and every player sees the same window. Whoever buys *@
+@* is the player in the seat, worked out on the host, never from what the panel sends. *@
+
+<root>
+	@if ( UiState.OfflineHint is not null )
+	{
+		<div class="offline">
+			<i>wifi_off</i>
+			<div class="offline-heading">No internet access</div>
+			<div class="offline-hint">@UiState.OfflineHint</div>
+		</div>
+	}
+	else if ( !UiState.HasAccount )
+	{
+		<div class="offline">
+			<i>@( UiState.NoSignal ? "signal_wifi_off" : "lock" )</i>
+			<div class="offline-heading">Depot</div>
+			<div class="offline-hint">@UiState.Message</div>
+		</div>
+	}
+	else
+	{
+		<div class="header">
+			<div class="logo">depot</div>
+			<div class="cash">@UiState.Cash</div>
+		</div>
+
+		@if ( UiState.Notice != "" )
+		{
+			<div class="notice">@UiState.Notice</div>
+		}
+
+		<div class="body">
+			<div class="heading">Furniture and equipment</div>
+			<div class="meta">Delivered to your mailbox area. Place it with the Physgun.</div>
+			<div class="cards">
+				@foreach ( var item in UiState.Shop )
+				{
+					<div class="card">
+						<div class="card-top">
+							<div class="name"><i>@item.Icon</i>@item.Name</div>
+							<div class="price">@item.Price</div>
+						</div>
+						<div class="note">@item.Description</div>
+						<div class="card-bottom">
+							<div class="meta">@( item.CanBuy ? item.Delivery : item.Reason )</div>
+							<div class="button @( item.CanBuy ? "" : "disabled" )"
+							     @onclick=@( () => Navi.Act( DepotViewModel.BuyAction, item.Id ) )>
+								Buy
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			<div class="heading">On its way</div>
+			@if ( UiState.Incoming.Count == 0 )
+			{
+				<div class="meta">Nothing ordered.</div>
+			}
+
+			@foreach ( var delivery in UiState.Incoming )
+			{
+				<div class="card">
+					<div class="name">@delivery.Name</div>
+					<div class="meta">@delivery.Detail</div>
+				</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	DepotViewModel ViewModel => field ??= new( GetSeat, GetComputer );
+
+	DepotUiState UiState => Navi.IsViewer ? Navi.GetState<DepotUiState>() ?? DepotUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}

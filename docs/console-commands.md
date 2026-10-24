@@ -48,6 +48,8 @@ Testing only. Editor only, on the host: they refuse anywhere else. Code: `Code/I
 | Command | What it does |
 |---|---|
 | `world_items_clear` | Remove every dropped item from the scene and from the world file (`world_items.json`, or `world_items_test.json` under `progress_test_data`). The same as what a season wipe calls (`WorldItemRegistry.Wipe`). |
+| `placed_objects_clear` | Remove every Depot object from the scene, every purchase on its way, and the file `placed_objects.json` (`placed_objects_test.json` under `progress_test_data`). What a season wipe calls (`PlacedObjectRegistry.Wipe`). |
+| `placed_objects_deliver_now` | Make every Depot purchase on its way arrive now. |
 
 ## Offline processing
 
