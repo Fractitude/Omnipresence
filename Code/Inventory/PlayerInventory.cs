@@ -413,7 +413,7 @@ public sealed class PlayerInventory : Component
 
 	void DoDrop( int slot )
 	{
-		// A parcel stays with its owner until it is sent.
+		// A kind can opt out of being dropped (ItemDef.CanDrop); none does today, parcels drop like anything else.
 		if ( At( slot ) is { IsBatch: true } batch && ItemCatalog.Find( batch.Kind ) is { CanDrop: false } )
 			return;
 

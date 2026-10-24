@@ -64,7 +64,7 @@ public static class ItemCatalog
 	[
 		.. ProductCatalog.Items,
 		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox.", 0,
-			CanDrop: false, Icon: "redeem", Color: "#c9a27a" ),
+			Icon: "redeem", Color: "#c9a27a" ),
 	];
 
 	public static IReadOnlyList<ItemDef> Items => items;

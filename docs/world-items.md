@@ -9,7 +9,7 @@ message and the item stays in the bag.
 
 Drag an item out of the bag's window and let go outside it (`InventoryGrid.EndDrag` -> `PlayerInventory.Drop( slot )`).
 Dropped onto a slot it moves; dropped inside the window but not on a slot it stays. The whole stack drops as **one** world
-item. A parcel (`ItemDef.CanDrop` false) never drops.
+item. A parcel drops like anything else, with its order, addressee and contents intact (`ItemDef.CanDrop` can still forbid a kind).
 
 ## Data flow
 
