@@ -73,7 +73,7 @@
 							@if ( target is VehicleCargo cargo )
 							{
 								<div class="menu-heading">
-									@( $"Big objects ({cargo.ViewObjects.Count}/{VehicleCargo.MaxBigObjects})" )
+									@( $"Big objects ({cargo.ViewObjects.Count}/{cargo.MaxBigObjects})" )
 								</div>
 								@if ( cargo.ViewObjects.Count == 0 )
 								{

@@ -1174,6 +1174,67 @@
             ]
           }
         ]
+      },
+      {
+        "__guid": "2072c1c1-9f3c-4361-bdb4-eba21a068649",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Cargo bed",
+        "Position": "-62,0,36",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.BoxCollider",
+            "__guid": "8cc8e9d8-5163-4206-9911-913d08008f06",
+            "__enabled": true,
+            "Flags": 0,
+            "Center": "0,0,0",
+            "IsTrigger": true,
+            "Scale": "52,70,44",
+            "Static": false
+          },
+          {
+            "__type": "Sandbox.Interactable",
+            "__guid": "0a580d9a-eeb1-4a82-8947-205ebc5b3d10",
+            "__enabled": true,
+            "Flags": 0,
+            "HandlerObject": null,
+            "Range": 250,
+            "Options": [
+              {
+                "Id": "",
+                "Label": "Use",
+                "Icon": "",
+                "Description": "",
+                "Available": true,
+                "RunOn": "Host",
+                "Cooldown": 0,
+                "OnInteract": null
+              }
+            ]
+          },
+          {
+            "__type": "Sandbox.VehicleCargo",
+            "__guid": "af9bda62-3008-4320-9d08-577bd0936f15",
+            "__enabled": true,
+            "Flags": 0,
+            "TypeName": "Buggy",
+            "Columns": 6,
+            "Rows": 4,
+            "MaxBigObjects": 3,
+            "LoadReach": 50,
+            "UnloadMargin": 6
+          }
+        ],
+        "Children": []
       }
     ],
     "__properties": {

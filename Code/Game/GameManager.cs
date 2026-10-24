@@ -237,7 +237,8 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		WorldItemRegistry.Forget( body.GameObject );
 
 		// A vehicle that falls out takes its cargo with it, unless the cargo is put on the ground first.
-		body.GameObject.Components.Get<VehicleCargo>()?.Spill();
+		foreach ( var cargo in body.GameObject.Components.GetAll<VehicleCargo>( FindMode.EverythingInSelfAndDescendants ).ToList() )
+			cargo.Spill();
 		body.DestroyGameObject();
 	}
 

@@ -39,11 +39,12 @@ public static class CargoMath
 	/// <summary>
 	/// Every place worth trying to unload something with the given size (in the vehicle's own axes: x and y are half
 	/// extents along and across it, z is the full height; the spots are the bottom middle of its box), in the order to try them: first behind the rear, in rows that go farther back, each row from the middle
-	/// out; then beside the vehicle, left then right, at the bed's end, the middle and a little either way along its
+	/// out; then beside the vehicle, left then right, centred on the cargo bed (<paramref name="bedCentreX"/>), the middle and a little either way along its
 	/// length, then again farther out; and last one spot above the vehicle. A ground candidate never overlaps the vehicle's
 	/// own box. The host drops each to the floor and tests it for room.
 	/// </summary>
-	public static List<UnloadCandidate> UnloadCandidates( Transform vehicle, BBox localBounds, Vector3 half, float gap = 20f )
+	public static List<UnloadCandidate> UnloadCandidates(
+		Transform vehicle, BBox localBounds, Vector3 half, float bedCentreX, float gap = 20f )
 	{
 		var spots = new List<UnloadCandidate>();
 		var lateralStep = half.y * 2f + gap * 0.5f;
@@ -65,7 +66,7 @@ public static class CargoMath
 		var length = localBounds.Size.x;
 		var along = new[]
 		{
-			localBounds.Mins.x + length * 0.15f,
+			bedCentreX,
 			localBounds.Center.x,
 			localBounds.Center.x + length * 0.3f,
 			localBounds.Center.x - length * 0.3f,

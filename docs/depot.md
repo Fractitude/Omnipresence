@@ -46,6 +46,17 @@ A bought object has a `Rigidbody`, so the Physgun moves it. It can also go in a 
 cargo area within 50 units (`VehicleCargo.LoadReach`) and in clear sight, the object offers "Load into <vehicle>" (one row per vehicle, by type name), and the cargo window
 unloads it behind the vehicle with the same id ([storage.md](storage.md), "Vehicle cargo").
 
+## Putting a cargo bed on a car
+
+A car has cargo only if its prefab has one, placed by hand. On a new car:
+
+1. Open the car's prefab in the editor. Add a child GameObject (call it "Cargo bed") under the car's root and set its Network Mode to **Snapshot** (never "Never": clients would not get it).
+2. Add the component **VehicleCargo** to it. It adds a `BoxCollider` (trigger) and an `Interactable` by itself. Set the Interactable's **Range** to about 250.
+3. Move and size the **BoxCollider** over the car's bed (the area things are loaded into). In the scene view it is drawn orange and labelled "Cargo bed". The box is the cargo area: you look at it to open the cargo, and an object must be within `LoadReach` of it to be loaded.
+4. Set the properties: **TypeName** ("Buggy", shown in "Load into Buggy"; empty uses the car's name), **Columns** and **Rows** (the grid), **MaxBigObjects**, and if wanted **LoadReach** (default 50) and **UnloadMargin** (default 6). Save the prefab.
+
+The car must have a Rigidbody (the bed finds its vehicle as the nearest rigidbody above it). A car without the component has no "Manage cargo", is never listed in "Load into ...", and spills nothing. The buggy's bed is at local (-62, 0, 36), 52 x 70 x 44, 6 x 4 slots, 3 big objects.
+
 ## Ownership
 
 `BuyerId` and the record's `Owner` are the buyer's Steam id, kept for the ownership design

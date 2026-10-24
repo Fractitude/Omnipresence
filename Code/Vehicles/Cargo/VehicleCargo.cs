@@ -25,17 +25,28 @@ public sealed class CargoObject
 /// <summary>
 /// A vehicle's cargo: a grid of slots built on the same item rules as a storage box (<see cref="ItemContainer"/>, the
 /// same window), plus a short list of big objects (a storage box, a grow tray, ...) that cannot go in a bag and take no
-/// grid slot. The option "Manage cargo" on the vehicle opens the window; a placed object near the vehicle offers
-/// "Load into vehicle" (<see cref="PlacedObject"/>); the window unloads a slot or a big object to the ground behind the
-/// car.
+/// grid slot. The option "Manage cargo" on the bed opens the window; a placed object near the bed offers "Load into
+/// <see cref="TypeName"/>" (<see cref="PlacedObject"/>); the window unloads a slot or a big object to the ground around
+/// the vehicle.
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>Placing it.</b> A vehicle has a cargo only if its prefab has this component, put there by hand: add a child
+/// GameObject to the vehicle (the bed), add <c>VehicleCargo</c> to it (it adds a <c>BoxCollider</c> and an
+/// <c>Interactable</c>), and size and position the box over the bed in the editor, where the box is drawn orange and
+/// labelled "Cargo bed". The box IS the cargo area: it is what a player looks at to open the cargo, and what a big
+/// object must be within <see cref="LoadReach"/> of. Set the child's Network Mode to Snapshot (or Object), never Never,
+/// or clients do not get it. Nothing is built or guessed at run time. The vehicle is the nearest rigidbody up the
+/// hierarchy (a <see cref="FourWheelVehicle"/> or any other), found by <see cref="Vehicle"/>.
+/// </para>
+/// <para>
 /// The cargo is runtime only, like the vehicle: nothing saves it, and it is gone with the vehicle (a vehicle that is
 /// removed out of bounds first spills it, <see cref="Spill"/>). Anyone within reach may put things in and take them out;
 /// it has no owner. The grid lives in a <see cref="CrimeRecord"/> of its own that no player's save holds, so
 /// <see cref="StorageRules"/> works on it unchanged. A big object loaded into a car keeps its record in
 /// <c>placed_objects.json</c> (its last resting place), so a restart while it is aboard puts it back there rather than
-/// losing it. Attached to every <see cref="FourWheelVehicle"/> at run time by <see cref="VehicleCargoSystem"/>.
+/// losing it.
+/// </para>
 /// </remarks>
 public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 {
@@ -45,17 +56,26 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// <summary>How far, in world units, a player may stand from the vehicle's box and still use its cargo.</summary>
 	public const float ReachDistance = 250f;
 
+	/// <summary>The default for <see cref="LoadReach"/>.</summary>
+	public const float DefaultLoadReach = 50f;
+
 	/// <summary>
-	/// How far, in world units, a big object's box may be from the vehicle's cargo area (the cargo bed's box, not the vehicle's
-	/// origin or whole body) and still be loaded into it. A thing set down right behind the vehicle is well inside it.
+	/// How far, in world units, a big object's box may be from the cargo area (this bed's box, not the vehicle's origin or
+	/// whole body) and still be loaded into it. A thing set down right behind the vehicle is well inside the default.
 	/// </summary>
-	public const float LoadReach = 50f;
+	[Property, Range( 0, 400 )]
+	public float LoadReach { get; set; } = DefaultLoadReach;
 
-	/// <summary>The most big objects one cargo holds.</summary>
-	public const int MaxBigObjects = 3;
+	/// <summary>The most big objects this cargo holds.</summary>
+	[Property, Range( 0, 8 )]
+	public int MaxBigObjects { get; set; } = 3;
+
+	/// <summary>The room, in world units, added around a thing's own box when looking for a spot to unload it.</summary>
+	[Property, Range( 0, 50 )]
+	public float UnloadMargin { get; set; } = 6f;
 
 	/// <summary>
-	/// What the vehicle is called in the "Load into ..." list: "Buggy". Empty uses its object's name, capitalised.
+	/// What the vehicle is called in the "Load into ..." list: "Buggy". Empty uses the vehicle's name, capitalised.
 	/// </summary>
 	[Property]
 	public string TypeName { get; set; } = "";
@@ -68,6 +88,18 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	[Property, Range( 1, StorageRules.MaxRows )]
 	public int Rows { get; set; } = 4;
 
+	/// <summary>
+	/// The trigger box that is the cargo area. Added with the component; its size and place are the author's.
+	/// </summary>
+	[RequireComponent]
+	public BoxCollider Bed { get; set; }
+
+	/// <summary>
+	/// What the player looks at and presses Use on ("Manage cargo"). Added with the component; set its Range in the editor.
+	/// </summary>
+	[RequireComponent]
+	public Interactable Interact { get; set; }
+
 	// On the host: the grid in a record of its own, and the big objects aboard.
 	readonly CrimeRecord grid = new();
 	readonly List<CargoObject> objects = new();
@@ -75,6 +107,7 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	// On the machine of the player who asked: the big objects as the host last said.
 	List<CargoObject> view = [];
 
+	GameObject vehicle;
 	Rigidbody body;
 	float still;
 	Transform lastRest;
@@ -96,7 +129,22 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// The name the player reads for this vehicle.
 	/// </summary>
 	public string VehicleName =>
-		!string.IsNullOrWhiteSpace( TypeName ) ? TypeName.Trim() : CargoNaming.Prettify( GameObject.Name );
+		!string.IsNullOrWhiteSpace( TypeName ) ? TypeName.Trim() : CargoNaming.Prettify( Vehicle.Name );
+
+	/// <summary>
+	/// The vehicle this bed is on: the object of the nearest rigidbody at or above it (so a <see cref="FourWheelVehicle"/>,
+	/// or any other rigidbody vehicle), else the root of its hierarchy.
+	/// </summary>
+	public GameObject Vehicle
+	{
+		get
+		{
+			if ( !vehicle.IsValid() )
+				vehicle = Components.Get<Rigidbody>( FindMode.EverythingInSelfAndParent )?.GameObject ?? GameObject.Root;
+
+			return vehicle;
+		}
+	}
 
 	/// <summary>
 	/// The big objects aboard as this player's window last heard.
@@ -118,7 +166,7 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// <summary>
 	/// The vehicle's box in world space, wheels and all.
 	/// </summary>
-	BBox WorldBounds => GameObject.GetBounds();
+	BBox WorldBounds => Vehicle.GetBounds();
 
 	public override bool IsNear( Vector3 position ) =>
 		CargoMath.DistanceToBounds( WorldBounds, position ) <= Reach;
@@ -129,32 +177,45 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	public float DistanceTo( Vector3 position ) => CargoMath.DistanceToBounds( WorldBounds, position );
 
 	/// <summary>
+	/// The cargo area (the bed's box) in the vehicle's own space. Its corners are carried over, so a bed turned inside the
+	/// vehicle gives the box that holds it.
+	/// </summary>
+	public BBox AreaInVehicleSpace()
+	{
+		var box = Components.Get<BoxCollider>();
+
+		if ( !box.IsValid() )
+			return Vehicle.GetLocalBounds();
+
+		var half = box.Scale * 0.5f;
+		var corners = new[] { -1f, 1f }
+			.SelectMany( x => new[] { -1f, 1f }.SelectMany( y => new[] { -1f, 1f }.Select( z => new Vector3( x, y, z ) ) ) )
+			.Select( k => Vehicle.WorldTransform.PointToLocal( WorldTransform.PointToWorld( box.Center + k * half ) ) )
+			.ToList();
+
+		return new BBox(
+			new Vector3( corners.Min( k => k.x ), corners.Min( k => k.y ), corners.Min( k => k.z ) ),
+			new Vector3( corners.Max( k => k.x ), corners.Max( k => k.y ), corners.Max( k => k.z ) ) );
+	}
+
+	/// <summary>
 	/// How far an object is from the cargo area (0 when they touch or overlap). Measured in the vehicle's own space, so the
 	/// vehicle's turn does not widen the cargo area's box: the area is the bed's box as it is, and the object is its own
 	/// box, corners carried over into the vehicle's space.
 	/// </summary>
 	public float ReachTo( GameObject thing )
 	{
-		var bed = GameObject.Children.FirstOrDefault( x => x.Name == VehicleCargoSystem.BedName );
-		var box = bed.IsValid() ? bed.Components.Get<BoxCollider>() : null;
-		var area = GameObject.GetLocalBounds();
-
-		if ( box.IsValid() )
-		{
-			var centre = bed.LocalPosition + bed.LocalRotation * box.Center;
-			area = new BBox( centre - box.Scale * 0.5f, centre + box.Scale * 0.5f );
-		}
-
+		var area = AreaInVehicleSpace();
 		var local = thing.GetLocalBounds();
 		var corners = new[] { local.Mins.x, local.Maxs.x }
 			.SelectMany( x => new[] { local.Mins.y, local.Maxs.y }.SelectMany( y =>
 				new[] { local.Mins.z, local.Maxs.z }.Select( z => new Vector3( x, y, z ) ) ) )
-			.Select( c => WorldTransform.PointToLocal( thing.WorldTransform.PointToWorld( c ) ) )
+			.Select( k => Vehicle.WorldTransform.PointToLocal( thing.WorldTransform.PointToWorld( k ) ) )
 			.ToList();
 
 		var other = new BBox(
-			new Vector3( corners.Min( c => c.x ), corners.Min( c => c.y ), corners.Min( c => c.z ) ),
-			new Vector3( corners.Max( c => c.x ), corners.Max( c => c.y ), corners.Max( c => c.z ) ) );
+			new Vector3( corners.Min( k => k.x ), corners.Min( k => k.y ), corners.Min( k => k.z ) ),
+			new Vector3( corners.Max( k => k.x ), corners.Max( k => k.y ), corners.Max( k => k.z ) ) );
 
 		return CargoMath.DistanceBetween( area, other );
 	}
@@ -174,6 +235,10 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 
 	protected override void OnStart()
 	{
+		// The bed is a hit box for looking and loading, never a solid part of the vehicle.
+		if ( Game.IsPlaying && Components.Get<BoxCollider>() is { IsTrigger: false } solid )
+			solid.IsTrigger = true;
+
 		var option = InteractionSetup.EnsureOption(
 			this, OptionId, "Manage cargo", "inventory_2", "Load and unload what the vehicle carries." );
 
@@ -193,12 +258,28 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 			StorageMenu.Open( this );
 	}
 
+	protected override void DrawGizmos()
+	{
+		var box = Components.Get<BoxCollider>();
+
+		if ( !box.IsValid() )
+			return;
+
+		var area = new BBox( box.Center - box.Scale * 0.5f, box.Center + box.Scale * 0.5f );
+
+		Gizmo.Draw.Color = new Color( 1f, 0.6f, 0.1f, 0.12f );
+		Gizmo.Draw.SolidBox( area );
+		Gizmo.Draw.Color = new Color( 1f, 0.6f, 0.1f, 1f );
+		Gizmo.Draw.LineBBox( area );
+		Gizmo.Draw.Text( "Cargo bed", new Transform( box.Center + Vector3.Up * (box.Scale.z * 0.5f + 8f) ) );
+	}
+
 	protected override void OnFixedUpdate()
 	{
 		if ( !Game.IsPlaying || Networking.IsActive && !Networking.IsHost )
 			return;
 
-		body ??= Components.Get<Rigidbody>();
+		body ??= Vehicle.Components.Get<Rigidbody>();
 		var speed = body.IsValid() ? body.Velocity.Length : 0f;
 
 		if ( speed > 20f )
@@ -210,9 +291,9 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		// Where the vehicle last stood still: where a spill goes if the vehicle falls out of the world.
 		still += Time.Delta;
 
-		if ( still > 1f && WorldItemRules.IsPlace( WorldPosition ) )
+		if ( still > 1f && WorldItemRules.IsPlace( Vehicle.WorldPosition ) )
 		{
-			lastRest = WorldTransform;
+			lastRest = Vehicle.WorldTransform;
 			hasRest = true;
 		}
 	}
@@ -228,9 +309,13 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( !scene.IsValid() )
 			return [];
 
-		var all = scene.GetAllComponents<VehicleCargo>().Where( x => x.IsValid() ).ToList();
-		var order = CargoMath.NearestWithin( all.Select( x => x.ReachTo( thing ) ).ToList(), LoadReach );
-		return order.Select( i => all[i] ).ToList();
+		return scene.GetAllComponents<VehicleCargo>()
+			.Where( x => x.IsValid() )
+			.Select( x => (Cargo: x, Reach: x.ReachTo( thing )) )
+			.Where( x => x.Reach <= x.Cargo.LoadReach )
+			.OrderBy( x => x.Reach )
+			.Select( x => x.Cargo )
+			.ToList();
 	}
 
 	// -- Loading ------------------------------------------------------------------------------------------------------
@@ -256,7 +341,7 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 
 		var trace = Scene.Trace.Ray( from, to )
 			.IgnoreGameObjectHierarchy( placed.GameObject )
-			.IgnoreGameObjectHierarchy( GameObject );
+			.IgnoreGameObjectHierarchy( Vehicle );
 
 		foreach ( var player in Scene.GetAllComponents<PlayerController>() )
 			trace = trace.IgnoreGameObjectHierarchy( player.GameObject );
@@ -339,7 +424,7 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( PlaceableCatalog.Find( cargo.Placeable ) is not { } item )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		var rotation = Rotation.FromYaw( WorldRotation.Yaw() );
+		var rotation = Rotation.FromYaw( Vehicle.WorldRotation.Yaw() );
 		var size = cargo.Maxs - cargo.Mins;
 		var box = size.x > 1f && size.y > 1f && size.z > 1f ? new BBox( cargo.Mins, cargo.Maxs ) : DeliverySpot.Hull;
 
@@ -369,11 +454,11 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( WorldItem.CountInScene( Scene ) >= WorldItem.MaxInScene )
 			return CrimeResult.Fail( "There are too many things on the ground." );
 
-		if ( UnloadSpot( ItemHull, Rotation.FromYaw( WorldRotation.Yaw() ) ) is not { } spot )
+		if ( UnloadSpot( ItemHull, Rotation.FromYaw( Vehicle.WorldRotation.Yaw() ) ) is not { } spot )
 			return CrimeResult.Fail( NoRoom );
 
 		// The item is made first and taken out of the grid second, so a failure loses nothing.
-		if ( !WorldItem.Spawn( item.Clone(), spot, Rotation.FromYaw( WorldRotation.Yaw() ), Vector3.Zero ).IsValid() )
+		if ( !WorldItem.Spawn( item.Clone(), spot, Rotation.FromYaw( Vehicle.WorldRotation.Yaw() ), Vector3.Zero ).IsValid() )
 			return CrimeResult.Fail( "It will not come out." );
 
 		StorageRules.Extract( grid, CargoId, slot );
@@ -386,9 +471,6 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// <summary>What the player is told when nothing can be put down anywhere around the vehicle.</summary>
 	public const string NoRoom = "There's no room to unload that here.";
 
-	/// <summary>The room added around a thing's own box when looking for a spot, in world units.</summary>
-	const float UnloadMargin = 6f;
-
 	/// <summary>
 	/// The origin to give a thing whose box is <paramref name="box"/> (in its own space) so that it stands in free room
 	/// next to the vehicle, or null when there is none. The candidates (<see cref="CargoMath.UnloadCandidates"/>) go in
@@ -398,15 +480,17 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// </summary>
 	public Vector3? UnloadSpot( BBox box, Rotation rotation )
 	{
-		var bounds = GameObject.GetLocalBounds();
-		var level = WorldTransform.PointToWorld( new Vector3( 0, 0, bounds.Mins.z ) ).z;
+		var tf = Vehicle.WorldTransform;
+		var bounds = Vehicle.GetLocalBounds();
+		var bedX = AreaInVehicleSpace().Center.x;
+		var level = tf.PointToWorld( new Vector3( 0, 0, bounds.Mins.z ) ).z;
 		var half = new Vector3( box.Size.x * 0.5f + UnloadMargin, box.Size.y * 0.5f + UnloadMargin, box.Size.z + UnloadMargin );
 		var hull = new BBox( new Vector3( -half.x, -half.y, 0 ), new Vector3( half.x, half.y, half.z ) );
 
 		// From the middle of the bottom of the box to the object's origin.
 		var toOrigin = rotation * -new Vector3( box.Center.x, box.Center.y, box.Mins.z );
 
-		foreach ( var candidate in CargoMath.UnloadCandidates( WorldTransform, bounds, half ) )
+		foreach ( var candidate in CargoMath.UnloadCandidates( tf, bounds, half, bedX ) )
 		{
 			if ( candidate.Kind == CargoMath.UnloadKind.Above )
 			{
@@ -417,10 +501,10 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 				continue;
 			}
 
-			if ( CargoMath.Overlaps( WorldTransform, bounds, half, candidate.Position ) )
+			if ( CargoMath.Overlaps( tf, bounds, half, candidate.Position ) )
 				continue;
 
-			if ( DeliverySpot.FindRoom( Scene, candidate.Position, level, hull, rotation, 60f, GameObject ) is { } floor )
+			if ( DeliverySpot.FindRoom( Scene, candidate.Position, level, hull, rotation, 60f, Vehicle ) is { } floor )
 				return floor + toOrigin;
 		}
 
@@ -437,7 +521,7 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( !Networking.IsHost || !Scene.IsValid() )
 			return;
 
-		var at = hasRest ? lastRest : WorldTransform;
+		var at = hasRest ? lastRest : Vehicle.WorldTransform;
 		var taken = new List<Vector3>();
 
 		foreach ( var cargo in objects.ToList() )
