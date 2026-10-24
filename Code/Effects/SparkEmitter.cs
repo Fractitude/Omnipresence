@@ -18,6 +18,9 @@ public sealed class SparkEmitter : Component
 	/// <summary>The side of the spark texture made here, in pixels.</summary>
 	const int SparkTextureSize = 32;
 
+	/// <summary>The crackle a clump plays when it isn't given one.</summary>
+	const string DefaultCrackle = "sounds/effects/sparks.sound";
+
 	/// <summary>Whether sparks are coming off it right now.</summary>
 	[Property] public bool Emitting { get; set; } = true;
 
@@ -75,6 +78,23 @@ public sealed class SparkEmitter : Component
 	[Property] public Sprite Sprite { get; set; }
 
 	/// <summary>
+	/// What a clump sounds like. Empty uses the crackle that ships with the game — three takes, picked at random, in
+	/// `sounds/effects/sparks.sound`.
+	/// </summary>
+	[Property] public SoundEvent Crackle { get; set; }
+
+	/// <summary>How loud the crackle is, 0 to 1, on top of the sound's own volume.</summary>
+	[Property, Range( 0f, 1f )]
+	public float CrackleVolume { get; set; } = 1f;
+
+	/// <summary>
+	/// The shortest gap between two crackles, in seconds. A clump every 0.07 of a second would machine-gun the sample;
+	/// this keeps the sound to the clumps that matter and lets the rest be silent sparks.
+	/// </summary>
+	[Property, Range( 0f, 1f )]
+	public float CrackleGap { get; set; } = 0.15f;
+
+	/// <summary>
 	/// Whether the sparks are drawn additively. Additive is the hotter look on a dark background, but it disappears
 	/// against a bright sky; off, the sparks keep their own colour wherever they are.
 	/// </summary>
@@ -95,6 +115,9 @@ public sealed class SparkEmitter : Component
 
 	/// <summary>How much of the next clump has been earned, so the clumps come out evenly.</summary>
 	float pending;
+
+	/// <summary>How long since the last crackle, so one clump in a burst is the one that is heard.</summary>
+	RealTimeSince sinceCrackle = float.MaxValue;
 
 	Sprite defaultSprite;
 
@@ -162,6 +185,8 @@ public sealed class SparkEmitter : Component
 		if ( !Picture.IsValid() )
 			return;
 
+		CrackleSound();
+
 		if ( Flash )
 			MakeSpark( FlashSize, FlashLifetime );
 
@@ -208,6 +233,28 @@ public sealed class SparkEmitter : Component
 		spark.Gravity = Gravity;
 		spark.Tint = Tint;
 		spark.Velocity = direction.Normal * Speed * (0.55f + System.Random.Shared.NextSingle() * 0.75f);
+	}
+
+	/// <summary>
+	/// Play the crackle, if enough has passed since the last one. The sound is picked, pitched and levelled a little
+	/// differently every time, by the sound asset and here, so a sparking camera doesn't sound like a loop.
+	/// </summary>
+	void CrackleSound()
+	{
+		if ( sinceCrackle < CrackleGap )
+			return;
+
+		sinceCrackle = 0;
+
+		var handle = Crackle is not null
+			? Sound.Play( Crackle, WorldPosition )
+			: Sound.Play( DefaultCrackle, WorldPosition );
+
+		if ( handle is null )
+			return;
+
+		handle.Volume = CrackleVolume * (0.8f + System.Random.Shared.NextSingle() * 0.3f);
+		handle.Pitch = 0.92f + System.Random.Shared.NextSingle() * 0.2f;
 	}
 
 	/// <summary>A single bulb for all the sparks, brightened as a clump goes off.</summary>

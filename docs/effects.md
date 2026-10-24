@@ -53,6 +53,22 @@ and crackling out. A camera with a bad earth, a cut cable, a machine burning out
   cut from one is mostly empty and the sizes stop meaning anything. Both emitters build a texture that fills its own
   square.
 
+## The sparks' sound
+
+A sparking camera is only half there without the noise, so the spark emitter came with a crackle of its own:
+`Assets/sounds/effects/sparks.sound`, a `SoundEvent` holding three short takes. `SoundEvent` picks one at random
+(`SelectionMode: Random`) and varies it (`Volume: 0.45 0.7`, `Pitch: 0.9 1.15`), so a camera that sparks for a minute
+doesn't sound like a loop. Distance attenuation over 700 units, with occlusion on.
+
+The takes are made, not found: `tools/audio/make_spark_crackle.py` writes `Assets/sounds/effects/sparks_{1,2,3}.wav` —
+a burst of bright noise that dies in tens of milliseconds, a handful of small ticks across its first tenth of a second,
+and a little low body so it reads as a spark rather than a hiss. Run it by hand and let the editor compile the wavs; it
+is not part of the build, and the wavs are committed so the game doesn't depend on Python.
+
+`SparkEmitter` plays it from `Clump`: `Crackle` (empty means the asset above), `CrackleVolume` on top of the sound's own
+volume, and `CrackleGap` — the shortest time between two crackles, 0.15 s by default. A clump every 0.07 s would
+machine-gun the sample; the gap keeps the sound to the clumps that matter and lets the rest be silent sparks.
+
 ## The broken camera's sparks
 
 `SecurityCamera.EnsureSparks` finds the emitter a camera already has, or makes one at the top of its body
