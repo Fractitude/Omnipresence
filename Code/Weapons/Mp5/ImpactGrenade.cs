@@ -4,9 +4,9 @@
 /// </summary>
 public sealed class ImpactGrenade : ProjectileEntity, Component.IDamageable
 {
-	[Property] public float ExplosionRadius { get; set; } = 200f;
-	[Property] public float ExplosionDamage { get; set; } = 125f;
-	[Property] public float ExplosionForce { get; set; } = 1f;
+	[Property] public float ExplosionRadius { get; set; } = 150f;
+	[Property] public float ExplosionDamage { get; set; } = 100f;
+	[Property] public float ExplosionForce { get; set; } = 0.5f;
 
 	/// <summary>Seconds before a round that never hit anything is removed.</summary>
 	[Property] public float Lifetime { get; set; } = 10f;

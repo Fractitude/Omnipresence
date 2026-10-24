@@ -9,7 +9,7 @@ public sealed class Mp5Weapon : BaseBulletWeapon
 	/// <summary>
 	/// Launch speed of the grenade.
 	/// </summary>
-	[Property, Feature( "Grenade Launcher" )] public float GrenadeSpeed { get; set; } = 1500f;
+	[Property, Feature( "Grenade Launcher" )] public float GrenadeSpeed { get; set; } = 1000f;
 
 	/// <summary>
 	/// Reserve grenades granted on first pickup - reloads top the launcher's magazine up from these.
