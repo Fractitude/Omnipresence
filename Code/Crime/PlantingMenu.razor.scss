@@ -57,6 +57,7 @@ PlantingMenu
 
 .product
 {
+	flex-shrink: 0;
 	align-items: center;
 	gap: 14px;
 	padding: 10px 12px;
@@ -152,6 +153,7 @@ PlantingMenu
 
 .notice
 {
+	flex-shrink: 0;
 	padding: 8px 10px;
 	border-radius: 6px;
 	background-color: rgba(242, 238, 226, 0.1);

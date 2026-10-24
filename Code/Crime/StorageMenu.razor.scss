@@ -146,6 +146,7 @@ StorageMenu
 
 .notice
 {
+	flex-shrink: 0;
 	padding: 8px 10px;
 	border-radius: 6px;
 	background-color: rgba(242, 238, 226, 0.1);
@@ -153,6 +154,7 @@ StorageMenu
 
 .hint
 {
+	flex-shrink: 0;
 	font-size: 13px;
 	opacity: 0.6;
 }
