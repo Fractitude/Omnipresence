@@ -114,5 +114,54 @@ public static class DeliverySpot
 		return overlapTrace.Run().Hit ? null : floor;
 	}
 
+	/// <summary>
+	/// Like <see cref="FindFloor"/> for a box turned by <paramref name="rotation"/>, and stricter: the floor under it is
+	/// level and supported at its four bottom corners, and nothing at all (the world, the vehicle, players, other solid
+	/// props) overlaps the box. Only the floor search ignores <paramref name="floorIgnore"/> (the vehicle's own wheels
+	/// must not count as floor); the overlap test does not, so the vehicle's body is in the way like anything else.
+	/// <paramref name="hull"/> has the middle of its bottom at the origin. Returns the spot, or null.
+	/// </summary>
+	public static Vector3? FindRoom(
+		Scene scene, Vector3 candidate, float level, BBox hull, Rotation rotation, float maxStep, GameObject floorIgnore )
+	{
+		var down = scene.Trace.Box( hull, candidate + Vector3.Up * 60f, candidate + Vector3.Down * 200f )
+			.Rotated( rotation )
+			.WithoutTags( "trigger" );
+
+		if ( floorIgnore.IsValid() )
+			down = down.IgnoreGameObjectHierarchy( floorIgnore );
+
+		var ground = down.Run();
+
+		if ( !ground.Hit || ground.StartedSolid || ground.Normal.z < 0.7f
+		     || System.Math.Abs( ground.EndPosition.z - level ) > maxStep )
+			return null;
+
+		var floor = ground.EndPosition + Vector3.Up * 2f;
+
+		// Supported: floor within reach under each bottom corner, so nothing hangs over an edge.
+		foreach ( var corner in new[] { (hull.Mins.x, hull.Mins.y), (hull.Mins.x, hull.Maxs.y), (hull.Maxs.x, hull.Mins.y),
+			         (hull.Maxs.x, hull.Maxs.y) } )
+		{
+			var at = floor + rotation * new Vector3( corner.Item1 * 0.9f, corner.Item2 * 0.9f, 0 );
+			var probe = scene.Trace.Ray( at + Vector3.Up * 8f, at + Vector3.Down * 24f ).WithoutTags( "trigger" );
+
+			if ( floorIgnore.IsValid() )
+				probe = probe.IgnoreGameObjectHierarchy( floorIgnore );
+
+			if ( !probe.Run().Hit )
+				return null;
+		}
+
+		return IsClear( scene, floor, hull, rotation ) ? floor : null;
+	}
+
+	/// <summary>
+	/// Whether the box (middle of its bottom at <paramref name="at"/>, turned by <paramref name="rotation"/>) overlaps
+	/// nothing solid.
+	/// </summary>
+	public static bool IsClear( Scene scene, Vector3 at, BBox hull, Rotation rotation ) =>
+		!scene.Trace.Box( hull, at, at ).Rotated( rotation ).WithoutTags( "trigger" ).Run().Hit;
+
 	static Vector3? Free( Scene scene, Vector3 candidate, float level ) => FindFloor( scene, candidate, level, Hull );
 }

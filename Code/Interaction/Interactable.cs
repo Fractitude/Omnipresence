@@ -131,9 +131,15 @@ public sealed class Interactable : Component, Component.IPressable
 			if ( direction.Length < 1f )
 				return true;
 
-			var trace = Scene.Trace.Ray( eye, point + direction.Normal * 2f )
-				.IgnoreGameObjectHierarchy( player )
-				.Run();
+			var ray = Scene.Trace.Ray( eye, point + direction.Normal * 2f )
+				.IgnoreGameObjectHierarchy( player );
+
+			// A trigger (a hit box that must not be solid, like a vehicle's cargo bed) is only hit when asked for. Without
+			// this a trigger could be looked at but never used. A solid in front still blocks the ray first.
+			if ( collider.IsTrigger )
+				ray = ray.HitTriggers();
+
+			var trace = ray.Run();
 
 			if ( trace.Hit && colliders.Contains( trace.Collider ) )
 				return true;

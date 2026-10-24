@@ -15,6 +15,11 @@ public sealed class CargoObject
 
 	/// <summary>The buyer's Steam id, put back on the object.</summary>
 	public ulong Owner { get; set; }
+
+	/// <summary>The corners of its box in its own space, as it was loaded, so unloading knows how much room it needs.</summary>
+	public Vector3 Mins { get; set; }
+
+	public Vector3 Maxs { get; set; }
 }
 
 /// <summary>
@@ -197,6 +202,35 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	// -- Loading ------------------------------------------------------------------------------------------------------
 
 	/// <summary>
+	/// The vehicles an object can be loaded into: within <see cref="LoadRange"/> and in clear sight, nearest first. The host
+	/// asks this again when the option is used.
+	/// </summary>
+	public static List<VehicleCargo> LoadTargets( PlacedObject placed ) =>
+		!placed.IsValid() ? [] : Near( placed.Scene, placed.WorldPosition ).Where( x => x.CanSee( placed ) ).ToList();
+
+	/// <summary>
+	/// Whether a ray from the middle of the object's box to the middle of the vehicle's box is clear: it ignores the
+	/// object, the vehicle with its children and the players, and is stopped by the world and any other solid prop.
+	/// </summary>
+	public bool CanSee( PlacedObject placed )
+	{
+		if ( !placed.IsValid() || !Scene.IsValid() )
+			return false;
+
+		var from = CargoMath.Centre( placed.GameObject.GetBounds() );
+		var to = CargoMath.Centre( WorldBounds );
+
+		var trace = Scene.Trace.Ray( from, to )
+			.IgnoreGameObjectHierarchy( placed.GameObject )
+			.IgnoreGameObjectHierarchy( GameObject );
+
+		foreach ( var player in Scene.GetAllComponents<PlayerController>() )
+			trace = trace.IgnoreGameObjectHierarchy( player.GameObject );
+
+		return !trace.Run().Hit;
+	}
+
+	/// <summary>
 	/// Whether another big object fits.
 	/// </summary>
 	public bool HasObjectRoom => objects.Count < MaxBigObjects;
@@ -215,13 +249,22 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( !HasObjectRoom )
 			return CrimeResult.Fail( $"The {VehicleName.ToLowerInvariant()}'s cargo is full." );
 
-		if ( DistanceTo( placed.WorldPosition ) > LoadRange )
+		if ( !CargoMath.CanLoad( DistanceTo( placed.WorldPosition ), LoadRange, true ) )
 			return CrimeResult.Fail( $"Move it closer to the {VehicleName.ToLowerInvariant()}." );
+
+		if ( !CanSee( placed ) )
+			return CrimeResult.Fail( $"Something is in the way of the {VehicleName.ToLowerInvariant()}." );
 
 		if ( objects.Any( x => x.Id == placed.ObjectId ) )
 			return CrimeResult.Fail( "It is already aboard." );
 
-		objects.Add( new CargoObject { Placeable = item.Id, Id = placed.ObjectId, Owner = placed.BuyerId } );
+		var box = placed.GameObject.GetLocalBounds();
+
+		objects.Add( new CargoObject
+		{
+			Placeable = item.Id, Id = placed.ObjectId, Owner = placed.BuyerId, Mins = box.Mins, Maxs = box.Maxs,
+		} );
+
 		placed.GameObject.Destroy();
 		return CrimeResult.Success( $"Loaded the {item.Name} into the {VehicleName.ToLowerInvariant()}." );
 	}
@@ -262,11 +305,14 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( PlaceableCatalog.Find( cargo.Placeable ) is not { } item )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		if ( RearSpot( DeliverySpot.Hull ) is not { } spot )
-			return CrimeResult.Fail( "There is no room behind the vehicle." );
+		var rotation = Rotation.FromYaw( WorldRotation.Yaw() );
+		var size = cargo.Maxs - cargo.Mins;
+		var box = size.x > 1f && size.y > 1f && size.z > 1f ? new BBox( cargo.Mins, cargo.Maxs ) : DeliverySpot.Hull;
 
-		var go = PlacedObjectRegistry.Create( item, cargo.Id, cargo.Owner, spot, Rotation.FromYaw( WorldRotation.Yaw() ),
-			Scene );
+		if ( UnloadSpot( box, rotation ) is not { } spot )
+			return CrimeResult.Fail( NoRoom );
+
+		var go = PlacedObjectRegistry.Create( item, cargo.Id, cargo.Owner, spot, rotation, Scene );
 
 		if ( !go.IsValid() )
 			return CrimeResult.Fail( "It will not come out." );
@@ -289,8 +335,8 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( WorldItem.CountInScene( Scene ) >= WorldItem.MaxInScene )
 			return CrimeResult.Fail( "There are too many things on the ground." );
 
-		if ( RearSpot( ItemHull ) is not { } spot )
-			return CrimeResult.Fail( "There is no room behind the vehicle." );
+		if ( UnloadSpot( ItemHull, Rotation.FromYaw( WorldRotation.Yaw() ) ) is not { } spot )
+			return CrimeResult.Fail( NoRoom );
 
 		// The item is made first and taken out of the grid second, so a failure loses nothing.
 		if ( !WorldItem.Spawn( item.Clone(), spot, Rotation.FromYaw( WorldRotation.Yaw() ), Vector3.Zero ).IsValid() )
@@ -303,20 +349,45 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// <summary>The room an item needs on the ground.</summary>
 	static readonly BBox ItemHull = new( new Vector3( -14, -14, 0 ), new Vector3( 14, 14, 28 ) );
 
+	/// <summary>What the player is told when nothing can be put down anywhere around the vehicle.</summary>
+	public const string NoRoom = "There's no room to unload that here.";
+
+	/// <summary>The room added around a thing's own box when looking for a spot, in world units.</summary>
+	const float UnloadMargin = 6f;
+
 	/// <summary>
-	/// A free floor spot behind the rear of the vehicle for something of this size, never inside the vehicle's box, or
-	/// null when every candidate is blocked.
+	/// The origin to give a thing whose box is <paramref name="box"/> (in its own space) so that it stands in free room
+	/// next to the vehicle, or null when there is none. The candidates (<see cref="CargoMath.UnloadCandidates"/>) go in
+	/// priority order: behind the rear and farther behind, then beside the vehicle on each side, then above it. Each is
+	/// dropped to the floor and must have a level, supported floor and no overlap with the world, the vehicle, a player
+	/// or another solid object (<see cref="DeliverySpot.FindRoom"/>). Host only.
 	/// </summary>
-	public Vector3? RearSpot( BBox hull, IReadOnlyCollection<Vector3> taken = null )
+	public Vector3? UnloadSpot( BBox box, Rotation rotation )
 	{
 		var bounds = GameObject.GetLocalBounds();
 		var level = WorldTransform.PointToWorld( new Vector3( 0, 0, bounds.Mins.z ) ).z;
+		var half = new Vector3( box.Size.x * 0.5f + UnloadMargin, box.Size.y * 0.5f + UnloadMargin, box.Size.z + UnloadMargin );
+		var hull = new BBox( new Vector3( -half.x, -half.y, 0 ), new Vector3( half.x, half.y, half.z ) );
 
-		foreach ( var candidate in CargoMath.RearCandidates( WorldTransform, bounds, hull.Size.y, hull.Size.x ) )
+		// From the middle of the bottom of the box to the object's origin.
+		var toOrigin = rotation * -new Vector3( box.Center.x, box.Center.y, box.Mins.z );
+
+		foreach ( var candidate in CargoMath.UnloadCandidates( WorldTransform, bounds, half ) )
 		{
-			if ( DeliverySpot.FindFloor( Scene, candidate, level, hull, 60f, GameObject ) is { } floor
-			     && !CargoMath.IsInside( WorldTransform, bounds, floor ) && !DeliverySpot.IsTaken( floor, taken ) )
-				return floor;
+			if ( candidate.Kind == CargoMath.UnloadKind.Above )
+			{
+				// In the air over the vehicle: only free room is needed, it lands on the vehicle.
+				if ( DeliverySpot.IsClear( Scene, candidate.Position, hull, rotation ) )
+					return candidate.Position + toOrigin;
+
+				continue;
+			}
+
+			if ( CargoMath.Overlaps( WorldTransform, bounds, half, candidate.Position ) )
+				continue;
+
+			if ( DeliverySpot.FindRoom( Scene, candidate.Position, level, hull, rotation, 60f, GameObject ) is { } floor )
+				return floor + toOrigin;
 		}
 
 		return null;

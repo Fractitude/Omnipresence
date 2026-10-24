@@ -101,7 +101,7 @@ public sealed class PlacedObject : Component, IInteractionHandler
 		if ( sinceNear > 0.25f )
 		{
 			sinceNear = 0;
-			near = VehicleCargo.Near( Scene, WorldPosition ).Take( MaxLoadOptions ).ToList();
+			near = VehicleCargo.LoadTargets( this ).Take( MaxLoadOptions ).ToList();
 		}
 
 		return near;
@@ -136,7 +136,7 @@ public sealed class PlacedObject : Component, IInteractionHandler
 			return;
 
 		// The host works the list out again from its own world, never from what the client saw.
-		var vehicles = VehicleCargo.Near( Scene, WorldPosition ).Take( MaxLoadOptions ).ToList();
+		var vehicles = VehicleCargo.LoadTargets( this ).Take( MaxLoadOptions ).ToList();
 		var crime = e.Interactor?.Components.Get<PlayerCrime>();
 
 		if ( index >= vehicles.Count )
