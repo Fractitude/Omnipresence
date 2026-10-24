@@ -1,6 +1,6 @@
 # Storage boxes
 
-A storage box holds what does not fit in the bag. A player walks up, opens it, and moves items between the bag and the box. A box belongs to the first player who opens it.
+A storage box holds what does not fit in the bag. A player walks up, opens it, and moves items between the bag and the box. Anyone may open any box: a box is not private. It belongs to the first player who opens it — that owner's record is where its contents are kept — but whoever stands at it can put things in and take things out.
 
 ## What exists, and where
 
@@ -25,8 +25,8 @@ A storage box holds what does not fit in the bag. A player walks up, opens it, a
 ## Security
 
 - All moves run on the host as `[Rpc.Host]` requests on the box (`RequestRefresh`; right click: `RequestStore( bagSlot )`, `RequestTake( boxSlot )`; drag: `RequestStoreTo( bagSlot, boxSlot )`, `RequestTakeTo( boxSlot, bagSlot )`, `RequestMoveInBox( from, to )`, `RequestMoveInBag( from, to )`; with Shift or Ctrl: `RequestStack( fromSide, from, toSide, to, mode )`, sides 0 bag and 1 box). The box is the network object the request goes to, so only slot indices travel.
-- The host takes the player from `Rpc.Caller` (`PlayerCrime.For`), never from the message. It checks the record is loaded, that the player stands within `StorageBox.Reach` (300) of THIS box, and that they may use it, then calls `StorageRules`.
-- `StorageBox.CanUse( steamId )` is the one place that decides who may open a box: the owner, or anyone while it is unclaimed. Raiding will change it there. Anyone else gets "This isn't your storage." and the panel closes.
+- The host takes the player from `Rpc.Caller` (`PlayerCrime.For`), never from the message. It checks the record is loaded, and that the player stands within `StorageBox.Reach` (300) of THIS box, then calls `StorageRules`.
+- **Anyone may use any box.** There is no ownership check: the box is the only gate, and it is where the box is, not whose it is. The one thing that must be checked is which record the contents are in, `StorageBox.RecordOf( ownerId )`: the owner's own player object when they are here, else the copy the host has in memory, else the owner's record read from the store — so a box whose owner is away still holds what they left in it, and anyone can add to or empty it. Nothing is read from the caller's record.
 - A move checks everything before it changes anything. `Store` and `StoreTo` remove from the bag and then put in the box (a swap first puts the displaced item in the freed bag slot, and undoes the removal if that fails); `TakeTo` does the mirror image; `Take` adds to the bag first and only then empties the box slot; `MoveInBox` swaps two entries; `Stack` plans the result in `StackRules.Plan`, checks it, and only then writes the two slots. A failure leaves both sides as they were, so an item is never lost or doubled. An item moves whole, with every field (`Kind`, `Count`, `Quality`, `OrderId`, `Contents`, paths).
 - The contents are in the owner's record on the host. The host sends them to the player who asked, to nobody else (`Rpc.FilterInclude`); the box's synced state is only the owner's Steam id. A client keeps the contents only while the panel is open.
 - The claim is made by the host on the first request from a player in reach, written to `storage.json` at once.
@@ -34,7 +34,7 @@ A storage box holds what does not fit in the bag. A player walks up, opens it, a
 ## Saved
 
 - The contents live in `CrimeRecord.Storage`, a section of the player's record next to the bag's items. They are saved with the record (the debounced save), restored when the player loads, and a season wipe of the crime state resets them with the rest. A record with no `Storage` (an old save) loads as empty.
-- Nothing needs the player's object: the box reads and writes the owner's record. The record is checked on load (`StorageRules.Clean`): ids must be plain, at most 20 boxes per player, slot indexes 0 to 95 and unique, an item of an unknown kind is dropped, counts (a stack above its kind's size is split into several stacks in free slots of the same box, up to slot 96, not clamped; 9999 tabs become 39 x 256 + 15) and qualities (0 to 100) are clamped, parcel contents are capped, text is cut short. An ordinary item (not from the catalogue) keeps its name, description and paths.
+- Nothing needs the player's object: the box reads and writes the owner's record. When the owner is here their own player object saves it (`PlayerProgress.NotifyChanged`); when they are away the box writes it (`PlayerProgression.SaveAsync`) and lets go of the record unless something of theirs is still waiting on the clock. The record is checked on load (`StorageRules.Clean`): ids must be plain, at most 20 boxes per player, slot indexes 0 to 95 and unique, an item of an unknown kind is dropped, counts (a stack above its kind's size is split into several stacks in free slots of the same box, up to slot 96, not clamped; 9999 tabs become 39 x 256 + 15) and qualities (0 to 100) are clamped, parcel contents are capped, text is cut short. An ordinary item (not from the catalogue) keeps its name, description and paths.
 - A cancelled order (the deadline passed) removes its parcel from the bag and from every box, for a player who is playing and for one who is away (`CrimeRules.Cancel` calls `StorageRules.RemoveParcelsOf` on the record).
 - If a box is made smaller later, items beyond the new size stay in the record and can still be taken, but nothing new goes there.
 - `progress_test_data on` also keeps the claims in `storage_test.json`.
@@ -56,5 +56,5 @@ The prefab is `Assets/crime/storage_box.prefab`: a root with `StorageBox`, `Inte
 
 ## Not done
 
-- Raiding another player's box (`CanUse` is the place for it).
+- Boxing items in: nothing stops a player from emptying a box they come across — there is no lock, no permission and no crime cost for it yet.
 - Stacking of seeds, parcels and ordinary items (only drug products and raw materials combine).

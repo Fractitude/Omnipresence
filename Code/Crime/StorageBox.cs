@@ -4,15 +4,15 @@ namespace Sandbox;
 /// A storage box: a grid of slots a player can offload their bag into. Using it opens the storage panel
 /// (<see cref="StorageMenu"/>) on the player's own screen; the press itself changes nothing (the option runs on the
 /// player's client, <see cref="InteractionSide.Local"/>). Every move is a request to the host, which takes the player
-/// from the network (<c>Rpc.Caller</c>), checks they stand within <see cref="Reach"/> of THIS box and may use it
-/// (<see cref="CanUse"/>), checks the slots and the items, and moves one item at a time (<see cref="StorageRules"/>).
-/// Only slot indices cross the network.
+/// from the network (<c>Rpc.Caller</c>), checks they stand within <see cref="Reach"/> of THIS box, checks the slots and
+/// the items, and moves one item at a time (<see cref="StorageRules"/>). Only slot indices cross the network.
 /// </summary>
 /// <remarks>
-/// A box belongs to the first player who uses it, remembered by <see cref="StorageRegistry"/> across restarts. What it
-/// holds is in the owner's <see cref="CrimeRecord.Storage"/>, under <see cref="BoxId"/>, not in this component: it is
-/// saved with the owner, and works while the owner is away. The host sends the contents to the player who asks, and to
-/// nobody else. Put it with an <see cref="Interactable"/> and a collider, and make the object a network object.
+/// Anyone may open and use any box. A box belongs to the first player who uses it, remembered by
+/// <see cref="StorageRegistry"/> across restarts, and that owner's <see cref="CrimeRecord.Storage"/> is where what is
+/// in it lives, under <see cref="BoxId"/>: the contents are one set for everyone who opens it, saved with the
+/// owner, and reachable while the owner is away. The host sends the contents to the player who asks, and to nobody
+/// else. Put it with an <see cref="Interactable"/> and a collider, and make the object a network object.
 /// </remarks>
 public sealed class StorageBox : Component, IInteractionHandler
 {
@@ -93,28 +93,9 @@ public sealed class StorageBox : Component, IInteractionHandler
 	}
 
 	/// <summary>
-	/// Whether this player may use the box: it is theirs, or nobody's yet. The one place that decides who may open it,
-	/// so raiding can change it later.
-	/// </summary>
-	public bool CanUse( ulong steamId ) => OwnerId == 0 || OwnerId == steamId;
-
-	/// <summary>
 	/// Whether a position is within <see cref="Reach"/> of this box.
 	/// </summary>
 	public bool IsNear( Vector3 position ) => WorldPosition.Distance( position ) <= Reach;
-
-	InteractionInfo? IInteractionHandler.Describe( InteractionEvent e )
-	{
-		if ( e.Option?.Id != OptionId )
-			return null;
-
-		var owner = e.Interactor?.Network.Owner ?? Connection.Local;
-		var me = owner is null ? 0UL : (ulong)owner.SteamId;
-
-		return CanUse( me )
-			? new( "Open storage", "inventory", "Keep things here when your bag is full." )
-			: new( "Open storage", "inventory", "This isn't your storage.", false );
-	}
 
 	void IInteractionHandler.OnInteract( InteractionEvent e )
 	{
@@ -129,84 +110,50 @@ public sealed class StorageBox : Component, IInteractionHandler
 	/// to the caller alone.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestRefresh()
-	{
-		if ( Begin() is { } who )
-			Reply( who, CrimeResult.Success() );
-	}
+	public void RequestRefresh() => _ = Ask( who => CrimeResult.Success(), moves: false );
 
 	/// <summary>
 	/// Move the item in a bag slot to the first free slot of the box.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestStore( int bagSlot )
-	{
-		if ( Begin() is not { } who )
-			return;
-
-		Reply( who, StorageRules.Store( who.Crime, BoxId, Capacity, who.Bag, bagSlot ) );
-	}
+	public void RequestStore( int bagSlot ) =>
+		_ = Ask( who => StorageRules.Store( who.Keeper.Crime, BoxId, Capacity, who.Bag, bagSlot ) );
 
 	/// <summary>
 	/// Move the item in a slot of the box to the first free bag slot.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestTake( int boxSlot )
-	{
-		if ( Begin() is not { } who )
-			return;
-
-		Reply( who, StorageRules.Take( who.Crime, BoxId, who.Bag, boxSlot ) );
-	}
+	public void RequestTake( int boxSlot ) =>
+		_ = Ask( who => StorageRules.Take( who.Keeper.Crime, BoxId, who.Bag, boxSlot ) );
 
 	/// <summary>
 	/// Move the item in a slot of the box to another slot of the box, swapping with what is there.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestMoveInBox( int from, int to )
-	{
-		if ( Begin() is not { } who )
-			return;
-
-		Reply( who, StorageRules.MoveInBox( who.Crime, BoxId, Capacity, from, to ) );
-	}
+	public void RequestMoveInBox( int from, int to ) =>
+		_ = Ask( who => StorageRules.MoveInBox( who.Keeper.Crime, BoxId, Capacity, from, to ) );
 
 	/// <summary>
 	/// Move the item in a bag slot to a chosen slot of the box (a drag). An item there goes to the freed bag slot.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestStoreTo( int bagSlot, int boxSlot )
-	{
-		if ( Begin() is not { } who )
-			return;
-
-		Reply( who, StorageRules.StoreTo( who.Crime, BoxId, Capacity, who.Bag, bagSlot, boxSlot ) );
-	}
+	public void RequestStoreTo( int bagSlot, int boxSlot ) =>
+		_ = Ask( who => StorageRules.StoreTo( who.Keeper.Crime, BoxId, Capacity, who.Bag, bagSlot, boxSlot ) );
 
 	/// <summary>
 	/// Move the item in a slot of the box to a chosen bag slot (a drag). An item there goes to the freed box slot.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestTakeTo( int boxSlot, int bagSlot )
-	{
-		if ( Begin() is not { } who )
-			return;
-
-		Reply( who, StorageRules.TakeTo( who.Crime, BoxId, who.Bag, boxSlot, bagSlot ) );
-	}
+	public void RequestTakeTo( int boxSlot, int bagSlot ) =>
+		_ = Ask( who => StorageRules.TakeTo( who.Keeper.Crime, BoxId, who.Bag, boxSlot, bagSlot ) );
 
 	/// <summary>
 	/// Move the item in a bag slot to another bag slot (a drag inside the panel's bag), swapping with what is there.
-	/// Asked here, not of the inventory, so the box's reach and ownership checks apply while the panel is open.
+	/// Asked here, not of the inventory, so the box's reach check applies while the panel is open.
 	/// </summary>
 	[Rpc.Host]
-	public void RequestMoveInBag( int from, int to )
-	{
-		if ( Begin() is not { } who )
-			return;
-
-		Reply( who, StorageRules.MoveInBag( who.Bag, from, to ) );
-	}
+	public void RequestMoveInBag( int from, int to ) =>
+		_ = Ask( who => StorageRules.MoveInBag( who.Bag, from, to ) );
 
 	/// <summary>
 	/// Combine or split with a drag (<see cref="StackRules"/>), between any two slots of the bag and the box. Sides are
@@ -216,35 +163,88 @@ public sealed class StorageBox : Component, IInteractionHandler
 	[Rpc.Host]
 	public void RequestStack( int fromSide, int from, int toSide, int to, int mode )
 	{
-		if ( Begin() is not { } who || !StackRules.IsMode( mode ) )
+		if ( !StackRules.IsMode( mode ) )
 			return;
 
-		Reply( who, StorageRules.Stack(
-			who.Crime, BoxId, Capacity, who.Bag, fromSide, from, toSide, to, (StackMode)mode ) );
+		_ = Ask( who => StorageRules.Stack(
+			who.Keeper.Crime, BoxId, Capacity, who.Bag, fromSide, from, toSide, to, (StackMode)mode ) );
 	}
 
 	/// <summary>
-	/// Who is asking, once the host has checked they may.
+	/// Who is asking, and the record the box's contents are in: the owner's, never the asker's.
 	/// </summary>
-	sealed record Asker( Connection Caller, PlayerCrime Player, PlayerProgress Progress, CrimeRecord Crime )
+	sealed record Asker( Connection Caller, PlayerCrime Player, Keeper Keeper )
 	{
 		public PlayerInventory Bag => Player.Components.Get<PlayerInventory>();
 	}
 
 	/// <summary>
-	/// The player behind the running RPC, or null when they may not do this: their record is not loaded, they are not
-	/// within reach of this box, or the box is another player's. Claims an unclaimed box for them. Host only.
+	/// The record a box's contents live in, and how a change to it is kept: by the owner's own player object when they
+	/// are here, else written here. Host only.
 	/// </summary>
-	Asker Begin()
+	sealed record Keeper( ulong SteamId, CrimeRecord Crime, PlayerProgress Live )
+	{
+		/// <summary>
+		/// Say the record changed, so it is saved: the owner's player object does it when they are here, else it is
+		/// written here and let go of when nothing else waits on it.
+		/// </summary>
+		public void Changed()
+		{
+			if ( Live is { Loaded: true } progress )
+			{
+				progress.NotifyChanged( ProgressChange.Crime );
+				return;
+			}
+
+			_ = SaveAsync();
+		}
+
+		async Task SaveAsync()
+		{
+			try
+			{
+				await PlayerProgression.SaveAsync( SteamId );
+
+				// Nothing of theirs waits on the clock: let the record go. The processor keeps it when something does.
+				if ( PlayerProgression.Cache.Peek( SteamId ) is { } record && CrimeRules.NextDue( record ) is null )
+					PlayerProgression.Release( SteamId );
+			}
+			catch ( System.Exception e )
+			{
+				Log.Warning( e, $"StorageBox: couldn't save the record of {SteamId}: {e.Message}" );
+			}
+		}
+	}
+
+	/// <summary>
+	/// Run one request: check who asks, run the rule for them, and answer them alone.
+	/// </summary>
+	/// <param name="rule">What the request does, once the host has said who is asking.</param>
+	/// <param name="moves">Whether it can change the box. A refresh only reads it, so nothing is saved.</param>
+	async Task Ask( System.Func<Asker, CrimeResult> rule, bool moves = true )
+	{
+		try
+		{
+			if ( await Begin() is { } who )
+				Reply( who, rule( who ), moves );
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( e, $"StorageBox: a request failed: {e.Message}" );
+		}
+	}
+
+	/// <summary>
+	/// The player behind the running RPC and the record the box's contents are in, or null when they may not do this:
+	/// their record is not loaded or they are not within reach of this box. Anyone may use any box; the first player
+	/// to open one claims it, so that its contents have a record to live in. Host only.
+	/// </summary>
+	async Task<Asker> Begin()
 	{
 		var caller = Rpc.Caller ?? Connection.Local;
 
-		if ( !Networking.IsHost || caller is null || PlayerCrime.For( caller ) is not { Ready: true } player
-		     || PlayerProgress.For( caller ) is not { Loaded: true } progress
-		     || progress.Record?.Crime is not { } crime )
+		if ( !Networking.IsHost || caller is null || PlayerCrime.For( caller ) is not { Ready: true } player )
 			return null;
-
-		var who = new Asker( caller, player, progress, crime );
 
 		if ( !IsNear( player.WorldPosition ) )
 		{
@@ -252,29 +252,70 @@ public sealed class StorageBox : Component, IInteractionHandler
 			return null;
 		}
 
-		var steamId = (ulong)caller.SteamId;
-
-		if ( !CanUse( steamId ) || (OwnerId == 0 && !StorageRegistry.Claim( BoxId, steamId )) )
+		if ( OwnerId == 0 )
 		{
-			player.Tell( CrimeResult.Fail( "This isn't your storage." ) );
+			var steamId = (ulong)caller.SteamId;
+
+			OwnerId = StorageRegistry.Claim( BoxId, steamId ) ? steamId : StorageRegistry.OwnerOf( BoxId );
+		}
+
+		if ( OwnerId == 0 || await RecordOf( OwnerId ) is not { } crime )
+		{
+			player.Tell( CrimeResult.Fail( "The storage box cannot be opened right now." ) );
 			SendView( caller, false, "" );
 			return null;
 		}
 
-		OwnerId = steamId;
-		return who;
+		return new Asker( caller, player, new Keeper( OwnerId, crime, Here( OwnerId ) ) );
 	}
 
 	/// <summary>
-	/// Save what a request did, say how it went, and send the contents back to the caller alone.
+	/// The record of the player a box belongs to, where its contents live: theirs when they are here, else the copy the
+	/// host has in memory, else read from the store (they are away). Null when it cannot be read. Host only.
 	/// </summary>
-	void Reply( Asker who, CrimeResult result )
+	async Task<CrimeRecord> RecordOf( ulong steamId )
 	{
-		if ( result.Ok )
-			who.Progress.NotifyChanged( ProgressChange.Crime );
+		if ( Here( steamId ) is { Loaded: true } progress && progress.Record is { } live )
+			return live.Crime;
+
+		if ( PlayerProgression.Cache.Peek( steamId ) is { } held )
+			return held.Crime;
+
+		try
+		{
+			var record = await PlayerProgression.LoadAsync( steamId );
+
+			if ( !this.IsValid() || !Networking.IsHost )
+				return null;
+
+			return record?.Crime;
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( e, $"StorageBox: couldn't read the record of {steamId}: {e.Message}" );
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// The player object of a player who is in the game, or null when they are away. Host only.
+	/// </summary>
+	static PlayerProgress Here( ulong steamId ) =>
+		Connection.All.FirstOrDefault( x => x.SteamId == steamId ) is { } connection
+			? PlayerProgress.For( connection )
+			: null;
+
+	/// <summary>
+	/// Save what a request did (when it could change the box), say how it went, and send the contents back to the
+	/// caller alone.
+	/// </summary>
+	void Reply( Asker who, CrimeResult result, bool moves )
+	{
+		if ( result.Ok && moves )
+			who.Keeper.Changed();
 
 		who.Player.Tell( result );
-		SendView( who.Caller, true, Json.Serialize( StorageRules.View( who.Crime, BoxId, Capacity ) ) );
+		SendView( who.Caller, true, Json.Serialize( StorageRules.View( who.Keeper.Crime, BoxId, Capacity ) ) );
 	}
 
 	void SendView( Connection caller, bool allowed, string json )
@@ -290,7 +331,7 @@ public sealed class StorageBox : Component, IInteractionHandler
 		ViewReady = allowed;
 		ViewVersion++;
 
-		// Told it is not theirs: the panel closes itself.
+		// Told it cannot be opened: the panel closes itself.
 		if ( !allowed )
 			StorageMenu.Refused( this );
 	}
