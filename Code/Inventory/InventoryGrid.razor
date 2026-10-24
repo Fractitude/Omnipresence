@@ -13,7 +13,8 @@
 				var slot = i;
 				var item = inventory.At( slot );
 				<div class="slot @( item is null ? "empty" : "" ) @( Marks( slot ) )"
-				     @onmousedown=@( () => BeginDrag( slot ) )
+				     @onmousedown=@( ( PanelEvent e ) => BeginDrag( slot, e ) )
+				     @onrightclick=@( () => OpenMenu( slot ) )
 				     @onmouseover=@( () => Hovered = slot )
 				     @onmouseout=@( () => { if ( Hovered == slot ) Hovered = -1; } )>
 					@if ( item is not null )
@@ -32,6 +33,7 @@
 
 @code
 {
+	const string MenuName = "character";
 	const int SlotSize = 64;
 	const int Gap = 6;
 
@@ -122,19 +124,48 @@
 			current = null;
 	}
 
-	static void BeginDrag( int slot )
+	static void BeginDrag( int slot, PanelEvent e )
 	{
+		// A right press is a right click (the slot's menu), not a drag. The button's name on the untyped event is not
+		// reliable, so only one known to be the right one is turned away.
+		var button = e?.Button ?? "";
+
+		if ( button.Contains( "right", System.StringComparison.OrdinalIgnoreCase ) || button.Contains( "2" ) )
+			return;
+
 		if ( PlayerInventory.Local?.At( slot ) is not null )
 			dragFrom = slot;
 	}
 
 	/// <summary>
-	/// Forget the drag and the hover, e.g. when the menu closes.
+	/// Forget the drag and the hover, and close the right-click menu, e.g. when the menu closes.
 	/// </summary>
 	public static void Cancel()
 	{
 		dragFrom = -1;
 		hovered = -1;
+		ContextMenu.HideFor( MenuName );
+	}
+
+	/// <summary>
+	/// Right click on a slot: a small menu of what can be done with the stack there (<see cref="ItemMenus.ForBag"/>:
+	/// drop it, as dragging it out of the window does). The host checks the drop again.
+	/// </summary>
+	static void OpenMenu( int slot )
+	{
+		dragFrom = -1;
+
+		if ( PlayerInventory.Local?.At( slot ) is not { } item )
+		{
+			ContextMenu.HideFor( MenuName );
+			return;
+		}
+
+		ContextMenu.Show( MenuName, item.Name, ItemMenus.Bind( ItemMenus.ForBag( item, null ), verb => verb switch
+		{
+			ItemMenus.Drop => () => PlayerInventory.Local?.Drop( slot ),
+			_ => null,
+		} ) );
 	}
 
 	/// <summary>

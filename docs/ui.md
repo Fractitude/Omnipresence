@@ -65,6 +65,15 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
 - A window that has more than one list of its own (the storage grids) puts them in its own `body`; the window never grows
   past the screen, and `body` scrolls (`overflow: scroll`).
 
+## The right-click menu
+
+`ContextMenu` (`Code/Hud/ContextMenu.razor`, one line in `HudSystem.Add`) is a small menu at the cursor. A window opens it on `@onrightclick` with `ContextMenu.Show( "window name", heading, entries )`, where an entry is a `ContextEntry( Verb, Label, Icon, Enabled, Run )` and the window decides what is listed: `ItemMenus` (`Code/Inventory/ItemMenus.cs`) is the one place that says what a slot of the bag, a storage box or a cargo offers, and `ItemMenus.Bind` gives the verbs their actions. An empty list opens nothing.
+
+- Its root is a full-screen layer at `$z-context` (350): above the menus and the ability hotbar, below the dragged icon (400) and the fade. While it is open the layer takes the mouse, so a click anywhere else only closes it (it does not also press what is under it). It is placed at the mouse and moved so the whole menu stays on the screen (`ContextMenu.Clamp`).
+- It closes on choosing an entry, a click outside, Escape and `ContextMenu.HideFor( "window name" )`, which a window calls when it closes. A window that handles Escape must test `ContextMenu.IsOpen` first, hide the menu and consume the key, so the first Escape closes the menu and the second the window (`StorageMenu` and `CharacterMenu` do).
+- A slot's mouse-down starts a drag only for the left button; a right press is a right click.
+- It does not register with `GameMenus`: it only exists over a window that did.
+
 ## What a window must also do
 
 1. **Register with `GameMenus`**: `GameMenus.SetOpen( "name", true )` on open and `false` on every way it closes (Close,

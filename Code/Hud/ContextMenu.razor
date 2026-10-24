@@ -1,0 +1,145 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+@* A small menu next to the cursor: a list of actions the window that opened it built. It knows nothing about what the *@
+@* actions do. A click anywhere else, Escape, choosing one, or the owning window closing, closes it. *@
+
+<root class="context-root @( IsOpen ? "open" : "" )"
+      @onmousedown=@( ( PanelEvent e ) => Dismiss( e ) )
+      @onrightclick=@( ( PanelEvent e ) => Dismiss( e ) )>
+	@if ( IsOpen )
+	{
+		var at = Place();
+		<div class="context-menu" style="left: @( at.x )px; top: @( at.y )px; width: @( MenuWidth )px">
+			@if ( !string.IsNullOrEmpty( heading ) )
+			{
+				<div class="context-heading">@heading</div>
+			}
+			@foreach ( var entry in entries )
+			{
+				var action = entry;
+				<div class="context-item @( action.Enabled ? "" : "disabled" )"
+				     @onmousedown=@( ( PanelEvent e ) => Choose( e, action ) )>
+					<i>@action.Icon</i>
+					<div class="label">@action.Label</div>
+				</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	const int MenuWidth = 190;
+	const int RowHeight = 32;
+	const int Padding = 6;
+	const int HeadingHeight = 24;
+	const int Margin = 8;
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static bool open;
+	static string owner = "";
+	static string heading = "";
+	static Vector2 mouse;
+	static List<ContextEntry> entries = new();
+
+	/// <summary>
+	/// Whether the menu is open on this computer. A window checks it before Escape closes the window itself.
+	/// </summary>
+	public static bool IsOpen => open;
+
+	/// <summary>
+	/// Open the menu at the mouse with these actions, for the window called <paramref name="by"/>. Replaces a menu that is
+	/// already open. Entries that do not apply must be left out by the caller; an empty list opens nothing.
+	/// </summary>
+	public static void Show( string by, string title, IEnumerable<ContextEntry> actions )
+	{
+		entries = actions?.ToList() ?? new();
+
+		if ( entries.Count == 0 )
+		{
+			Hide();
+			return;
+		}
+
+		owner = by ?? "";
+		heading = title ?? "";
+		mouse = Mouse.Position;
+		open = true;
+	}
+
+	/// <summary>
+	/// Close the menu.
+	/// </summary>
+	public static void Hide()
+	{
+		open = false;
+		owner = "";
+		entries = new();
+	}
+
+	/// <summary>
+	/// Close the menu if it was opened by this window: called when the window closes.
+	/// </summary>
+	public static void HideFor( string by )
+	{
+		if ( open && owner == by )
+			Hide();
+	}
+
+	/// <summary>
+	/// The height of a menu with this many rows, in panel pixels.
+	/// </summary>
+	public static int HeightOf( int rows, bool withHeading ) =>
+		rows * RowHeight + Padding * 2 + (withHeading ? HeadingHeight : 0);
+
+	/// <summary>
+	/// Where the menu's top left goes: at the mouse, moved so the whole menu stays on the screen.
+	/// </summary>
+	public static Vector2 Clamp( Vector2 at, Vector2 screen, int width, int height ) => new(
+		System.Math.Clamp( at.x, Margin, System.Math.Max( Margin, screen.x - width - Margin ) ),
+		System.Math.Clamp( at.y, Margin, System.Math.Max( Margin, screen.y - height - Margin ) ) );
+
+	Vector2 Place()
+	{
+		var scale = Panel?.ScaleFromScreen ?? 1f;
+		return Clamp( mouse * scale, Screen.Size * scale, MenuWidth, HeightOf( entries.Count, heading != "" ) );
+	}
+
+	/// <summary>
+	/// A click on the empty backdrop closes the menu (and nothing under it gets the click).
+	/// </summary>
+	void Dismiss( PanelEvent e )
+	{
+		e.StopPropagation();
+		Hide();
+	}
+
+	void Choose( PanelEvent e, ContextEntry entry )
+	{
+		e.StopPropagation();
+
+		if ( !entry.Enabled )
+			return;
+
+		Hide();
+		entry.Run?.Invoke();
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !open )
+			return;
+
+		if ( Input.EscapePressed )
+		{
+			Input.EscapePressed = false;
+			Hide();
+		}
+	}
+
+	protected override void OnDisabled() => Hide();
+
+	protected override int BuildHash() => System.HashCode.Combine( open, entries.Count, mouse, heading );
+}

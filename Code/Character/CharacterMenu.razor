@@ -91,6 +91,14 @@
 	{
 		if ( IsOpen )
 		{
+			// Escape closes the right-click menu first.
+			if ( ContextMenu.IsOpen && Input.EscapePressed )
+			{
+				Input.EscapePressed = false;
+				ContextMenu.Hide();
+				return;
+			}
+
 			if ( Input.EscapePressed || Input.Pressed( "CharacterMenu" ) || NaviInputCapture.Current is not null )
 			{
 				Input.EscapePressed = false;
