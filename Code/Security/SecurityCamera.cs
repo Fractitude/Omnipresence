@@ -11,12 +11,20 @@ namespace Sandbox;
 /// world in it. What the app needs is the camera's place: it connects to the cameras within
 /// <see cref="SignalRange"/> of the computer.
 ///
-/// A camera that has been shot, or that has no signal, is <see cref="Broken"/>: it stops looking at the world and gives
-/// a television's static instead, made here rather than in the world, throws sparks, and its LED goes dark.
+/// A camera is out of action when it is <see cref="Destroyed"/> or when it has been unplugged
+/// (<see cref="PluggedIn"/>). Either way it stops looking at the world and gives a television's static instead, made
+/// here rather than in the world, and its LED goes out. Only a destroyed one throws sparks and crackles: one that is
+/// merely unplugged is off, and the player can plug it back in. A destroyed one is fixed with the Repair option.
 /// </remarks>
 [Title( "Security Camera" ), Icon( "videocam" )]
-public sealed class SecurityCamera : Component, Component.IDamageable
+public sealed class SecurityCamera : Component, Component.IDamageable, IInteractionHandler
 {
+	/// <summary>The id of the option that plugs the camera's power in and out.</summary>
+	const string PowerOption = "power";
+
+	/// <summary>The id of the option that fixes a destroyed camera.</summary>
+	const string RepairOption = "repair";
+
 	/// <summary>
 	/// What the Security System calls this camera. Empty uses the object's name.
 	/// </summary>
@@ -35,14 +43,24 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	public float FieldOfView { get; set; } = 70f;
 
 	/// <summary>
-	/// The camera is out of action: destroyed, or with no signal. One flag for both, because the app and the player see
-	/// the same thing either way: static instead of a view, and NO SIGNAL where LIVE was. The host sets it when the camera
-	/// is damaged; setting it by hand makes a camera that never worked.
+	/// The camera has been shot to pieces: no picture, sparks and a crackle, and a Repair option to fix it.
 	/// </summary>
-	[Property, Sync] public bool Broken { get; set; }
+	[Property, Sync] public bool Destroyed { get; set; }
 
 	/// <summary>
-	/// How much damage the camera takes before it is <see cref="Broken"/>. A couple of bullets is enough.
+	/// Whether the camera has power. Pulled (by the player, with the Unplug option) it shows the same static as a
+	/// destroyed one, but nothing is broken: no sparks, no crackle, and plugging it back in is all it takes.
+	/// </summary>
+	[Property, Sync] public bool PluggedIn { get; set; } = true;
+
+	/// <summary>
+	/// The camera is out of action, whether it was destroyed or unplugged. What the app and the picture care about: it
+	/// gives static instead of a view, and NO SIGNAL where LIVE was.
+	/// </summary>
+	public bool Offline => Destroyed || !PluggedIn;
+
+	/// <summary>
+	/// How much damage the camera takes before it is <see cref="Destroyed"/>. A couple of bullets is enough.
 	/// </summary>
 	[Property, Range( 1f, 500f )]
 	public float Health { get; set; } = 20f;
@@ -90,10 +108,10 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	/// <summary>The camera the picture is drawn through, kept from the first frame it is needed.</summary>
 	CameraComponent lens;
 
-	/// <summary>The LED on the front, so it can be put out when the camera is broken.</summary>
+	/// <summary>The LED on the front, so it can be put out when the camera is off.</summary>
 	ModelRenderer led;
 
-	/// <summary>The sparks that come off a broken camera.</summary>
+	/// <summary>The sparks that come off a destroyed camera.</summary>
 	SparkEmitter sparks;
 
 	Texture feed;
@@ -106,7 +124,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	/// <summary>Whether the LED was last drawn lit, so it is only touched when that changes. Null until found.</summary>
 	bool? ledLit;
 
-	/// <summary>The damage the host has seen, which breaks the camera when it passes the camera's toughness.</summary>
+	/// <summary>The damage the host has seen, which destroys the camera when it passes its health.</summary>
 	float damageTaken;
 
 	RealTimeSince sinceAsked = float.MaxValue;
@@ -131,30 +149,46 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	}
 
 	/// <summary>
-	/// The picture of this camera for an app that shows it: its view while it works, static once it is broken. The same
+	/// Give the camera the two options a player uses on it: unplug it, and repair it once it is broken. Every machine does
+	/// this the same way, so the host and the clients number the options alike.
+	/// </summary>
+	protected override void OnStart()
+	{
+		if ( !Game.IsPlaying )
+			return;
+
+		_ = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
+			?? GameObject.Components.Create<Interactable>();
+
+		InteractionSetup.EnsureOption( this, PowerOption, "Unplug", "power", "Cut the picture." );
+		InteractionSetup.EnsureOption( this, RepairOption, "Repair", "build", "Fix what the bullets broke." );
+	}
+
+	/// <summary>
+	/// The picture of this camera for an app that shows it: its view while it works, static once it is offline. The same
 	/// texture comes back on every ask, so a panel that holds it sees the picture move without rebuilding.
 	/// </summary>
 	public Texture RequestFeed()
 	{
 		sinceAsked = 0;
 
-		return Broken ? StaticPicture() : LiveFeed();
+		return Offline ? StaticPicture() : LiveFeed();
 	}
 
 	/// <summary>
 	/// Draw the next picture if an app asked for one recently enough and the last one is a frame old. A working camera
-	/// draws its view twelve times a second, which reads as live and costs a twelfth of the screen's own camera; a broken
-	/// one draws static at the screen's own rate.
+	/// draws its view twelve times a second, which reads as live and costs a twelfth of the screen's own camera; an
+	/// offline one draws static at the screen's own rate.
 	/// </summary>
 	protected override void OnPreRender()
 	{
-		if ( sinceAsked > FeedHold || sinceFrame < (Broken ? StaticInterval : FrameInterval) )
+		if ( sinceAsked > FeedHold || sinceFrame < (Offline ? StaticInterval : FrameInterval) )
 			return;
 
 		sinceFrame = 0;
 
-		// A broken camera doesn't look at the world at all.
-		if ( Broken )
+		// A camera that is offline doesn't look at the world at all.
+		if ( Offline )
 		{
 			DrawStatic();
 
@@ -169,41 +203,94 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	}
 
 	/// <summary>
-	/// Keep the LED on the front saying whether the camera works, and the sparks coming off a broken one, on every
+	/// Keep the LED on the front saying whether the camera works, and the sparks coming off a destroyed one, on every
 	/// machine: the host decides, and both are part of what a client sees.
 	/// </summary>
 	protected override void OnUpdate()
 	{
 		var electric = EnsureSparks();
 
-		if ( electric.IsValid() && electric.Emitting != Broken )
-			electric.Emitting = Broken;
+		// Only damage throws sparks; a camera that is merely unplugged is off, not shorting.
+		if ( electric.IsValid() && electric.Emitting != Destroyed )
+			electric.Emitting = Destroyed;
 
 		if ( !led.IsValid() )
 			led = FindLed();
 
-		if ( !led.IsValid() || ledLit == Broken )
+		if ( !led.IsValid() || ledLit == !Offline )
 			return;
 
-		ledLit = Broken;
-		led.Tint = Broken ? new Color( 0.16f, 0.06f, 0.06f ) : new Color( 1f, 0.12f, 0.12f );
+		// Red while it works, black when it is off. The LED stays where it is: a dead light, not a missing one.
+		ledLit = !Offline;
+		led.Tint = Offline ? Color.Black : new Color( 1f, 0.12f, 0.12f );
 	}
 
 	void Component.IDamageable.OnDamage( in DamageInfo damage )
 	{
-		if ( IsProxy || !Networking.IsHost || Broken || damage.Damage <= 0f )
+		if ( IsProxy || !Networking.IsHost || Destroyed || damage.Damage <= 0f )
 			return;
 
 		damageTaken += damage.Damage;
 
 		if ( damageTaken >= Health )
-			Broken = true;
+			Destroyed = true;
+	}
+
+	/// <summary>
+	/// What the player sees in the menu while looking at the camera: plug it in or pull it out, and repair it once it is
+	/// broken (nothing to repair before that, so the row is hidden).
+	/// </summary>
+	InteractionInfo? IInteractionHandler.Describe( InteractionEvent e )
+	{
+		switch ( e.Option?.Id )
+		{
+			case PowerOption:
+				return PluggedIn
+					? new InteractionInfo( "Unplug", "power", "Cut the picture." )
+					: new InteractionInfo( "Plug in", "power", "Give it power." );
+
+			case RepairOption:
+				return Destroyed
+					? new InteractionInfo( "Repair", "build", "Fix what the bullets broke." )
+					: new InteractionInfo( "" );
+
+			default:
+				return null;
+		}
+	}
+
+	/// <summary>There is nothing to repair on a camera that still works.</summary>
+	bool IInteractionHandler.CanInteract( InteractionEvent e ) =>
+		e.Option?.Id != RepairOption || Destroyed;
+
+	/// <summary>
+	/// The player plugged the camera in or pulled it out, or repaired it. Runs on the host, which owns both flags.
+	/// </summary>
+	void IInteractionHandler.OnInteract( InteractionEvent e )
+	{
+		if ( IsProxy || !Networking.IsHost )
+			return;
+
+		switch ( e.Option?.Id )
+		{
+			case PowerOption:
+				PluggedIn = !PluggedIn;
+				break;
+
+			case RepairOption:
+				if ( !Destroyed )
+					return;
+
+				Destroyed = false;
+				damageTaken = 0f;
+				break;
+		}
 	}
 
 	Texture LiveFeed() => feed ??= Texture.CreateRenderTarget().WithSize( FeedWidth, FeedHeight ).Create();
 
 	/// <summary>
-	/// The static a broken camera shows. Made the first time it is asked for, and drawn on before it is handed back, so
+	/// The static an offline camera shows. Made the first time it is asked for, and drawn on before it is handed back, so
 	/// the first picture is already snow rather than an empty texture.
 	/// </summary>
 	Texture StaticPicture()
@@ -292,8 +379,8 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 		.FirstOrDefault( x => x.IsValid() );
 
 	/// <summary>
-	/// The sparks a broken camera gives off: the emitter the prefab has, or one made here for a camera a player put
-	/// together by hand. It starts off, and <see cref="Broken"/> turns it on.
+	/// The sparks a destroyed camera gives off: the emitter the prefab has, or one made here for a camera a player put
+	/// together by hand. It starts off, and <see cref="Destroyed"/> turns it on.
 	/// </summary>
 	SparkEmitter EnsureSparks()
 	{
@@ -326,7 +413,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 
 	/// <summary>
 	/// Show where the camera looks, so it can be aimed while placing it: the edges of its view, forward along its x. Red
-	/// for a broken one, so a dead camera in the scene is obvious.
+	/// for one that is offline, so a dead camera in the scene is obvious.
 	/// </summary>
 	protected override void DrawGizmos()
 	{
@@ -341,7 +428,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 			new Vector3( reach, half, -half ),
 		};
 
-		Gizmo.Draw.Color = Broken ? Color.Red : Color.Cyan;
+		Gizmo.Draw.Color = Offline ? Color.Red : Color.Cyan;
 
 		for ( var i = 0; i < corners.Length; i++ )
 		{

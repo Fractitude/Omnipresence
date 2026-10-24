@@ -102,7 +102,7 @@ public sealed class SecurityViewModel
 				x.GameObject.Id.ToString(),
 				x.DisplayName,
 				$"{MathF.Round( x.WorldPosition.Distance( at ) * MetresPerUnit )} m away",
-				x.Broken ) )
+				x.Offline ) )
 			.ToList();
 	}
 
@@ -112,5 +112,5 @@ public sealed class SecurityViewModel
 	/// </summary>
 	static bool Same( IReadOnlyList<SecurityCameraRow> cameras, IReadOnlyList<SecurityCameraRow> known ) =>
 		cameras.Count == known.Count
-		&& !cameras.Where( ( row, i ) => row.Id != known[i].Id || row.Broken != known[i].Broken ).Any();
+		&& !cameras.Where( ( row, i ) => row.Id != known[i].Id || row.Offline != known[i].Offline ).Any();
 }

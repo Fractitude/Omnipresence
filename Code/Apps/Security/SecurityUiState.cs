@@ -4,7 +4,7 @@ namespace OmnipresenceApps;
 /// One camera the computer can connect to, as the app lists it: the id its object has on every machine, its name, how
 /// far away it is already written out, and whether it is out of action.
 /// </summary>
-public sealed record SecurityCameraRow( string Id, string Name, string Detail, bool Broken );
+public sealed record SecurityCameraRow( string Id, string Name, string Detail, bool Offline );
 
 /// <summary>
 /// What the Security System panel draws: the cameras in range, nearest first, and which one the player enlarged.

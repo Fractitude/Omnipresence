@@ -31,24 +31,42 @@ Nothing about a camera has to be synced to be watched. **The picture never cross
 own, from its own copy of the world and its own copy of the camera. A camera placed in the scene or spawned by the host
 exists on every client, so every client can draw it.
 
-## A broken camera
+## A camera that is out of action
 
-`Broken` is one flag for both ways a camera stops working — destroyed, or with no signal — because the app and the player
-see the same thing either way.
+Two flags, because there are two ways for a camera to stop working and the player treats them differently:
+`Destroyed` and `PluggedIn`. `Offline` is either of them — `Destroyed || !PluggedIn` — and it is what the app and the
+picture care about, because they see the same thing either way.
 
-- **The host sets it** when the camera takes `Health` damage (20 by default): `SecurityCamera` implements
-  `Component.IDamageable`, so bullets and explosions count. `[Property, Sync]` takes it to every client, and setting it in
-  the inspector makes a camera that never worked.
-- **It stops looking at the world.** `OnPreRender` never calls `RenderToTexture` again.
+- **`Destroyed`** is the host's: `SecurityCamera` implements `Component.IDamageable`, so bullets and explosions count,
+  and the camera breaks when the damage passes `Health` (20 by default). Rolling it by hand in the inspector makes a
+  camera that was never put up. A destroyed camera is what **throws sparks and crackles** — nothing else does.
+- **`PluggedIn`** is the player's, from the camera's own menu: `Unplug` cuts the picture, `Plug in` gives it back. A
+  camera that is off this way shows the same static, but nothing is broken — no sparks, no crackle, and one press puts
+  it right.
+- Both are `[Property, Sync]`, so the host's word reaches every client.
+- **An offline camera stops looking at the world.** `OnPreRender` never calls `RenderToTexture` again.
 - **It shows television static instead**: one 320×180 texture (`Texture.Update` from a `Color32` buffer) with a new grey
   snow pattern on every rendered frame, up to 60 a second, and a brighter band rolling down it. Static is made on each
   client like the feed is, so it costs the network nothing; half the feed's size is enough because the screen scales it
   up, and it is what a lost signal looks like anyway.
 - **The app says NO SIGNAL** where it said LIVE — an amber badge instead of a red one, on the cell and on the enlarged
-  feed alike — and the LED on the camera's front goes dark. The rows carry `Broken` into the state, and the view model's
-  `Same` compares it, so a camera breaking updates the screen on the next scan (half a second) rather than when
-  something else changes.
-- The editor gizmo of a broken camera is drawn red, so a dead one in the scene is obvious.
+  feed alike. The rows carry `Offline` into the state, and the view model's `Same` compares it, so a camera going offline
+  updates the screen on the next scan (half a second) rather than when something else changes.
+- **The LED on the camera's front is the tell.** It is red while the camera works and black when it does not, and it
+  stays where it is: a dead light, not a missing one.
+- The editor gizmo of an offline camera is drawn red, so a dead one in the scene is obvious.
+
+## Working a camera
+
+`SecurityCamera` answers to the `Interactable` it makes for itself on `OnStart` (the engine's `IPressable` path, the one
+every other object in the game uses), so the prompt appears under the crosshair when a player looks at the camera:
+
+| Row | When | What it does |
+|---|---|---|
+| `Unplug` / `Plug in` | always | Flips `PluggedIn`. |
+| `Repair` | only while `Destroyed` | Clears `Destroyed` and the damage taken with it, so the camera is whole again. Hidden otherwise, not greyed out. |
+
+Both options run on the host (`RunOn.Host`), which is where the flags live, and the option ids are `power` and `repair`.
 
 ## The app
 

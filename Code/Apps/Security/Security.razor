@@ -62,9 +62,9 @@
 					<div class="waiting">Connecting...</div>
 				}
 
-				<div class="live @( selected.Broken ? "broken" : "" )">
+				<div class="live @( selected.Offline ? "broken" : "" )">
 					<div class="dot"></div>
-					@( selected.Broken ? "NO SIGNAL" : "LIVE" )
+					@( selected.Offline ? "NO SIGNAL" : "LIVE" )
 				</div>
 			</div>
 		</div>
@@ -84,9 +84,9 @@
 						<div class="waiting">Connecting...</div>
 					}
 
-					<div class="live @( camera.Broken ? "broken" : "" )">
+					<div class="live @( camera.Offline ? "broken" : "" )">
 						<div class="dot"></div>
-						@( camera.Broken ? "NO SIGNAL" : "LIVE" )
+						@( camera.Offline ? "NO SIGNAL" : "LIVE" )
 					</div>
 
 					<div class="caption">

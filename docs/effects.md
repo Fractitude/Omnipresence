@@ -85,14 +85,15 @@ is not part of the build, and the wavs are committed so the game doesn't depend 
 default: `Crackle` (empty means the asset above) and `CrackleVolume` on top of the sound's own volume. The sound sits
 at about 0.2, under everything else that is going on; a shorting camera should be a snap you notice, not a siren.
 
-## The broken camera's sparks
+## The destroyed camera's sparks
 
 `SecurityCamera.EnsureSparks` finds the emitter a camera already has, or makes one at the top of its body
-(`Vector3.Up * 6f`) for a camera put together by hand, and sets its `Emitting` to `Broken` every frame. A camera sparks
-from the moment it breaks, on every client, and stops if it is ever fixed again.
+(`Vector3.Up * 6f`) for a camera put together by hand, and sets its `Emitting` to `Destroyed` every frame. A camera sparks
+from the moment it is shot to pieces, on every client, and stops when it is repaired. One that is merely unplugged is
+off, not shorting: it shows the same static and throws no sparks.
 
 The camera smoked before this (`SmokeEmitter` was on it). The smoke is still in the project and works the same, so
-putting one back on the camera prefab is one component — but nothing drives a `SmokeEmitter` from `Broken` any more.
+putting one back on the camera prefab is one component — but nothing drives a `SmokeEmitter` from the camera any more.
 
 ## Trying it
 
