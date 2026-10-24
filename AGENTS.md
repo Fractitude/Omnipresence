@@ -22,6 +22,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 
 - **Never change scenes, prefabs or inspector values while the game is in play mode**, unless the user asked to try values out in play mode. Play-mode changes are runtime state and are lost, or worse, get saved into the asset. Stop play first (`play_stop`), then edit.
 - **Don't hand-edit `.scene` or `.prefab` JSON while the editor has the project open.** The editor writes its own copy back and puts runtime state in it (a `local_player` tag, regenerated guids), which broke the player controller's setup once. Use the editor's tools through `sbox-cli` (`create_game_object`, the component tools, `asset_write`). If you must edit the file, check `git diff` afterwards for changes you didn't make.
+- **A child of a network object is only sent to clients if it is Network Mode Snapshot (or Object), never Never.** The engine builds each client's copy of a network object from its networked children alone: a `Never` child — the model, the collider — never arrives, so the client gets the object with no children at all, and it is invisible and cannot be looked at or used. The root stays Object; the children a client must have are Snapshot, as `mailbox.prefab` has them. This is why the storage box, the grow tray, the press bench, the packing table and every dropped world item were host-only. A child a component creates itself at run time is not affected.
 
 ## Layout
 
