@@ -666,6 +666,8 @@ A fourth, combined board picks the overall winner.
 
 Players can form **crews** (a few members with a shared stash and name). Crews have their own board, summed from members' net worth and shared market share. Crew membership shows next to the name.
 
+**As built (first part):** a crew is an **organization** (`docs/organizations.md`): a name, one of 16 icons and a colour, up to 16 members with a role label and a **share** of every payout. When an order pays the player who packed it, their teammates get their shares at once and the rest stays with the packer, so many players can work one operation and all be paid. Members join by invitation and consent. The shared stash, the boards and turf are not built.
+
 ### How it is built
 
 - A host-only `SeasonLedger` system takes **hourly snapshots** of each player's net worth, rolling NPC sales and reputation.

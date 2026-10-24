@@ -32,7 +32,7 @@ Testing only, for the grow, press, post and Hush loop. They ask the host, which 
 
 ## Organizations
 
-Testing only, for the organization the Government app runs ([organizations.md](organizations.md)). They ask the host, which refuses unless it is the editor (`OrgCommands`). The last two also refuse unless `progress_test_data` is on, so they never touch `orgs.json`. Code: `Code/Org/OrgCommands.cs`.
+Testing only, for the organization the Organizations app runs ([organizations.md](organizations.md)). They ask the host, which refuses unless it is the editor (`OrgCommands`). The last two also refuse unless `progress_test_data` is on, so they never touch `orgs.json`. Code: `Code/Org/OrgCommands.cs`.
 
 | Command | What it does |
 | --- | --- |

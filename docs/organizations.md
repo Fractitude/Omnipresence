@@ -2,7 +2,7 @@
 
 Many players can work in one drug operation, but an order pays only the player who packed and posted it. An **organization**
 groups teammates and splits that revenue automatically, so a Grower, a Presser and a Courier can all be paid for one
-order. The players run it in the **Government** app; the rules and the payout live in `Code/Org/`.
+order. The players run it in the **Organizations** app; the rules and the payout live in `Code/Org/`.
 
 ## The model
 
@@ -16,7 +16,7 @@ order. The players run it in the **Government** app; the rules and the payout li
 | `OrgRegistry` | `Code/Org/OrgRegistry.cs` | The host's data and every change to it (each is checked by `OrgRules` first, then saved at once). Finds a player's organization from their Steam id, also while they are away. |
 | `OrgPayouts` | `Code/Org/OrgPayouts.cs` | `Distribute`: the one function that shares a payment. |
 | `OrgSystem` | `Code/Org/OrgSystem.cs` | Every 5 s delivers the shares that wait for absent members. |
-| Government app | `Code/Apps/Government/`, `Assets/navi/system/government.napp` | `GovernmentViewModel` / `GovernmentUiState` / a stateless `Government.razor`, like Hush and Payments. Shared app: the host's copy runs it; every action carries only an id, a role or icon name, a small step or typed text, and acts as the player in the seat (`GameAppSeat`). |
+| Organizations app | `Code/Apps/Organizations/`, `Assets/navi/system/organizations.napp` | `OrganizationsViewModel` / `OrganizationsUiState` / a stateless `Organizations.razor`, like Hush and Payments. Shared app: the host's copy runs it; every action carries only an id, a role or icon name, a small step or typed text, and acts as the player in the seat (`GameAppSeat`). |
 
 ## Rules
 
@@ -50,7 +50,7 @@ order. The players run it in the **Government** app; the rules and the payout li
 
 An Owner or Manager picks one of the **players online** who is in no organization (not themselves, nor someone already invited
 by the organization), a role and a share, and sends it. The invited player gets a chat line and sees it in **their own**
-Government app (Invitations tab); membership starts only when they **accept**, since a share changes their income. They can
+Organizations app (Invitations tab); membership starts only when they **accept**, since a share changes their income. They can
 decline. The sender (or any Owner or Manager of the organization) can cancel it.
 
 - An invitation **runs out after 10 minutes** (real time, `OrgCatalog.InviteSeconds`; skipping the game clock doesn't
@@ -92,7 +92,7 @@ It replaces the plain `record.AddCrypto`: it credits the receiver's own record i
 (`FileProgressStore.WriteSafely`). It holds organizations, invitations and the waiting shares. The index from Steam id to
 organization is rebuilt on load. The registry's statics are not `readonly` (hot reload).
 
-## Government app
+## Organizations app
 
 Tabs: **Organization** (a register form when you are in none: name, a grid of the 16 icons, 12 colours or a hex colour, a live
 preview; when you are in one: the card, the members table, and for Owner and Manager the member editor (select a row: role chips,

@@ -35,6 +35,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `docs/scripting.md` is what we know about the engine's experimental run-time scripting (`Game.Scripting`, Breen): the API, the language, and what a script can reach in this game. Read it before adding any script feature to Navi or the game; update it when you test more.
 - `docs/ui.md` is how the HUD and the menu windows are built: one HUD GameObject that `HudSystem` puts every runtime piece on (`hud.Attach<T>()`, one line each, ordered by CSS `z-index`), and `MenuWindow`, the one window every menu uses (size cap, ability bar clearance, scrolling lists, rows that don't shrink). Read it before adding a menu or a HUD piece.
 - `docs/world-items.md` is how an item is dropped into the world and picked up again (`WorldItem`, `PickupRules`, the merge rule `StackRules.CanMerge`). Read it before changing the inventory's add, drop or stack code.
+- `docs/organizations.md` is how organizations work: teammates grouped in the Organizations Navi app, with roles, shares and invitations, and `OrgPayouts.Distribute`, the one function a revenue source calls to share a payment. Read it before adding a source of money.
 - `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 
 ## Vehicles
