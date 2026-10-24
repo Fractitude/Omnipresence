@@ -21,7 +21,9 @@ PackingMenu
 
 .window
 {
-	max-height: 90%;
+	// Keeps clear of the ability bar at the bottom of the screen (56px slots, 24px from the edge).
+	max-height: 80%;
+	margin-bottom: 104px;
 	width: 760px;
 	padding: 18px 20px;
 	flex-direction: column;

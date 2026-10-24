@@ -21,7 +21,9 @@ StorageMenu
 
 .window
 {
-	max-height: 90%;
+	// Keeps clear of the ability bar at the bottom of the screen (56px slots, 24px from the edge).
+	max-height: 80%;
+	margin-bottom: 104px;
 	flex-shrink: 0;
 	max-width: 96%;
 	padding: 18px 20px;
