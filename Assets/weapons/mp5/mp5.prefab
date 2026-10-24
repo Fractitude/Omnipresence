@@ -92,7 +92,7 @@
           "_type": "gameobject",
           "prefab": "weapons/mp5/mp5_projectile.prefab"
         },
-        "GrenadeSpeed": 1500,
+        "GrenadeSpeed": 1000,
         "Handedness": "Both",
         "HoldBone": "hold_r",
         "HoldType": "Rifle",
