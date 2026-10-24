@@ -216,7 +216,6 @@ public sealed class OrganizationsViewModel
 	void Register( Connection seat )
 	{
 		var me = seat.SteamId;
-		var wallet = PlayerWallet.For( seat );
 
 		if ( OrgRegistry.CheckCreate( me, draft.Name, draft.IconId, draft.Color ) is { } error )
 		{
@@ -226,7 +225,8 @@ public sealed class OrganizationsViewModel
 
 		var fee = OrgCatalog.RegistrationFee;
 
-		if ( fee > 0 && (wallet is null || !wallet.TrySpendCash( fee, StatMechanic.Fee, "Organization registration" )) )
+		if ( fee > 0 && !Transactions.Pay( me, Parties.Government, TransactionCurrency.Cash, fee, TxKind.RegistrationFee,
+			    "Organization registration" ).Ok )
 		{
 			notice = $"Registering costs ${fee:N0}.";
 			return;
@@ -236,7 +236,8 @@ public sealed class OrganizationsViewModel
 
 		// The fee is only kept for an organization that was made.
 		if ( !result.Ok && fee > 0 )
-			wallet?.AddCash( fee, StatMechanic.Refund, "Organization registration" );
+			Transactions.Receive( me, Parties.Government, TransactionCurrency.Cash, fee, TxKind.Refund,
+				"Organization registration" );
 
 		notice = result.Message;
 

@@ -3,7 +3,8 @@ namespace Sandbox;
 /// <summary>
 /// Everything a player owns in money, on the player object: <see cref="Cash"/> (dollars, the real world),
 /// <see cref="Credits"/> (the Wired) and <see cref="Crypto"/> (the dark web). It is the only way to read a balance
-/// and the only way to change one. See <c>docs/currency.md</c>.
+/// and the only way to change a credit. Cash and crypto change only through <see cref="Transactions"/>. See
+/// <c>docs/currency.md</c>.
 /// <para>
 /// The numbers are saved in the player's <see cref="ProgressRecord"/> (<c>Money</c>, <c>Credits</c>, <c>Crypto</c>),
 /// which <see cref="PlayerProgress"/> loads and saves on the host; the wallet reads and writes that record and shows the
@@ -51,6 +52,11 @@ public sealed class PlayerWallet : Component
 	/// </summary>
 	public static PlayerWallet For( Connection connection ) => Players.For<PlayerWallet>( connection );
 
+	/// <summary>
+	/// The Steam id of the player this wallet belongs to, or 0 before the host knows. Host only.
+	/// </summary>
+	public ulong SteamId => Progress?.Owner is { } owner ? (ulong)owner.SteamId : 0UL;
+
 	PlayerProgress Progress => field ??= Components.Get<PlayerProgress>();
 
 	ProgressRecord Record => Progress?.Record;
@@ -96,35 +102,6 @@ public sealed class PlayerWallet : Component
 		Record?.CanHoldCrypto( amount ) ?? Crypto + amount <= ProgressRecord.MaxCrypto;
 
 	/// <summary>
-	/// Give dollars. Host only. Zero and negative amounts are ignored. <paramref name="mechanic"/> (a
-	/// <see cref="StatMechanic"/>) and <paramref name="detail"/> say where the money came from, for the stats log.
-	/// </summary>
-	public void AddCash( long amount, string mechanic = null, string detail = null )
-	{
-		if ( !CanChange || amount <= 0 )
-			return;
-
-		var before = Record.Money;
-		Record.AddCash( amount );
-		Logged( StatsLog.MoneyCash, Record.Money - before, Record.Money, mechanic, detail );
-		Changed();
-	}
-
-	/// <summary>
-	/// Take dollars if there are enough. Host only. Returns whether they were taken.
-	/// </summary>
-	public bool TrySpendCash( long amount, string mechanic = null, string detail = null )
-	{
-		if ( !CanChange || amount <= 0 || Record.Money < amount )
-			return false;
-
-		Record.Money -= amount;
-		Logged( StatsLog.MoneyCash, -amount, Record.Money, mechanic, detail );
-		Changed();
-		return true;
-	}
-
-	/// <summary>
 	/// Give credits. Host only.
 	/// </summary>
 	public void AddCredits( long amount, string mechanic = null, string detail = null )
@@ -153,103 +130,45 @@ public sealed class PlayerWallet : Component
 	}
 
 	/// <summary>
-	/// Give crypto. Host only.
-	/// </summary>
-	public void AddCrypto( long amount, string mechanic = null, string detail = null )
-	{
-		if ( !CanChange || amount <= 0 )
-			return;
-
-		var before = Record.Crypto;
-		Record.AddCrypto( amount );
-		Logged( StatsLog.MoneyCrypto, Record.Crypto - before, Record.Crypto, mechanic, detail );
-		Changed();
-	}
-
-	/// <summary>
-	/// Take crypto if there are enough. Host only. Returns whether it was taken.
-	/// </summary>
-	public bool TrySpendCrypto( long amount, string mechanic = null, string detail = null )
-	{
-		if ( !CanChange || amount <= 0 || Record.Crypto < amount )
-			return false;
-
-		Record.Crypto -= amount;
-		Logged( StatsLog.MoneyCrypto, -amount, Record.Crypto, mechanic, detail );
-		Changed();
-		return true;
-	}
-
-	/// <summary>
 	/// Write a balance change in the stats log (every wallet method that changes a balance ends here).
 	/// </summary>
 	void Logged( string currency, long delta, long balance, string mechanic, string detail, Connection other = null ) =>
 		StatsLog.Money( Progress.Owner, currency, delta, balance, mechanic ?? "unknown", detail, other );
 
 	/// <summary>
-	/// Move dollars from this player to another, and write it in both payment histories (the Payments app). Host only.
-	/// Returns whether it was moved: not to oneself, not more than there is, not past the most the other can hold.
+	/// Why a balance changed outside <see cref="Transactions"/>. These two are the only ones allowed: money that is not
+	/// moved between parties but appears.
 	/// </summary>
-	public bool TryPayCash( PlayerWallet to, long amount )
+	public enum UntrackedReason
 	{
-		if ( !CanChange || to is null || to == this || !to.CanChange || amount <= 0 )
-			return false;
+		/// <summary>Money lying in the world that the player picked up. No such item exists yet.</summary>
+		GroundPickup,
 
-		if ( Record.Money < amount || to.Record.Money + amount > ProgressRecord.MaxMoney )
-			return false;
-
-		var at = WorldClock.Now;
-		var from = Progress.Owner;
-		var target = to.Progress.Owner;
-
-		Record.Money -= amount;
-		to.Record.Money += amount;
-
-		Progress.AddPayment( new() { At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount } );
-		to.Progress.AddPayment( new() { At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount } );
-		Logged( StatsLog.MoneyCash, -amount, Record.Money, StatMechanic.Payment, null, target );
-		to.Logged( StatsLog.MoneyCash, amount, to.Record.Money, StatMechanic.Payment, null, from );
-		Changed();
-		to.Changed();
-		return true;
+		/// <summary>A test command (<c>progress_give_money</c> and its kin).</summary>
+		ConsoleCommand,
 	}
 
 	/// <summary>
-	/// Move crypto from this player to another, and write it in both payment histories (the Payments app). Host only.
-	/// Returns whether it was moved: not to oneself, not more than there is, not past the most the other can hold.
+	/// Give cash or crypto without a transaction: picking money up from the ground, or a console command. It is the
+	/// only way a balance goes up outside <see cref="Transactions"/>, so it is named for what it skips: no history
+	/// entry, no ledger line. The stats log still hears of it. Host only; zero and negative amounts are ignored, and
+	/// the cap holds.
 	/// </summary>
-	public bool TryPayCrypto( PlayerWallet to, long amount )
+	public void GrantUntracked( TransactionCurrency currency, long amount, UntrackedReason reason )
 	{
-		if ( !CanChange || to is null || to == this || !to.CanChange || amount <= 0 )
-			return false;
+		if ( !CanChange || amount <= 0 )
+			return;
 
-		if ( Record.Crypto < amount || to.Record.Crypto + amount > ProgressRecord.MaxCrypto )
-			return false;
+		var before = TransactionRules.BalanceOf( Record, currency );
+		Record.Settle( currency, amount );
+		var after = TransactionRules.BalanceOf( Record, currency );
 
-		var at = WorldClock.Now;
-		var from = Progress.Owner;
-		var target = to.Progress.Owner;
+		var unit = currency == TransactionCurrency.Crypto ? StatsLog.MoneyCrypto : StatsLog.MoneyCash;
 
-		Record.Crypto -= amount;
-		to.Record.Crypto += amount;
+		Logged( unit, after - before, after,
+			reason == UntrackedReason.GroundPickup ? StatMechanic.GroundPickup : StatMechanic.ConsoleCommand, null );
 
-		Progress.AddPayment( new()
-		{
-			At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount,
-			Currency = PaymentCurrency.Crypto,
-		} );
-
-		to.Progress.AddPayment( new()
-		{
-			At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount,
-			Currency = PaymentCurrency.Crypto,
-		} );
-
-		Logged( StatsLog.MoneyCrypto, -amount, Record.Crypto, StatMechanic.Payment, null, target );
-		to.Logged( StatsLog.MoneyCrypto, amount, to.Record.Crypto, StatMechanic.Payment, null, from );
 		Changed();
-		to.Changed();
-		return true;
 	}
 
 	/// <summary>
@@ -262,8 +181,8 @@ public sealed class PlayerWallet : Component
 		if ( !Application.IsEditor || Rpc.Caller != (Network.Owner ?? Connection.Local) )
 			return;
 
-		AddCash( cash, StatMechanic.ConsoleCommand );
+		GrantUntracked( TransactionCurrency.Cash, cash, UntrackedReason.ConsoleCommand );
 		AddCredits( credits, StatMechanic.ConsoleCommand );
-		AddCrypto( crypto, StatMechanic.ConsoleCommand );
+		GrantUntracked( TransactionCurrency.Crypto, crypto, UntrackedReason.ConsoleCommand );
 	}
 }

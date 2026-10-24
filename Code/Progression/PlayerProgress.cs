@@ -47,9 +47,9 @@ public sealed class PlayerProgress : Component
 	public Connection Owner => Network.Owner ?? Connection.Local;
 
 	/// <summary>
-	/// The newest payments, oldest first. Host only: empty anywhere else.
+	/// The newest cash and crypto transactions, oldest first. Host only: empty anywhere else.
 	/// </summary>
-	public IReadOnlyList<PaymentRecord> Payments => record?.Payments ?? [];
+	public IReadOnlyList<TransactionEntry> TransactionHistory => record?.Transactions ?? [];
 
 	/// <summary>
 	/// The ids of the dead servers this player has breached. Host only: empty anywhere else.
@@ -339,11 +339,12 @@ public sealed class PlayerProgress : Component
 	/// </summary>
 	public bool TryOrder( string itemId, long price, long deliverySeconds )
 	{
-		if ( !CanChange || string.IsNullOrWhiteSpace( itemId ) || price <= 0 || Wallet is not { } wallet )
+		if ( !CanChange || string.IsNullOrWhiteSpace( itemId ) || price <= 0 || Wallet is null )
 			return false;
 
 		if ( record.Shipments.Count >= ShipmentRecord.MaxKept
-		     || !wallet.TrySpendCash( price, StatMechanic.Shop, $"Hardware store: {itemId}" ) )
+		     || !Transactions.Pay( Owner.SteamId, Parties.HardwareStore, TransactionCurrency.Cash, price,
+			     TxKind.ShopPurchase, $"Hardware store: {itemId}", itemId ).Ok )
 			return false;
 
 		StatsLog.Purchase( Owner, "hardware", itemId, itemId, price );
@@ -411,16 +412,6 @@ public sealed class PlayerProgress : Component
 	{
 		if ( record.DeliverShipments( WorldClock.Now ) )
 			Changed( ProgressChange.Hardware );
-	}
-
-	internal void AddPayment( PaymentRecord payment )
-	{
-		record.Payments.Add( payment );
-
-		if ( record.Payments.Count > PaymentRecord.MaxKept )
-			record.Payments.RemoveAt( 0 );
-
-		Changed( ProgressChange.Payments );
 	}
 
 	/// <summary>

@@ -31,14 +31,20 @@ public static class Exchange
 		// A venue that pays at once needs no queue: the dollars go straight in.
 		if ( venue.PaysAtOnce )
 		{
-			if ( !wallet.CanHoldCash( cash ) )
-				return CrimeResult.Fail( "Your account can't hold that much." );
+			var sold = Transactions.Batch(
+			[
+				new( Party.Player( wallet.SteamId ), Party.System( Parties.Exchange ), TransactionCurrency.Crypto,
+					crypto, TxKind.ExchangeSell, $"Sold at {venue.Name}", venue.Id ),
+				new( Party.System( Parties.Exchange ), Party.Player( wallet.SteamId ), TransactionCurrency.Cash, cash,
+					TxKind.ExchangeSell, $"Sold crypto at {venue.Name}", venue.Id ),
+			] );
 
-			if ( !wallet.TrySpendCrypto( crypto, StatMechanic.Exchange, $"Sold at {venue.Name}" ) )
-				return CrimeResult.Fail( "Not enough crypto." );
-
-			wallet.AddCash( cash, StatMechanic.Exchange, $"Sold crypto at {venue.Name}" );
-			return CrimeResult.Success( $"Sold {crypto:N0} crypto for ${cash:N0}." );
+			return sold.Failure switch
+			{
+				TxFailure.None => CrimeResult.Success( $"Sold {crypto:N0} crypto for ${cash:N0}." ),
+				TxFailure.CapExceeded => CrimeResult.Fail( "Your account can't hold that much." ),
+				_ => sold.ToCrimeResult(),
+			};
 		}
 
 		// A venue that pays later needs somewhere to keep the cash-out until it is due.
@@ -48,8 +54,11 @@ public static class Exchange
 		if ( crime.Cashouts.Count >= CrimeRecord.MaxEntries )
 			return CrimeResult.Fail( "Too many cash-outs waiting." );
 
-		if ( !wallet.TrySpendCrypto( crypto, StatMechanic.Exchange, $"Sold at {venue.Name}, cash-out waiting" ) )
-			return CrimeResult.Fail( "Not enough crypto." );
+		var taken = Transactions.Pay( wallet.SteamId, Parties.Exchange, TransactionCurrency.Crypto, crypto,
+			TxKind.ExchangeSell, $"Sold at {venue.Name}, cash-out waiting", venue.Id );
+
+		if ( !taken.Ok )
+			return taken.ToCrimeResult();
 
 		crime.Cashouts.Add( new() { Cash = cash, ReadyAt = WorldClock.Now + venue.CashoutDelaySeconds } );
 		var minutes = venue.CashoutDelaySeconds / 60f;
@@ -75,21 +84,21 @@ public static class Exchange
 		if ( crypto < 1 )
 			return CrimeResult.Fail( "That is too little to change." );
 
-		if ( !wallet.CanHoldCrypto( crypto ) )
-			return CrimeResult.Fail( "Your wallet can't hold that much crypto." );
+		var bought = Transactions.Batch(
+		[
+			new( Party.Player( wallet.SteamId ), Party.System( Parties.Exchange ), TransactionCurrency.Cash, cash,
+				TxKind.ExchangeBuy, $"Bought crypto at {venue.Name}", venue.Id ),
+			new( Party.System( Parties.Exchange ), Party.Player( wallet.SteamId ), TransactionCurrency.Crypto, crypto,
+				TxKind.ExchangeBuy, $"Bought at {venue.Name}", venue.Id ),
+		] );
 
-		if ( !wallet.TrySpendCash( cash, StatMechanic.Exchange, $"Bought crypto at {venue.Name}" ) )
-			return CrimeResult.Fail( "Not enough dollars." );
-
-		wallet.AddCrypto( crypto, StatMechanic.Exchange, $"Bought at {venue.Name}" );
-		return CrimeResult.Success( $"Bought {crypto:N0} crypto for ${cash:N0}." );
+		return bought.Failure switch
+		{
+			TxFailure.None => CrimeResult.Success( $"Bought {crypto:N0} crypto for ${cash:N0}." ),
+			TxFailure.CapExceeded => CrimeResult.Fail( "Your wallet can't hold that much crypto." ),
+			_ => bought.ToCrimeResult(),
+		};
 	}
-
-	/// <summary>
-	/// The name of a connected player for the stats log, or empty.
-	/// </summary>
-	internal static string SteamName( ulong steamId ) =>
-		Connection.All.FirstOrDefault( x => x.SteamId == steamId )?.DisplayName ?? "";
 
 	/// <summary>
 	/// Pay the cash-outs whose delay is over by <paramref name="now"/>, into the record. Needs no player: the offline
@@ -101,17 +110,21 @@ public static class Exchange
 			return false;
 
 		var due = record.Crime.Cashouts.Where( x => x.ReadyAt <= now && record.CanHoldCash( x.Cash ) ).ToList();
+		var paid = false;
 
 		foreach ( var cashout in due )
 		{
-			var before = record.Money;
-			record.AddCash( cashout.Cash );
-			StatsLog.Money( steamId, SteamName( steamId ), StatsLog.MoneyCash, record.Money - before, record.Money,
-				StatMechanic.Exchange, "Cash-out arrived" );
+			var arrived = Transactions.Receive( steamId, Parties.Exchange, TransactionCurrency.Cash, cashout.Cash,
+				TxKind.CashOut, "Cash-out arrived", record: record );
+
+			if ( !arrived.Ok )
+				continue;
+
 			record.Crime.Cashouts.Remove( cashout );
+			paid = true;
 		}
 
-		return due.Count > 0;
+		return paid;
 	}
 }
 

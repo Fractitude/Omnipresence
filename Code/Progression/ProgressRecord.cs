@@ -6,7 +6,7 @@ namespace Sandbox;
 /// </summary>
 public sealed class ProgressRecord
 {
-	public const int CurrentVersion = 3;
+	public const int CurrentVersion = 4;
 	public const long MaxMoney = 1_000_000_000_000;
 	public const long MaxCredits = 1_000_000_000_000;
 	public const long MaxCrypto = 1_000_000_000_000;
@@ -85,9 +85,16 @@ public sealed class ProgressRecord
 	public List<string> Rerouted { get; set; } = new();
 
 	/// <summary>
-	/// The newest payments with other players, oldest first. See <see cref="PaymentRecord"/>.
+	/// Old: the payments with other players, before <see cref="Transactions"/>. Only read, to move them into
+	/// <see cref="Transactions"/> when a record from before version 4 loads; always empty after <see cref="Sanitize"/>.
 	/// </summary>
 	public List<PaymentRecord> Payments { get; set; } = new();
+
+	/// <summary>
+	/// The newest movements of cash and crypto this player was part of, oldest first (at most
+	/// <see cref="TransactionEntry.MaxKept"/>). Written only by <see cref="Transactions"/>. Added in version 4.
+	/// </summary>
+	public List<TransactionEntry> Transactions { get; set; } = new();
 
 	/// <summary>
 	/// The crime game's state. Kept in its own section so a season wipe can reset it alone. Added in version 3.
@@ -157,8 +164,45 @@ public sealed class ProgressRecord
 
 		Version = CurrentVersion;
 
-		if ( Payments.Count > PaymentRecord.MaxKept )
-			Payments.RemoveRange( 0, Payments.Count - PaymentRecord.MaxKept );
+		SanitizeTransactions();
+	}
+
+	/// <summary>
+	/// Clean the history, and move the payments of an older save into it (once: the old list is emptied).
+	/// </summary>
+	void SanitizeTransactions()
+	{
+		Transactions ??= new();
+		Transactions.RemoveAll( x => x is null );
+
+		foreach ( var payment in Payments )
+		{
+			Transactions.Add( new()
+			{
+				Id = $"old-{System.Guid.NewGuid():N}"[..16], At = payment.At,
+				Currency = payment.Currency == PaymentCurrency.Crypto ? TransactionCurrency.Crypto : TransactionCurrency.Cash,
+				Amount = payment.Amount, Kind = nameof(TxKind.PlayerPayment), Peer = payment.PeerId,
+				PeerName = payment.PeerName,
+			} );
+		}
+
+		Payments.Clear();
+		Transactions = Transactions.OrderBy( x => x.At ).ToList();
+
+		foreach ( var entry in Transactions )
+		{
+			entry.Id ??= "";
+			entry.Group ??= "";
+			entry.Kind ??= "";
+			entry.Peer ??= "";
+			entry.PeerName ??= "";
+			entry.Note ??= "";
+			entry.Ref ??= "";
+			entry.Currency = System.Enum.IsDefined( entry.Currency ) ? entry.Currency : TransactionCurrency.Cash;
+		}
+
+		if ( Transactions.Count > TransactionEntry.MaxKept )
+			Transactions.RemoveRange( 0, Transactions.Count - TransactionEntry.MaxKept );
 	}
 
 	// -- Balances and shipments ---------------------------------------------------------------------------------------
@@ -169,22 +213,23 @@ public sealed class ProgressRecord
 
 	internal bool CanHoldCrypto( long amount ) => Crypto + amount <= MaxCrypto;
 
-	internal void AddCash( long amount )
-	{
-		if ( amount > 0 )
-			Money = System.Math.Min( Money + amount, MaxMoney );
-	}
-
 	internal void AddCredits( long amount )
 	{
 		if ( amount > 0 )
 			Credits = System.Math.Min( Credits + amount, MaxCredits );
 	}
 
-	internal void AddCrypto( long amount )
+	/// <summary>
+	/// Change a balance by <paramref name="delta"/>, kept between zero and the cap. The only way cash or crypto in a
+	/// record changes: <see cref="TransactionRules"/> (a transaction) and <see cref="PlayerWallet.GrantUntracked"/>
+	/// call it, and nothing else may (<c>tools/check_money_writes.py</c> fails the build of a change that does).
+	/// </summary>
+	internal void Settle( TransactionCurrency currency, long delta )
 	{
-		if ( amount > 0 )
-			Crypto = System.Math.Min( Crypto + amount, MaxCrypto );
+		if ( currency == TransactionCurrency.Crypto )
+			Crypto = System.Math.Clamp( Crypto + delta, 0, MaxCrypto );
+		else
+			Money = System.Math.Clamp( Money + delta, 0, MaxMoney );
 	}
 
 	/// <summary>

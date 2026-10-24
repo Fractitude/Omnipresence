@@ -38,7 +38,8 @@ public static class PlaceableShop
 		if ( delivery is null )
 			return CrimeResult.Fail( "Too many deliveries are on their way." );
 
-		if ( !PlayerWallet.For( buyer ).TrySpendCash( item.Price, StatMechanic.Shop, $"Depot: {item.Name}" ) )
+		if ( !Transactions.Pay( (ulong)buyer.SteamId, Parties.Depot, TransactionCurrency.Cash, item.Price,
+			    TxKind.DepotPurchase, $"Depot: {item.Name}", item.Id ).Ok )
 		{
 			PlacedObjectRegistry.Cancel( delivery );
 			return CrimeResult.Fail( "Not enough cash." );

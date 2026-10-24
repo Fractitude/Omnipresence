@@ -562,8 +562,11 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		var total = entry.Price * quantity;
 
-		if ( !Wallet.TrySpendCrypto( total, StatMechanic.Shop, $"Hush shop: {quantity} x {entry.Id}" ) )
-			return CrimeResult.Fail( "Not enough crypto." );
+		var paid = Transactions.Pay( Progress.Owner.SteamId, Parties.HushShop, TransactionCurrency.Crypto, total,
+			TxKind.ShopPurchase, $"Hush shop: {quantity} x {entry.Id}", entry.Id );
+
+		if ( !paid.Ok )
+			return paid.ToCrimeResult();
 
 		var delivery = new DeliveryRecord
 		{

@@ -37,9 +37,11 @@ public static class OrgPayouts
 			if ( amount > RoomOf( record, currency ) )
 				return false;
 
-			CreditRecord( receiver, record, currency, amount, reason );
-			return true;
+			return Transactions.Batch(
+				[Leg( receiver, record, currency, amount, TxKind.OrderPayout, reason, orderId, reason )] ).Ok;
 		}
+
+		var note = $"{org.Name}: {reason}";
 
 		var done = string.IsNullOrEmpty( orderId )
 			? null
@@ -51,14 +53,37 @@ public static class OrgPayouts
 			if ( done.Kept > RoomOf( record, currency ) )
 				return false;
 
-			CreditRecord( receiver, record, currency, done.Kept, $"{org.Name}: {reason}" );
-			return true;
+			return done.Kept <= 0
+			       || Transactions.Batch(
+				       [Leg( receiver, record, currency, done.Kept, TxKind.OrderPayout, note, orderId, reason )] ).Ok;
 		}
 
 		var split = OrgRules.Split(
 			amount, receiver, org.Members.Select( x => (x.SteamId, x.SharePercent) ), id => MemberRoom( id, currency ) );
 
 		if ( split.Kept > RoomOf( record, currency ) )
+			return false;
+
+		// One group of legs from the payer: the receiver's own part and one share per teammate. The receiver is never
+		// credited the whole amount first, so a full wallet never blocks a share, and the history reads right.
+		var legs = new List<TxLeg>();
+		var waiting = new List<(ulong MemberId, long Share)>();
+
+		foreach ( var (memberId, share) in split.Credits )
+		{
+			if ( share <= 0 )
+				continue;
+
+			if ( LiveRecord( memberId ) is null )
+				waiting.Add( (memberId, share) );
+			else
+				legs.Add( Leg( memberId, null, currency, share, TxKind.OrgShare, note, orderId, reason ) );
+		}
+
+		if ( split.Kept > 0 )
+			legs.Add( Leg( receiver, record, currency, split.Kept, TxKind.OrderPayout, note, orderId, reason ) );
+
+		if ( legs.Count > 0 && !Transactions.Batch( legs ).Ok )
 			return false;
 
 		var payout = new OrgPayout
@@ -76,11 +101,13 @@ public static class OrgPayouts
 		foreach ( var (memberId, share) in split.Credits )
 		{
 			var member = org.MemberOf( memberId );
-			CreditMember( memberId, currency, share, org, orderId, reason );
+
+			if ( waiting.Any( x => x.MemberId == memberId ) )
+				OrgRegistry.AddPending( memberId, currency, share, org.Name, orderId );
+
+			NotifyMember( memberId, currency, share, org, orderId );
 			payout.Splits.Add( new() { MemberId = memberId, Name = member is null ? "" : OrgRegistry.NameOf( member ), Amount = share } );
 		}
-
-		CreditRecord( receiver, record, currency, split.Kept, $"{org.Name}: {reason}" );
 
 		if ( org.MemberOf( receiver ) is { } receiverMember )
 			receiverMember.Name = payout.ReceiverName;
@@ -106,24 +133,30 @@ public static class OrgPayouts
 		: ProgressRecord.MaxMoney - record.Money;
 
 	/// <summary>
-	/// Add as much of <paramref name="amount"/> as fits under the cap to a record, and write it in the stats log as
-	/// <paramref name="steamId"/>'s. Returns what was added.
+	/// A leg from the payer to a player. <paramref name="record"/> is the player's record when the caller holds it.
+	/// </summary>
+	static TxLeg Leg(
+		ulong steamId, ProgressRecord record, OrgCurrency currency, long amount, TxKind kind, string note,
+		string orderId, string reason )
+	{
+		var payer = Party.System( reason == "order" ? Parties.HushEscrow : Parties.World );
+		var to = Party.Player( steamId );
+		return new( payer, to, CurrencyOf( currency ), amount, kind, note, orderId ) { ToRecord = record };
+	}
+
+	static TransactionCurrency CurrencyOf( OrgCurrency currency ) =>
+		currency == OrgCurrency.Crypto ? TransactionCurrency.Crypto : TransactionCurrency.Cash;
+
+	/// <summary>
+	/// Add as much of <paramref name="amount"/> as fits under the cap to a record, as a transaction to
+	/// <paramref name="steamId"/>. Returns what was added.
 	/// </summary>
 	internal static long CreditRecord(
-		ulong steamId, ProgressRecord record, OrgCurrency currency, long amount, string detail )
+		ulong steamId, ProgressRecord record, OrgCurrency currency, long amount, string note )
 	{
-		var given = System.Math.Clamp( amount, 0, System.Math.Max( RoomOf( record, currency ), 0 ) );
-
-		if ( currency == OrgCurrency.Crypto )
-			record.AddCrypto( given );
-		else
-			record.AddCash( given );
-
-		var crypto = currency == OrgCurrency.Crypto;
-		StatsLog.Money( steamId, Exchange.SteamName( steamId ), crypto ? StatsLog.MoneyCrypto : StatsLog.MoneyCash, given,
-			crypto ? record.Crypto : record.Money, StatMechanic.OrgPayout, detail );
-
-		return given;
+		var leg = Leg( steamId, record, currency, amount, TxKind.OrgShare, note, null, "order" ) with { UpTo = true };
+		var result = Transactions.Batch( [leg] );
+		return result.Ok ? result.Amount : 0;
 	}
 
 	/// <summary>The record of a member who can be paid right now, or null when it is not in memory.</summary>
@@ -142,34 +175,13 @@ public static class OrgPayouts
 	static long MemberRoom( ulong steamId, OrgCurrency currency ) =>
 		LiveRecord( steamId ) is { } record ? RoomOf( record, currency ) : long.MaxValue;
 
-	static void CreditMember(
-		ulong steamId, OrgCurrency currency, long amount, OrgRecord org, string orderId, string reason )
+	static void NotifyMember( ulong steamId, OrgCurrency currency, long amount, OrgRecord org, string orderId )
 	{
-		var connection = ConnectionOf( steamId );
+		if ( ConnectionOf( steamId ) is not { } connection )
+			return;
 
-		if ( connection is not null && PlayerProgress.For( connection ) is { Loaded: true }
-	     && PlayerWallet.For( connection ) is { } wallet )
-		{
-			if ( currency == OrgCurrency.Crypto )
-				wallet.AddCrypto( amount, StatMechanic.OrgPayout, $"{org.Name}: {reason}" );
-			else
-				wallet.AddCash( amount, StatMechanic.OrgPayout, $"{org.Name}: {reason}" );
-		}
-		else if ( PlayerProgression.Cache.Peek( steamId ) is { } record )
-		{
-			CreditRecord( steamId, record, currency, amount, $"{org.Name}: {reason}" );
-			_ = PlayerProgression.SaveAsync( steamId );
-		}
-		else
-		{
-			OrgRegistry.AddPending( steamId, currency, amount, org.Name, orderId );
-		}
-
-		if ( connection is not null )
-		{
-			var unit = currency == OrgCurrency.Crypto ? "crypto" : "dollars";
-			var order = string.IsNullOrEmpty( orderId ) ? "" : $" (order #{(orderId.Length > 8 ? orderId[..8] : orderId)})";
-			GameManager.Current?.Notify( connection, $"You got {amount:N0} {unit} from {org.Name}{order}" );
-		}
+		var unit = currency == OrgCurrency.Crypto ? "crypto" : "dollars";
+		var order = string.IsNullOrEmpty( orderId ) ? "" : $" (order #{(orderId.Length > 8 ? orderId[..8] : orderId)})";
+		GameManager.Current?.Notify( connection, $"You got {amount:N0} {unit} from {org.Name}{order}" );
 	}
 }

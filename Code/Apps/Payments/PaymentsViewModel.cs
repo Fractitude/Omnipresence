@@ -188,32 +188,26 @@ public sealed class PaymentsViewModel
 			notice = "Enter an amount.";
 		else if ( value > MaxPayment )
 			notice = $"At most {MostText()} at a time.";
-		else if ( PlayerWallet.For( seat ) is not { } wallet || PlayerWallet.For( to ) is not { } target )
-			notice = "That payment can't be made.";
-		else if ( currency == PaymentsCurrency.Crypto )
-			SendCrypto( wallet, target, to, value );
 		else
-			SendCash( wallet, target, to, value );
+			Pay( seat, to, value );
 	}
 
-	void SendCash( PlayerWallet wallet, PlayerWallet target, Connection to, long value )
+	/// <summary>
+	/// The payment itself is a <see cref="Transactions"/> transfer, made for the player in the seat to a player the
+	/// panel listed; nothing about it is taken from the panel but the amount and the choice of payee.
+	/// </summary>
+	void Pay( Connection seat, Connection to, long value )
 	{
-		if ( value > wallet.Cash )
-			notice = "Not enough money.";
-		else if ( !wallet.TryPayCash( target, value ) )
-			notice = "That payment can't be made.";
-		else
-			Succeeded( $"${value:N0}", to.DisplayName );
-	}
+		var crypto = currency == PaymentsCurrency.Crypto;
+		var unit = crypto ? TransactionCurrency.Crypto : TransactionCurrency.Cash;
 
-	void SendCrypto( PlayerWallet wallet, PlayerWallet target, Connection to, long value )
-	{
-		if ( value > wallet.Crypto )
-			notice = "Not enough crypto.";
-		else if ( !wallet.TryPayCrypto( target, value ) )
-			notice = "That payment can't be made.";
+		var result = Transactions.Transfer( Party.Player( seat.SteamId ), Party.Player( to.SteamId ), unit, value,
+			TxKind.PlayerPayment );
+
+		if ( !result.Ok )
+			notice = result.Failure == TxFailure.Insufficient && !crypto ? "Not enough money." : result.Message;
 		else
-			Succeeded( $"{value:N0} crypto", to.DisplayName );
+			Succeeded( crypto ? $"{value:N0} crypto" : $"${value:N0}", to.DisplayName );
 	}
 
 	void Succeeded( string amountText, string name )
@@ -345,7 +339,7 @@ public sealed class PaymentsViewModel
 			Balance = $"${wallet?.Cash:N0}",
 			Crypto = $"{wallet?.Crypto:N0}",
 			Payees = rows,
-			History = progress.Payments.Reverse().Select( ToRow ).ToList(),
+			History = progress.TransactionHistory.Reverse().Select( ToRow ).ToList(),
 			Target = target,
 			Amount = amount,
 			SentAmount = sentAmount,
@@ -356,15 +350,37 @@ public sealed class PaymentsViewModel
 		};
 	}
 
-	static PaymentRow ToRow( PaymentRecord payment )
+	static PaymentRow ToRow( TransactionEntry entry )
 	{
-		var incoming = payment.Amount > 0;
-		var when = WorldClock.Format( payment.At );
+		var incoming = entry.Amount > 0;
+		var when = $"{WorldClock.Format( entry.At )} - {LabelOf( entry )}";
 
-		var amount = payment.Currency == PaymentCurrency.Crypto
-			? $"{(incoming ? "+" : "-")}{Math.Abs( payment.Amount ):N0} crypto"
-			: $"{(incoming ? "+" : "-")}${Math.Abs( payment.Amount ):N0}";
+		var amount = entry.Currency == TransactionCurrency.Crypto
+			? $"{(incoming ? "+" : "-")}{Math.Abs( entry.Amount ):N0} crypto"
+			: $"{(incoming ? "+" : "-")}${Math.Abs( entry.Amount ):N0}";
 
-		return new PaymentRow( payment.PeerName, amount, when, incoming );
+		return new PaymentRow( string.IsNullOrEmpty( entry.PeerName ) ? "Unknown" : entry.PeerName, amount, when,
+			incoming );
+	}
+
+	/// <summary>What the activity list calls a transaction: its kind, and the note when there is one.</summary>
+	static string LabelOf( TransactionEntry entry )
+	{
+		var kind = entry.Kind switch
+		{
+			nameof(TxKind.PlayerPayment) => "Payment",
+			nameof(TxKind.OrderPayout) => "Order payout",
+			nameof(TxKind.OrgShare) => "Organization share",
+			nameof(TxKind.ShopPurchase) or nameof(TxKind.DepotPurchase) => "Purchase",
+			nameof(TxKind.ExchangeSell) or nameof(TxKind.ExchangeBuy) => "Exchange",
+			nameof(TxKind.CashOut) => "Cash-out",
+			nameof(TxKind.RegistrationFee) => "Registration",
+			var other when other.Length > 0 => other,
+			_ => "Transaction",
+		};
+
+		return string.IsNullOrEmpty( entry.Note ) || entry.Kind == nameof(TxKind.PlayerPayment)
+			? kind
+			: $"{kind}: {entry.Note}";
 	}
 }
