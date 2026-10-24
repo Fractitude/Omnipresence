@@ -149,7 +149,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable, IInteract
 	}
 
 	/// <summary>
-	/// Give the camera the two options a player uses on it: unplug it, and repair it once it is broken. Every machine does
+	/// Give the camera the two options a player uses on it: repair it once it is broken, and unplug it. Every machine does
 	/// this the same way, so the host and the clients number the options alike.
 	/// </summary>
 	protected override void OnStart()
@@ -160,8 +160,9 @@ public sealed class SecurityCamera : Component, Component.IDamageable, IInteract
 		_ = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
 			?? GameObject.Components.Create<Interactable>();
 
-		InteractionSetup.EnsureOption( this, PowerOption, "Unplug", "power", "Cut the picture." );
+		// Repair first: the menu lists the options in this order, and a broken camera is mostly about the repair.
 		InteractionSetup.EnsureOption( this, RepairOption, "Repair", "build", "Fix what the bullets broke." );
+		InteractionSetup.EnsureOption( this, PowerOption, "Unplug", "power", "Cut the picture." );
 	}
 
 	/// <summary>
