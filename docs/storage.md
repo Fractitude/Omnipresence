@@ -15,7 +15,8 @@ A storage box holds what does not fit in the bag. A player walks up, opens it, a
 ## Using it
 
 - Look at the box and use it (**Open storage**).
-- **Left mouse, drag:** press on an item (bag or box), drag, and release on any slot of the bag or the box. An empty slot takes the item; an occupied slot swaps the two items, also between bag and box (the target's item goes to the slot the dragged one came from). Reordering inside the box and inside the bag works the same way. A ghost icon follows the mouse and the slot under it is highlighted. Releasing outside any slot, on the slot it came from (a plain click, which does nothing), pressing Escape (once; the next Escape closes the panel) or closing the panel cancels the drag.
+- **Left mouse, drag:** press on an item (bag or box), drag, and release on any slot of the bag or the box. An empty slot takes the item; an occupied slot swaps the two items, also between bag and box (the target's item goes to the slot the dragged one came from). Reordering inside the box and inside the bag works the same way.
+- **Shift while dragging combines** two stacks of the same drug product or raw material (counts added up to 9999, quality averaged weighted by quantity, rounded). **Ctrl while dragging splits** the stack in half (rounded down) into an empty slot; Ctrl + Shift adds that half to another stack. Both work between bag and box in every direction. The keys are read when the mouse is released and a label by the dragged icon says what will happen. Seeds, parcels and ordinary items do not stack. The rules are in [crime.md](crime.md), "Combining and splitting stacks". A ghost icon follows the mouse and the slot under it is highlighted. Releasing outside any slot, on the slot it came from (a plain click, which does nothing), pressing Escape (once; the next Escape closes the panel) or closing the panel cancels the drag.
 - **Right click** on an item sends it to the other side: from the bag to the first free box slot, from the box to the first free bag slot.
 - Hover an item for its details: name, description, batch lines, and what a parcel holds.
 - A full box or a full bag says so in the panel and in chat; nothing moves.
@@ -23,10 +24,10 @@ A storage box holds what does not fit in the bag. A player walks up, opens it, a
 
 ## Security
 
-- All moves run on the host as `[Rpc.Host]` requests on the box (`RequestRefresh`; right click: `RequestStore( bagSlot )`, `RequestTake( boxSlot )`; drag: `RequestStoreTo( bagSlot, boxSlot )`, `RequestTakeTo( boxSlot, bagSlot )`, `RequestMoveInBox( from, to )`, `RequestMoveInBag( from, to )`). The box is the network object the request goes to, so only slot indices travel.
+- All moves run on the host as `[Rpc.Host]` requests on the box (`RequestRefresh`; right click: `RequestStore( bagSlot )`, `RequestTake( boxSlot )`; drag: `RequestStoreTo( bagSlot, boxSlot )`, `RequestTakeTo( boxSlot, bagSlot )`, `RequestMoveInBox( from, to )`, `RequestMoveInBag( from, to )`; with Shift or Ctrl: `RequestStack( fromSide, from, toSide, to, mode )`, sides 0 bag and 1 box). The box is the network object the request goes to, so only slot indices travel.
 - The host takes the player from `Rpc.Caller` (`PlayerCrime.For`), never from the message. It checks the record is loaded, that the player stands within `StorageBox.Reach` (300) of THIS box, and that they may use it, then calls `StorageRules`.
 - `StorageBox.CanUse( steamId )` is the one place that decides who may open a box: the owner, or anyone while it is unclaimed. Raiding will change it there. Anyone else gets "This isn't your storage." and the panel closes.
-- A move checks everything before it changes anything. `Store` and `StoreTo` remove from the bag and then put in the box (a swap first puts the displaced item in the freed bag slot, and undoes the removal if that fails); `TakeTo` does the mirror image; `Take` adds to the bag first and only then empties the box slot; `MoveInBox` swaps two entries. A failure leaves both sides as they were, so an item is never lost or doubled. An item moves whole, with every field (`Kind`, `Count`, `Quality`, `OrderId`, `Contents`, paths).
+- A move checks everything before it changes anything. `Store` and `StoreTo` remove from the bag and then put in the box (a swap first puts the displaced item in the freed bag slot, and undoes the removal if that fails); `TakeTo` does the mirror image; `Take` adds to the bag first and only then empties the box slot; `MoveInBox` swaps two entries; `Stack` plans the result in `StackRules.Plan`, checks it, and only then writes the two slots. A failure leaves both sides as they were, so an item is never lost or doubled. An item moves whole, with every field (`Kind`, `Count`, `Quality`, `OrderId`, `Contents`, paths).
 - The contents are in the owner's record on the host. The host sends them to the player who asked, to nobody else (`Rpc.FilterInclude`); the box's synced state is only the owner's Steam id. A client keeps the contents only while the panel is open.
 - The claim is made by the host on the first request from a player in reach, written to `storage.json` at once.
 
@@ -54,4 +55,4 @@ The prefab is `Assets/crime/storage_box.prefab`: a root with `StorageBox`, `Inte
 ## Not done
 
 - Raiding another player's box (`CanUse` is the place for it).
-- Stacking: two batches of the same kind stay in two slots.
+- Stacking of seeds, parcels and ordinary items (only drug products and raw materials combine).
