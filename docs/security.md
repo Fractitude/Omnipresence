@@ -31,6 +31,25 @@ Nothing about a camera has to be synced to be watched. **The picture never cross
 own, from its own copy of the world and its own copy of the camera. A camera placed in the scene or spawned by the host
 exists on every client, so every client can draw it.
 
+## A broken camera
+
+`Broken` is one flag for both ways a camera stops working — destroyed, or with no signal — because the app and the player
+see the same thing either way.
+
+- **The host sets it** when the camera takes `Toughness` damage (20 by default): `SecurityCamera` implements
+  `Component.IDamageable`, so bullets and explosions count. `[Property, Sync]` takes it to every client, and setting it in
+  the inspector makes a camera that never worked.
+- **It stops looking at the world.** `OnPreRender` never calls `RenderToTexture` again.
+- **It shows television static instead**: one 320×180 texture (`Texture.Update` from a `Color32` buffer) with a new grey
+  snow pattern on every rendered frame, up to 60 a second, and a brighter band rolling down it. Static is made on each
+  client like the feed is, so it costs the network nothing; half the feed's size is enough because the screen scales it
+  up, and it is what a lost signal looks like anyway.
+- **The app says NO SIGNAL** where it said LIVE — an amber badge instead of a red one, on the cell and on the enlarged
+  feed alike — and the LED on the camera's front goes dark. The rows carry `Broken` into the state, and the view model's
+  `Same` compares it, so a camera breaking updates the screen on the next scan (half a second) rather than when
+  something else changes.
+- The editor gizmo of a broken camera is drawn red, so a dead one in the scene is obvious.
+
 ## The app
 
 `Code/Apps/Security/`, described by `Assets/navi/system/security.napp`. A core app (`IsSystem` + prepackaged, so it is

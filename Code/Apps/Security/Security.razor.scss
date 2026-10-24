@@ -101,6 +101,7 @@ i
 
 .cell
 {
+	position: relative;
 	width: 212px;
 	flex-direction: column;
 	flex-shrink: 0;
@@ -208,28 +209,41 @@ i
 		width: 100%;
 		height: 100%;
 	}
+}
 
-	.live
+// The state of a feed, in the corner of its picture: LIVE, or NO SIGNAL once the camera is broken and shows static.
+// Opacity is high and the broken one is amber, because a feed can be bright snow and the badge has to be read on it.
+.live
+{
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	flex-direction: row;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 6px;
+	font-size: 10px;
+	font-weight: 700;
+	white-space: nowrap;
+	letter-spacing: 1px;
+	color: #ff8a8a;
+	background-color: rgba( 0, 0, 0, 0.72 );
+
+	.dot
 	{
-		position: absolute;
-		left: 8px;
-		top: 8px;
-		flex-direction: row;
-		align-items: center;
-		gap: 5px;
-		padding: 2px 6px;
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: 1px;
-		color: #ff6b6b;
-		background-color: rgba( 0, 0, 0, 0.55 );
+		width: 6px;
+		height: 6px;
+		border-radius: 3px;
+		background-color: #ff3b3b;
+	}
+
+	&.broken
+	{
+		color: #ffd166;
 
 		.dot
 		{
-			width: 6px;
-			height: 6px;
-			border-radius: 3px;
-			background-color: #ff3b3b;
+			background-color: #c9a227;
 		}
 	}
 }

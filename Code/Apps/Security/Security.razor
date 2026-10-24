@@ -51,9 +51,9 @@
 					<div class="waiting">Connecting...</div>
 				}
 
-				<div class="live">
+				<div class="live @( selected.Broken ? "broken" : "" )">
 					<div class="dot"></div>
-					LIVE
+					@( selected.Broken ? "NO SIGNAL" : "LIVE" )
 				</div>
 			</div>
 		</div>
@@ -72,6 +72,11 @@
 					{
 						<div class="waiting">Connecting...</div>
 					}
+
+					<div class="live @( camera.Broken ? "broken" : "" )">
+						<div class="dot"></div>
+						@( camera.Broken ? "NO SIGNAL" : "LIVE" )
+					</div>
 
 					<div class="caption">
 						<div class="caption-name">@camera.Name</div>

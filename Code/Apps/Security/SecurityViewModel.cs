@@ -101,11 +101,16 @@ public sealed class SecurityViewModel
 			.Select( x => new SecurityCameraRow(
 				x.GameObject.Id.ToString(),
 				x.DisplayName,
-				$"{MathF.Round( x.WorldPosition.Distance( at ) * MetresPerUnit )} m away" ) )
+				$"{MathF.Round( x.WorldPosition.Distance( at ) * MetresPerUnit )} m away",
+				x.Broken ) )
 			.ToList();
 	}
 
-	/// <summary>Are these the same cameras, in the same order, as the state already holds?</summary>
+	/// <summary>
+	/// Are these the same cameras, in the same order and the same state, as the state already holds? A camera breaking
+	/// changes the list the panel draws, so it counts.
+	/// </summary>
 	static bool Same( IReadOnlyList<SecurityCameraRow> cameras, IReadOnlyList<SecurityCameraRow> known ) =>
-		cameras.Count == known.Count && !cameras.Where( ( row, i ) => row.Id != known[i].Id ).Any();
+		cameras.Count == known.Count
+		&& !cameras.Where( ( row, i ) => row.Id != known[i].Id || row.Broken != known[i].Broken ).Any();
 }
