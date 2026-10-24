@@ -65,11 +65,32 @@
 	// Static: the panel's mouse events and this component's updates are not always on the same instance.
 	static int toldAtOpen;
 
+	// Whether a press was asked for since the panel opened: the panel closes itself once nothing is left to press.
+	static bool pressed;
+
 	/// <summary>
 	/// What the panel says when the bag holds no raw of any drug.
 	/// </summary>
 	public static string NothingToPress =>
 		$"You have no raw {string.Join( " or ", ProductCatalog.Products.Select( x => x.Name ) )} to press.";
+
+	/// <summary>
+	/// Whether some raw batch in the bag holds a whole multiple, so there is still something a Press button can do.
+	/// Per slot, not per kind: raw of two qualities is two batches, and each is pressed alone.
+	/// </summary>
+	static bool AnythingToPress()
+	{
+		var inventory = PlayerInventory.Local;
+
+		for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
+		{
+			if ( inventory.At( slot ) is { IsBatch: true } item
+			     && ProductCatalog.OfRaw( item.Kind ) is { } product && item.Count >= product.RawPerProduct )
+				return true;
+		}
+
+		return false;
+	}
 
 	/// <summary>
 	/// Open the panel, from a press bench the player used. Does nothing with another menu open.
@@ -81,6 +102,7 @@
 			return;
 
 		toldAtOpen = crime.ToldCount;
+		pressed = false;
 		IsOpen = true;
 		GameMenus.SetOpen( "press", true );
 	}
@@ -92,6 +114,7 @@
 
 		IsOpen = false;
 		GameMenus.SetOpen( "press", false );
+		pressed = false;
 		MenuControls.Free( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}
@@ -107,6 +130,7 @@
 		     || item.Count < product.RawPerProduct )
 			return;
 
+		pressed = true;
 		PlayerCrime.Local?.RequestPress( slot );
 	}
 
@@ -120,6 +144,14 @@
 		     || !PressBench.IsNear( Players.LocalController?.WorldPosition ?? default ) )
 		{
 			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		// A press that used the last whole batch leaves nothing to do here: close once the host's bag arrives.
+		// Before any press the panel stays open, to say why a batch is too small to press.
+		if ( pressed && !AnythingToPress() )
+		{
 			Close();
 			return;
 		}
