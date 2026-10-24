@@ -150,7 +150,7 @@ public sealed class OrganizationsViewModel
 				draft = new();
 				break;
 
-			case PickAction:
+			case PickAction when !OnCooldown( me, arg ):
 				pickedInvitee = arg;
 				break;
 
@@ -199,7 +199,7 @@ public sealed class OrganizationsViewModel
 				break;
 
 			case AcceptAction:
-				var joined = OrgRegistry.Accept( me, seat.DisplayName, arg );
+				var joined = OrgInviteSystem.Answer( seat, arg, true, false );
 				notice = joined.Message;
 
 				if ( joined.Ok )
@@ -208,7 +208,7 @@ public sealed class OrganizationsViewModel
 				break;
 
 			case DeclineAction:
-				notice = OrgRegistry.Decline( me, arg ).Message;
+				notice = OrgInviteSystem.Answer( seat, arg, false, false ).Message;
 				break;
 		}
 	}
@@ -262,8 +262,7 @@ public sealed class OrganizationsViewModel
 			return;
 
 		pickedInvitee = "";
-		GameManager.Current?.Notify(
-			target, $"{seat.DisplayName} invited you to {OrgRegistry.OrgOf( seat.SteamId )?.Name}. Open Organizations on your computer." );
+		GameManager.Current?.Notify( target, $"{OrgRegistry.OrgOf( seat.SteamId )?.Name} invited you." );
 	}
 
 	void Confirmed( ulong me )
@@ -289,6 +288,13 @@ public sealed class OrganizationsViewModel
 		}
 	}
 
+	static string WaitOf( OrgRecord org, Connection who ) =>
+		OrgRegistry.InviteWait( org.Id, who.SteamId ) is var wait and > 0 ? OrgRules.WaitText( wait ) : "";
+
+	// Whether the organization of this player must still wait before inviting the player picked.
+	static bool OnCooldown( ulong me, string picked ) =>
+		OrgRegistry.OrgOf( me ) is { } org && ulong.TryParse( picked, out var id ) && OrgRegistry.InviteWait( org.Id, id ) > 0;
+
 	static string Clip( string text, int length ) => (text ?? "").Length > length ? text[..length] : text ?? "";
 
 	static OrgRole RoleOf( OrgRecord org, ulong steamId ) => org.MemberOf( steamId )?.Role ?? OrgRole.Member;
@@ -304,11 +310,11 @@ public sealed class OrganizationsViewModel
 			seat?.Id,
 			GameAppNetwork.IsOnline( getComputer() ),
 			OrgRegistry.Version,
+			// A wait after a rejection counts down on the wall clock.
+			OrgRegistry.HasRejections ? OrgRegistry.Now / 5 : 0,
 			(tab, editing, confirm, notice, selected, pickedInvitee),
 			(inviteRole, inviteShare, draft.IconId, draft.Color),
 			string.Join( ',', Connection.All.Select( x => $"{x.Id}:{x.DisplayName}" ) ),
-			// Invitations run out on the wall clock.
-			OrgRegistry.Now / 5,
 			PlayerProgress.For( seat )?.Loaded ).ToString();
 
 	OrganizationsUiState Build()
@@ -412,17 +418,16 @@ public sealed class OrganizationsViewModel
 		if ( pickedInvitee != "" && candidates.All( x => x.SteamId.ToString() != pickedInvitee ) )
 			pickedInvitee = "";
 
-		var now = OrgRegistry.Now;
-
 		return new InviteForm(
-			candidates.Select( x => new CandidateRow( x.SteamId.ToString(), x.DisplayName, x.SteamId.ToString() == pickedInvitee ) )
+			candidates.Select( x => new CandidateRow(
+					x.SteamId.ToString(), x.DisplayName, x.SteamId.ToString() == pickedInvitee, WaitOf( org, x ) ) )
 				.ToList(),
 			RolesFor( x => OrgRules.CanInviteAs( role, x ), inviteRole ),
 			inviteShare,
 			pickedInvitee != "",
 			OrgRegistry.InvitesOf( org.Id )
 				.Select( x => new SentInviteRow(
-					x.Id, x.InviteeName, x.Role.ToString(), x.SharePercent, Countdown( OrgCatalog.InviteSeconds - (now - x.Created) ) ) )
+					x.Id, x.InviteeName, x.Role.ToString(), x.SharePercent ) )
 				.ToList() );
 	}
 
@@ -437,8 +442,7 @@ public sealed class OrganizationsViewModel
 			org?.IconColor ?? OrgCatalog.DefaultColor,
 			invite.Role.ToString(),
 			invite.SharePercent,
-			invite.InviterName,
-			Countdown( OrgCatalog.InviteSeconds - (OrgRegistry.Now - invite.Created) ) );
+			invite.InviterName );
 	}
 
 	static string Countdown( long seconds ) =>

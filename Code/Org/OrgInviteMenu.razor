@@ -1,0 +1,139 @@
+@using Sandbox.Movement
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="menu-root @( IsOpen ? "open" : "" )">
+	@if ( IsOpen && Shown is { } invite )
+	{
+		var count = Waiting.Count;
+
+		<MenuWindow Title=@( count > 1 ? $"Organization invitation (1 of {count})" : "Organization invitation" )
+		            Width=@( 460 ) OnClose=@Later Hint="Escape decides later (see your Organizations app).">
+			<ChildContent>
+				<div class="invite">
+					<div class="emblem" style=@( $"background-color: {Soft( invite.Color )}; color: {invite.Color};" )>
+						<i>@invite.Glyph</i>
+					</div>
+					<div class="org-name">@invite.OrgName</div>
+					<div class="from">@( $"{invite.From} invited you to join." )</div>
+					<div class="terms">
+						<div class="term">
+							<div class="label">Role</div>
+							<div class="value">@invite.Role</div>
+						</div>
+						<div class="term">
+							<div class="label">Revenue share</div>
+							<div class="value">@( $"{invite.Share}%" )</div>
+						</div>
+					</div>
+					<div class="note">Joining puts you in this organization. You can leave it later.</div>
+					<div class="buttons">
+						<div class="menu-button accept" @onclick=@( () => Answer( invite.Id, true ) )>Accept</div>
+						<div class="menu-button reject" @onclick=@( () => Answer( invite.Id, false ) )>Reject</div>
+					</div>
+				</div>
+			</ChildContent>
+		</MenuWindow>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the window is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	// Not readonly: a hot reload would reset a readonly set of strings to empty.
+	// The ids the player closed with Escape this session: they are not offered again (the app still lists them).
+	static HashSet<string> dismissed = new();
+
+	/// <summary>
+	/// The invitations to offer, oldest first: the ones the host sent that were not put off.
+	/// </summary>
+	static List<OrgInviteView> Waiting => OrgInviteSystem.Mine.Where( x => !dismissed.Contains( x.Id ) ).ToList();
+
+	static OrgInviteView Shown => Waiting.FirstOrDefault();
+
+	static string Soft( string color ) => color.Length == 7 ? color + "33" : color;
+
+	/// <summary>
+	/// Whether the player can be shown a window now: in the world, alive, not steering a seat, no other menu or Navi
+	/// computer using the keyboard.
+	/// </summary>
+	static bool CanShow()
+	{
+		var controller = Players.LocalController;
+
+		return controller.IsValid() && Players.Local<PlayerHealth>() is { Health: > 0 }
+		       && controller.GetComponentInParent<ISitTarget>( false ) is null
+		       && !GameMenus.IsAnyOpen && NaviInputCapture.Current is null;
+	}
+
+	static void Open()
+	{
+		IsOpen = true;
+		GameMenus.SetOpen( "orginvite", true );
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "orginvite", false );
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Decide later: close, and do not offer what is waiting now again this session. They stay in the app.
+	/// </summary>
+	static void Later()
+	{
+		foreach ( var invite in OrgInviteSystem.Mine )
+			dismissed.Add( invite.Id );
+
+		Close();
+	}
+
+	/// <summary>
+	/// Send the answer: only the invitation id goes; the host checks it is this player's and applies it.
+	/// </summary>
+	static void Answer( string id, bool accept ) => OrgInviteSystem.AnswerRpc( id, accept );
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+		{
+			if ( Shown is not null && CanShow() )
+				Open();
+
+			return;
+		}
+
+		// Escape puts it off. Dying, sitting down or a Navi screen closes it but keeps the invitation queued.
+		if ( Input.EscapePressed )
+		{
+			Input.EscapePressed = false;
+			Later();
+			return;
+		}
+
+		if ( Shown is null || !Players.LocalController.IsValid() || NaviInputCapture.Current is not null )
+		{
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, OrgInviteSystem.Version, dismissed.Count );
+}

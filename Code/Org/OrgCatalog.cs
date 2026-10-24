@@ -17,8 +17,14 @@ public static class OrgCatalog
 	/// <summary>The most invitations one organization has waiting at once.</summary>
 	public const int MaxPendingInvites = 5;
 
-	/// <summary>Real seconds an invitation can be answered in.</summary>
-	public const long InviteSeconds = 600;
+	/// <summary>
+	/// After a player rejects an organization's invitation it can't invite them again for this long, doubling with each
+	/// further rejection up to the cap. Real seconds.
+	/// </summary>
+	public const long RejectBaseSeconds = 300, RejectMaxSeconds = 1800;
+
+	/// <summary>A rejection streak is forgotten once this long has passed since the last one (24 hours).</summary>
+	public const long RejectResetSeconds = 86400;
 
 	/// <summary>The newest payouts an organization keeps for the Payouts tab.</summary>
 	public const int MaxPayouts = 50;

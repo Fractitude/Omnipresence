@@ -46,6 +46,7 @@ Testing only, for the organization the Organizations app runs ([organizations.md
 | --- | --- |
 | `org_create <name>` | Register an organization for yourself: `org_create "Night Owls"`. You start with a 0% share. |
 | `org_member_add <steamId> <nickname> [share]` | Put a made-up player in your organization, to try a split without a second client: `org_member_add 76561198000000001 Mule 30`. |
+| `org_invite_test [org] [role] [share] [respectCooldown]` | Send yourself an invitation from a made-up organization (made if missing; each name has its own founder): `org_invite_test "Test Syndicate" Courier 15`. Opens the invitation popup. Needs `progress_test_data on` and you in no organization. A rejection wait is cleared first unless the last argument is `true`. |
 | `org_dump` | Log every organization, its members and shares, its waiting invitations, and the shares waiting for an absent member. |
 | `org_clear` | Delete every organization. |
 

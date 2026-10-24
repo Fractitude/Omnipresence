@@ -55,6 +55,22 @@ public sealed class OrgInvite
 	public long Created { get; set; }
 }
 
+/// <summary>
+/// How often a player rejected an organization's invitations in a row, and when last: the organization has to wait
+/// before it can invite them again (<see cref="OrgRules.RejectionWait"/>).
+/// </summary>
+public sealed class OrgRejection
+{
+	public string OrgId { get; set; } = "";
+	public ulong InviteeId { get; set; }
+
+	/// <summary>Rejections in the current streak.</summary>
+	public int Count { get; set; }
+
+	/// <summary>Real unix seconds of the last one.</summary>
+	public long Last { get; set; }
+}
+
 /// <summary>What one member got from a payout.</summary>
 public sealed class OrgPayoutSplit
 {
@@ -126,4 +142,5 @@ public sealed class OrgData
 	public List<OrgRecord> Orgs { get; set; } = new();
 	public List<OrgInvite> Invites { get; set; } = new();
 	public List<OrgPendingCredit> Pending { get; set; } = new();
+	public List<OrgRejection> Rejections { get; set; } = new();
 }

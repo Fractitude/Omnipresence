@@ -139,12 +139,10 @@ public static class OrgRules
 
 	// -- Invitations --------------------------------------------------------------------------------------------------
 
-	public static bool IsExpired( OrgInvite invite, long now ) => now - invite.Created >= OrgCatalog.InviteSeconds;
-
 	/// <summary>Why <paramref name="actor"/> can't send this invitation now, or null.</summary>
 	public static string CheckInvite(
 		OrgRecord org, IReadOnlyList<OrgInvite> waiting, ulong actor, ulong invitee, bool inviteeHasOrg, OrgRole role,
-		int share, long now )
+		int share, OrgRejection rejection = null, long now = 0, string inviteeName = null )
 	{
 		if ( org.MemberOf( actor ) is not { } member || !Can( member.Role, OrgAction.Invite ) )
 			return "You can't invite people to this organization.";
@@ -161,25 +159,70 @@ public static class OrgRules
 		if ( org.Members.Count >= OrgCatalog.MaxMembers )
 			return "The organization is full.";
 
-		var open = waiting.Where( x => !IsExpired( x, now ) ).ToList();
-
-		if ( open.Count >= OrgCatalog.MaxPendingInvites )
-			return $"At most {OrgCatalog.MaxPendingInvites} invitations can wait at once.";
-
-		if ( open.Any( x => x.InviteeId == invitee ) )
+		if ( waiting.Any( x => x.InviteeId == invitee ) )
 			return "That player already has an invitation.";
+
+		if ( RejectionWait( rejection, now ) is var wait and > 0 )
+		{
+			return $"{(string.IsNullOrEmpty( inviteeName ) ? "That player" : inviteeName)} declined recently. "
+			       + $"You can invite them again in {WaitText( wait )}.";
+		}
+
+		if ( waiting.Count >= OrgCatalog.MaxPendingInvites )
+			return $"At most {OrgCatalog.MaxPendingInvites} invitations can wait at once.";
 
 		return CheckShare( org.Members, invitee, share );
 	}
 
-	/// <summary>Why this invitation can't be accepted now, or null. Everything is checked again.</summary>
-	public static string CheckAccept( OrgRecord org, OrgInvite invite, bool inviteeHasOrg, long now )
+	/// <summary>The wait after the n-th rejection in a row: 5, 10, 20 minutes, then 30 at most. 0 for none.</summary>
+	public static long RejectionCooldown( int count )
+	{
+		if ( count <= 0 )
+			return 0;
+
+		var seconds = OrgCatalog.RejectBaseSeconds;
+
+		for ( var i = 1; i < count && seconds < OrgCatalog.RejectMaxSeconds; i++ )
+			seconds *= 2;
+
+		return System.Math.Min( seconds, OrgCatalog.RejectMaxSeconds );
+	}
+
+	/// <summary>
+	/// Seconds the organization still has to wait before it may invite this player again, 0 when it may (no rejection,
+	/// the wait is over - exactly at its end counts as over - or the streak is a day old and forgotten).
+	/// </summary>
+	public static long RejectionWait( OrgRejection rejection, long now )
+	{
+		if ( rejection is null || rejection.Count <= 0 )
+			return 0;
+
+		var since = now - rejection.Last;
+
+		if ( since >= OrgCatalog.RejectResetSeconds )
+			return 0;
+
+		return System.Math.Max( RejectionCooldown( rejection.Count ) - since, 0 );
+	}
+
+	/// <summary>The rejection streak after one more rejection at <paramref name="now"/>: a forgotten one starts again at 1.</summary>
+	public static int NextRejectionCount( OrgRejection rejection, long now ) =>
+		rejection is null || rejection.Count <= 0 || now - rejection.Last >= OrgCatalog.RejectResetSeconds
+			? 1
+			: rejection.Count + 1;
+
+	/// <summary>"4 min" (rounded up) or "30 s".</summary>
+	public static string WaitText( long seconds ) =>
+		seconds >= 60 ? $"{(seconds + 59) / 60} min" : $"{System.Math.Max( seconds, 0 )} s";
+
+	/// <summary>
+	/// Why this invitation can't be accepted now, or null. Everything is checked again, since an invitation never runs
+	/// out: it waits until it is answered, cancelled or void.
+	/// </summary>
+	public static string CheckAccept( OrgRecord org, OrgInvite invite, bool inviteeHasOrg )
 	{
 		if ( org is null )
 			return "That organization no longer exists.";
-
-		if ( IsExpired( invite, now ) )
-			return "That invitation ran out.";
 
 		if ( inviteeHasOrg )
 			return "You are already in an organization.";
@@ -192,6 +235,13 @@ public static class OrgRules
 
 		return CheckShare( org.Members, invite.InviteeId, invite.SharePercent );
 	}
+
+	/// <summary>
+	/// Whether an invitation can never be accepted any more, so it is removed without anyone answering: its organization
+	/// is gone, or the invited player is in an organization already. A full organization or shares that no longer fit
+	/// are not permanent (a member may leave), so those are only checked when it is accepted.
+	/// </summary>
+	public static bool IsVoid( OrgRecord org, bool inviteeHasOrg ) => org is null || inviteeHasOrg;
 
 	// -- Payouts ------------------------------------------------------------------------------------------------------
 

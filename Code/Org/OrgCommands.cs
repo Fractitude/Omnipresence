@@ -42,8 +42,7 @@ public static class OrgCommands
 		}
 
 		var check = OrgRules.CheckInvite(
-			org, [], Connection.Local.SteamId, steamId, OrgRegistry.OrgOf( steamId ) is not null, OrgRole.Member, share,
-			OrgRegistry.Now );
+			org, [], Connection.Local.SteamId, steamId, OrgRegistry.OrgOf( steamId ) is not null, OrgRole.Member, share );
 
 		if ( check is not null )
 		{
@@ -55,6 +54,35 @@ public static class OrgCommands
 			org, new() { SteamId = steamId, Name = nickname, Role = OrgRole.Member, SharePercent = share, Joined = OrgRegistry.Now } );
 
 		Log.Info( $"{nickname} added to {org.Name}" );
+	}
+
+	/// <summary>
+	/// Send yourself an invitation from a made-up organization, to try the invitation window without a second client:
+	/// <c>org_invite_test "Test Syndicate" Courier 15</c> (organization, role, share, and true to keep the wait after a rejection, which is cleared by default). Only with
+	/// <c>progress_test_data</c> on, and you must be in no organization.
+	/// </summary>
+	[ConCmd( "org_invite_test" )]
+	public static void InviteTest(
+		string orgName = "Test Syndicate", string role = "Member", int share = 10, bool respectCooldown = false )
+	{
+		if ( !Allowed() || !OnTestData() )
+		{
+			Log.Info( "Only in the editor, with progress_test_data on" );
+			return;
+		}
+
+		if ( !System.Enum.TryParse<OrgRole>( role, true, out var parsed ) || !System.Enum.IsDefined( parsed ) )
+		{
+			Log.Info( "Roles: Manager, Grower, Presser, Packer, Courier, Member" );
+			return;
+		}
+
+		var me = Connection.Local;
+		var result = OrgRegistry.DebugInvite( me.SteamId, me.DisplayName, orgName, parsed, share, respectCooldown );
+		Log.Info( result.Message );
+
+		if ( result.Ok )
+			GameManager.Current?.Notify( me, $"{OrgRules.NormalizeName( orgName )} invited you." );
 	}
 
 	/// <summary>Log every organization, its members and shares, the waiting invitations and the shares in transit.</summary>

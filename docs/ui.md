@@ -89,3 +89,6 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
 6. **A dialog opened from another window** (`DropCashMenu`, the amount dialog of the Character menu's wallet) is a `MenuWindow` piece like the rest, `menu-root` at `$z-menu`, so it draws over the Character menu, which has no z-index; the right-click menu (`$z-context`) draws above both. It registers as `dropcash` and takes the mouse and the keys while open: the Character menu does not close on Escape or its key while `DropCashMenu.IsOpen`, and the dialog gives the controls back on close only if the Character menu is not open under it. A text field is a `TextEntry` (digits only, the handler cleans the text and writes it back; `@onsubmit` is Enter); focus it once the panel exists. The Character menu's `WalletStrip` lists cash, crypto and credits; right-clicking the cash row opens the context menu with Drop.
 7. The Character menu and the Ability menu predate `MenuWindow` and have their own layout; they still use
    `GameMenus` and `MenuControls`.
+8. A window can also open **by itself** when something arrives (`OrgInviteMenu`, an organization invitation): it opens only
+   when the player can take it (alive, not in a seat, `!GameMenus.IsAnyOpen`, no `NaviInputCapture`), otherwise it queues;
+   Escape closes it and the item is not offered again that session.

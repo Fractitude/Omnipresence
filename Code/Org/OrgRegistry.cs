@@ -18,8 +18,9 @@ public readonly record struct OrgResult( bool Ok, string Message )
 /// </summary>
 /// <remarks>
 /// Host only. Not <c>readonly</c> (see AGENTS.md, "Static state and hot reload"): loaded the first time it is asked, and
-/// the index of Steam ids is rebuilt from the data every time it is loaded. Times are real unix seconds, so an
-/// invitation runs out on the wall clock even when the world clock is skipped.
+/// the index of Steam ids is rebuilt from the data every time it is loaded. Times are real unix seconds. An invitation
+/// never runs out: it waits (also across a restart, for an invitee who is away) until it is accepted, rejected,
+/// cancelled, or void (<see cref="SweepVoid"/>).
 /// </remarks>
 public static class OrgRegistry
 {
@@ -133,10 +134,13 @@ public static class OrgRegistry
 		if ( OrgOf( actor ) is not { } org )
 			return OrgResult.Fail( "You are not in an organization." );
 
-		PurgeExpired();
+		SweepVoid();
+		var now = Now;
+		Data.Rejections.RemoveAll( x => OrgRules.RejectionWait( x, now ) == 0 );
 
 		if ( OrgRules.CheckInvite(
-			    org, InvitesOf( org.Id ), actor, invitee, OrgOf( invitee ) is not null, role, share, Now ) is { } error )
+			    org, InvitesOf( org.Id ), actor, invitee, OrgOf( invitee ) is not null, role, share,
+			    RejectionOf( org.Id, invitee ), now, inviteeName ) is { } error )
 			return OrgResult.Fail( error );
 
 		var inviter = org.MemberOf( actor );
@@ -172,12 +176,23 @@ public static class OrgRegistry
 		return OrgResult.Success( "Invitation cancelled." );
 	}
 
-	/// <summary>The invitations waiting for this player (the ones that ran out are dropped).</summary>
-	public static IReadOnlyList<OrgInvite> InvitesFor( ulong steamId )
-	{
-		PurgeExpired();
-		return Data.Invites.Where( x => x.InviteeId == steamId ).ToList();
-	}
+	/// <summary>The invitations waiting for this player.</summary>
+	public static IReadOnlyList<OrgInvite> InvitesFor( ulong steamId ) =>
+		Data.Invites.Where( x => x.InviteeId == steamId ).ToList();
+
+	/// <summary>The rejection streak of this player with this organization, or null.</summary>
+	public static OrgRejection RejectionOf( string orgId, ulong invitee ) =>
+		Data.Rejections.FirstOrDefault( x => x.OrgId == orgId && x.InviteeId == invitee );
+
+	/// <summary>Seconds until this organization may invite this player again; 0 when it may.</summary>
+	public static long InviteWait( string orgId, ulong invitee ) =>
+		OrgRules.RejectionWait( RejectionOf( orgId, invitee ), Now );
+
+	/// <summary>Whether any rejection is still being waited out (a panel then redraws as the time passes).</summary>
+	public static bool HasRejections => Data.Rejections.Count > 0;
+
+	/// <summary>The invitation with this id, or null.</summary>
+	public static OrgInvite FindInvite( string inviteId ) => Data.Invites.FirstOrDefault( x => x.Id == inviteId );
 
 	/// <summary>The invitations an organization has waiting.</summary>
 	public static IReadOnlyList<OrgInvite> InvitesOf( string orgId ) =>
@@ -186,7 +201,6 @@ public static class OrgRegistry
 	/// <summary>Join through an invitation. Everything is checked again: the invitation may be old.</summary>
 	public static OrgResult Accept( ulong invitee, string inviteeName, string inviteId )
 	{
-		PurgeExpired();
 		var invite = Data.Invites.FirstOrDefault( x => x.Id == inviteId && x.InviteeId == invitee );
 
 		if ( invite is null )
@@ -194,7 +208,7 @@ public static class OrgRegistry
 
 		var org = Find( invite.OrgId );
 
-		if ( OrgRules.CheckAccept( org, invite, OrgOf( invitee ) is not null, Now ) is { } error )
+		if ( OrgRules.CheckAccept( org, invite, OrgOf( invitee ) is not null ) is { } error )
 		{
 			Data.Invites.Remove( invite );
 			Save();
@@ -209,22 +223,88 @@ public static class OrgRegistry
 
 		Index[invitee] = org;
 
+		// Accepting ends the streak of rejections with this organization.
+		Data.Rejections.RemoveAll( x => x.OrgId == org.Id && x.InviteeId == invitee );
+
 		// Their other invitations are of no use now.
 		Data.Invites.RemoveAll( x => x.InviteeId == invitee );
 		Save();
 		return OrgResult.Success( $"You joined {org.Name}." );
 	}
 
-	public static OrgResult Decline( ulong invitee, string inviteId )
+	/// <summary>Reject an invitation: it is removed. <paramref name="invite"/> is what was removed, for telling its sender.</summary>
+	public static OrgResult Decline( ulong invitee, string inviteId, out OrgInvite invite )
 	{
-		var invite = Data.Invites.FirstOrDefault( x => x.Id == inviteId && x.InviteeId == invitee );
+		invite = Data.Invites.FirstOrDefault( x => x.Id == inviteId && x.InviteeId == invitee );
 
 		if ( invite is null )
 			return OrgResult.Fail( "That invitation is gone." );
 
 		Data.Invites.Remove( invite );
+
+		// Only a rejection counts: the organization must wait before it asks this player again.
+		var now = Now;
+		var streak = RejectionOf( invite.OrgId, invitee );
+		var count = OrgRules.NextRejectionCount( streak, now );
+
+		if ( streak is null )
+			Data.Rejections.Add( streak = new() { OrgId = invite.OrgId, InviteeId = invitee } );
+
+		streak.Count = count;
+		streak.Last = now;
 		Save();
 		return OrgResult.Success( "Invitation declined." );
+	}
+
+	/// <summary>
+	/// Remove the invitations that can never be accepted: their organization is gone, or the player joined another one
+	/// (<see cref="OrgRules.IsVoid"/>). Returns what was removed, so the invitees can be told.
+	/// </summary>
+	public static IReadOnlyList<OrgInvite> SweepVoid()
+	{
+		var voided = Data.Invites.Where( x => OrgRules.IsVoid( Find( x.OrgId ), OrgOf( x.InviteeId ) is not null ) ).ToList();
+
+		if ( voided.Count == 0 )
+			return voided;
+
+		Data.Invites.RemoveAll( x => voided.Contains( x ) );
+		Save();
+		return voided;
+	}
+
+	/// <summary>
+	/// Put an invitation to <paramref name="invitee"/> from a made-up inviter, making the organization when there is none
+	/// of that name. For the test command only.
+	/// </summary>
+	internal static OrgResult DebugInvite(
+		ulong invitee, string inviteeName, string orgName, OrgRole role, int share, bool respectCooldown )
+	{
+		// One made-up founder per organization name, so two test organizations can each invite you.
+		var key = OrgRules.NameKey( orgName );
+		var hash = key.Aggregate( 17, ( sum, c ) => sum * 31 + c ) & 0xffff;
+		var fakeFounder = 76561198000100000UL + (ulong)hash;
+
+		var org = Data.Orgs.FirstOrDefault( x => OrgRules.NameKey( x.Name ) == OrgRules.NameKey( orgName ) );
+
+		if ( org is null )
+		{
+			var made = Create( fakeFounder, "Test inviter", orgName, OrgCatalog.Icons[3].Id, OrgCatalog.Palette[3] );
+
+			if ( !made.Ok )
+				return made;
+
+			org = Find( Index[fakeFounder].Id );
+		}
+
+		if ( !respectCooldown )
+			Data.Rejections.RemoveAll( x => x.OrgId == org.Id && x.InviteeId == invitee );
+
+		var inviter = org.Members.FirstOrDefault( x => OrgRules.Can( x.Role, OrgAction.Invite ) );
+
+		if ( inviter is null )
+			return OrgResult.Fail( "That organization has nobody who can invite." );
+
+		return Invite( inviter.SteamId, invitee, inviteeName, role, share );
 	}
 
 	/// <summary>Leave. The Owner can't: they disband.</summary>
@@ -318,6 +398,7 @@ public static class OrgRegistry
 
 		Data.Orgs.Remove( org );
 		Data.Invites.RemoveAll( x => x.OrgId == org.Id );
+		Data.Rejections.RemoveAll( x => x.OrgId == org.Id );
 		Save();
 		return OrgResult.Success( $"{org.Name} was disbanded." );
 	}
@@ -400,14 +481,6 @@ public static class OrgRegistry
 
 	// -- File ---------------------------------------------------------------------------------------------------------
 
-	static void PurgeExpired()
-	{
-		var now = Now;
-
-		if ( Data.Invites.RemoveAll( x => OrgRules.IsExpired( x, now ) ) > 0 )
-			Save();
-	}
-
 	static OrgData Load()
 	{
 		try
@@ -417,6 +490,7 @@ public static class OrgRegistry
 				saved.Orgs ??= new();
 				saved.Invites ??= new();
 				saved.Pending ??= new();
+				saved.Rejections ??= new();
 				return saved;
 			}
 		}

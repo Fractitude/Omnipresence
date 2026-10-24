@@ -11,6 +11,8 @@ order. The players run it in the **Organizations** app; the rules and the payout
 | `OrgRecord` | `Code/Org/OrgRecord.cs` | Id, Name, IconId (one of 16), IconColor (`#rrggbb`), FounderId (Steam id), Created (real unix seconds), Members, the last 50 `Payouts`. |
 | `OrgMember` | same | Steam id, last known nickname, `Role`, `SharePercent` (0 to 100), Joined. |
 | `OrgInvite` | same | An offer to one player: organization, role, share, who sent it, when. |
+| `OrgRejection` | same | How many times a player rejected an organization in a row, and when last (the invite cooldown). |
+| `OrgInviteSystem` / `OrgInviteMenu` | `Code/Org/` | Carries invitations to the invited player's client and answers back; the popup that shows them. |
 | `OrgRules` | `Code/Org/OrgRules.cs` | **Pure functions**, no scene: names, colours, shares, permissions, invitations, the payout split. Testable alone. |
 | `OrgCatalog` | `Code/Org/OrgCatalog.cs` | The 16 icons, the colour palette, the limits and the registration fee. |
 | `OrgRegistry` | `Code/Org/OrgRegistry.cs` | The host's data and every change to it (each is checked by `OrgRules` first, then saved at once). Finds a player's organization from their Steam id, also while they are away. |
@@ -49,15 +51,49 @@ order. The players run it in the **Organizations** app; the rules and the payout
 ## Invitations
 
 An Owner or Manager picks one of the **players online** who is in no organization (not themselves, nor someone already invited
-by the organization), a role and a share, and sends it. The invited player gets a chat line and sees it in **their own**
-Organizations app (Invitations tab); membership starts only when they **accept**, since a share changes their income. They can
-decline. The sender (or any Owner or Manager of the organization) can cancel it.
+by the organization), a role and a share, and sends it. The invited player gets a short chat line ("Org invited you.") and a
+**popup** (below); the same invitation is in **their own** Organizations app (Invitations tab). Membership starts only when they
+**accept**, since a share changes their income. They can reject it. The sender (or any Owner or Manager of the organization)
+can cancel it.
 
-- An invitation **runs out after 10 minutes** (real time, `OrgCatalog.InviteSeconds`; skipping the game clock doesn't
-  matter). An organization has at most **5 waiting** invitations and **16 members**.
-- Accepting checks everything again (`OrgRules.CheckAccept`): the organization still exists, the invitation is not old, the
-  player is still in no organization, the shares still fit. A failed accept removes the invitation. Accepting removes the
-  player's other invitations.
+- **An invitation never runs out.** It waits until it is accepted, rejected, cancelled by the organization, or **void**. It is
+  kept in `orgs.json`, so it survives a restart and an invitee who is away finds it next time. Void means it can never be
+  accepted: the organization was disbanded, or the player joined another one. The host removes those within a second
+  (`OrgRegistry.SweepVoid`, from `OrgInviteSystem`) and tells the invitee if they are online. A **full** organization or shares
+  that **no longer fit** are not void (a member may leave, a share may be lowered): they are checked when it is accepted, and
+  then the invitation is removed and the invitee is told why (`OrgRules.CheckAccept`).
+- An organization has at most **5 waiting** invitations and **16 members**, and can't send a second invitation to a player
+  who already has one from it (another organization can).
+- Accepting checks everything again (`CheckAccept`): the organization exists, the player is still in no organization, it is
+  not full, the shares fit. A failed accept removes the invitation. Accepting removes the player's other invitations.
+- **After a reject the organization must wait to invite that player again:** 5 minutes after the first rejection, 10 after
+  the second, 20 after the third, then 30 minutes at most (`OrgRules.RejectionCooldown`, real UTC time). Only **Reject** counts:
+  not Escape in the popup, not a cancel by the organization, not a void invitation. The record is per organization and player
+  (`OrgRejection`, saved in `orgs.json`, so a restart does not reset it). The streak is forgotten when the player **accepts** an
+  invitation of that organization, when the organization is disbanded, or **24 hours** after the last rejection
+  (`OrgCatalog.RejectResetSeconds`). The host enforces it in `OrgRegistry.Invite`, refusing with "NAME declined recently. You
+  can invite them again in 4 min." (`OrgRules.CheckInvite`); the invite form in the app lists such players greyed out with
+  "(wait 4 min)" and they can't be picked. A wait ends exactly at its end (`RejectionWait` is 0 then).
+
+### The invitation popup
+
+`OrgInviteMenu` (`Code/Org/OrgInviteMenu.razor`, a `MenuWindow`, attached in `HudSystem.Add`, registered with `GameMenus` as
+`orginvite`) shows one invitation at a time: the organization's icon in its colour, its name, who invited you, the role and the
+revenue share offered, **Accept** and **Reject**, and "1 of 3" in the title when more wait.
+
+- **Only the invitee's client learns of an invitation.** `OrgInviteSystem` (host) tells each connection its own list with an rpc
+  filtered to that connection (also when they log in with some waiting, and again every 20 s while some wait, in case the first
+  went before the client could take it). The client keeps it in `OrgInviteSystem.Mine`.
+- **Pressing sends only the invitation id** (`OrgInviteSystem.AnswerRpc`, `[Rpc.Host]`). The host takes the caller from
+  `Rpc.Caller`, and `OrgRegistry.Accept` / `Decline` only find an invitation whose invitee is that caller, so one player can't
+  answer another's. Accept joins through the normal rules; Reject removes it, records the rejection and tells the inviter in
+  the chat ("X rejected your invitation to Org."). The answer's result goes to the invitee's chat.
+- **Escape** (or Close) decides later: the window closes and the invitations waiting then are not offered again until the next
+  login (their ids are kept in a static set for the session). They stay in the app's Invitations tab, which has the same
+  Accept and Reject. A new invitation opens the window again.
+- It **queues** instead of opening while the player is dead or not spawned, sits in a seat (`ISitTarget`), another menu is open
+  (`GameMenus.IsAnyOpen`) or a Navi computer has the keyboard (`NaviInputCapture`); it opens when none of that holds. It takes
+  the mouse and the controls like the other menus.
 
 ## Payouts
 
@@ -89,7 +125,7 @@ It credits the receiver's own record itself, as one group of transactions ([tran
 ## Files and test data
 
 `orgs.json` in the game's data folder (`orgs_test.json` under `progress_test_data on`), written atomically with a `.bak`
-(`FileProgressStore.WriteSafely`). It holds organizations, invitations and the waiting shares. The index from Steam id to
+(`FileProgressStore.WriteSafely`). It holds organizations, invitations, rejection records and the waiting shares. The index from Steam id to
 organization is rebuilt on load. The registry's statics are not `readonly` (hot reload).
 
 ## Organizations app
@@ -97,10 +133,10 @@ organization is rebuilt on load. The registry's statics are not `readonly` (hot 
 Tabs: **Organization** (a register form when you are in none: name, a grid of the 16 icons, 12 colours or a hex colour, a live
 preview; when you are in one: the card, the members table, and for Owner and Manager the member editor (select a row: role chips,
 share -5 -1 +1 +5, remove with a second press), the invite form and the sent invitations; the Owner also edits name, icon and
-colour, and disbands with a second press; everyone else leaves with a second press), **Invitations** (yours, Accept or Decline),
+colour, and disbands with a second press; everyone else leaves with a second press), **Invitations** (yours, Accept or Reject),
 **Payouts** (the organization's recent splits with your part highlighted). It needs the computer to be online.
 
 ## Dev commands
 
-`org_create <name>`, `org_member_add <steamId> <nick> [share]`, `org_dump`, `org_clear`: see
-[console-commands.md](console-commands.md). Editor and host only; the last two need `progress_test_data on`.
+`org_create <name>`, `org_member_add <steamId> <nick> [share]`, `org_invite_test`, `org_dump`, `org_clear`: see
+[console-commands.md](console-commands.md). Editor and host only; the last three need `progress_test_data on`.

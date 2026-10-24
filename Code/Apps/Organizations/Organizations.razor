@@ -206,9 +206,9 @@
 							<div class="filters">
 								@foreach ( var candidate in invite.Candidates )
 								{
-									<div class="filter @( candidate.Picked ? "active" : "" )"
+									<div class="filter @( candidate.Picked ? "active" : "" ) @( candidate.Wait != "" ? "cooling" : "" )"
 									     @onclick=@( () => Navi.Act( OrganizationsViewModel.PickAction, candidate.Id ) )>
-										@candidate.Name
+										@( candidate.Wait != "" ? $"{candidate.Name} (wait {candidate.Wait})" : candidate.Name )
 									</div>
 								}
 							</div>
@@ -239,7 +239,7 @@
 							{
 								<div class="sent">
 									<div class="sent-text">
-										@( $"{sent.Name} as {sent.Role}, {sent.Share}%. Runs out in {sent.Expires}." )
+										@( $"{sent.Name} as {sent.Role}, {sent.Share}%." )
 									</div>
 									<div class="step" @onclick=@( () => Navi.Act( OrganizationsViewModel.InviteCancelAction, sent.Id ) )>
 										Cancel
@@ -316,7 +316,6 @@
 							<div class="org-info">
 								<div class="org-name">@invite.OrgName</div>
 								<div class="meta">@( $"{invite.From} invites you as {invite.Role}, with {invite.Share}% of every payout." )</div>
-								<div class="meta">@( $"Runs out in {invite.Expires}." )</div>
 							</div>
 						</div>
 						<div class="actions">

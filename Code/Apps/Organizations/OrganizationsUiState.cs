@@ -86,9 +86,10 @@ public sealed record MemberEdit(
 	bool CanKick,
 	IReadOnlyList<RoleChip> Roles );
 
-public sealed record CandidateRow( string Id, string Name, bool Picked );
+/// <summary><paramref name="Wait"/> is the time left before this player may be invited again, or empty.</summary>
+public sealed record CandidateRow( string Id, string Name, bool Picked, string Wait );
 
-public sealed record SentInviteRow( string Id, string Name, string Role, int Share, string Expires );
+public sealed record SentInviteRow( string Id, string Name, string Role, int Share );
 
 /// <summary>The invitation form of an Owner or a Manager.</summary>
 public sealed record InviteForm(
@@ -121,8 +122,7 @@ public sealed record IncomingInviteRow(
 	string Color,
 	string Role,
 	int Share,
-	string From,
-	string Expires );
+	string From );
 
 public sealed record SplitLine( string Name, string Amount, bool IsYou );
 
