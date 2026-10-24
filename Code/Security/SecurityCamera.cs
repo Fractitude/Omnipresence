@@ -68,6 +68,16 @@ public sealed class SecurityCamera : Component
 	public bool Reaches( Vector3 point ) => WorldPosition.Distance( point ) <= SignalRange;
 
 	/// <summary>
+	/// Take the lens off the scene's own rendering the moment the component comes on. An enabled camera with no render
+	/// target draws the player's screen, so a camera around the house took the view away from the main camera — in
+	/// whatever order the scene happened to list them, which read as spectating one of them at random.
+	/// </summary>
+	protected override void OnEnabled()
+	{
+		EnsureLens();
+	}
+
+	/// <summary>
 	/// The live picture of this camera. The same texture comes back on every ask: the camera draws into it while it is
 	/// asked for, so a panel that holds it sees the feed move without rebuilding.
 	/// </summary>

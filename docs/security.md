@@ -20,6 +20,10 @@ costs nothing:
 - `RequestFeed()` returns one 640×360 render target, the same object on every ask, and starts the clock again.
 - `OnPreRender` draws into it at 12 pictures a second while the clock is running. Twelve is enough to read as live and
   a twelfth of what the screen's own camera costs, which matters when nine of them are on one screen.
+- The lens camera is **disabled** (`IsMainCamera` off as well, and `OnEnabled` does it for a camera made by hand): an
+  enabled camera with no render target draws the player's screen, so an enabled lens took the view away from the main
+  camera — in whatever order the scene listed them, which read as spawning into a random camera. A disabled camera
+  still renders on demand, which is all `RenderToTexture` needs.
 - The texture is kept for the life of the object (nothing re-creates it when the app closes again), so reopening the
   app is instant.
 
