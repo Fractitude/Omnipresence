@@ -127,7 +127,7 @@ public static class CrimeRules
 			         .OrderBy( x => x.ReleaseAt )
 			         .ToList() )
 		{
-			changed |= Release( record, order );
+			changed |= Release( steamId, record, order );
 		}
 
 		foreach ( var order in crime.Orders
@@ -198,18 +198,20 @@ public static class CrimeRules
 
 	/// <summary>
 	/// Pay what escrow held, less the reputation fee. Waits (returns false) while the record cannot hold the payment.
+	/// The payment goes through <see cref="OrgPayouts.Distribute"/>: the player who owns the record (whoever packed the
+	/// parcel) is the receiver, and if they are in an organization their teammates get their shares. This is the only
+	/// place order crypto is credited, and an order leaves Delivered in the same call, so it is shared once.
 	/// </summary>
-	static bool Release( ProgressRecord record, OrderRecord order )
+	static bool Release( ulong steamId, ProgressRecord record, OrderRecord order )
 	{
 		var crime = record.Crime;
 		var gross = order.Total;
 		var fee = gross * CrimeCatalog.FeeFor( crime ) / 100;
 		var paid = gross - fee;
 
-		if ( !record.CanHoldCrypto( paid ) )
+		if ( !OrgPayouts.Distribute( steamId, record, paid, OrgCurrency.Crypto, "order", order.Id ) )
 			return false;
 
-		record.AddCrypto( paid );
 		order.Paid = paid;
 		order.State = OrderState.Released;
 		crime.GoodTrades++;

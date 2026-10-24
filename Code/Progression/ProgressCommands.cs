@@ -39,7 +39,7 @@ public static class ProgressCommands
 	/// <summary>
 	/// <c>progress_test_data on</c> keeps progress in <c>progress_test/</c>, the clock in <c>world_test.json</c> and
 	/// the mailbox claims in <c>mailboxes_test.json</c>, the storage claims in <c>storage_test.json</c> and the dropped
-	/// items in <c>world_items_test.json</c>, so a test never
+	/// items in <c>world_items_test.json</c> and the organizations in <c>orgs_test.json</c>, so a test never
 	/// touches the real save; <c>off</c> goes back.
 	/// Editor only, and only before a player has spawned.
 	/// </summary>
@@ -59,6 +59,7 @@ public static class ProgressCommands
 		MailboxRegistry.UseFile( test ? "mailboxes_test.json" : "mailboxes.json" );
 		StorageRegistry.UseFile( test ? "storage_test.json" : "storage.json" );
 		WorldItemRegistry.UseFile( test ? "world_items_test.json" : "world_items.json" );
+		OrgRegistry.UseFile( test ? "orgs_test.json" : "orgs.json" );
 		Log.Info( test ? "Test data: progress_test/ and world_test.json" : "Real data: progress/ and world.json" );
 	}
 

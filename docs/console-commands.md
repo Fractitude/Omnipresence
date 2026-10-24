@@ -16,7 +16,7 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_give_crypto <amount>` | Give yourself crypto. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
-| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json` and the storage claims in `storage_test.json` and the dropped items in `world_items_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
+| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json`, the storage claims in `storage_test.json`, the dropped items in `world_items_test.json` and the organizations in `orgs_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
 
 ## Crime
 
@@ -29,6 +29,17 @@ Testing only, for the grow, press, post and Hush loop. They ask the host, which 
 | `crime_postal_now` | The mailman, the escrow release and the Exchange cash-outs are all due now. |
 | `crime_orders [count]` | Put more orders on the Hush board (up to 10). |
 | `crime_deliver_now` | Every delivery you bought in the Hush shop has reached your mailbox now. |
+
+## Organizations
+
+Testing only, for the organization the Government app runs ([organizations.md](organizations.md)). They ask the host, which refuses unless it is the editor (`OrgCommands`). The last two also refuse unless `progress_test_data` is on, so they never touch `orgs.json`. Code: `Code/Org/OrgCommands.cs`.
+
+| Command | What it does |
+| --- | --- |
+| `org_create <name>` | Register an organization for yourself: `org_create "Night Owls"`. You start with a 0% share. |
+| `org_member_add <steamId> <nickname> [share]` | Put a made-up player in your organization, to try a split without a second client: `org_member_add 76561198000000001 Mule 30`. |
+| `org_dump` | Log every organization, its members and shares, its waiting invitations, and the shares waiting for an absent member. |
+| `org_clear` | Delete every organization. |
 
 ## World items
 

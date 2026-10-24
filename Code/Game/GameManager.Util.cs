@@ -13,6 +13,17 @@ public sealed partial class GameManager
 		NotifyRpc( text );
 	}
 
+	/// <summary>
+	/// Puts a line in one player's chat. Host only.
+	/// </summary>
+	public void Notify( Connection connection, string text )
+	{
+		Assert.True( Networking.IsHost, "Only the host can send notifications" );
+
+		using ( Rpc.FilterInclude( connection ) )
+			NotifyRpc( text );
+	}
+
 	[Rpc.Broadcast( NetFlags.HostOnly )]
 	void NotifyRpc( string text )
 	{
