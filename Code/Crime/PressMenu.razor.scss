@@ -21,6 +21,7 @@ PressMenu
 
 .window
 {
+	max-height: 90%;
 	width: 560px;
 	padding: 18px 20px;
 	flex-direction: column;
@@ -33,6 +34,7 @@ PressMenu
 
 .header
 {
+	flex-shrink: 0;
 	justify-content: space-between;
 	align-items: center;
 
@@ -45,6 +47,7 @@ PressMenu
 
 .heading
 {
+	flex-shrink: 0;
 	font-size: 14px;
 	font-weight: 700;
 	opacity: 0.7;
@@ -151,4 +154,14 @@ PressMenu
 {
 	font-size: 14px;
 	opacity: 0.6;
+}
+
+// The rows scroll when there are more than fit on the screen.
+.list
+{
+	flex-direction: column;
+	gap: 12px;
+	flex-shrink: 1;
+	min-height: 0;
+	overflow-y: scroll;
 }

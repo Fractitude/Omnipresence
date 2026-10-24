@@ -16,68 +16,76 @@
 			<div class="body">
 				<div class="column orders">
 					<div class="heading">Orders to pack</div>
-					@if ( orders.Count == 0 )
-					{
-						<div class="empty">No accepted orders waiting.</div>
-					}
-					@foreach ( var order in orders )
-					{
-						var id = order.Id;
-						<div class="order @( id == selectedId ? "selected" : "" )" @onclick=@( () => Select( id ) )>
-							<div class="line">
-								<div class="handle">@order.Handle</div>
-								<div class="left @CrimeCatalog.DeadlineClass( order.Deadline - WorldClock.Now )">
-									@( $"{InteractionSetup.Countdown( order.Deadline - WorldClock.Now )} left to send" )
+					<div class="list">
+						@if ( orders.Count == 0 )
+						{
+							<div class="empty">No accepted orders waiting.</div>
+						}
+						@foreach ( var order in orders )
+						{
+							var id = order.Id;
+							<div class="order @( id == selectedId ? "selected" : "" )" @onclick=@( () => Select( id ) )>
+								<div class="line">
+									<div class="handle">@order.Handle</div>
+									<div class="left @CrimeCatalog.DeadlineClass( order.Deadline - WorldClock.Now )">
+										@( $"{InteractionSetup.Countdown( order.Deadline - WorldClock.Now )} "
+										   + "left to send" )
+									</div>
+								</div>
+								<div class="what">
+									@( $"{order.Count} x {ProductName( order.Kind )}, asked quality {order.Asked}+" )
 								</div>
 							</div>
-							<div class="what">
-								@( $"{order.Count} x {ProductName( order.Kind )}, asked quality {order.Asked}+" )
-							</div>
-						</div>
-					}
+						}
+					</div>
 				</div>
 				<div class="column batches">
 					<div class="heading">Choose a batch</div>
-					@if ( selected.Id is null )
-					{
-						<div class="empty">Pick an order on the left.</div>
-					}
-					else
-					{
-						var inventory = PlayerInventory.Local;
-						var found = 0;
-
-						@for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
+					<div class="list">
+						@if ( selected.Id is null )
 						{
-							var index = slot;
-							var item = inventory.At( index );
+							<div class="empty">Pick an order on the left.</div>
+						}
+						else
+						{
+							var inventory = PlayerInventory.Local;
+							var found = 0;
 
-							if ( item is not { IsBatch: true } || item.Kind != selected.Kind
-							     || item.Count < selected.Count )
+							@for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
 							{
-								continue;
+								var index = slot;
+								var item = inventory.At( index );
+
+								if ( item is not { IsBatch: true } || item.Kind != selected.Kind
+								     || item.Count < selected.Count )
+								{
+									continue;
+								}
+
+								found++;
+								var orderId = selected.Id;
+								var compare = Compare( item.Quality, selected.Asked );
+
+								<div class="batch">
+									<div class="info">
+										<div class="size">
+											@( $"{item.Count} x {item.Name}, quality {item.Quality}" )
+										</div>
+										<div class="compare @compare.Class">@compare.Text</div>
+									</div>
+									<div class="button" @onclick=@( () => Pack( orderId, index ) )>Pack</div>
+								</div>
 							}
 
-							found++;
-							var orderId = selected.Id;
-							var compare = Compare( item.Quality, selected.Asked );
-
-							<div class="batch">
-								<div class="info">
-									<div class="size">@( $"{item.Count} x {item.Name}, quality {item.Quality}" )</div>
-									<div class="compare @compare.Class">@compare.Text</div>
+							@if ( found == 0 )
+							{
+								<div class="empty">
+									@( $"You have no batch of {selected.Count} or more "
+									   + $"{ProductName( selected.Kind )}." )
 								</div>
-								<div class="button" @onclick=@( () => Pack( orderId, index ) )>Pack</div>
-							</div>
+							}
 						}
-
-						@if ( found == 0 )
-						{
-							<div class="empty">
-								@( $"You have no batch of {selected.Count} or more {ProductName( selected.Kind )}." )
-							</div>
-						}
-					}
+					</div>
 				</div>
 			</div>
 			@if ( crime.ToldCount > toldAtOpen )

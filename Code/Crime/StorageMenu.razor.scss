@@ -21,8 +21,9 @@ StorageMenu
 
 .window
 {
-	width: 820px;
+	max-height: 90%;
 	flex-shrink: 0;
+	max-width: 96%;
 	padding: 18px 20px;
 	flex-direction: column;
 	gap: 12px;
@@ -48,6 +49,10 @@ StorageMenu
 {
 	flex-direction: row;
 	gap: 28px;
+	flex-shrink: 1;
+	min-height: 0;
+	min-width: 0;
+	overflow: scroll;
 }
 
 .column

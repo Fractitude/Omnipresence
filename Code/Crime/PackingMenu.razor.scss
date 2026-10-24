@@ -21,6 +21,7 @@ PackingMenu
 
 .window
 {
+	max-height: 90%;
 	width: 760px;
 	padding: 18px 20px;
 	flex-direction: column;
@@ -33,6 +34,7 @@ PackingMenu
 
 .header
 {
+	flex-shrink: 0;
 	justify-content: space-between;
 	align-items: center;
 
@@ -47,6 +49,8 @@ PackingMenu
 {
 	flex-direction: row;
 	gap: 18px;
+	flex-shrink: 1;
+	min-height: 0;
 }
 
 .column
@@ -55,11 +59,12 @@ PackingMenu
 	gap: 8px;
 	flex-grow: 1;
 	flex-basis: 0;
-	min-height: 260px;
+	min-height: 0;
 }
 
 .heading
 {
+	flex-shrink: 0;
 	font-size: 14px;
 	font-weight: 700;
 	opacity: 0.7;
@@ -206,4 +211,14 @@ PackingMenu
 {
 	font-size: 13px;
 	opacity: 0.6;
+}
+
+// The rows scroll when there are more than fit on the screen.
+.list
+{
+	flex-direction: column;
+	gap: 12px;
+	flex-shrink: 1;
+	min-height: 0;
+	overflow-y: scroll;
 }

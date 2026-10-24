@@ -21,6 +21,7 @@ PlantingMenu
 
 .window
 {
+	max-height: 90%;
 	width: 560px;
 	padding: 18px 20px;
 	flex-direction: column;
@@ -33,6 +34,7 @@ PlantingMenu
 
 .header
 {
+	flex-shrink: 0;
 	justify-content: space-between;
 	align-items: center;
 
@@ -45,6 +47,7 @@ PlantingMenu
 
 .heading
 {
+	flex-shrink: 0;
 	font-size: 14px;
 	font-weight: 700;
 	opacity: 0.7;
@@ -150,4 +153,14 @@ PlantingMenu
 	padding: 8px 10px;
 	border-radius: 6px;
 	background-color: rgba(242, 238, 226, 0.1);
+}
+
+// The rows scroll when there are more than fit on the screen.
+.list
+{
+	flex-direction: column;
+	gap: 12px;
+	flex-shrink: 1;
+	min-height: 0;
+	overflow-y: scroll;
 }
