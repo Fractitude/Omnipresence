@@ -1,6 +1,6 @@
 namespace OmnipresenceApps;
 
-public enum GovernmentTab
+public enum OrganizationsTab
 {
 	Organization,
 	Invitations,
@@ -8,18 +8,18 @@ public enum GovernmentTab
 }
 
 /// <summary>
-/// What the Government panel draws. Replaced whole by <see cref="GovernmentViewModel"/> on every change. It holds only
+/// What the Organizations panel draws. Replaced whole by <see cref="OrganizationsViewModel"/> on every change. It holds only
 /// what the player in the seat may see: their own organization, their own invitations and its payouts.
 /// </summary>
-public sealed record GovernmentUiState
+public sealed record OrganizationsUiState
 {
 	/// <summary>What a viewer draws until the host's state arrives.</summary>
-	public static GovernmentUiState Empty { get; } = new();
+	public static OrganizationsUiState Empty { get; } = new();
 
 	/// <summary>Goes up whenever anything else here changes. The panel's BuildHash is this.</summary>
 	public int Revision { get; init; }
 
-	public GovernmentTab Tab { get; init; }
+	public OrganizationsTab Tab { get; init; }
 
 	/// <summary>False while the app can't work (nobody in the seat, offline, account not loaded).</summary>
 	public bool HasAccount { get; init; }

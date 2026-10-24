@@ -3,7 +3,7 @@ using System;
 namespace OmnipresenceApps;
 
 /// <summary>
-/// Everything Government does: register an organization, run it (invite, roles, shares, remove), answer invitations
+/// Everything Organizations does: register an organization, run it (invite, roles, shares, remove), answer invitations
 /// and read the payouts. Runs in the host's copy only (the app is shared), because organizations are the host's.
 /// </summary>
 /// <remarks>
@@ -12,7 +12,7 @@ namespace OmnipresenceApps;
 /// rule again, so an action can't do more than the seated player's role allows. Nothing here pays anyone: money moves
 /// only in <see cref="OrgPayouts"/>.
 /// </remarks>
-public sealed class GovernmentViewModel
+public sealed class OrganizationsViewModel
 {
 	public const string TabAction = "tab";
 	public const string NameAction = "name";
@@ -42,7 +42,7 @@ public sealed class GovernmentViewModel
 	readonly Func<Connection> getSeat;
 	readonly Func<NaviComputer> getComputer;
 
-	GovernmentTab tab;
+	OrganizationsTab tab;
 	OrgDraft draft = new();
 	bool editing;
 	string confirm = "";
@@ -55,14 +55,14 @@ public sealed class GovernmentViewModel
 	string signature;
 	int revision;
 
-	public GovernmentViewModel( Func<Connection> getSeat, Func<NaviComputer> getComputer )
+	public OrganizationsViewModel( Func<Connection> getSeat, Func<NaviComputer> getComputer )
 	{
 		this.getSeat = getSeat;
 		this.getComputer = getComputer;
 		UiState = Build();
 	}
 
-	public GovernmentUiState UiState { get; private set; }
+	public OrganizationsUiState UiState { get; private set; }
 
 	/// <summary>
 	/// Once a frame: start over when the seat changed, and draw again if anything drawn changed.
@@ -74,7 +74,7 @@ public sealed class GovernmentViewModel
 		if ( (seat?.Id ?? default) != lastSeatId )
 		{
 			lastSeatId = seat?.Id ?? default;
-			tab = GovernmentTab.Organization;
+			tab = OrganizationsTab.Organization;
 			draft = new();
 			editing = false;
 			confirm = "";
@@ -108,7 +108,7 @@ public sealed class GovernmentViewModel
 
 		switch ( action )
 		{
-			case TabAction when Enum.TryParse<GovernmentTab>( arg, true, out var next ) && Enum.IsDefined( next ):
+			case TabAction when Enum.TryParse<OrganizationsTab>( arg, true, out var next ) && Enum.IsDefined( next ):
 				tab = next;
 				notice = "";
 				confirm = "";
@@ -203,7 +203,7 @@ public sealed class GovernmentViewModel
 				notice = joined.Message;
 
 				if ( joined.Ok )
-					tab = GovernmentTab.Organization;
+					tab = OrganizationsTab.Organization;
 
 				break;
 
@@ -262,7 +262,7 @@ public sealed class GovernmentViewModel
 
 		pickedInvitee = "";
 		GameManager.Current?.Notify(
-			target, $"{seat.DisplayName} invited you to {OrgRegistry.OrgOf( seat.SteamId )?.Name}. Open Government on your computer." );
+			target, $"{seat.DisplayName} invited you to {OrgRegistry.OrgOf( seat.SteamId )?.Name}. Open Organizations on your computer." );
 	}
 
 	void Confirmed( ulong me )
@@ -310,18 +310,18 @@ public sealed class GovernmentViewModel
 			OrgRegistry.Now / 5,
 			PlayerProgress.For( seat )?.Loaded ).ToString();
 
-	GovernmentUiState Build()
+	OrganizationsUiState Build()
 	{
 		var seat = getSeat();
 		signature = Signature( seat );
 
-		var state = new GovernmentUiState { Revision = ++revision, Tab = tab, Notice = notice, Draft = draft };
+		var state = new OrganizationsUiState { Revision = ++revision, Tab = tab, Notice = notice, Draft = draft };
 
 		if ( !GameAppNetwork.IsOnline( getComputer() ) )
 			return state with { OfflineHint = GameAppNetwork.OfflineHint( getComputer() ) };
 
 		if ( seat is null )
-			return state with { Message = "Sit down to open Government." };
+			return state with { Message = "Sit down to open Organizations." };
 
 		if ( PlayerProgress.For( seat ) is not { Loaded: true } )
 			return state with { Message = "Loading your account..." };

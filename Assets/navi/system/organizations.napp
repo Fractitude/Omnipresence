@@ -1,9 +1,9 @@
 {
-  "Title": "Government",
+  "Title": "Organizations",
   "Description": "Register an organization, invite your team and share what you earn.",
   "Icon": "account_balance",
   "Color": "#27406b",
-  "PanelType": "OmnipresenceApps.Government",
+  "PanelType": "OmnipresenceApps.Organizations",
   "CanMinimize": true,
   "CanMaximize": true,
   "CanResize": true,
