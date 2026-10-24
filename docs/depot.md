@@ -7,7 +7,7 @@ cash and has them delivered.
 | Piece | Code | Notes |
 | --- | --- | --- |
 | **The catalog** | `Code/Placeables/PlaceableCatalog.cs` | `Placeable( Id, Name, Description, Icon, Price, Prefab, DeliverSeconds )`. Data only: a new object is one more line. Prices are first guesses (box $150, tray $400, press $600, table $350; 2 to 5 minutes). |
-| **The shop** | `PlaceableShop.cs`, `Code/Apps/Depot/` | `Buy( buyer, id, now )` on the host: the order is made first, then `PlayerWallet.TrySpendCash`; a failed payment takes the order back. The app is Shared like Hush, works at home with the network on, and sends an object id only. |
+| **The shop** | `PlaceableShop.cs`, `Code/Apps/Depot/` | `Buy( buyer, id, now )` on the host: the order is made first, then `Transactions.Pay` to `depot`; a failed payment takes the order back. The app is Shared like Hush, works at home with the network on, and sends an object id only. |
 | **The id** | `PlacedObject.cs` | A component with a permanent `ObjectId` (synced from the host). `PlacedObject.IdOf( this )` is what `StorageBox.BoxId` and `GrowTray.TrayId` use: a bought object's id, else its object id (scene-placed objects keep the id they always had). |
 | **The registry** | `PlacedObjectRegistry.cs`, `PlacedObjectRules.cs` | `placed_objects.json` in the data folder (`placed_objects_test.json` under `progress_test_data`). Objects: id, placeable, buyer, scene, position, angles. Deliveries: id, buyer, arrival time. Written 3 s after the last change, atomically (`FileProgressStore.WriteSafely`). |
 | **The system** | `PlacedObjectSystem.cs` | Host only. Restores the scene's objects 1.5 s after start (by id, so never twice), makes due deliveries arrive once a second, tells buyers, saves. |
@@ -39,6 +39,12 @@ non-static collider is what the Physgun grabs.
 `PlacedObject` (host) writes down where the object comes to rest (still for half a second, moved more than 1 unit), as
 `WorldItemKeeper` does. An object the engine destroys out of bounds is not forgotten: it comes back at its last
 resting place at the next start.
+
+## Moving it
+
+A bought object has a `Rigidbody`, so the Physgun moves it. It can also go in a vehicle: with a vehicle that has a
+cargo within 400 units, the object offers "Load into <vehicle>" (one row per vehicle, by type name), and the cargo window
+unloads it behind the vehicle with the same id ([storage.md](storage.md), "Vehicle cargo").
 
 ## Ownership
 

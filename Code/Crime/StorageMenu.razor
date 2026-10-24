@@ -7,7 +7,7 @@
 	{
 		var used = bag.SlotCount - bag.FreeSlots;
 
-		<MenuWindow Title="Storage box" OnClose=@Close
+		<MenuWindow Title=@target.Title OnClose=@Close
 		            Notice=@( crime.ToldCount > toldAtOpen ? crime.LastTold : null )
 		            Hint="Drag to move. Shift: combine stacks. Ctrl: split half. Right click: send to the other side.">
 			<ChildContent>
@@ -41,13 +41,13 @@
 					<div class="column">
 						@if ( !target.ViewReady )
 						{
-							<div class="menu-heading">Storage box</div>
+							<div class="menu-heading">@target.Title</div>
 							<div class="menu-empty">Opening...</div>
 						}
 						else
 						{
-							<div class="menu-heading">@( $"Storage box ({target.ViewCount}/{target.Capacity})" )</div>
-							<div @ref="boxGridRef" class="grid" style="width: @( target.Columns * (SlotSize + Gap) )px">
+							<div class="menu-heading">@( $"{target.Title} ({target.ViewCount}/{target.Capacity})" )</div>
+							<div @ref="boxGridRef" class="grid" style="width: @( target.ColumnCount * (SlotSize + Gap) )px">
 								@for ( var i = 0; i < target.Capacity; i++ )
 								{
 									var slot = i;
@@ -70,6 +70,30 @@
 									</div>
 								}
 							</div>
+							@if ( target is VehicleCargo cargo )
+							{
+								<div class="menu-heading">
+									@( $"Big objects ({cargo.ViewObjects.Count}/{VehicleCargo.MaxBigObjects})" )
+								</div>
+								@if ( cargo.ViewObjects.Count == 0 )
+								{
+									<div class="menu-empty">Nothing big aboard. Use "Load into vehicle" on an object nearby.</div>
+								}
+								@for ( var i = 0; i < cargo.ViewObjects.Count; i++ )
+								{
+									var index = i;
+									var placeable = PlaceableCatalog.Find( cargo.ViewObjects[i].Placeable );
+									<div class="menu-row roomy big-object">
+										<div class="menu-icon">
+											<ItemIcon Icon=@( placeable?.Icon ?? "deployed_code" ) Color="#d9a15b"/>
+										</div>
+										<div class="info">@( placeable?.Name ?? "Object" )</div>
+										<div class="menu-button" @onclick=@( () => UnloadObject( cargo, index ) )>
+											Unload
+										</div>
+									</div>
+								}
+							}
 						}
 					</div>
 				</div>
@@ -126,7 +150,7 @@
 	public static bool IsOpen { get; private set; }
 
 	// Static: the panel's mouse events and this component's updates are not always on the same instance.
-	static StorageBox target;
+	static ItemContainer target;
 	static int toldAtOpen;
 	static int hoverBag = -1;
 	static int hoverBox = -1;
@@ -196,9 +220,9 @@
 	}
 
 	/// <summary>
-	/// Open the panel, from a storage box the player used. Does nothing with another menu open.
+	/// Open the panel, from a storage box or a cargo the player used. Does nothing with another menu open.
 	/// </summary>
-	public static void Open( StorageBox box )
+	public static void Open( ItemContainer box )
 	{
 		if ( IsOpen || !box.IsValid() || PlayerCrime.Local is not { } crime || GameMenus.IsAnyOpen
 		     || NaviInputCapture.Current is not null )
@@ -239,7 +263,7 @@
 	/// <summary>
 	/// The host said the box is not this player's: close the panel (the host told them why).
 	/// </summary>
-	public static void Refused( StorageBox box )
+	public static void Refused( ItemContainer box )
 	{
 		if ( IsOpen && target == box )
 			Close();
@@ -254,6 +278,17 @@
 
 		if ( target.IsValid() && PlayerInventory.Local?.At( slot ) is not null )
 			target.RequestStore( slot );
+	}
+
+	/// <summary>
+	/// Ask the host to put a big object of the vehicle's cargo on the ground behind it. Only the place in the list goes.
+	/// </summary>
+	static void UnloadObject( VehicleCargo cargo, int index )
+	{
+		CancelDrag();
+
+		if ( cargo.IsValid() )
+			cargo.RequestUnloadObject( index );
 	}
 
 	/// <summary>

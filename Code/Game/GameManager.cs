@@ -235,6 +235,9 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	void IScenePhysicsEvents.OnOutOfBounds( Rigidbody body )
 	{
 		WorldItemRegistry.Forget( body.GameObject );
+
+		// A vehicle that falls out takes its cargo with it, unless the cargo is put on the ground first.
+		body.GameObject.Components.Get<VehicleCargo>()?.Spill();
 		body.DestroyGameObject();
 	}
 

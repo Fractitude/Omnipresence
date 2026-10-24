@@ -122,3 +122,16 @@
 		opacity: 0.8;
 	}
 }
+
+// A big object of a vehicle's cargo: its icon, its name, the Unload button.
+.big-object
+{
+	align-items: center;
+	gap: 10px;
+
+	.info
+	{
+		flex-grow: 1;
+		font-weight: 700;
+	}
+}

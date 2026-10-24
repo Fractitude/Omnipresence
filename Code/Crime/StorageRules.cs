@@ -322,6 +322,46 @@ public static class StorageRules
 	}
 
 	/// <summary>
+	/// Take the item out of a slot of a box and hand it over, or null when the slot is empty. The caller must put it
+	/// somewhere (or back with <see cref="Put"/>): this is how a vehicle unloads a slot to the ground.
+	/// </summary>
+	public static ItemData Extract( CrimeRecord crime, string boxId, int slot )
+	{
+		var box = Find( crime, boxId );
+
+		if ( slot < 0 || slot >= MaxSlots || At( box, slot ) is not { } item )
+			return null;
+
+		Set( box, slot, null );
+		Tidy( crime, box );
+		return item;
+	}
+
+	/// <summary>
+	/// Put an item back in an empty slot of a box (an <see cref="Extract"/> that could not be used). False when the slot
+	/// is taken.
+	/// </summary>
+	public static bool Put( CrimeRecord crime, string boxId, int slot, ItemData item )
+	{
+		if ( crime is null || item is null || slot < 0 || slot >= MaxSlots )
+			return false;
+
+		var box = Find( crime, boxId );
+
+		if ( At( box, slot ) is not null )
+			return false;
+
+		if ( box is null )
+		{
+			box = new StorageBoxRecord { Id = boxId };
+			crime.Storage.Add( box );
+		}
+
+		Set( box, slot, item );
+		return true;
+	}
+
+	/// <summary>
 	/// Put an item in a slot (or empty it, with null), keeping the list ordered by slot.
 	/// </summary>
 	static void Set( StorageBoxRecord box, int slot, ItemData item )

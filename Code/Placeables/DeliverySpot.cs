@@ -87,20 +87,32 @@ public static class DeliverySpot
 		                                      && System.Math.Abs( x.y - spot.y ) < Hull.Size.y );
 
 	/// <summary>
-	/// The candidate dropped to the floor, if the hull fits there and nothing stands in it.
+	/// The candidate dropped to the floor, if the hull fits there and nothing stands in it. The floor must be within
+	/// <paramref name="maxStep"/> of <paramref name="level"/> (not the top of a wall or a table). Anything under
+	/// <paramref name="ignore"/> (a vehicle being unloaded) does not count as in the way.
 	/// </summary>
-	static Vector3? Free( Scene scene, Vector3 candidate, float level )
+	public static Vector3? FindFloor(
+		Scene scene, Vector3 candidate, float level, BBox hull, float maxStep = MaxStep, GameObject ignore = null )
 	{
 		var from = candidate + Vector3.Up * 60f;
-		var ground = scene.Trace.Box( Hull, from, candidate + Vector3.Down * 200f ).WithoutTags( "trigger" ).Run();
+		var trace = scene.Trace.Box( hull, from, candidate + Vector3.Down * 200f ).WithoutTags( "trigger" );
 
-		// Not the top of a wall or a table: the floor is near the anchor's own level.
-		if ( !ground.Hit || ground.StartedSolid || System.Math.Abs( ground.EndPosition.z - level ) > MaxStep )
+		if ( ignore.IsValid() )
+			trace = trace.IgnoreGameObjectHierarchy( ignore );
+
+		var ground = trace.Run();
+
+		if ( !ground.Hit || ground.StartedSolid || System.Math.Abs( ground.EndPosition.z - level ) > maxStep )
 			return null;
 
 		var floor = ground.EndPosition + Vector3.Up * 2f;
-		var overlap = scene.Trace.Box( Hull, floor, floor ).WithoutTags( "trigger" ).Run();
+		var overlapTrace = scene.Trace.Box( hull, floor, floor ).WithoutTags( "trigger" );
 
-		return overlap.Hit ? null : floor;
+		if ( ignore.IsValid() )
+			overlapTrace = overlapTrace.IgnoreGameObjectHierarchy( ignore );
+
+		return overlapTrace.Run().Hit ? null : floor;
 	}
+
+	static Vector3? Free( Scene scene, Vector3 candidate, float level ) => FindFloor( scene, candidate, level, Hull );
 }
