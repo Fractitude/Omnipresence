@@ -12,7 +12,7 @@ namespace Sandbox;
 /// <see cref="SignalRange"/> of the computer.
 ///
 /// A camera that has been shot, or that has no signal, is <see cref="Broken"/>: it stops looking at the world and gives
-/// a television's static instead, made here rather than in the world, and its LED goes dark.
+/// a television's static instead, made here rather than in the world, throws sparks, and its LED goes dark.
 /// </remarks>
 [Title( "Security Camera" ), Icon( "videocam" )]
 public sealed class SecurityCamera : Component, Component.IDamageable
@@ -93,8 +93,8 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	/// <summary>The LED on the front, so it can be put out when the camera is broken.</summary>
 	ModelRenderer led;
 
-	/// <summary>The smoke that comes out of a broken camera.</summary>
-	SmokeEmitter smoke;
+	/// <summary>The sparks that come off a broken camera.</summary>
+	SparkEmitter sparks;
 
 	Texture feed;
 	Texture staticFeed;
@@ -169,15 +169,15 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	}
 
 	/// <summary>
-	/// Keep the LED on the front saying whether the camera works, and the smoke coming out of a broken one, on every
+	/// Keep the LED on the front saying whether the camera works, and the sparks coming off a broken one, on every
 	/// machine: the host decides, and both are part of what a client sees.
 	/// </summary>
 	protected override void OnUpdate()
 	{
-		var vent = EnsureSmoke();
+		var electric = EnsureSparks();
 
-		if ( vent.IsValid() && vent.Emitting != Broken )
-			vent.Emitting = Broken;
+		if ( electric.IsValid() && electric.Emitting != Broken )
+			electric.Emitting = Broken;
 
 		if ( !led.IsValid() )
 			led = FindLed();
@@ -292,27 +292,27 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 		.FirstOrDefault( x => x.IsValid() );
 
 	/// <summary>
-	/// The smoke a broken camera gives off: the emitter the prefab has, or one made here for a camera a player put
+	/// The sparks a broken camera gives off: the emitter the prefab has, or one made here for a camera a player put
 	/// together by hand. It starts off, and <see cref="Broken"/> turns it on.
 	/// </summary>
-	SmokeEmitter EnsureSmoke()
+	SparkEmitter EnsureSparks()
 	{
-		if ( smoke.IsValid() )
-			return smoke;
+		if ( sparks.IsValid() )
+			return sparks;
 
-		smoke = GetComponentInChildren<SmokeEmitter>( true );
+		sparks = GetComponentInChildren<SparkEmitter>( true );
 
-		if ( !smoke.IsValid() )
+		if ( !sparks.IsValid() )
 		{
-			var vent = new GameObject( GameObject, true, "Smoke" );
-			vent.Flags |= GameObjectFlags.NotSaved;
-			vent.LocalPosition = Vector3.Up * 9f;
+			var shorting = new GameObject( GameObject, true, "Sparks" );
+			shorting.Flags |= GameObjectFlags.NotSaved;
+			shorting.LocalPosition = Vector3.Up * 6f;
 
-			smoke = vent.Components.Create<SmokeEmitter>();
-			smoke.Emitting = false;
+			sparks = shorting.Components.Create<SparkEmitter>();
+			sparks.Emitting = false;
 		}
 
-		return smoke;
+		return sparks;
 	}
 
 	protected override void OnDestroy()

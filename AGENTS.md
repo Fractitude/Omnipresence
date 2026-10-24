@@ -84,11 +84,11 @@ The **Security System** app (`Code/Apps/Security/`, `Assets/navi/system/security
 
 ## Effects
 
-`Code/Effects/` is for small effects the game makes itself instead of borrowing a particle file. The first is smoke: `SmokeEmitter` (`Emitting`, `Rate`, `Lifetime`, `Rise`, `Wind`, `Spread`, `StartSize`, `EndSize`, `Tint`, and a `Sprite` to override the picture) on anything that should smoke, and a `SmokePuff` per puff — a billboard that grows, drifts, fades and destroys itself. See [effects.md](docs/effects.md).
+`Code/Effects/` is for small effects the game makes itself instead of borrowing a particle file. `SmokeEmitter` makes a plume that rises and fades; `SparkEmitter` throws clumps of electric sparks that fall and crackle out. Both are drop-on-anything components — an emitter with a rate or an interval, a tint, sizes, and a `Sprite` to override the picture they make themselves — and both spawn one billboard per particle (`SmokePuff`, `SparkPuff`) that destroys itself. See [effects.md](docs/effects.md).
 
-- **Nothing about a puff is saved or sent**: each one is made on the client that sees it, like a camera's feed, so `Emitting` is not synced and its owner sets it from something that is.
-- **`SpriteRenderer.AlphaCutoff` must be 0** and `Lighting`/`Shadows` off, or a plume reads as a string of speckled bubbles instead of smoke.
-- A broken security camera smokes: `SecurityCamera.EnsureSmoke` makes or finds its emitter and sets `Emitting` to `Broken` every frame.
+- **Nothing about a particle is saved or sent**: each one is made on the client that sees it, like a camera's feed, so `Emitting` is not synced and its owner sets it from something that is.
+- **`SpriteRenderer.AlphaCutoff` must be 0** and `Lighting`/`Shadows` off, or a particle reads as a speckled bubble; keep them small and many rather than big and few.
+- A broken security camera sparks: `SecurityCamera.EnsureSparks` makes or finds its emitter and sets `Emitting` to `Broken` every frame. It smoked before that — the smoke component is still there for anything that wants it.
 
 ## The Wired
 
