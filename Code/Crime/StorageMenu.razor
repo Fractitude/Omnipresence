@@ -2,59 +2,28 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
+<root class="menu-root @( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
 	@if ( IsOpen && target.IsValid() && PlayerCrime.Local is { } crime && PlayerInventory.Local is { } bag )
 	{
-		<div class="window">
-			<div class="header">
-				<div class="title">Storage box</div>
-				<div class="close" @onclick=@Close>Close</div>
-			</div>
-			<div class="body">
-				<div class="column">
-					<div class="heading">@( $"Your bag ({bag.SlotCount - bag.FreeSlots}/{bag.SlotCount})" )</div>
-					<div @ref="bagGridRef" class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
-						@for ( var i = 0; i < bag.SlotCount; i++ )
-						{
-							var slot = i;
-							var item = bag.At( slot );
-							<div class="slot @( item is null ? "empty" : "" ) @( Marks( false, slot ) )"
-							     @onmousedown=@( ( PanelEvent e ) => BeginDrag( false, slot, e ) )
-							     @onrightclick=@( () => Store( slot ) )
-							     @onmouseover=@( () => HoverBag( slot ) )
-							     @onmouseout=@( () => HoverBag( -1, slot ) )>
-								@if ( item is not null )
-								{
-									<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath
-									          Icon=@ItemCatalog.IconFor( item ) Color=@ItemCatalog.ColorFor( item )/>
-									@if ( item.IsBatch )
-									{
-										<div class="count">@( $"x{item.Count}" )</div>
-									}
-								}
-							</div>
-						}
-					</div>
-				</div>
-				<div class="column">
-					@if ( !target.ViewReady )
-					{
-						<div class="heading">Storage box</div>
-						<div class="empty">Opening...</div>
-					}
-					else
-					{
-						<div class="heading">@( $"Storage box ({target.ViewCount}/{target.Capacity})" )</div>
-						<div @ref="boxGridRef" class="grid" style="width: @( target.Columns * (SlotSize + Gap) )px">
-							@for ( var i = 0; i < target.Capacity; i++ )
+		var used = bag.SlotCount - bag.FreeSlots;
+
+		<MenuWindow Title="Storage box" OnClose=@Close
+		            Notice=@( crime.ToldCount > toldAtOpen ? crime.LastTold : null )
+		            Hint="Drag with left mouse to move. Right click to send to the other side.">
+			<ChildContent>
+				<div class="body">
+					<div class="column">
+						<div class="menu-heading">@( $"Your bag ({used}/{bag.SlotCount})" )</div>
+						<div @ref="bagGridRef" class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
+							@for ( var i = 0; i < bag.SlotCount; i++ )
 							{
 								var slot = i;
-								var item = target.ViewAt( slot );
-								<div class="slot @( item is null ? "empty" : "" ) @( Marks( true, slot ) )"
-								     @onmousedown=@( ( PanelEvent e ) => BeginDrag( true, slot, e ) )
-								     @onrightclick=@( () => Take( slot ) )
-								     @onmouseover=@( () => HoverBox( slot ) )
-								     @onmouseout=@( () => HoverBox( -1, slot ) )>
+								var item = bag.At( slot );
+								<div class="slot @( item is null ? "empty" : "" ) @( Marks( false, slot ) )"
+								     @onmousedown=@( ( PanelEvent e ) => BeginDrag( false, slot, e ) )
+								     @onrightclick=@( () => Store( slot ) )
+								     @onmouseover=@( () => HoverBag( slot ) )
+								     @onmouseout=@( () => HoverBag( -1, slot ) )>
 									@if ( item is not null )
 									{
 										<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath
@@ -68,15 +37,44 @@
 								</div>
 							}
 						</div>
-					}
+					</div>
+					<div class="column">
+						@if ( !target.ViewReady )
+						{
+							<div class="menu-heading">Storage box</div>
+							<div class="menu-empty">Opening...</div>
+						}
+						else
+						{
+							<div class="menu-heading">@( $"Storage box ({target.ViewCount}/{target.Capacity})" )</div>
+							<div @ref="boxGridRef" class="grid" style="width: @( target.Columns * (SlotSize + Gap) )px">
+								@for ( var i = 0; i < target.Capacity; i++ )
+								{
+									var slot = i;
+									var item = target.ViewAt( slot );
+									<div class="slot @( item is null ? "empty" : "" ) @( Marks( true, slot ) )"
+									     @onmousedown=@( ( PanelEvent e ) => BeginDrag( true, slot, e ) )
+									     @onrightclick=@( () => Take( slot ) )
+									     @onmouseover=@( () => HoverBox( slot ) )
+									     @onmouseout=@( () => HoverBox( -1, slot ) )>
+										@if ( item is not null )
+										{
+											<ItemIcon PrefabPath=@item.PrefabPath ModelPath=@item.ModelPath
+											          Icon=@ItemCatalog.IconFor( item )
+											          Color=@ItemCatalog.ColorFor( item )/>
+											@if ( item.IsBatch )
+											{
+												<div class="count">@( $"x{item.Count}" )</div>
+											}
+										}
+									</div>
+								}
+							</div>
+						}
+					</div>
 				</div>
-			</div>
-			@if ( crime.ToldCount > toldAtOpen )
-			{
-				<div class="notice">@crime.LastTold</div>
-			}
-			<div class="hint">Drag with left mouse to move. Right click to send to the other side.</div>
-		</div>
+			</ChildContent>
+		</MenuWindow>
 
 		@if ( Dragged is { } dragged )
 		{

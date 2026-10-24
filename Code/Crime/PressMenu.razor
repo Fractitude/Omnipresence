@@ -2,60 +2,56 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( IsOpen ? "open" : "" )">
+<root class="menu-root @( IsOpen ? "open" : "" )">
 	@if ( IsOpen && PlayerCrime.Local is { } crime )
 	{
 		var inventory = PlayerInventory.Local;
 		var found = 0;
 
-		<div class="window">
-			<div class="header">
-				<div class="title">Press bench</div>
-				<div class="close" @onclick=@Close>Close</div>
-			</div>
-			<div class="heading">
-				Choose a batch to press. Only whole multiples are pressed; the rest stays in your bag.
-			</div>
-			<div class="list">
-				@for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
-				{
-					var index = slot;
-					var item = inventory.At( index );
+		<MenuWindow Title="Press bench" Width=@( 560 ) OnClose=@Close
+		            Notice=@( crime.ToldCount > toldAtOpen ? crime.LastTold : null )>
+			<ChildContent>
+				<div class="menu-heading">
+					Choose a batch to press. Only whole multiples are pressed; the rest stays in your bag.
+				</div>
+				<div class="menu-list">
+					@for ( var slot = 0; inventory is not null && slot < inventory.SlotCount; slot++ )
+					{
+						var index = slot;
+						var item = inventory.At( index );
 
-					if ( item is not { IsBatch: true } || ProductCatalog.OfRaw( item.Kind ) is not { } product )
-						continue;
+						if ( item is not { IsBatch: true } || ProductCatalog.OfRaw( item.Kind ) is not { } product )
+							continue;
 
-					found++;
-					var made = item.Count / product.RawPerProduct;
-					var left = item.Count - made * product.RawPerProduct;
-					var makes = made > 0
-						? $"Makes {made} {product.Product.Name}" + (left > 0 ? $", {left} raw stays in your bag" : "")
-						: $"Needs {product.RawPerProduct} for one {product.Product.Name}";
+						found++;
+						var made = item.Count / product.RawPerProduct;
+						var left = item.Count - made * product.RawPerProduct;
+						var makes = made > 0
+							? $"Makes {made} {product.Product.Name}"
+								  + (left > 0 ? $", {left} raw stays in your bag" : "")
+							: $"Needs {product.RawPerProduct} for one {product.Product.Name}";
 
-					<div class="batch @( made > 0 ? "" : "unavailable" )">
-						<div class="icon">
-							<ItemIcon Icon=@product.Raw.Icon Color=@product.Raw.Color/>
+						<div class="menu-row roomy batch @( made > 0 ? "" : "unavailable" )">
+							<div class="menu-icon">
+								<ItemIcon Icon=@product.Raw.Icon Color=@product.Raw.Color/>
+							</div>
+							<div class="info">
+								<div class="size">@( $"{item.Count} x {item.Name}, quality {item.Quality}" )</div>
+								<div class="detail">@makes</div>
+								<div class="detail">@( $"Ratio: {product.RawPerProduct}:1" )</div>
+							</div>
+							<div class="menu-button @( made > 0 ? "" : "disabled" )" @onclick=@( () => Press( index ) )>
+								Press
+							</div>
 						</div>
-						<div class="info">
-							<div class="size">@( $"{item.Count} x {item.Name}, quality {item.Quality}" )</div>
-							<div class="detail">@makes</div>
-							<div class="detail">@( $"Ratio: {product.RawPerProduct}:1" )</div>
-						</div>
-						<div class="button @( made > 0 ? "" : "disabled" )" @onclick=@( () => Press( index ) )>
-							Press
-						</div>
-					</div>
-				}
-				@if ( found == 0 )
-				{
-					<div class="empty">@NothingToPress</div>
-				}
-			</div>
-			@if ( crime.ToldCount > toldAtOpen )
-			{
-				<div class="notice">@crime.LastTold</div>
-			}
-		</div>
+					}
+					@if ( found == 0 )
+					{
+						<div class="menu-empty">@NothingToPress</div>
+					}
+				</div>
+			</ChildContent>
+		</MenuWindow>
 	}
 </root>
 

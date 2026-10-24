@@ -1,51 +1,6 @@
-PackingMenu
-{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	align-items: center;
-	justify-content: center;
-	pointer-events: none;
-	font-family: Poppins;
-	color: #f2eee2;
-	text-shadow: 1px 1px 2px #1b1a2e;
+@import "../Hud/_hud.scss";
 
-	&.open
-	{
-		pointer-events: all;
-		background-color: rgba(27, 26, 46, 0.35);
-	}
-}
-
-.window
-{
-	// Keeps clear of the ability bar at the bottom of the screen (56px slots, 24px from the edge).
-	max-height: 80%;
-	margin-bottom: 104px;
-	width: 760px;
-	padding: 18px 20px;
-	flex-direction: column;
-	gap: 12px;
-	background-color: rgba(18, 17, 30, 0.9);
-	backdrop-filter-blur: 14px;
-	border: 1px solid rgba(242, 238, 226, 0.12);
-	border-radius: 10px;
-}
-
-.header
-{
-	flex-shrink: 0;
-	justify-content: space-between;
-	align-items: center;
-
-	.title
-	{
-		font-size: 22px;
-		font-weight: 700;
-	}
-}
+// The window, its lists and its rows are MenuWindow's. This is the packing table's own layout.
 
 .body
 {
@@ -64,66 +19,10 @@ PackingMenu
 	min-height: 0;
 }
 
-.heading
-{
-	flex-shrink: 0;
-	font-size: 14px;
-	font-weight: 700;
-	opacity: 0.7;
-}
-
-.empty
-{
-	font-size: 14px;
-	opacity: 0.6;
-}
-
-.button
-{
-	padding: 6px 14px;
-	font-size: 14px;
-	font-weight: 700;
-	border-radius: 6px;
-	background-color: rgba(127, 209, 255, 0.25);
-	border: 1px solid rgba(127, 209, 255, 0.6);
-	cursor: pointer;
-
-	&:hover
-	{
-		background-color: rgba(127, 209, 255, 0.4);
-	}
-}
-
-.close
-{
-	padding: 4px 12px;
-	font-size: 14px;
-	border-radius: 6px;
-	border: 1px solid rgba(242, 238, 226, 0.3);
-	cursor: pointer;
-
-	&:hover
-	{
-		background-color: rgba(242, 238, 226, 0.12);
-	}
-}
-
 .order
 {
-	flex-shrink: 0;
 	flex-direction: column;
 	gap: 2px;
-	padding: 8px 10px;
-	border-radius: 6px;
-	border: 1px solid rgba(242, 238, 226, 0.12);
-	background-color: rgba(242, 238, 226, 0.05);
-	cursor: pointer;
-
-	&.selected
-	{
-		border-color: rgba(127, 209, 255, 0.7);
-		background-color: rgba(127, 209, 255, 0.15);
-	}
 
 	.line
 	{
@@ -139,19 +38,6 @@ PackingMenu
 	{
 		font-size: 13px;
 		opacity: 0.7;
-
-		// A deadline that is running low.
-		&.warn
-		{
-			color: #ffb347;
-			opacity: 1;
-		}
-
-		&.urgent
-		{
-			color: #ff5c5c;
-			opacity: 1;
-		}
 	}
 
 	.what
@@ -163,14 +49,9 @@ PackingMenu
 
 .batch
 {
-	flex-shrink: 0;
 	justify-content: space-between;
 	align-items: center;
 	gap: 10px;
-	padding: 8px 10px;
-	border-radius: 6px;
-	border: 1px solid rgba(242, 238, 226, 0.12);
-	background-color: rgba(242, 238, 226, 0.05);
 
 	.info
 	{
@@ -202,29 +83,4 @@ PackingMenu
 			color: #f0a070;
 		}
 	}
-}
-
-.notice
-{
-	flex-shrink: 0;
-	padding: 8px 10px;
-	border-radius: 6px;
-	background-color: rgba(242, 238, 226, 0.1);
-}
-
-.hint
-{
-	flex-shrink: 0;
-	font-size: 13px;
-	opacity: 0.6;
-}
-
-// The rows scroll when there are more than fit on the screen.
-.list
-{
-	flex-direction: column;
-	gap: 12px;
-	flex-shrink: 1;
-	min-height: 0;
-	overflow-y: scroll;
 }

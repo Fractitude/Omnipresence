@@ -1,51 +1,6 @@
-StorageMenu
-{
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	align-items: center;
-	justify-content: center;
-	pointer-events: none;
-	font-family: Poppins;
-	color: #f2eee2;
-	text-shadow: 1px 1px 2px #1b1a2e;
+@import "../Hud/_hud.scss";
 
-	&.open
-	{
-		pointer-events: all;
-		background-color: rgba(27, 26, 46, 0.35);
-	}
-}
-
-.window
-{
-	// Keeps clear of the ability bar at the bottom of the screen (56px slots, 24px from the edge).
-	max-height: 80%;
-	margin-bottom: 104px;
-	flex-shrink: 0;
-	max-width: 96%;
-	padding: 18px 20px;
-	flex-direction: column;
-	gap: 12px;
-	background-color: rgba(18, 17, 30, 0.9);
-	backdrop-filter-blur: 14px;
-	border: 1px solid rgba(242, 238, 226, 0.12);
-	border-radius: 10px;
-}
-
-.header
-{
-	justify-content: space-between;
-	align-items: center;
-
-	.title
-	{
-		font-size: 22px;
-		font-weight: 700;
-	}
-}
+// The window, its heading, notice and hint are MenuWindow's. This is the box's own layout: the two grids side by side.
 
 .body
 {
@@ -62,33 +17,6 @@ StorageMenu
 	flex-direction: column;
 	flex-shrink: 0;
 	gap: 8px;
-}
-
-.heading
-{
-	font-size: 14px;
-	font-weight: 700;
-	opacity: 0.7;
-}
-
-.empty
-{
-	font-size: 14px;
-	opacity: 0.6;
-}
-
-.close
-{
-	padding: 4px 12px;
-	font-size: 14px;
-	border-radius: 6px;
-	border: 1px solid rgba(242, 238, 226, 0.3);
-	cursor: pointer;
-
-	&:hover
-	{
-		background-color: rgba(242, 238, 226, 0.12);
-	}
 }
 
 .grid
@@ -119,6 +47,8 @@ StorageMenu
 	&.empty
 	{
 		cursor: default;
+		// What the old shared .empty rule drew on an empty slot.
+		opacity: 0.6;
 	}
 
 	&.dragged
@@ -142,21 +72,6 @@ StorageMenu
 		color: #f2eee2;
 		text-shadow: 1px 1px 2px #1b1a2e;
 	}
-}
-
-.notice
-{
-	flex-shrink: 0;
-	padding: 8px 10px;
-	border-radius: 6px;
-	background-color: rgba(242, 238, 226, 0.1);
-}
-
-.hint
-{
-	flex-shrink: 0;
-	font-size: 13px;
-	opacity: 0.6;
 }
 
 .ghost

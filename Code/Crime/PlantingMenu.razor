@@ -2,50 +2,45 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( IsOpen ? "open" : "" )">
+<root class="menu-root @( IsOpen ? "open" : "" )">
 	@if ( IsOpen && PlayerCrime.Local is { } crime )
 	{
 		var inventory = PlayerInventory.Local;
 
-		<div class="window">
-			<div class="header">
-				<div class="title">Grow tray</div>
-				<div class="close" @onclick=@Close>Close</div>
-			</div>
-			<div class="heading">Choose what to plant. A tray grows one thing at a time.</div>
-			<div class="list">
-				@foreach ( var product in ProductCatalog.Products )
-				{
-					var id = product.Id;
-					var seeds = inventory?.CountOf( product.Seed.Id ) ?? 0;
-					var can = seeds > 0;
-					var grows = $"Grows in {InteractionSetup.Countdown( product.GrowSeconds )}, "
-					            + $"gives {product.HarvestRaw} {product.Raw.Name}";
+		<MenuWindow Title="Grow tray" Width=@( 560 ) OnClose=@Close
+		            Notice=@( crime.ToldCount > toldAtOpen ? crime.LastTold : null )>
+			<ChildContent>
+				<div class="menu-heading">Choose what to plant. A tray grows one thing at a time.</div>
+				<div class="menu-list">
+					@foreach ( var product in ProductCatalog.Products )
+					{
+						var id = product.Id;
+						var seeds = inventory?.CountOf( product.Seed.Id ) ?? 0;
+						var can = seeds > 0;
+						var grows = $"Grows in {InteractionSetup.Countdown( product.GrowSeconds )}, "
+						            + $"gives {product.HarvestRaw} {product.Raw.Name}";
 
-					<div class="product @( can ? "" : "unavailable" )">
-						<div class="icon">
-							<ItemIcon Icon=@product.Seed.Icon Color=@product.Seed.Color/>
+						<div class="menu-row roomy product @( can ? "" : "unavailable" )">
+							<div class="menu-icon">
+								<ItemIcon Icon=@product.Seed.Icon Color=@product.Seed.Color/>
+							</div>
+							<div class="info">
+								<div class="name">@product.Name</div>
+								<div class="detail">@( $"{product.Seed.Name}: {seeds} in your bag" )</div>
+								<div class="detail">@grows</div>
+								@if ( !can )
+								{
+									<div class="reason">@( $"You have no {product.Seed.Name}. Buy one in Hush." )</div>
+								}
+							</div>
+							<div class="menu-button @( can ? "" : "disabled" )" @onclick=@( () => Plant( id ) )>
+								Plant
+							</div>
 						</div>
-						<div class="info">
-							<div class="name">@product.Name</div>
-							<div class="detail">@( $"{product.Seed.Name}: {seeds} in your bag" )</div>
-							<div class="detail">@grows</div>
-							@if ( !can )
-							{
-								<div class="reason">@( $"You have no {product.Seed.Name}. Buy one in Hush." )</div>
-							}
-						</div>
-						<div class="button @( can ? "" : "disabled" )" @onclick=@( () => Plant( id ) )>
-							Plant
-						</div>
-					</div>
-				}
-			</div>
-			@if ( crime.ToldCount > toldAtOpen )
-			{
-				<div class="notice">@crime.LastTold</div>
-			}
-		</div>
+					}
+				</div>
+			</ChildContent>
+		</MenuWindow>
 	}
 </root>
 
