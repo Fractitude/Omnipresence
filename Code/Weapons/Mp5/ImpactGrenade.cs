@@ -4,8 +4,13 @@
 /// </summary>
 public sealed class ImpactGrenade : ProjectileEntity, Component.IDamageable
 {
+	/// <summary>Radius of the blast, in inches.</summary>
 	[Property] public float ExplosionRadius { get; set; } = 150f;
+
+	/// <summary>Damage dealt to everything within <see cref="ExplosionRadius"/>.</summary>
 	[Property] public float ExplosionDamage { get; set; } = 100f;
+
+	/// <summary>How hard the blast throws what it catches, as the force's scale.</summary>
 	[Property] public float ExplosionForce { get; set; } = 0.5f;
 
 	/// <summary>Seconds before a round that never hit anything is removed.</summary>
