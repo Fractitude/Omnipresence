@@ -46,6 +46,12 @@ public sealed class CrimeRecord
 	/// <summary>Parcels sent, newest last.</summary>
 	public List<ParcelRecord> Parcels { get; set; } = new();
 
+	/// <summary>
+	/// Parcels this player posted for another player (the shipping record is in the sender's record). Only counts toward
+	/// this player's own post limit until each is delivered. See <see cref="ParcelPostRules"/>.
+	/// </summary>
+	public List<PostedRecord> Posted { get; set; } = new();
+
 	/// <summary>Supplies bought in the Hush shop, on their way or waiting in the mailbox. Newest last.</summary>
 	public List<DeliveryRecord> Deliveries { get; set; } = new();
 
@@ -131,6 +137,10 @@ public sealed class CrimeRecord
 			.ToList();
 
 		Parcels = Parcels.Where( p => inFlight.Contains( p ) || others.Contains( p ) ).ToList();
+
+		Posted ??= new();
+		Posted.RemoveAll( x => x is null );
+		Posted = Posted.TakeLast( MaxEntries ).ToList();
 
 		Deliveries ??= new();
 		Deliveries.RemoveAll(
@@ -377,6 +387,18 @@ public sealed class ParcelRecord
 	public long SentAt { get; set; }
 
 	public long CollectAt { get; set; }
+	public long DeliverAt { get; set; }
+}
+
+/// <summary>
+/// A parcel the player posted for another player: counts toward the poster's post limit until it is delivered.
+/// </summary>
+public sealed class PostedRecord
+{
+	public string ParcelId { get; set; } = "";
+	public ulong SenderId { get; set; }
+
+	/// <summary>Game seconds when it arrives; after that it no longer counts.</summary>
 	public long DeliverAt { get; set; }
 }
 

@@ -48,6 +48,30 @@ public sealed class ItemData
 	public string To { get; set; } = "";
 
 	/// <summary>
+	/// For a parcel: the Steam id of the player who packed it, who is paid when it is delivered, whoever posts it. 0 for
+	/// everything else, and for a parcel packed before this was kept (it is posted against the poster's own orders).
+	/// </summary>
+	public ulong SenderId { get; set; }
+
+	/// <summary>
+	/// For a parcel: the packing player's display name, shown as "From: name". Never the Steam id. Empty when unknown.
+	/// </summary>
+	public string SenderName { get; set; } = "";
+
+	/// <summary>
+	/// For a parcel: a description of the order it was packed for (kind, ordered count, agreed total, deadline in game
+	/// seconds). Only a description for the player and a check: delivery and payment follow the sender's own order record
+	/// (see <see cref="ParcelPostRules"/>), never these numbers.
+	/// </summary>
+	public string OrderKind { get; set; } = "";
+
+	public int OrderCount { get; set; }
+
+	public long OrderPrice { get; set; }
+
+	public long OrderDeadline { get; set; }
+
+	/// <summary>
 	/// For a parcel: what is inside, one entry per batch packed. Empty for everything else, and for parcels from before
 	/// contents were kept.
 	/// </summary>
@@ -76,8 +100,34 @@ public sealed class ItemData
 		Quality = Quality,
 		OrderId = OrderId,
 		To = To,
+		SenderId = SenderId,
+		SenderName = SenderName,
+		OrderKind = OrderKind,
+		OrderCount = OrderCount,
+		OrderPrice = OrderPrice,
+		OrderDeadline = OrderDeadline,
 		Contents = (Contents ?? []).Select( x => x with { } ).ToList(),
 	};
+
+	/// <summary>
+	/// Copy a parcel's sender and order facts from <paramref name="source"/> (a loaded item) into this one, cut to safe
+	/// sizes. For code that rebuilds an item from a file and would otherwise drop them.
+	/// </summary>
+	public void CopySenderFrom( ItemData source )
+	{
+		if ( source is null )
+			return;
+
+		SenderId = source.SenderId;
+		SenderName = Cut( source.SenderName, 64 );
+		OrderKind = Cut( source.OrderKind, 64 );
+		OrderCount = System.Math.Clamp( source.OrderCount, 0, ItemCatalog.MaxCount );
+		OrderPrice = System.Math.Clamp( source.OrderPrice, 0, 1_000_000_000 );
+		OrderDeadline = System.Math.Max( source.OrderDeadline, 0 );
+	}
+
+	static string Cut( string text, int max ) =>
+		string.IsNullOrEmpty( text ) ? "" : text.Length > max ? text[..max] : text;
 
 	/// <summary>
 	/// Whether both hold exactly the same facts (every field, and a parcel's contents in order). What a drop and a pickup

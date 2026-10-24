@@ -213,6 +213,11 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			// that what fits is kept when the bag is too small for all of it.
 			foreach ( var item in crime.Items.ToList() )
 			{
+				// A parcel packed before senders were kept is ours: write us on it, so that whoever posts it, it pays us.
+				if ( item is { Kind: ItemCatalog.Parcel, SenderId: 0 }
+				     && crime.Orders.FirstOrDefault( x => x.Id == item.OrderId ) is { } packedFor )
+					ParcelPostRules.Stamp( item, Progress.Owner.SteamId, Network.Owner?.DisplayName, packedFor );
+
 				var left = item.Count;
 
 				while ( left > 0 )
@@ -580,9 +585,12 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Send every parcel the player carries from this mailbox, until the post is full (<see
-	/// cref="CrimeCatalog.MaxParcels"/>); the rest stay in the bag. A mailbox is claimed by the first player who sends
-	/// from it, and stays theirs; nobody else can use it. Host only.
+	/// Post every parcel the player carries from this mailbox, until the post is full (<see
+	/// cref="CrimeCatalog.MaxParcels"/>); the rest stay in the bag. A mailbox is claimed by the first player who posts
+	/// from it, and stays theirs; nobody else can use it. A parcel carries its sender, and is posted against the
+	/// sender's order, whoever posts it (see <see cref="ParcelPostRules"/>): the sender's record gets the shipping and
+	/// is paid, never the poster. A parcel that cannot be posted stays in the bag and the poster is told why. The limit
+	/// counts the poster's own parcels and the ones they posted for others. Host only.
 	/// </summary>
 	public CrimeResult SendAllParcels( MailBox box )
 	{
@@ -605,37 +613,64 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( slots.Count == 0 )
 			return CrimeResult.Fail( "You have no parcel to send." );
 
-		if ( PostalSystem.InPost( crime ) >= CrimeCatalog.MaxParcels )
+		var now = WorldClock.Now;
+
+		if ( ParcelPostRules.PostLoad( crime, now ) >= CrimeCatalog.MaxParcels )
 			return CrimeResult.Fail( "The post has too many of your parcels." );
 
 		var sent = 0;
+		var forOthers = 0;
+		var full = 0;
 		var firstCollect = long.MaxValue;
+		var lastBuyer = "";
+		var deferred = new List<(ItemData Item, ulong Sender)>();
+		var refused = new List<string>();
 
 		foreach ( var slot in slots )
 		{
-			if ( PostalSystem.InPost( crime ) >= CrimeCatalog.MaxParcels )
-				break;
+			if ( ParcelPostRules.PostLoad( crime, now ) + deferred.Count >= CrimeCatalog.MaxParcels )
+			{
+				full++;
+				continue;
+			}
 
-			var item = Inventory.TakeBatch( slot );
-			var order = crime.Orders.FirstOrDefault( x => x.Id == item.OrderId );
+			var item = Inventory.At( slot );
+			var senderId = ParcelPostRules.SenderOf( item, steamId );
+			var own = senderId == steamId;
 
-			// A parcel for an order that is gone (cancelled) is only a box. One for an order in progress ships it.
-			if ( order is { State: OrderState.Packed } )
-				order.State = OrderState.Shipped;
+			// Another player's record: in memory when they are here (or were lately), else it is read first, below.
+			var senderRecord = own ? Progress.Record : PlayerProgression.Cache.Peek( senderId );
 
-			// A parcel with no order shows what is inside; only a parcel with no contents either falls back to Static.
-			var inside = (item.Contents ?? []).FirstOrDefault();
+			if ( senderRecord is null )
+			{
+				deferred.Add( (item.Clone(), senderId) );
+				continue;
+			}
 
-			var parcel = PostalSystem.Send(
-				crime,
-				order?.Id ?? "",
-				order?.Kind ?? inside?.Kind ?? ProductCatalog.Default.Product.Id,
-				order?.Count ?? inside?.Count ?? item.Count,
-				item.Quality );
+			var verdict = ParcelPostRules.Judge( item, senderRecord.Crime, now );
 
-			firstCollect = System.Math.Min( firstCollect, parcel.CollectAt );
+			if ( verdict != ParcelPostRules.Verdict.Ship )
+			{
+				refused.Add( ParcelPostRules.TextFor( verdict ) );
+				continue;
+			}
+
+			lastBuyer = item.To;
+			var shipped = PostOne( slot, senderId, senderRecord );
+			firstCollect = System.Math.Min( firstCollect, shipped.CollectAt );
 			sent++;
+			forOthers += own ? 0 : 1;
 		}
+
+		foreach ( var wanted in deferred )
+			_ = PostWhenLoadedAsync( wanted.Item, wanted.Sender );
+
+		var note = (full > 0 ? $" The post is full: {Plural( full )} still in your bag." : "")
+		           + (refused.Count > 0 ? $" {Plural( refused.Count )} could not be posted: {refused[0]}" : "")
+		           + (deferred.Count > 0 ? $" Checking {Plural( deferred.Count )} more..." : "");
+
+		if ( sent == 0 && deferred.Count == 0 )
+			return CrimeResult.Fail( $"Nothing was posted.{note}" );
 
 		box.OwnerId = steamId;
 		crime.MailboxId = box.BoxId;
@@ -643,19 +678,123 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		UpdateFlag();
 		Changed();
 
-		var time = WorldClock.TimeOfDayOf( firstCollect );
-		var left = slots.Count - sent;
+		if ( sent == 0 )
+			return CrimeResult.Success( note.Trim() );
 
-		if ( left > 0 )
-		{
-			var verb = left == 1 ? "is" : "are";
-			return CrimeResult.Success(
-				$"Sent {Plural( sent )}. The post is full: {Plural( left )} {verb} still in your bag." );
-		}
+		var time = WorldClock.TimeOfDayOf( firstCollect );
+
+		if ( sent == 1 && forOthers == 1 )
+			return CrimeResult.Success( $"You posted a parcel for {lastBuyer}. It will be delivered. The mailman comes at {time}.{note}" );
 
 		return CrimeResult.Success( sent == 1
-			? $"The mailman comes at {time}."
-			: $"Sent {sent} parcels. The mailman comes at {time}." );
+			? $"The mailman comes at {time}.{note}"
+			: $"Sent {sent} parcels. The mailman comes at {time}.{note}" );
+	}
+
+	/// <summary>
+	/// Take the parcel in <paramref name="slot"/> out of the bag and put it on its way in the sender's record (the caller
+	/// has had it judged shippable). When the sender is another player the poster remembers it for their own limit, and
+	/// the sender hears of it. Returns the shipping record.
+	/// </summary>
+	ParcelRecord PostOne( int slot, ulong senderId, ProgressRecord senderRecord )
+	{
+		var item = Inventory.TakeBatch( slot );
+		var shipped = ParcelPostRules.Ship( senderRecord.Crime, item.OrderId );
+
+		if ( senderId == Progress.Owner.SteamId )
+			return shipped;
+
+		ParcelPostRules.RecordPosted( Crime, senderId, shipped, WorldClock.Now );
+
+		if ( LiveCrimeOf( senderId ) is { } live )
+			live.OnPostedByOther( Network.Owner?.DisplayName, item.To );
+		else
+		{
+			_ = PlayerProgression.SaveAsync( senderId );
+			OfflineCrimeSystem.Current?.Processor?.Wake( senderId );
+		}
+
+		return shipped;
+	}
+
+	/// <summary>
+	/// The sender's player object when they are here and ready, else null.
+	/// </summary>
+	static PlayerCrime LiveCrimeOf( ulong steamId ) =>
+		Connection.All.FirstOrDefault( x => x.SteamId == steamId ) is { } connection
+		&& For( connection ) is { Ready: true } crime
+			? crime
+			: null;
+
+	/// <summary>
+	/// Someone else posted a parcel this player packed: their record already has the shipping. Show it and save it.
+	/// Host only.
+	/// </summary>
+	void OnPostedByOther( string poster, string buyer )
+	{
+		UpdateFlag();
+		Changed();
+		Tell( CrimeResult.Success(
+			$"{(string.IsNullOrEmpty( poster ) ? "Someone" : poster)} posted your parcel for {buyer}." ) );
+	}
+
+	/// <summary>
+	/// Post a parcel whose sender's record was not in memory (the sender is away and nothing is looking after them right
+	/// now): read it, then do what <see cref="SendAllParcels"/> does. The parcel stays in the bag until the record is
+	/// there, and is found again by what it is. The poster is told the result. Host only.
+	/// </summary>
+	async System.Threading.Tasks.Task PostWhenLoadedAsync( ItemData wanted, ulong senderId )
+	{
+		try
+		{
+			var record = await PlayerProgression.LoadAsync( senderId );
+
+			if ( !this.IsValid() || !Ready )
+				return;
+
+			var slot = -1;
+
+			for ( var i = 0; i < Inventory.SlotCount && slot < 0; i++ )
+			{
+				if ( Inventory.At( i ) is { Kind: ItemCatalog.Parcel } held && held.SameAs( wanted ) )
+					slot = i;
+			}
+
+			// The player dropped or moved it meanwhile: nothing to post.
+			if ( slot < 0 )
+				return;
+
+			var now = WorldClock.Now;
+			var verdict = ParcelPostRules.Judge( wanted, record.Crime, now );
+
+			if ( verdict != ParcelPostRules.Verdict.Ship )
+			{
+				Tell( CrimeResult.Fail( ParcelPostRules.TextFor( verdict ) ) );
+
+				// A record only looked at (an unknown sender) is let go; one with work waiting is the processor's.
+				if ( CrimeRules.NextDue( record ) is null )
+					PlayerProgression.Release( senderId );
+
+				return;
+			}
+
+			if ( ParcelPostRules.PostLoad( Crime, now ) >= CrimeCatalog.MaxParcels )
+			{
+				Tell( CrimeResult.Fail( "The post has too many of your parcels." ) );
+				return;
+			}
+
+			var shipped = PostOne( slot, senderId, record );
+			Changed();
+			Tell( CrimeResult.Success(
+				$"You posted a parcel for {wanted.To}. It will be delivered. The mailman comes at "
+				+ $"{WorldClock.TimeOfDayOf( shipped.CollectAt )}." ) );
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( e, $"PlayerCrime: couldn't post a parcel for {senderId}: {e.Message}" );
+			Tell( CrimeResult.Fail( "The parcel could not be posted right now." ) );
+		}
 	}
 
 	static string Plural( int parcels ) => parcels == 1 ? "1 parcel" : $"{parcels} parcels";
@@ -806,6 +945,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return CrimeResult.Fail( "Nothing happens." );
 
 		parcel.To = order.Handle ?? "";
+		ParcelPostRules.Stamp( parcel, Progress.Owner.SteamId, Network.Owner?.DisplayName, order );
 		parcel.Contents.Add( new( taken.Kind, taken.Count, taken.Quality ) );
 
 		if ( !Inventory.Add( parcel ) )

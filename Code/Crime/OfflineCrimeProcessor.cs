@@ -59,6 +59,17 @@ public sealed class OfflineCrimeProcessor
 	public long? DueOf( ulong steamId ) => due.TryGetValue( steamId, out var at ) ? at : null;
 
 	/// <summary>
+	/// Look at this record on the next tick: something outside the processor gave it work that falls due sooner than
+	/// the time it was set to wait for (another player posted a parcel the player had packed). No effect on an id that
+	/// is not tracked yet: its save puts it in the index, which <see cref="Track"/> reads.
+	/// </summary>
+	public void Wake( ulong steamId )
+	{
+		if ( due.ContainsKey( steamId ) )
+			due[steamId] = 0;
+	}
+
+	/// <summary>
 	/// Read the index of players with work waiting (making it first if the store has none) and start on them.
 	/// </summary>
 	public async Task StartAsync()

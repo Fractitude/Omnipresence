@@ -425,6 +425,9 @@ public static class StorageRules
 			var parcel = stack.Kind == ItemCatalog.Parcel;
 			stack.Contents = parcel ? CrimeRecord.CleanContents( item.Contents ) : new();
 			stack.To = parcel ? Cut( item.To, 64 ) : "";
+
+			if ( parcel )
+				stack.CopySenderFrom( item );
 		}
 
 		return stacks;
