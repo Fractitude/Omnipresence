@@ -1,8 +1,8 @@
 {
   "UI": false,
-  "Volume": "0.8 1.0",
+  "Volume": "1 1",
   "Pitch": "0.9 1.15",
-  "Decibels": 78,
+  "Decibels": 85,
   "SelectionMode": "Random",
   "Sounds": [
     "sounds/effects/sparks_1.vsnd",
@@ -10,36 +10,22 @@
     "sounds/effects/sparks_3.vsnd"
   ],
   "Occlusion": true,
-  "AirAbsorption": true,
+  "AirAbsorption": false,
   "Transmission": false,
   "OcclusionRadius": 32,
   "DistanceAttenuation": true,
-  "Distance": 400,
+  "Distance": 5000,
   "Falloff": [
     {
       "x": 0,
       "y": 1,
       "in": 0,
-      "out": -1.2,
-      "mode": "Mirrored"
-    },
-    {
-      "x": 0.1,
-      "y": 0.6,
-      "in": 1.2,
-      "out": -1.2,
-      "mode": "Mirrored"
-    },
-    {
-      "x": 0.4,
-      "y": 0.2,
-      "in": 0.35,
-      "out": -0.35,
+      "out": 0,
       "mode": "Mirrored"
     },
     {
       "x": 1,
-      "y": 0,
+      "y": 1,
       "in": 0,
       "out": 0,
       "mode": "Mirrored"

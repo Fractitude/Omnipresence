@@ -90,7 +90,7 @@ public sealed class SparkEmitter : Component
 	/// (220 is about 5.5 m): past that it is not heard at all.
 	/// </summary>
 	[Property, Range( 50f, 2000f )]
-	public float HearingRange { get; set; } = 400f;
+	public float HearingRange { get; set; } = 5000f;
 
 	/// <summary>
 	/// The shortest gap between two crackles, in seconds. The first one plays the moment the sparks start, and then the
@@ -293,8 +293,11 @@ public sealed class SparkEmitter : Component
 
 		handle.Distance = HearingRange;
 		handle.SpacialBlend = 1f;
-		handle.AirAbsorption = true;
 		handle.ReverbEnabled = true;
+
+		// Air absorption off: a crackle is almost all top end, which is the first thing the air takes away, and with it
+		// on there was nothing left of the sound by the time it reached the player.
+		handle.AirAbsorption = false;
 
 		// Occlusion off: the emitter sits inside the camera's own housing, and a sound traced from in there comes out
 		// blocked by the object it belongs to. A crackle is a noise at the surface anyway.

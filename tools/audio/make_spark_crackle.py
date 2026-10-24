@@ -21,15 +21,15 @@ OUT = pathlib.Path(__file__).resolve().parents[2] / "Assets" / "sounds" / "effec
 
 # (name, seed, main decay, ticks, main level, body level)
 TAKES = [
-    ( "sparks_1", 7, 62.0, 7, 0.95, 0.14 ),
-    ( "sparks_2", 23, 48.0, 5, 0.85, 0.10 ),
-    ( "sparks_3", 41, 78.0, 9, 1.00, 0.18 ),
+    ( "sparks_1", 7, 26.0, 12, 0.95, 0.30 ),
+    ( "sparks_2", 23, 20.0, 10, 0.85, 0.26 ),
+    ( "sparks_3", 41, 32.0, 14, 1.00, 0.34 ),
 ]
 
 
 def crackle( seed: int, decay: float, ticks: int, level: float, body: float ) -> tuple[list[float], int]:
     rng = random.Random( seed )
-    length = 0.35
+    length = 0.5
     count = int( RATE * length )
     samples = [0.0] * count
 
@@ -44,7 +44,7 @@ def crackle( seed: int, decay: float, ticks: int, level: float, body: float ) ->
 
     # The ticks: a spark is never one sound, it is a handful of small ones.
     for _ in range( ticks ):
-        start = rng.uniform( 0.0, 0.13 )
+        start = rng.uniform( 0.0, 0.25 )
         span = rng.uniform( 0.003, 0.012 )
         amp = rng.uniform( 0.25, 0.75 )
         offset = int( start * RATE )
@@ -58,6 +58,13 @@ def crackle( seed: int, decay: float, ticks: int, level: float, body: float ) ->
         t = i / RATE
         samples[i] += math.sin( 2.0 * math.pi * 72.0 * t ) * math.exp( -t * 45.0 ) * body
 
+    # A soft knee, then full scale: a crackle read from a few metres away needs body, not one loud spike that clips
+    # the meter and leaves nothing behind it.
+    drive = 3.5
+    shaped = [math.tanh( value * drive ) for value in samples]
+    top = max( abs( value ) for value in shaped ) or 1.0
+    samples = [value / top for value in shaped]
+
     # A clean tail, so no click at the end of the sample.
     fade = int( RATE * 0.06 )
     for i in range( fade ):
@@ -65,7 +72,7 @@ def crackle( seed: int, decay: float, ticks: int, level: float, body: float ) ->
 
     peak = max( abs( value ) for value in samples ) or 1.0
 
-    return [value / peak * 0.89 for value in samples], count
+    return samples, count
 
 
 def brightness( samples: list[float] ) -> float:
