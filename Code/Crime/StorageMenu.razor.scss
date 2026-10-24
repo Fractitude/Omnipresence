@@ -119,6 +119,12 @@ StorageMenu
 		opacity: 0.35;
 	}
 
+	&.target
+	{
+		border-color: rgba(127, 209, 255, 0.9);
+		background-color: rgba(127, 209, 255, 0.18);
+	}
+
 	.count
 	{
 		position: absolute;

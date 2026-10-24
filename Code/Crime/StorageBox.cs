@@ -172,6 +172,43 @@ public sealed class StorageBox : Component, IInteractionHandler
 	}
 
 	/// <summary>
+	/// Move the item in a bag slot to a chosen slot of the box (a drag). An item there goes to the freed bag slot.
+	/// </summary>
+	[Rpc.Host]
+	public void RequestStoreTo( int bagSlot, int boxSlot )
+	{
+		if ( Begin() is not { } who )
+			return;
+
+		Reply( who, StorageRules.StoreTo( who.Crime, BoxId, Capacity, who.Bag, bagSlot, boxSlot ) );
+	}
+
+	/// <summary>
+	/// Move the item in a slot of the box to a chosen bag slot (a drag). An item there goes to the freed box slot.
+	/// </summary>
+	[Rpc.Host]
+	public void RequestTakeTo( int boxSlot, int bagSlot )
+	{
+		if ( Begin() is not { } who )
+			return;
+
+		Reply( who, StorageRules.TakeTo( who.Crime, BoxId, who.Bag, boxSlot, bagSlot ) );
+	}
+
+	/// <summary>
+	/// Move the item in a bag slot to another bag slot (a drag inside the panel's bag), swapping with what is there.
+	/// Asked here, not of the inventory, so the box's reach and ownership checks apply while the panel is open.
+	/// </summary>
+	[Rpc.Host]
+	public void RequestMoveInBag( int from, int to )
+	{
+		if ( Begin() is not { } who )
+			return;
+
+		Reply( who, StorageRules.MoveInBag( who.Bag, from, to ) );
+	}
+
+	/// <summary>
 	/// Who is asking, once the host has checked they may.
 	/// </summary>
 	sealed record Asker( Connection Caller, PlayerCrime Player, PlayerProgress Progress, CrimeRecord Crime )

@@ -2,7 +2,7 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( IsOpen ? "open" : "" )" @onmouseup=@CancelDrag>
+<root class="@( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
 	@if ( IsOpen && target.IsValid() && PlayerCrime.Local is { } crime && PlayerInventory.Local is { } bag )
 	{
 		<div class="window">
@@ -13,13 +13,14 @@
 			<div class="body">
 				<div class="column">
 					<div class="heading">@( $"Your bag ({bag.SlotCount - bag.FreeSlots}/{bag.SlotCount})" )</div>
-					<div class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
+					<div @ref="bagGridRef" class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
 						@for ( var i = 0; i < bag.SlotCount; i++ )
 						{
 							var slot = i;
 							var item = bag.At( slot );
-							<div class="slot @( item is null ? "empty" : "" )"
-							     @onclick=@( () => Store( slot ) )
+							<div class="slot @( item is null ? "empty" : "" ) @( Marks( false, slot ) )"
+							     @onmousedown=@( ( PanelEvent e ) => BeginDrag( false, slot, e ) )
+							     @onrightclick=@( () => Store( slot ) )
 							     @onmouseover=@( () => HoverBag( slot ) )
 							     @onmouseout=@( () => HoverBag( -1, slot ) )>
 								@if ( item is not null )
@@ -44,15 +45,14 @@
 					else
 					{
 						<div class="heading">@( $"Storage box ({target.ViewCount}/{target.Capacity})" )</div>
-						<div class="grid" style="width: @( target.Columns * (SlotSize + Gap) )px">
+						<div @ref="boxGridRef" class="grid" style="width: @( target.Columns * (SlotSize + Gap) )px">
 							@for ( var i = 0; i < target.Capacity; i++ )
 							{
 								var slot = i;
 								var item = target.ViewAt( slot );
-								<div class="slot @( item is null ? "empty" : "" ) @( dragBox == slot ? "dragged" : "" )"
-								     @onclick=@( () => Take( slot ) )
-								     @onmousedown=@( () => BeginDrag( slot ) )
-								     @onmouseup=@( () => EndDrag( slot ) )
+								<div class="slot @( item is null ? "empty" : "" ) @( Marks( true, slot ) )"
+								     @onmousedown=@( ( PanelEvent e ) => BeginDrag( true, slot, e ) )
+								     @onrightclick=@( () => Take( slot ) )
 								     @onmouseover=@( () => HoverBox( slot ) )
 								     @onmouseout=@( () => HoverBox( -1, slot ) )>
 									@if ( item is not null )
@@ -75,7 +75,7 @@
 			{
 				<div class="notice">@crime.LastTold</div>
 			}
-			<div class="hint">Click an item to move it across. Drag an item in the box to rearrange it.</div>
+			<div class="hint">Drag with left mouse to move. Right click to send to the other side.</div>
 		</div>
 
 		@if ( Dragged is { } dragged )
@@ -128,13 +128,26 @@
 	static int toldAtOpen;
 	static int hoverBag = -1;
 	static int hoverBox = -1;
-	static int dragBox = -1;
 	static RealTimeSince sinceRefresh;
 
+	// The drag: where it started (the box, or the bag) and which slot, and the slot under the mouse while it lasts.
+	static bool dragging;
+	static bool dragFromBox;
+	static int dragSlot = -1;
+	static bool overBox;
+	static int overSlot = -1;
+
+	// The two grids, to find the slot under the mouse (the mouse buttons read false over a panel, so the drop is read
+	// from the panel's mouseup and the slot from where the mouse is).
+	static Panel bagGridRef;
+	static Panel boxGridRef;
+
 	/// <summary>
-	/// The item dragged inside the box, or null.
+	/// The item being dragged, or null.
 	/// </summary>
-	static ItemData Dragged => dragBox >= 0 && target.IsValid() ? target.ViewAt( dragBox ) : null;
+	static ItemData Dragged => !dragging ? null
+		: dragFromBox ? (target.IsValid() ? target.ViewAt( dragSlot ) : null)
+		: PlayerInventory.Local?.At( dragSlot );
 
 	/// <summary>
 	/// The item under the mouse while nothing is dragged, or null.
@@ -143,7 +156,7 @@
 	{
 		get
 		{
-			if ( dragBox >= 0 )
+			if ( dragging )
 				return null;
 
 			if ( hoverBag >= 0 )
@@ -164,7 +177,8 @@
 
 		target = box;
 		toldAtOpen = crime.ToldCount;
-		hoverBag = hoverBox = dragBox = -1;
+		hoverBag = hoverBox = -1;
+		CancelDrag();
 		box.ClearView();
 		IsOpen = true;
 		GameMenus.SetOpen( "storage", true );
@@ -186,7 +200,9 @@
 			target.ClearView();
 
 		target = null;
-		hoverBag = hoverBox = dragBox = -1;
+		hoverBag = hoverBox = -1;
+		CancelDrag();
+		bagGridRef = boxGridRef = null;
 		MenuControls.Free( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}
@@ -218,26 +234,101 @@
 			target.RequestTake( slot );
 	}
 
-	static void BeginDrag( int slot )
+	/// <summary>
+	/// The left button went down on a slot: if it holds an item, start dragging it. Other buttons do nothing here.
+	/// </summary>
+	static void BeginDrag( bool fromBox, int slot, PanelEvent e )
 	{
-		if ( target.IsValid() && target.ViewAt( slot ) is not null )
-			dragBox = slot;
+		if ( !string.Equals( e.Button, "mouseleft", System.StringComparison.OrdinalIgnoreCase ) || !target.IsValid() )
+			return;
+
+		var item = fromBox ? target.ViewAt( slot ) : PlayerInventory.Local?.At( slot );
+
+		if ( item is null )
+			return;
+
+		dragging = true;
+		dragFromBox = fromBox;
+		dragSlot = slot;
+		overBox = fromBox;
+		overSlot = slot;
+	}
+
+	static void CancelDrag()
+	{
+		dragging = false;
+		dragSlot = overSlot = -1;
 	}
 
 	/// <summary>
-	/// The mouse came up on a slot of the box: the dragged item goes there. On the slot it came from it is a plain
-	/// click, which takes the item out instead.
+	/// The mouse button came up: drop the dragged item on the slot under the mouse. Nothing under the mouse, or the
+	/// slot it came from (a plain click), changes nothing. Only slot numbers go to the host, which checks everything.
 	/// </summary>
-	static void EndDrag( int slot )
+	static void EndDrag()
 	{
-		var from = dragBox;
-		dragBox = -1;
+		if ( !dragging )
+			return;
 
-		if ( from >= 0 && from != slot && target.IsValid() )
-			target.RequestMoveInBox( from, slot );
+		var fromBox = dragFromBox;
+		var from = dragSlot;
+		CancelDrag();
+
+		if ( !target.IsValid() || !SlotAt( Mouse.Position, out var toBox, out var to )
+		     || (fromBox == toBox && from == to) )
+			return;
+
+		if ( fromBox && toBox )
+			target.RequestMoveInBox( from, to );
+		else if ( fromBox )
+			target.RequestTakeTo( from, to );
+		else if ( toBox )
+			target.RequestStoreTo( from, to );
+		else
+			target.RequestMoveInBag( from, to );
 	}
 
-	static void CancelDrag() => dragBox = -1;
+	/// <summary>
+	/// The slot under a screen position, in the box or in the bag, or false.
+	/// </summary>
+	static bool SlotAt( Vector2 position, out bool inBox, out int slot )
+	{
+		inBox = false;
+		slot = -1;
+
+		foreach ( var (grid, box) in new[] { (bagGridRef, false), (boxGridRef, true) } )
+		{
+			if ( grid is not { IsValid: true } )
+				continue;
+
+			var index = 0;
+
+			foreach ( var child in grid.Children )
+			{
+				if ( child.Box.Rect.IsInside( position ) )
+				{
+					inBox = box;
+					slot = index;
+					return true;
+				}
+
+				index++;
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// The style classes of a slot: the one being dragged, and the one a drop would go to.
+	/// </summary>
+	static string Marks( bool inBox, int slot )
+	{
+		if ( !dragging )
+			return "";
+
+		var marks = dragFromBox == inBox && dragSlot == slot ? "dragged " : "";
+		return overBox == inBox && overSlot == slot && marks == "" ? "target" : marks;
+	}
 
 	static void HoverBag( int slot, int leaving = -1 )
 	{
@@ -258,6 +349,14 @@
 
 		var controller = Players.LocalController;
 
+		// Escape drops a drag in the air first, and closes the panel the next time.
+		if ( dragging && Input.EscapePressed )
+		{
+			Input.EscapePressed = false;
+			CancelDrag();
+			return;
+		}
+
 		// Leave if the player walked away or died, the box is gone, another menu took over, or Escape was pressed.
 		if ( Input.EscapePressed || NaviInputCapture.Current is not null || PlayerCrime.Local is null
 		     || controller is null || !target.IsValid() || !target.IsNear( controller.WorldPosition ) )
@@ -269,6 +368,20 @@
 
 		Mouse.Visibility = MouseVisibility.Visible;
 		MenuControls.Free( false );
+
+		// The slot a drop would go to.
+		if ( dragging )
+		{
+			if ( SlotAt( Mouse.Position, out var inBox, out var slot ) )
+			{
+				overBox = inBox;
+				overSlot = slot;
+			}
+			else
+			{
+				overSlot = -1;
+			}
+		}
 
 		if ( sinceRefresh > RefreshSeconds )
 		{
@@ -282,11 +395,12 @@
 	protected override int BuildHash()
 	{
 		// The dragged icon and the details follow the mouse.
-		var following = dragBox >= 0 || hoverBag >= 0 || hoverBox >= 0;
+		var following = dragging || hoverBag >= 0 || hoverBox >= 0;
 
 		return System.HashCode.Combine(
 			IsOpen, target.IsValid() ? target.ViewVersion : 0, PlayerInventory.Local?.Version,
-			PlayerCrime.Local?.ToldCount, System.HashCode.Combine( hoverBag, hoverBox, dragBox ),
+			PlayerCrime.Local?.ToldCount, System.HashCode.Combine( hoverBag, hoverBox, dragging, dragSlot, overSlot ),
+			overBox,
 			following ? Mouse.Position : default );
 	}
 }

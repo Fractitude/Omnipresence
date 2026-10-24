@@ -15,18 +15,18 @@ A storage box holds what does not fit in the bag. A player walks up, opens it, a
 ## Using it
 
 - Look at the box and use it (**Open storage**).
-- Click an item in your bag to move it to the first free slot of the box. Click an item in the box to move it to the first free slot of the bag.
-- Drag an item in the box onto another slot of the box to move it there (an item already there swaps). A drop on the slot it came from counts as a click and takes the item out.
+- **Left mouse, drag:** press on an item (bag or box), drag, and release on any slot of the bag or the box. An empty slot takes the item; an occupied slot swaps the two items, also between bag and box (the target's item goes to the slot the dragged one came from). Reordering inside the box and inside the bag works the same way. A ghost icon follows the mouse and the slot under it is highlighted. Releasing outside any slot, on the slot it came from (a plain click, which does nothing), pressing Escape (once; the next Escape closes the panel) or closing the panel cancels the drag.
+- **Right click** on an item sends it to the other side: from the bag to the first free box slot, from the box to the first free bag slot.
 - Hover an item for its details: name, description, batch lines, and what a parcel holds.
 - A full box or a full bag says so in the panel and in chat; nothing moves.
 - Parcels may be stored. A stored parcel is not posted: Send all parcels sends the bag's parcels only.
 
 ## Security
 
-- All moves run on the host as `[Rpc.Host]` requests on the box (`RequestRefresh`, `RequestStore( bagSlot )`, `RequestTake( boxSlot )`, `RequestMoveInBox( from, to )`). The box is the network object the request goes to, so only slot indices travel.
+- All moves run on the host as `[Rpc.Host]` requests on the box (`RequestRefresh`; right click: `RequestStore( bagSlot )`, `RequestTake( boxSlot )`; drag: `RequestStoreTo( bagSlot, boxSlot )`, `RequestTakeTo( boxSlot, bagSlot )`, `RequestMoveInBox( from, to )`, `RequestMoveInBag( from, to )`). The box is the network object the request goes to, so only slot indices travel.
 - The host takes the player from `Rpc.Caller` (`PlayerCrime.For`), never from the message. It checks the record is loaded, that the player stands within `StorageBox.Reach` (300) of THIS box, and that they may use it, then calls `StorageRules`.
 - `StorageBox.CanUse( steamId )` is the one place that decides who may open a box: the owner, or anyone while it is unclaimed. Raiding will change it there. Anyone else gets "This isn't your storage." and the panel closes.
-- A move checks everything before it changes anything. `Store` removes from the bag and then puts in the box; `Take` adds to the bag first and only then empties the box slot; `MoveInBox` swaps two entries. A failure leaves both sides as they were, so an item is never lost or doubled. An item moves whole, with every field (`Kind`, `Count`, `Quality`, `OrderId`, `Contents`, paths).
+- A move checks everything before it changes anything. `Store` and `StoreTo` remove from the bag and then put in the box (a swap first puts the displaced item in the freed bag slot, and undoes the removal if that fails); `TakeTo` does the mirror image; `Take` adds to the bag first and only then empties the box slot; `MoveInBox` swaps two entries. A failure leaves both sides as they were, so an item is never lost or doubled. An item moves whole, with every field (`Kind`, `Count`, `Quality`, `OrderId`, `Contents`, paths).
 - The contents are in the owner's record on the host. The host sends them to the player who asked, to nobody else (`Rpc.FilterInclude`); the box's synced state is only the owner's Steam id. A client keeps the contents only while the panel is open.
 - The claim is made by the host on the first request from a player in reach, written to `storage.json` at once.
 
@@ -55,4 +55,3 @@ The prefab is `Assets/crime/storage_box.prefab`: a root with `StorageBox`, `Inte
 
 - Raiding another player's box (`CanUse` is the place for it).
 - Stacking: two batches of the same kind stay in two slots.
-- Moving inside the bag from this panel (use the Character menu).

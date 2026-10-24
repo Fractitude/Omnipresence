@@ -113,6 +113,111 @@ public static class StorageRules
 	}
 
 	/// <summary>
+	/// Move the item in a bag slot to a chosen slot of the box. An item already there goes to the bag slot that was
+	/// just freed (a swap). Everything is checked first, and the one step that could fail (the displaced item needs the
+	/// freed slot, which is always there) is undone if it does, so nothing is lost or doubled.
+	/// </summary>
+	public static CrimeResult StoreTo(
+		CrimeRecord crime, string boxId, int capacity, PlayerInventory bag, int bagSlot, int boxSlot )
+	{
+		if ( crime is null || bag is null || bagSlot < 0 || bagSlot >= bag.SlotCount || bag.At( bagSlot ) is null )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		if ( boxSlot < 0 || boxSlot >= capacity || boxSlot >= MaxSlots )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		var box = Find( crime, boxId );
+
+		if ( box is null && crime.Storage.Count >= MaxBoxes )
+			return CrimeResult.Fail( "You cannot keep things in any more boxes." );
+
+		var displaced = At( box, boxSlot );
+
+		if ( bag.Remove( bagSlot ) is not { } item )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		if ( displaced is not null && !PlaceInBag( bag, displaced, bagSlot ) )
+		{
+			bag.Add( item );
+			return CrimeResult.Fail( "Nothing happens." );
+		}
+
+		if ( box is null )
+		{
+			box = new StorageBoxRecord { Id = boxId };
+			crime.Storage.Add( box );
+		}
+
+		Set( box, boxSlot, item );
+		return CrimeResult.Success();
+	}
+
+	/// <summary>
+	/// Move the item in a box slot to a chosen bag slot. An item already there goes to the box slot that was just freed
+	/// (a swap). Checked first and undone on a failed step, like <see cref="StoreTo"/>.
+	/// </summary>
+	public static CrimeResult TakeTo( CrimeRecord crime, string boxId, PlayerInventory bag, int boxSlot, int bagSlot )
+	{
+		var box = Find( crime, boxId );
+
+		if ( bag is null || boxSlot < 0 || boxSlot >= MaxSlots || At( box, boxSlot ) is not { } item )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		if ( bagSlot < 0 || bagSlot >= bag.SlotCount )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		var displaced = bag.At( bagSlot ) is null ? null : bag.Remove( bagSlot );
+
+		if ( !PlaceInBag( bag, item, bagSlot ) )
+		{
+			if ( displaced is not null )
+				bag.Add( displaced );
+
+			return CrimeResult.Fail( "Your bag is full. Make room first." );
+		}
+
+		Set( box, boxSlot, displaced );
+		Tidy( crime, box );
+		return CrimeResult.Success();
+	}
+
+	/// <summary>
+	/// Move the item in a bag slot to another bag slot, swapping with what is there.
+	/// </summary>
+	public static CrimeResult MoveInBag( PlayerInventory bag, int from, int to )
+	{
+		if ( bag is null || from == to || from < 0 || from >= bag.SlotCount || to < 0 || to >= bag.SlotCount
+		     || bag.At( from ) is null )
+			return CrimeResult.Fail( "Nothing happens." );
+
+		bag.Move( from, to );
+		return CrimeResult.Success();
+	}
+
+	/// <summary>
+	/// Put an item in a given, empty bag slot. The bag only adds to its first free slot, so it goes there and is then
+	/// moved. False, with the bag as it was, when there is no free slot.
+	/// </summary>
+	static bool PlaceInBag( PlayerInventory bag, ItemData item, int slot )
+	{
+		if ( bag.At( slot ) is not null || !bag.Add( item ) )
+			return false;
+
+		for ( var i = 0; i < bag.SlotCount; i++ )
+		{
+			if ( ReferenceEquals( bag.At( i ), item ) )
+			{
+				if ( i != slot )
+					bag.Move( i, slot );
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
 	/// Move the item in a box slot to another slot of the same box, swapping with what is there.
 	/// </summary>
 	public static CrimeResult MoveInBox( CrimeRecord crime, string boxId, int capacity, int from, int to )
