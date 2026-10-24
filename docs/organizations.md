@@ -63,7 +63,7 @@ decline. The sender (or any Owner or Manager of the organization) can cancel it.
 
 `OrgPayouts.Distribute( receiverSteamId, receiverRecord, amount, currency, reason, orderId )` is called wherever a source of
 revenue credits a player. Today that is the escrow release in `CrimeRules.Release`; **a new source calls the same function**.
-It replaces the plain `record.AddCrypto`: it credits the receiver's own record itself.
+It credits the receiver's own record itself, as one group of transactions ([transactions.md](transactions.md)): the payer (`hush-escrow` for an order) pays the receiver's part (`OrderPayout`) and each live teammate's share (`OrgShare`) directly, so the receiver never holds the whole amount and the history of each reads right.
 
 - The **receiver** is the player who did the work: for a Hush order, whoever packed the parcel (the parcel carries its sender,
   and the order is shipped and paid in the sender's record, even when someone else posted it). Only the organization the
@@ -74,10 +74,10 @@ It replaces the plain `record.AddCrypto`: it credits the receiver's own record i
   total paid out is always exactly the amount (the split is `OrgRules.Split`, tested with 20 000 random cases, including
   33/33/33, 1 crypto and caps). A receiver who can't hold what they keep gets `false`: nothing is paid and escrow tries again a
   minute later, as before.
-- **Online or in-memory** members are credited at once: through `PlayerWallet` for a player who is there (one source of truth,
-  so the HUD updates and nothing is overwritten), directly in their record if only the record is loaded. **Any other member** gets
+- **Online or in-memory** members are credited at once, in the same all-or-none batch as the receiver (a player who is there through
+  their own progress, so the HUD updates and nothing is overwritten; a record that is only loaded is saved by the system). **Any other member** gets
   the share written in `orgs.json` (`Pending`) and it goes into their saved record within 5 s (`OrgSystem`, `FlushPendingAsync`):
-  the record is loaded, credited, saved, and only then the entry removed. If it doesn't fit under the cap, the rest stays and is
+  the record is loaded, credited with a transaction (`UpTo`), saved, and only then the entry removed. If it doesn't fit under the cap, the rest stays and is
   retried (known limit: that share is not redirected to the receiver, because the receiver has been paid already).
 - **Idempotent:** escrow pays an order once (it leaves the Delivered state in the same call). On top of that a payout is
   written to the organization's list under `reason + orderId + receiver`; calling again for the same one gives the receiver only

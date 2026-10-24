@@ -60,10 +60,6 @@ The prompt reads "Pick up {name} x{count}" with the same details as the inventor
 out with "Your bag is full." when `PlayerInventory.RoomFor` (the dry run, no changes) says not even one fits, and says
 "Only N fit in your bag." when part fits.
 
-## Cash
-
-Cash is a world item with kind `cash` (`ItemCatalog.Cash`, prefab `items/cash.prefab`) whose dollars are `ItemData.Amount`; it is made by `CashDrops.Drop`, never by the bag. It counts toward `MaxInScene`. `WorldItem` picks it up in its own branch (`PickUpCash`): the dollars go to the interactor's wallet, not the bag, as many as the wallet cap allows (the rest stays, `Amount` reduced and re-synced), and there is no bag-full refusal. `ItemCatalog.Make` and `MakeStacks` return nothing for cash (`MakeCash` makes a pile). `WorldItemRules.CleanItem` keeps a cash item with its amount cut to 1..`MaxMoney` and a count of 1, drops one with no dollars, and sets `Amount` to 0 on every other kind. The details line is the amount, "$1,250". See [currency.md](currency.md), "Cash on the ground".
-
 ## The merge rule
 
 `StackRules.CanMerge( a, b )` is the one place that says whether the game may combine two stacks on its own: same kind,

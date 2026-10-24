@@ -38,6 +38,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `docs/organizations.md` is how organizations work: teammates grouped in the Organizations Navi app, with roles, shares and invitations, and `OrgPayouts.Distribute`, the one function a revenue source calls to share a payment. Read it before adding a source of money.
 - `docs/depot.md` is how big objects (storage box, grow tray, press bench, packing table) are bought in the Depot app, delivered and kept between sessions (`Code/Placeables/`, `PlacedObject` ids). Read it before adding something the player places in the world.
 - `docs/stats.md` is the server's log of what players do over time (joins, playtime, kills, deaths, every money movement, purchases, kicks, bans): `StatsLog`, the files it writes and how to log a new source of money. Read it before adding a source or sink of money, a purchase or a way to remove a player.
+- `docs/transactions.md` is how cash and crypto move between players and system parties (`Transactions`, the history, the ledger file, the exempt paths). Read it before adding any place that pays or charges money.
 - `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 
 ## Vehicles
@@ -138,6 +139,7 @@ s&box uses a scene/GameObject/Component model. Gameplay is written as `Component
 
 - **Find a player's parts with `Players`** (`Code/Game/Players.cs`): `Players.LocalController`, `Players.LocalObject`, `Players.Local<T>()` and `Players.For<T>( connection )`. Every player component is on the player prefab, so any of them can be asked for. Don't write another `GetAll<…>().FirstOrDefault( x => !x.IsProxy )`.
 - **React to a change with a scene event, not by polling.** Implement the interface on a component: `Global.IPlayerEvents` (spawn, damage, death, kills), `Global.IProgressEvents` (a `PlayerProgress` loaded or changed, with `ProgressChange` flags saying what; host only) and `Global.IInventoryEvents` (slots changed, item dropped). A new system that others may care about posts its own `Global.I…Events`, the same way.
+- **Move money only through `Transactions`** (`Code/Wallet/Transactions.cs`): cash and crypto between players and system parties, all or none, with a history and a ledger. Never write `ProgressRecord.Money` / `Crypto` or add a wallet mutator; the only direct additions are `PlayerWallet.GrantUntracked` (ground pickup, console). `python tools/check_money_writes.py` checks it.
 - **Redraw with one `Version`.** `PlayerProgress`, `PlayerInventory` and `AbilityLoadout` each bump a `Version` on every change; a panel or view model hashes it in `BuildHash` or its signature.
 - **The game's own Navi apps find their seat with `GameAppSeat`** (`UserOf( panel )`, `ComputerOf( panel )`), never from what an action says.
 

@@ -130,27 +130,12 @@ public static class WorldItemRules
 			Kind = Limit( item.Kind, 64 ),
 			Count = item.Count,
 			Quality = System.Math.Clamp( item.Quality, 0, 100 ),
-			Amount = System.Math.Clamp( item.Amount, 0, ProgressRecord.MaxMoney ),
 			OrderId = Limit( item.OrderId, 64 ),
 			To = Limit( item.To, 64 ),
 			Contents = CrimeRecord.CleanContents( item.Contents ),
 		};
 
 		clean.CopySenderFrom( item );
-
-		if ( clean.Kind == ItemCatalog.Cash )
-		{
-			// Cash is its amount: a note with no dollars is nothing, and it is never more than one stack.
-			if ( clean.Amount < 1 )
-				return null;
-
-			clean.Count = 1;
-			clean.Quality = 0;
-			clean.Name = ItemCatalog.Find( ItemCatalog.Cash ).Name;
-			return clean;
-		}
-
-		clean.Amount = 0;
 
 		if ( ItemCatalog.Find( clean.Kind ) is { } def )
 		{
