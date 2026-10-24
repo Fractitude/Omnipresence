@@ -105,17 +105,10 @@ public sealed class HushViewModel
 					notice = crime.BuyFromShop( args[0], wanted ).Message;
 					break;
 
+				// The player stays on the Orders tab after accepting; the accepted order shows under Your orders.
 				case AcceptAction when args.Length > 0:
-				{
-					var accepted = crime.Accept( args[0] );
-					notice = accepted.Message;
-
-					// Packing (at the packing table) and sending happen under Your orders.
-					if ( accepted.Ok )
-						tab = HushTab.YourOrders;
-
+					notice = crime.Accept( args[0] ).Message;
 					break;
-				}
 
 				case SellAction when args.Length > 0:
 					notice = crime.SellCrypto( AmountOf( args[0], PlayerWallet.For( seat )?.Crypto ?? 0 ) ).Message;
