@@ -160,9 +160,21 @@ public static class ProductCatalog
 	/// </summary>
 	static ProductDef With( ProductDef product ) => product with
 	{
-		Seed = product.Seed with { Category = product.Name, MaxStack = StackSize },
-		Raw = product.Raw with { Category = product.Name, MaxStack = StackSize },
-		Product = product.Product with { Category = product.Name, MaxStack = StackSize },
+		Seed = WithDefaults( product.Seed, product.Name ),
+		Raw = WithDefaults( product.Raw, product.Name ),
+		Product = WithDefaults( product.Product, product.Name ),
+	};
+
+	/// <summary>
+	/// One item of a drug: its category, the stack size, quality that matters for merging, and its world prefab
+	/// (<c>items/{id}.prefab</c>, which falls back to the shared one if there is none).
+	/// </summary>
+	static ItemDef WithDefaults( ItemDef item, string category ) => item with
+	{
+		Category = category,
+		MaxStack = StackSize,
+		QualityMatters = true,
+		WorldPrefab = $"items/{item.Id}.prefab",
 	};
 
 	/// <summary>

@@ -14,7 +14,7 @@ public static partial class Global
 		void OnInventoryChanged( PlayerInventory inventory ) { }
 
 		/// <summary>
-		/// An item was dropped. Host only. The item is out of the inventory by then. Nothing puts it back in the world yet.
+		/// An item was dropped. Host only. The item is out of the inventory by then, and is a <see cref="WorldItem"/> on the ground.
 		/// </summary>
 		void OnItemDropped( PlayerInventory inventory, ItemData item ) { }
 	}

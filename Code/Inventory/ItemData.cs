@@ -80,6 +80,12 @@ public sealed class ItemData
 	};
 
 	/// <summary>
+	/// Whether both hold exactly the same facts (every field, and a parcel's contents in order). What a drop and a pickup
+	/// must keep.
+	/// </summary>
+	public bool SameAs( ItemData other ) => other is not null && Json.Serialize( this ) == Json.Serialize( other );
+
+	/// <summary>
 	/// The prefab the object was made from: its own, else the nearest parent's. Empty if it is not from a prefab.
 	/// </summary>
 	public static string NearestPrefab( GameObject go )

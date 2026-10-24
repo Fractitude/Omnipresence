@@ -1,0 +1,97 @@
+{
+ "RootObject": {
+  "__guid": "96d69545-a388-4e44-b424-bb466d9a4f5c",
+  "__version": 2,
+  "Flags": 0,
+  "Name": "static_tab",
+  "Position": "0,0,0",
+  "Rotation": "0,0,0,1",
+  "Scale": "1,1,1",
+  "Tags": "",
+  "Enabled": true,
+  "NetworkMode": 1,
+  "NetworkFlags": 0,
+  "NetworkOrphaned": 0,
+  "NetworkTransmit": true,
+  "OwnerTransfer": 1,
+  "Components": [
+   {
+    "__type": "Sandbox.WorldItem",
+    "__guid": "dd1c0540-513f-49da-80aa-bf593aebf0f7",
+    "__enabled": true,
+    "Flags": 0
+   },
+   {
+    "__type": "Sandbox.BoxCollider",
+    "__guid": "36849796-670d-4a4e-b590-25071724adc1",
+    "__enabled": true,
+    "Flags": 0,
+    "Center": "0,0,0",
+    "Scale": "10,7,4",
+    "Static": false
+   },
+   {
+    "__type": "Sandbox.Rigidbody",
+    "__guid": "07e02b8d-42a8-4192-90e6-5ee7ed49ca9c",
+    "__enabled": true,
+    "Flags": 0
+   },
+   {
+    "__type": "Sandbox.Interactable",
+    "__guid": "405f39c7-1ae6-4850-b352-5f55db30cae5",
+    "__enabled": true,
+    "Flags": 0,
+    "HandlerObject": null,
+    "Range": 120,
+    "Options": [
+     {
+      "Id": "pickup",
+      "Label": "Pick up",
+      "Icon": "back_hand",
+      "Description": "",
+      "Available": true,
+      "RunOn": "Host",
+      "Cooldown": 0,
+      "OnInteract": null
+     }
+    ]
+   }
+  ],
+  "Children": [
+   {
+    "__guid": "933bf558-1e4a-490c-85e3-98f8f477f75c",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "Model",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "0.2,0.14,0.08",
+    "Tags": "",
+    "Enabled": true,
+    "NetworkMode": 0,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+     {
+      "__type": "Sandbox.ModelRenderer",
+      "__guid": "af5bf6a7-31cb-4e7d-9a51-38e0ec09f1c5",
+      "__enabled": true,
+      "Flags": 0,
+      "Model": {
+       "Id": "8a84e5a0-01f8-0000-f0db-b088f8010000",
+       "Path": "models/dev/box.vmdl"
+      },
+      "Tint": "0.498,0.82,1,1",
+      "RenderType": "On"
+     }
+    ],
+    "Children": []
+   }
+  ]
+ },
+ "ResourceVersion": 1,
+ "__references": [],
+ "__version": 2
+}

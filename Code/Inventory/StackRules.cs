@@ -45,6 +45,23 @@ public static class StackRules
 		item is { IsBatch: true } && ItemCatalog.IsCombinable( item.Kind );
 
 	/// <summary>
+	/// Whether two stacks may be merged by the game on its own (a pickup, or any code that puts a stack into the bag
+	/// without the player choosing): the same kind, both stackable, the same order and addressee, and, for a kind whose
+	/// <see cref="ItemDef.QualityMatters"/>, the same quality. The result of a merge never averages a quality. The
+	/// player's own Shift-combine (<see cref="Plan"/>) does average, because they chose it.
+	/// </summary>
+	public static bool CanMerge( ItemData a, ItemData b ) =>
+		IsStackable( a ) && IsStackable( b ) && Compatible( a, b, ItemCatalog.QualityMattersOf( a.Kind ) );
+
+	/// <summary>
+	/// The part of <see cref="CanMerge(ItemData, ItemData)"/> that does not read the catalogue: the same kind, order and
+	/// addressee, and the same quality when <paramref name="qualityMatters"/>.
+	/// </summary>
+	public static bool Compatible( ItemData a, ItemData b, bool qualityMatters ) =>
+		a is not null && b is not null && a.Kind == b.Kind && a.OrderId == b.OrderId && a.To == b.To
+		&& (!qualityMatters || a.Quality == b.Quality);
+
+	/// <summary>
 	/// The quality of two stacks put together: each quality weighted by its count, rounded to the nearest.
 	/// </summary>
 	public static int AverageQuality( int countA, int qualityA, int countB, int qualityB )

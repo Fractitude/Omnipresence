@@ -114,6 +114,42 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
+	/// Put as much of <paramref name="data"/> in the bag as fits and return how many of its count went in (0 when nothing
+	/// did). A batch tops up the stacks it may merge with and fills free slots (<see cref="PickupRules"/>); an ordinary
+	/// item takes one free slot or nothing. <paramref name="data"/> itself is not changed: the caller keeps the rest.
+	/// Written in one step, so the bag gains exactly the returned count. Host only.
+	/// </summary>
+	public int AddPartial( ItemData data )
+	{
+		if ( data is null || !CheckAuthority( nameof( AddPartial ) ) )
+			return 0;
+
+		Resize();
+		var taken = PickupRules.Plan( slots, data, planned );
+
+		if ( taken < 1 )
+			return 0;
+
+		foreach ( var write in planned )
+			slots[write.Slot] = write.Item;
+
+		Changed();
+		return taken;
+	}
+
+	/// <summary>
+	/// How many of <paramref name="data"/>'s count <see cref="AddPartial"/> would take right now, without changing
+	/// anything. Works on every machine, from the synced slots (a prompt asks it).
+	/// </summary>
+	public int RoomFor( ItemData data )
+	{
+		Resize();
+		return data is null ? 0 : PickupRules.Plan( slots, data, new() );
+	}
+
+	readonly List<SlotWrite> planned = new();
+
+	/// <summary>
 	/// Put a new batch of a catalog kind in the free slots: as many full stacks (the kind's
 	/// <see cref="ItemDef.MaxStack"/>) as the count needs, then the remainder, all of the same quality. All or nothing:
 	/// false, and nothing added, when there is no room for all of it, no such kind or nothing to add. Host only.
@@ -377,17 +413,41 @@ public sealed class PlayerInventory : Component
 
 	void DoDrop( int slot )
 	{
-		// A parcel stays with its owner until it is sent: nothing puts a dropped item back in the world yet.
+		// A parcel stays with its owner until it is sent.
 		if ( At( slot ) is { IsBatch: true } batch && ItemCatalog.Find( batch.Kind ) is { CanDrop: false } )
 			return;
+
+		if ( At( slot ) is not { } held )
+			return;
+
+		if ( WorldItem.CountInScene( Scene ) >= WorldItem.MaxInScene )
+		{
+			Tell( "There is too much on the ground already." );
+			return;
+		}
+
+		// The world item is made first, so a drop that cannot be placed never loses the item.
+		if ( WorldItem.SpawnFrom( GameObject, held.Clone() ) is null )
+		{
+			Tell( "You cannot drop that here." );
+			return;
+		}
 
 		var item = Remove( slot );
 
 		if ( item is null )
 			return;
 
-		Log.Warning( $"PlayerInventory: dropped '{item.Name}', but nothing puts it back in the world yet." );
 		Global.IInventoryEvents.Post( x => x.OnItemDropped( this, item ) );
+	}
+
+	/// <summary>
+	/// Say something to this player alone, in their chat. Host only.
+	/// </summary>
+	void Tell( string text )
+	{
+		if ( Components.Get<PlayerCrime>() is { } crime )
+			crime.Tell( CrimeResult.Fail( text ) );
 	}
 
 	bool CheckAuthority( string method )

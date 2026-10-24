@@ -12,6 +12,11 @@ namespace Sandbox;
 /// that is not sold (a parcel).</param>
 /// <param name="MaxStack">The most one stack of this kind holds. 1 (the default) means it never stacks, and cannot be
 /// combined or split. The drugs' items set <see cref="ProductCatalog.StackSize"/>.</param>
+/// <param name="QualityMatters">True when two stacks of different quality must never be merged automatically (a pickup,
+/// <see cref="StackRules.CanMerge(ItemData, ItemData)"/>), because averaging would change what the player holds. True for
+/// the drugs' items. The player's own Shift-combine still averages.</param>
+/// <param name="WorldPrefab">The prefab (relative to Assets, like "items/static_tab.prefab") that shows a dropped item of
+/// this kind in the world. Empty, or a prefab that does not exist, uses <see cref="ItemCatalog.WorldFallbackPrefab"/>.</param>
 public sealed record ItemDef(
 	string Id,
 	string Name,
@@ -21,7 +26,9 @@ public sealed record ItemDef(
 	string Icon = "inventory_2",
 	string Color = "",
 	string Category = "",
-	int MaxStack = 1 );
+	int MaxStack = 1,
+	bool QualityMatters = false,
+	string WorldPrefab = "" );
 
 /// <summary>
 /// The crime items: batches with a kind, a count and a quality (see <see cref="ItemData"/>). The three items of each
@@ -37,6 +44,11 @@ public static class ItemCatalog
 	public const string HazeRaw = "haze_raw";
 	public const string HazeVial = "haze_vial";
 	public const string Parcel = "parcel";
+
+	/// <summary>
+	/// The prefab for a dropped item whose kind names no world prefab of its own, and for an ordinary item.
+	/// </summary>
+	public const string WorldFallbackPrefab = "items/world_item.prefab";
 
 	/// <summary>
 	/// A sanity bound for counts that are not stacks (an order's count, a delivery's, a parcel's contents lines) and
@@ -71,6 +83,17 @@ public static class ItemCatalog
 	/// than one. A new item stacks by setting <see cref="ItemDef.MaxStack"/>.
 	/// </summary>
 	public static bool IsCombinable( string kind ) => MaxStackOf( kind ) > 1;
+
+	/// <summary>
+	/// Whether stacks of different quality of this kind must not be merged automatically. False for an unknown kind.
+	/// </summary>
+	public static bool QualityMattersOf( string kind ) => Find( kind )?.QualityMatters ?? false;
+
+	/// <summary>
+	/// The prefab that shows a dropped item of this kind: the kind's own, else <see cref="WorldFallbackPrefab"/>.
+	/// </summary>
+	public static string WorldPrefabOf( string kind ) =>
+		Find( kind )?.WorldPrefab is { Length: > 0 } own ? own : WorldFallbackPrefab;
 
 	/// <summary>
 	/// The icon glyph for an item with no model: its kind's icon, or the plain box for an ordinary item.
