@@ -1,6 +1,6 @@
 # Currency
 
-The game has three currencies. Each belongs to a place, and credits never mix with the others. All three live in one component on the player, **`PlayerWallet`** (`Code/Wallet/PlayerWallet.cs`), and nothing else reads or changes a balance.
+The game has three currencies. Each belongs to a place, and credits never mix with the others. All three live in one component on the player, **`PlayerWallet`** (`Code/Wallet/PlayerWallet.cs`), and nothing else reads a balance. Cash and crypto change only through `Transactions` ([transactions.md](transactions.md)).
 
 | Currency | World | Symbol | Wallet value | Saved as |
 | --- | --- | --- | --- | --- |
@@ -21,13 +21,15 @@ The game has three currencies. Each belongs to a place, and credits never mix wi
 ## In code
 
 - Read a balance with `PlayerWallet.Local` (the player on this computer) or `PlayerWallet.For( connection )`. The values are `[Sync]` from the host, so clients can draw them. `Version` goes up on every change on every machine; a panel hashes it.
-- Change a balance only on the host: `AddCash` / `TrySpendCash`, `AddCredits` / `TrySpendCredits`, `AddCrypto` / `TrySpendCrypto`, each capped by `ProgressRecord` (`MaxMoney`, `MaxCredits`, `MaxCrypto`). `TryPayCash` and `TryPayCrypto` move money between two players and write both payment histories (`PaymentRecord.Currency` says which of the two moved).
+- **Move cash and crypto only through `Transactions`** ([transactions.md](transactions.md)), on the host: a transfer between players, a payment to a system party (a shop, a fee) or a payment from one (a payout, a refund), all or none, capped (`MaxMoney`, `MaxCrypto`), written to both players' history (`ProgressRecord.Transactions`, the Payments app's Activity list) and to the ledger file. The old `AddCash` / `TrySpendCash` / `AddCrypto` / `TrySpendCrypto` / `TryPayCash` / `TryPayCrypto` are gone. The only direct additions are `PlayerWallet.GrantUntracked` (a pickup from the ground, a console command). `tools/check_money_writes.py` fails on anything else.
+- Credits change only on the host: `AddCredits` / `TrySpendCredits`, capped by `MaxCredits`.
 - A change bumps the wallet and `PlayerProgress` versions, saves soon, and posts `Global.IProgressEvents.OnProgressChanged` with `ProgressChange.Wallet`.
-- A reward from the Wired calls `AddCredits` (or `PlayerProgress.CompleteIntrusion` / `FinishOperation`, which pay credits through the wallet). A reward from the real world calls `AddCash`; Hush calls `AddCrypto`.
-- The caps and the arithmetic of a balance live on the record (`ProgressRecord.AddCash`, `AddCrypto`, `AddCredits`, `CanHoldCash`, `CanHoldCrypto`); `PlayerWallet` delegates to them and then shows and saves the change. The crime rules (`CrimeRules`, `Exchange.Settle`) change the record directly for a player who is away: escrow pays crypto and a cash-out pays dollars with no player object, under the same caps.
+- A reward from the Wired calls `AddCredits` (or `PlayerProgress.CompleteIntrusion` / `FinishOperation`, which pay credits through the wallet). A reward from the real world is a `Transactions.Receive` of cash; Hush orders pay crypto the same way (`OrgPayouts.Distribute`).
+- The caps live on the record (`ProgressRecord.MaxMoney`, `MaxCrypto`, `AddCredits`, `CanHoldCash`, `CanHoldCrypto`) and the check in `TransactionRules`. A transaction works on a player who is away (escrow pays crypto and a cash-out pays dollars with no player object) the same way as on one who is playing; the caller passes the record it holds.
 - The wallet keeps nothing of its own: it reads and writes the player's `ProgressRecord` through `PlayerProgress` (one file per Steam id). The JSON names `Money` and `Credits` are unchanged, so old saves load. `Crypto` came with record version 3; older saves have 0 (`ProgressRecord.Sanitize`).
 - `PlayerProgress` creates the `PlayerWallet` on the host if the player prefab doesn't have one, then refreshes the network object so clients receive it. No prefab edit is needed.
-- Dev commands: `progress_give_money`, `progress_give_credits`, `progress_give_crypto` (editor only, host checks).
+- Dev commands: `progress_give_money`, `progress_give_credits`, `progress_give_crypto` (editor only, host checks); money and crypto go through `PlayerWallet.GrantUntracked`.
+
 
 ## Reward items
 
