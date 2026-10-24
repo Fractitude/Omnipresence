@@ -134,8 +134,8 @@ public static class ItemCatalog
 
 	/// <summary>
 	/// The details of a batch, one line each. An ordinary batch has one: "x1", or "x12 / 256, quality 40" when the kind
-	/// stacks. A parcel lists what is inside by name, like "Static tabs x10, quality 66", and has no line of its own
-	/// (its count and quality mean nothing).
+	/// stacks. A parcel starts with "To: nickname" (when it has one), then lists what is inside by name, like
+	/// "Static tabs x10, quality 66", and has no line of its own (its count and quality mean nothing).
 	/// </summary>
 	public static IReadOnlyList<string> DescribeLines( ItemData item )
 	{
@@ -145,9 +145,11 @@ public static class ItemCatalog
 			return [item.Quality > 0 ? $"{count}, quality {item.Quality}" : count];
 		}
 
-		return (item.Contents ?? [])
+		var to = string.IsNullOrEmpty( item.To ) ? Enumerable.Empty<string>() : [$"To: {item.To}"];
+
+		return to.Concat( (item.Contents ?? [])
 			.Select( x => $"{Find( x.Kind )?.Name ?? x.Kind} x{x.Count}"
-			              + (x.Quality > 0 ? $", quality {x.Quality}" : "") )
+			              + (x.Quality > 0 ? $", quality {x.Quality}" : "") ) )
 			.ToList();
 	}
 

@@ -805,6 +805,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( parcel is null || Inventory.TakeFrom( slot, order.Count ) is not { } taken )
 			return CrimeResult.Fail( "Nothing happens." );
 
+		parcel.To = order.Handle ?? "";
 		parcel.Contents.Add( new( taken.Kind, taken.Count, taken.Quality ) );
 
 		if ( !Inventory.Add( parcel ) )

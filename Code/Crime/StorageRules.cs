@@ -421,7 +421,11 @@ public static class StorageRules
 		var stacks = ItemCatalog.MakeStacks( item.Kind, item.Count, item.Quality, order );
 
 		foreach ( var stack in stacks )
-			stack.Contents = stack.Kind == ItemCatalog.Parcel ? CrimeRecord.CleanContents( item.Contents ) : new();
+		{
+			var parcel = stack.Kind == ItemCatalog.Parcel;
+			stack.Contents = parcel ? CrimeRecord.CleanContents( item.Contents ) : new();
+			stack.To = parcel ? Cut( item.To, 64 ) : "";
+		}
 
 		return stacks;
 	}

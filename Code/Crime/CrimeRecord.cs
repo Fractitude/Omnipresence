@@ -165,6 +165,24 @@ public sealed class CrimeRecord
 		RatingCount = System.Math.Max( RatingCount, 0 );
 		RatingSum = System.Math.Clamp( RatingSum, 0, RatingCount * 5 );
 		NextId = System.Math.Max( NextId, 1 );
+
+		AddRecipients();
+	}
+
+	/// <summary>
+	/// A parcel packed before the recipient was kept has none: take it from its order's handle, in the bag and in the
+	/// boxes. A parcel whose order is gone keeps none.
+	/// </summary>
+	void AddRecipients()
+	{
+		var parcels = Items.Concat( Storage.SelectMany( b => b.Slots ).Select( s => s.Item ) )
+			.Where( x => x is { Kind: ItemCatalog.Parcel } && string.IsNullOrEmpty( x.To ) );
+
+		foreach ( var parcel in parcels )
+		{
+			if ( Orders.FirstOrDefault( x => x.Id == parcel.OrderId ) is { Handle: { Length: > 0 } handle } )
+				parcel.To = handle.Length > 64 ? handle[..64] : handle;
+		}
 	}
 
 	/// <summary>The most entries a parcel's contents keep.</summary>

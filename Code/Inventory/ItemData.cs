@@ -42,6 +42,12 @@ public sealed class ItemData
 	public string OrderId { get; set; } = "";
 
 	/// <summary>
+	/// For a parcel: the nickname of the buyer it is addressed to (the order's handle, which the player sees in Hush).
+	/// Empty for everything else, for a parcel packed before this was kept whose order is gone. Plain text only.
+	/// </summary>
+	public string To { get; set; } = "";
+
+	/// <summary>
 	/// For a parcel: what is inside, one entry per batch packed. Empty for everything else, and for parcels from before
 	/// contents were kept.
 	/// </summary>
@@ -69,6 +75,7 @@ public sealed class ItemData
 		Count = Count,
 		Quality = Quality,
 		OrderId = OrderId,
+		To = To,
 		Contents = (Contents ?? []).Select( x => x with { } ).ToList(),
 	};
 
