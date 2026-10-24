@@ -2026,6 +2026,270 @@
         "a9d11ac6-d984-4670-a316-2672922cfe6e": "b6dc504e-8fe4-4f9b-9871-aa14a0b785c4",
         "3a95563e-fac0-404f-aec8-fb684a20a51a": "0d1195ae-fc4c-4ed8-85a4-dd13ab2903e9"
       }
+    },
+    {
+      "__guid": "88a2f416-6785-4646-9b94-12dd96477c38",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+        "Path": "security/camera.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Name",
+            "Value": "Security Camera (Desk)"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Position",
+            "Value": "18,62,110"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Rotation",
+            "Value": "0.208185002,0.327225953,-0.494769037,0.777679801"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "Label",
+            "Value": "Desk"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "88a2f416-6785-4646-9b94-12dd96477c38",
+        "c9567e43-d3fe-477e-a261-d921396c2d23": "47a7e030-4cd2-404f-a14e-542119bda4eb",
+        "c4526fce-596e-4331-9816-32a671e4d93b": "9a4a8efc-ad2f-4295-8d1a-97686ec951d5",
+        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "92b2040d-7313-41b6-90b9-502f8fd4ab84",
+        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "65ef5fba-30a8-44c4-a7e2-fafe3d8d3677",
+        "f42b025f-c24a-4d86-b543-1284c0989517": "da6492bb-79ec-4503-9be0-8f610b897b8f",
+        "62263d32-fc91-43f5-9020-836ce7abedf9": "cb7bc091-a509-4250-9df2-9bd464c7250a",
+        "2cf02a53-c411-4032-8b2c-875bd43d433e": "806776cb-aa56-4ed3-8410-3dbb188ba30a",
+        "cf2e3047-6914-4da4-9a5c-37b675792c80": "69ff0346-0e54-4c48-9b5a-c76b1f4524b1",
+        "76156ece-a237-495c-9598-69a3c4c6a454": "c07aa806-d542-4085-b501-30987583065a",
+        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "c443ca2e-2cf3-4b0b-8e13-9dcad3e17bf5",
+        "ad13592b-3687-4a7a-ac06-c3a68b073935": "62973ce1-dcc3-4544-80e2-2fcbd8018a03",
+        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "b7cc0bf8-51f0-44ad-8a18-891ee89732a4",
+        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "56bb681a-7af8-4e3e-8901-d46b8194244e",
+        "1d159a06-e23e-4af3-90d3-5a014345f915": "e11a3353-91a4-4541-9fda-5a67de101635",
+        "dc697170-e74a-4de8-8e02-e5365aff70e6": "c602268f-a751-4f19-b9c1-523bdff1d968",
+        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "e2c95ff5-874e-41e0-965b-8f05cc7d4781"
+      }
+    },
+    {
+      "__guid": "324b5013-d60d-4b3b-89d4-1456ec68b73b",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+        "Path": "security/camera.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Name",
+            "Value": "Security Camera (Store)"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Position",
+            "Value": "120,-120,105"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Rotation",
+            "Value": "-0.275207222,0.0910160914,0.90866369,0.300511807"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "Label",
+            "Value": "Store"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "324b5013-d60d-4b3b-89d4-1456ec68b73b",
+        "c9567e43-d3fe-477e-a261-d921396c2d23": "47508bf6-12dc-4482-a860-295535875b83",
+        "c4526fce-596e-4331-9816-32a671e4d93b": "19ffd0a7-f1ef-4136-878a-1cbbed976a03",
+        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "a08d5d2d-21aa-4b78-a10b-06a2e15db18c",
+        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "03d85ec2-aafc-4f05-a2c9-34b3ce67b62e",
+        "f42b025f-c24a-4d86-b543-1284c0989517": "c1817d17-bafb-4e84-ac1c-ec163aa9c23f",
+        "62263d32-fc91-43f5-9020-836ce7abedf9": "cd1f7261-4302-4e9f-962b-0ad87fa286db",
+        "2cf02a53-c411-4032-8b2c-875bd43d433e": "99576fdd-5583-4b34-a10b-f99c18f2f192",
+        "cf2e3047-6914-4da4-9a5c-37b675792c80": "3242c441-a609-482e-ae06-487836f810a0",
+        "76156ece-a237-495c-9598-69a3c4c6a454": "fb6869d5-37ba-4f4c-8d7b-dd71777c5f21",
+        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "b518c78f-ccc6-4844-9cd1-6200f56d55dd",
+        "ad13592b-3687-4a7a-ac06-c3a68b073935": "ad57a573-fbaf-4eda-82ca-65af00a9b947",
+        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "b6130c29-1a18-485a-bcb0-228fa203b69e",
+        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "89f3a5e5-005a-4f00-a3ee-a19e35253fdd",
+        "1d159a06-e23e-4af3-90d3-5a014345f915": "d185f7fb-74f7-48a3-82b8-8546037be3f9",
+        "dc697170-e74a-4de8-8e02-e5365aff70e6": "f54a41a2-713d-48d0-adf1-d955dbc14607",
+        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "0b638e27-d4e3-40a0-99be-ab14e68fffa4"
+      }
+    },
+    {
+      "__guid": "2922599a-db73-4bfc-a4be-0196db3ea27e",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+        "Path": "security/camera.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Name",
+            "Value": "Security Camera (Yard)"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Position",
+            "Value": "30,-170,120"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Rotation",
+            "Value": "-0.175405353,0.141382709,0.758555949,0.611422002"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "Label",
+            "Value": "Yard"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "2922599a-db73-4bfc-a4be-0196db3ea27e",
+        "c9567e43-d3fe-477e-a261-d921396c2d23": "2ab14ac4-e4a2-41e0-8e3a-2b4affc58703",
+        "c4526fce-596e-4331-9816-32a671e4d93b": "16174c43-87cb-4ee0-af62-ee952873860d",
+        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "63d122d7-87f8-4ba4-b4b8-a45967068139",
+        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "89ebcc4d-ef89-4bce-80a6-5bc69cd29e92",
+        "f42b025f-c24a-4d86-b543-1284c0989517": "c07a51b5-9680-451d-9641-91186ddc45bc",
+        "62263d32-fc91-43f5-9020-836ce7abedf9": "75386762-566f-4132-b5ec-bc93be4d98b6",
+        "2cf02a53-c411-4032-8b2c-875bd43d433e": "53ce68a0-cb2f-4cac-9f3a-0246e9ec088d",
+        "cf2e3047-6914-4da4-9a5c-37b675792c80": "c57c8ed5-21ae-4c23-a847-a3cc66176622",
+        "76156ece-a237-495c-9598-69a3c4c6a454": "8a1ecdee-7908-4331-853e-9c8ef0e82aa3",
+        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "023bfee1-3fab-4be1-a151-288d1b719757",
+        "ad13592b-3687-4a7a-ac06-c3a68b073935": "e6b516b3-17aa-4ba1-b05d-f87dd5a27452",
+        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "5a4f7d26-6599-4a66-850e-34d539c39e38",
+        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "7ab9bd8b-ac16-4ec0-9ad8-1969059bec97",
+        "1d159a06-e23e-4af3-90d3-5a014345f915": "a67c588c-c43d-40c0-a8bc-e9598dbc0715",
+        "dc697170-e74a-4de8-8e02-e5365aff70e6": "c6118695-1ea3-4702-a58a-f7314cf1514c",
+        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "e9eb7811-c351-43c5-98d3-ca7c4a12e342"
+      }
+    },
+    {
+      "__guid": "c1cba323-2858-4478-bbf5-778a94e40f4d",
+      "__version": 2,
+      "__Prefab": {
+        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+        "Path": "security/camera.prefab"
+      },
+      "__PrefabInstancePatch": {
+        "AddedObjects": [],
+        "RemovedObjects": [],
+        "PropertyOverrides": [
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Name",
+            "Value": "Security Camera (Grow)"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Position",
+            "Value": "-40,-40,80"
+          },
+          {
+            "Target": {
+              "Type": "GameObject",
+              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+            },
+            "Property": "Rotation",
+            "Value": "0.226259455,0.142207608,-0.815865219,0.512784064"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "Label",
+            "Value": "Grow tray"
+          }
+        ],
+        "MovedObjects": []
+      },
+      "__PrefabIdToInstanceId": {
+        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "c1cba323-2858-4478-bbf5-778a94e40f4d",
+        "c9567e43-d3fe-477e-a261-d921396c2d23": "59774bfa-1f83-4282-8b57-e790cbe9b7c5",
+        "c4526fce-596e-4331-9816-32a671e4d93b": "312d61f3-8424-4938-94be-60191c5555fd",
+        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "c34611c1-10f7-4898-96c9-8db1f79222b9",
+        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "058e4d4c-d730-4c31-9512-48e3c5e310eb",
+        "f42b025f-c24a-4d86-b543-1284c0989517": "6151f2f0-26bd-4fe5-8502-e3fa911c1dbc",
+        "62263d32-fc91-43f5-9020-836ce7abedf9": "3d1b46a8-491f-4ea1-9802-1adb7883b5d6",
+        "2cf02a53-c411-4032-8b2c-875bd43d433e": "7bb1b216-d9b6-468d-889f-b32fd339e071",
+        "cf2e3047-6914-4da4-9a5c-37b675792c80": "717016f0-a622-499d-9198-55fcdcf1c52b",
+        "76156ece-a237-495c-9598-69a3c4c6a454": "072754f9-b9e7-4c74-b863-fe59e3cc8c43",
+        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "3da146b8-27ab-4005-9b20-acb1b71e1827",
+        "ad13592b-3687-4a7a-ac06-c3a68b073935": "91d60180-ce14-44e7-92fa-387245d6b664",
+        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "ed5d42d6-edde-4b43-81d2-96d35a60903d",
+        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "8af3e787-dfb4-4fe2-bb13-2a73b27c9849",
+        "1d159a06-e23e-4af3-90d3-5a014345f915": "55e8de54-0ef4-4310-bac2-ca83c9452c3e",
+        "dc697170-e74a-4de8-8e02-e5365aff70e6": "1dca0226-9671-404e-9fed-833109e9eb91",
+        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "3582fdc5-2229-46a3-a850-57f39dc959ef"
+      }
     }
   ],
   "SceneProperties": {
