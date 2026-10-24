@@ -1,5 +1,8 @@
+@import "_layers.scss";
+
 ScreenFade
 {
+	z-index: $z-fade;
 	position: absolute;
 	width: 100%;
 	height: 100%;

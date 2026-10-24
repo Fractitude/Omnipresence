@@ -1,5 +1,8 @@
+@import "../Hud/_layers.scss";
+
 AbilityMenu
 {
+	z-index: $z-menu;
 	position: absolute;
 	left: 0;
 	top: 0;

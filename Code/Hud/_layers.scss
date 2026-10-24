@@ -1,0 +1,7 @@
+// The draw order of the HUD pieces that share the HUD's screen panel: a higher number draws, and is clicked, above a
+// lower one. Menus cover the screen, so the hotbar has to sit above them and the dragged icon above both. The fade
+// goes over everything. A piece without a z-index (the readouts, the crosshair) is below all of them.
+$z-menu: 200;
+$z-hotbar: 300;
+$z-drag: 400;
+$z-fade: 1000;

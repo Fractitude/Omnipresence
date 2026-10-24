@@ -1,5 +1,8 @@
+@import "../Hud/_layers.scss";
+
 AbilityHotbar
 {
+	z-index: $z-hotbar;
 	position: absolute;
 	left: 0;
 	right: 0;

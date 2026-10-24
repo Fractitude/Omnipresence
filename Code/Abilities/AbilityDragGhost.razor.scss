@@ -1,5 +1,8 @@
+@import "../Hud/_layers.scss";
+
 AbilityDragGhost
 {
+	z-index: $z-drag;
 	position: absolute;
 	left: 0;
 	top: 0;

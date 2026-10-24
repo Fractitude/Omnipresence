@@ -19,5 +19,10 @@
 	/// </summary>
 	public static bool IsBlack { get; set; }
 
+	/// <summary>
+	/// It starts clear: a hot reload or a new scene mustn't leave the screen black.
+	/// </summary>
+	protected override void OnStart() => IsBlack = false;
+
 	protected override int BuildHash() => HashCode.Combine( IsBlack );
 }
