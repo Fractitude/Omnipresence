@@ -93,6 +93,9 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	/// <summary>The LED on the front, so it can be put out when the camera is broken.</summary>
 	ModelRenderer led;
 
+	/// <summary>The smoke that comes out of a broken camera.</summary>
+	SmokeEmitter smoke;
+
 	Texture feed;
 	Texture staticFeed;
 	Color32[] staticPixels;
@@ -166,11 +169,16 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 	}
 
 	/// <summary>
-	/// Keep the LED on the front saying whether the camera works, on every machine: the host decides, and the LED is part
-	/// of what a client sees.
+	/// Keep the LED on the front saying whether the camera works, and the smoke coming out of a broken one, on every
+	/// machine: the host decides, and both are part of what a client sees.
 	/// </summary>
 	protected override void OnUpdate()
 	{
+		var vent = EnsureSmoke();
+
+		if ( vent.IsValid() && vent.Emitting != Broken )
+			vent.Emitting = Broken;
+
 		if ( !led.IsValid() )
 			led = FindLed();
 
@@ -282,6 +290,30 @@ public sealed class SecurityCamera : Component, Component.IDamageable
 		.Where( x => x.Name == "Led" )
 		.Select( x => x.Components.Get<ModelRenderer>() )
 		.FirstOrDefault( x => x.IsValid() );
+
+	/// <summary>
+	/// The smoke a broken camera gives off: the emitter the prefab has, or one made here for a camera a player put
+	/// together by hand. It starts off, and <see cref="Broken"/> turns it on.
+	/// </summary>
+	SmokeEmitter EnsureSmoke()
+	{
+		if ( smoke.IsValid() )
+			return smoke;
+
+		smoke = GetComponentInChildren<SmokeEmitter>( true );
+
+		if ( !smoke.IsValid() )
+		{
+			var vent = new GameObject( GameObject, true, "Smoke" );
+			vent.Flags |= GameObjectFlags.NotSaved;
+			vent.LocalPosition = Vector3.Up * 9f;
+
+			smoke = vent.Components.Create<SmokeEmitter>();
+			smoke.Emitting = false;
+		}
+
+		return smoke;
+	}
 
 	protected override void OnDestroy()
 	{

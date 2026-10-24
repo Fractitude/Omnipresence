@@ -82,6 +82,14 @@ The **Security System** app (`Code/Apps/Security/`, `Assets/navi/system/security
 - One 640×360 texture per camera, twelve pictures a second, 16 by 9, kept until the object goes: the grid and the enlarged view scale the same picture, so a camera never holds two.
 - Placing the prefab is all it takes to add a camera; the app finds them by scanning the scene and keeps the nearest nine. Nothing about a camera is synced to be watched, so it works the same whether the scene placed it or the host spawned it.
 
+## Effects
+
+`Code/Effects/` is for small effects the game makes itself instead of borrowing a particle file. The first is smoke: `SmokeEmitter` (`Emitting`, `Rate`, `Lifetime`, `Rise`, `Wind`, `Spread`, `StartSize`, `EndSize`, `Tint`, and a `Sprite` to override the picture) on anything that should smoke, and a `SmokePuff` per puff — a billboard that grows, drifts, fades and destroys itself. See [effects.md](docs/effects.md).
+
+- **Nothing about a puff is saved or sent**: each one is made on the client that sees it, like a camera's feed, so `Emitting` is not synced and its owner sets it from something that is.
+- **`SpriteRenderer.AlphaCutoff` must be 0** and `Lighting`/`Shadows` off, or a plume reads as a string of speckled bubbles instead of smoke.
+- A broken security camera smokes: `SecurityCamera.EnsureSmoke` makes or finds its emitter and sets `Emitting` to `Broken` every frame.
+
 ## The Wired
 
 The Wired is in the same scene as the real world, under the map. `WiredTravel.Cross( connection )` (host only, from The Wired app, for the player in the seat) teleports the player to a random object tagged `spawn_point_wired` and back to where they were; `PlayerData.InWired` says which. `WiredWorldSystem` dresses each client's own view for its own player: every skybox component (2D or 3D) on an object tagged `wired` is on and every other one is off (found by component, not by tag: the map makes its own objects at load, so a tag set on one in the editor is lost at Play), and the main camera excludes the tag `map` while in the Wired and the tag `wired` at home, so neither draws the other's world. Apps ask `WiredTravel.PlaceOf( seat )`, never the scene. The crossing fades the traveller's screen to black (`ScreenFade`, a HUD layer above the rest, put on the HUD object by `HudSystem`, with the highest `z-index`; `GameManager.Fade` asks one player's client), moves them while it is black, and fades back in.
