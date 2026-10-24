@@ -35,7 +35,7 @@ cut cable, a machine burning out.
 | Property | What it is |
 |---|---|
 | `Emitting` | On or off. |
-| `Interval`, `Count` | How often a clump is thrown, in seconds, and how many sparks are in it. The engine emits at a rate, so `Count / Interval` sparks a second — 285 with the defaults — which looks the same once they are flying. |
+| `Interval`, `Count` | How often a clump is thrown, in seconds, and how many sparks are in it. The engine emits at a rate, so `Count / Interval` sparks a second — 8 with the defaults, and about 20 in the air at once — which looks the same once they are flying. Sparse on purpose: a failing camera throws a scrap or two, not a shower. |
 | `Lifetime` | How long a spark lives, in seconds; each one differs a little from this. |
 | `Speed`, `Gravity` | How fast it leaves, in units a second, and how hard it is pulled down. |
 | `Spread` | How far from the emitter a spark may start, in units. |
@@ -43,7 +43,7 @@ cut cable, a machine burning out.
 | `Tint` | The sparks' colour. |
 | `Additive` | Additive is the hotter look on a dark background, but it disappears against a bright sky. Off, the sparks keep their own colour anywhere — the default, because this game is played outdoors in daylight. |
 | `Light`, `LightRadius` | One point light on the emitter, flickering while the sparks fly, which is what makes them read at night. |
-| `Crackle`, `CrackleVolume`, `CrackleGap` | The sound, how loud, and the shortest gap between two of them. See below. |
+| `Crackle`, `CrackleVolume`, `CrackleGap` | The sound, how loud, and the shortest gap between two of them: the first plays the moment the sparks start, then one every 5 seconds. See below. |
 | `Sprite` | What a spark is drawn with. Empty uses a hard-edged hot dot the emitter makes, 32 px. |
 
 There is no `UpBias` any more: the engine's emitters throw particles outward from the shape they are given, and a sphere
@@ -73,7 +73,7 @@ scraps at the source, and the light does what the flash used to.
 
 A sparking camera is only half there without the noise, so the spark emitter came with a crackle of its own:
 `Assets/sounds/effects/sparks.sound`, a `SoundEvent` holding three short takes. `SoundEvent` picks one at random
-(`SelectionMode: Random`) and varies it (`Volume: 0.45 0.7`, `Pitch: 0.9 1.15`), so a camera that sparks for a minute
+(`SelectionMode: Random`) and varies it (`Volume: 0.15 0.25`, `Pitch: 0.9 1.15`), so a camera that sparks for a minute
 doesn't sound like a loop. Distance attenuation over 700 units, with occlusion on.
 
 The takes are made, not found: `tools/audio/make_spark_crackle.py` writes `Assets/sounds/effects/sparks_{1,2,3}.wav` —
@@ -81,9 +81,9 @@ a burst of bright noise that dies in tens of milliseconds, a handful of small ti
 and a little low body so it reads as a spark rather than a hiss. Run it by hand and let the editor compile the wavs; it
 is not part of the build, and the wavs are committed so the game doesn't depend on Python.
 
-`SparkEmitter` plays it while it emits: `Crackle` (empty means the asset above), `CrackleVolume` on top of the sound's
-own volume, and `CrackleGap` — the shortest time between two crackles, 0.15 s by default. Sparks leave at 285 a second;
-without the gap they would machine-gun the sample.
+`SparkEmitter` plays it when the sparks start — the moment a camera breaks — and then `CrackleGap` afterwards, 5 s by
+default: `Crackle` (empty means the asset above) and `CrackleVolume` on top of the sound's own volume. The sound sits
+at about 0.2, under everything else that is going on; a shorting camera should be a snap you notice, not a siren.
 
 ## The broken camera's sparks
 

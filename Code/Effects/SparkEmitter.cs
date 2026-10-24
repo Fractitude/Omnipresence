@@ -28,23 +28,23 @@ public sealed class SparkEmitter : Component
 
 	/// <summary>How often a clump of sparks is thrown, in seconds.</summary>
 	[Property, Range( 0.02f, 3f )]
-	public float Interval { get; set; } = 0.07f;
+	public float Interval { get; set; } = 0.5f;
 
 	/// <summary>How many sparks are in a clump.</summary>
 	[Property, Range( 1, 30 )]
-	public int Count { get; set; } = 20;
+	public int Count { get; set; } = 4;
 
 	/// <summary>How long a spark lives, in seconds. Each one differs a little from this.</summary>
 	[Property, Range( 0.05f, 2f )]
-	public float Lifetime { get; set; } = 0.18f;
+	public float Lifetime { get; set; } = 0.4f;
 
 	/// <summary>How fast a spark leaves the emitter, in units a second.</summary>
 	[Property, Range( 0f, 1000f )]
-	public float Speed { get; set; } = 260f;
+	public float Speed { get; set; } = 130f;
 
 	/// <summary>How hard they are pulled down, in units a second squared.</summary>
 	[Property, Range( 0f, 1000f )]
-	public float Gravity { get; set; } = 600f;
+	public float Gravity { get; set; } = 350f;
 
 	/// <summary>How far from the emitter a spark may start, in units.</summary>
 	[Property, Range( 0f, 50f )]
@@ -83,11 +83,11 @@ public sealed class SparkEmitter : Component
 	public float CrackleVolume { get; set; } = 1f;
 
 	/// <summary>
-	/// The shortest gap between two crackles, in seconds. A clump every 0.07 of a second would machine-gun the sample;
-	/// this keeps the sound to the clumps that matter and lets the rest be silent sparks.
+	/// The shortest gap between two crackles, in seconds. The first one plays the moment the sparks start, and then the
+	/// noise comes back this often: a shorting camera is mostly silent, with an occasional snap.
 	/// </summary>
-	[Property, Range( 0f, 1f )]
-	public float CrackleGap { get; set; } = 0.15f;
+	[Property, Range( 0f, 15f )]
+	public float CrackleGap { get; set; } = 5f;
 
 	/// <summary>
 	/// Whether the sparks are drawn additively. Additive is the hotter look on a dark background, but it disappears
@@ -111,6 +111,9 @@ public sealed class SparkEmitter : Component
 	/// <summary>How long since the last crackle, so one clump in a burst is the one that is heard.</summary>
 	RealTimeSince sinceCrackle = float.MaxValue;
 
+	/// <summary>Whether the sparks were flying last frame, so the moment they start can be told apart.</summary>
+	bool wasEmitting;
+
 	protected override void OnEnabled()
 	{
 		Build();
@@ -128,9 +131,17 @@ public sealed class SparkEmitter : Component
 
 		if ( !Emitting )
 		{
+			wasEmitting = false;
 			Flicker( 0f );
 
 			return;
+		}
+
+		// Fixed and broken again: it cracks at once rather than waiting out the gap from last time.
+		if ( !wasEmitting )
+		{
+			wasEmitting = true;
+			sinceCrackle = float.MaxValue;
 		}
 
 		CrackleSound();
