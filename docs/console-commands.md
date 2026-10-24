@@ -16,7 +16,7 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_give_crypto <amount>` | Give yourself crypto. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
-| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json` and the storage claims in `storage_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
+| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json` and the storage claims in `storage_test.json` and the dropped items in `world_items_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
 
 ## Crime
 
@@ -29,6 +29,14 @@ Testing only, for the grow, press, post and Hush loop. They ask the host, which 
 | `crime_postal_now` | The mailman, the escrow release and the Exchange cash-outs are all due now. |
 | `crime_orders [count]` | Put more orders on the Hush board (up to 10). |
 | `crime_deliver_now` | Every delivery you bought in the Hush shop has reached your mailbox now. |
+
+## World items
+
+Testing only. Editor only, on the host: they refuse anywhere else. Code: `Code/Inventory/WorldItemCommands.cs`.
+
+| Command | What it does |
+|---|---|
+| `world_items_clear` | Remove every dropped item from the scene and from the world file (`world_items.json`, or `world_items_test.json` under `progress_test_data`). The same as what a season wipe calls (`WorldItemRegistry.Wipe`). |
 
 ## Offline processing
 

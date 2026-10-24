@@ -1,9 +1,9 @@
 # World items: dropping and picking up
 
 An item the player drops becomes a `WorldItem` on the ground, and picking it up gives back exactly what was dropped. World
-items are **runtime only**: they are never saved, so a restart (or a map change) clears the ground, and what was dropped
-is gone. There is no despawn timer; the only limit is `WorldItem.MaxInScene` (300), beyond which a drop is refused with a
-message and the item stays in the bag.
+items are **saved between sessions** (see "Saved between sessions"): what was dropped is still on the ground the next time
+the scene starts on the host. There is no despawn timer; the only limit is `WorldItem.MaxInScene` (300) per scene, beyond
+which a drop is refused with a message and the item stays in the bag.
 
 ## How the player drops
 
@@ -62,3 +62,45 @@ quality are never auto-merged and no quality is ever averaged. A kind with it of
 the bag keeps its quality). Use `CanMerge` or `PickupRules.Plan` for anything that puts a stack into the bag on its own.
 The player's own Shift-combine (`StackRules.Plan`) still averages, because they chose it. `PlayerInventory.Add`, `AddItem`
 and the storage code do not top up stacks and were left as they were.
+
+## Saved between sessions
+
+The host keeps every dropped item in `world_items.json` (the data folder, like `mailboxes.json`; `world_items_test.json`
+under `progress_test_data on`). Code: `WorldItemRegistry` (the file and the list), `WorldItemRules` (the pure rules),
+`WorldItemKeeper` (a host-only component on each tracked object) and `WorldItemSystem` (restore and debounce). Only the
+host reads or writes it; clients just see the networked objects.
+
+- **Format.** `{ "Version": 1, "Items": [ ... ] }`, oldest first. Each entry has `Id` (a unique id, the key), `Scene` (the
+  scene's resource path, like `scenes/home.scene`, from `WorldItemRegistry.SceneKey`), `Prefab` (the prefab it was made
+  from, for the record), `Item` (the whole `ItemData` as JSON: kind, count, quality, `OrderId`, `To`, sender and order
+  facts, `Contents`), and `Position` and `Angles`. The file is written with `FileProgressStore.WriteSafely` (a `.bak` of the
+  previous good copy, read back if the file is damaged).
+- **What is tracked.** `WorldItem.Spawn` calls `WorldItemRegistry.Track` for everything it makes: a `WorldItem` and an
+  ordinary item that dropped as its own `PickupItem` prefab. Items pre-placed in a scene are not part of this.
+- **When it is written.** A change only marks the registry dirty; `WorldItemSystem` writes the file 3 seconds
+  (`SaveDelay`) after the last change, never every frame. The changes are: a drop (`Track`), a pickup of all (`Forget`),
+  a partial pickup (`SetItem`, the new count), an item that went out of bounds (`GameManager`, `Forget`), and an item that
+  came to rest. `WorldItemKeeper` watches the rigidbody and reports the position only after it has been still
+  (under 2 units/s) for half a second and lies more than 1 unit from the last saved place, so a tumbling item is not
+  saved mid-air and a pushed one is saved again where it stops. The system also writes once when the scene goes
+  (`Dispose`).
+- **Not saved.** A position that is not finite or beyond 100000 units on any axis. There is no "below the map" test: The
+  Wired lies under the map in the same scene, and an item that falls out of the world is destroyed by the engine's
+  out-of-bounds rule, which also forgets it. An object destroyed by anything else (not a pickup, not out of bounds) is
+  not forgotten and comes back at the next start.
+- **Restore.** One second after play starts on the host, `WorldItemSystem` calls `WorldItemRegistry.Restore( scene )`: for
+  each entry whose `Scene` is this scene and whose id is not already live (`WorldItemKeeper.ItemId`), it calls
+  `WorldItem.Spawn` with the saved item, position and rotation, zero velocity and the saved id: the same prefab choice and
+  fallback as a drop, then the rigidbody wakes and settles at (or just above) where it lay. A second call, or a hot
+  reload, makes nothing new. Entries of other scenes are left in the file untouched.
+- **Sanitising on load** (`WorldItemRules.Sanitise`). Malformed entries are dropped, never thrown on: no scene, no item,
+  a bad position, a repeated id. A missing id gets a new one. The item is rebuilt: a known kind keeps its count within the
+  kind's stack size and its quality within 0..100; an unknown kind is kept only if it has a name, as an ordinary item
+  (one, no kind); texts are cut, a parcel's contents are capped, a prefab path that is not a plain `.prefab` path is
+  cleared (a prefab that cannot be made falls back to the shared world item). A scene keeps at most `MaxInScene` entries:
+  the oldest are dropped, in the file too.
+- **Wipe.** `WorldItemRegistry.Wipe( scene )` destroys every world item of the scene and empties the file. The console
+  command `world_items_clear` calls it (editor, host). There is no season wipe in the game yet: when one is added (the
+  place that resets `CrimeRecord` and `mailboxes.json`), call `WorldItemRegistry.Wipe` there too.
+- **Hot reload.** The registry's state is in non-readonly statics, so a hot reload keeps it.
+- Parcels persist like anything else: a packed order stays `Packed` until someone picks the parcel up and posts it.

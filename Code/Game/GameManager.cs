@@ -234,6 +234,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	/// </summary>
 	void IScenePhysicsEvents.OnOutOfBounds( Rigidbody body )
 	{
+		WorldItemRegistry.Forget( body.GameObject );
 		body.DestroyGameObject();
 	}
 

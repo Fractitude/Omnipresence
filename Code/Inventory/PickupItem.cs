@@ -48,7 +48,11 @@ public class PickupItem : Component, IItem, IInteractionHandler
 		if ( e.Option?.Id != PickupId || e.Interactor?.Components.Get<PlayerInventory>() is not { } inventory )
 			return;
 
-		if ( inventory.Add( this ) )
-			GameObject.Destroy();
+		if ( !inventory.Add( this ) )
+			return;
+
+		// A dropped one is no longer kept in the world file.
+		WorldItemRegistry.Forget( GameObject );
+		GameObject.Destroy();
 	}
 }

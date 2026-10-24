@@ -8,7 +8,7 @@ namespace Sandbox;
 /// <para>
 /// The host runs the pickup: it checks the interactor's reach (the Interactable does), fits as much as it can into the
 /// bag (<see cref="PlayerInventory.AddPartial"/>), and either destroys the object, or keeps it with the remainder. World
-/// items are runtime only: they are never saved, so a restart clears the ground.
+/// items are kept in the world file (<see cref="WorldItemRegistry"/>) and made again in the next session.
 /// </para>
 /// </summary>
 public sealed class WorldItem : Component, IInteractionHandler
@@ -93,9 +93,11 @@ public sealed class WorldItem : Component, IInteractionHandler
 	/// <summary>
 	/// Make a world item for <paramref name="item"/> (a copy is kept) at a place and network-spawn it. A kind uses its
 	/// own prefab; an ordinary item that came from a prefab with a <see cref="PickupItem"/> drops as that prefab; the rest
-	/// use the shared prefab. Returns null when nothing could be made. Host only.
+	/// use the shared prefab. Returns null when nothing could be made. The object is tracked by the
+	/// <see cref="WorldItemRegistry"/> so it is saved; a restored item passes the id it was saved under. Host only.
 	/// </summary>
-	public static GameObject Spawn( ItemData item, Vector3 position, Rotation rotation, Vector3 velocity )
+	public static GameObject Spawn( ItemData item, Vector3 position, Rotation rotation, Vector3 velocity,
+		string restoreId = null )
 	{
 		if ( item is null || item.Count < 1 || Networking.IsActive && !Networking.IsHost )
 			return null;
@@ -106,11 +108,18 @@ public sealed class WorldItem : Component, IInteractionHandler
 		if ( !item.IsBatch && !string.IsNullOrEmpty( item.PrefabPath ) && MakeOrdinary( item, transform ) is { } own )
 		{
 			Launch( own, velocity );
+			WorldItemRegistry.Track( own, item, item.PrefabPath, restoreId );
 			return own;
 		}
 
-		var go = MakeWorld( ItemCatalog.WorldPrefabOf( item.Kind ), transform, out var world )
-		         ?? MakeWorld( ItemCatalog.WorldFallbackPrefab, transform, out world );
+		var prefab = ItemCatalog.WorldPrefabOf( item.Kind );
+		var go = MakeWorld( prefab, transform, out var world );
+
+		if ( go is null )
+		{
+			prefab = ItemCatalog.WorldFallbackPrefab;
+			go = MakeWorld( prefab, transform, out world );
+		}
 
 		if ( go is null )
 			return null;
@@ -118,6 +127,7 @@ public sealed class WorldItem : Component, IInteractionHandler
 		world.Set( item );
 		go.NetworkSpawn();
 		Launch( go, velocity );
+		WorldItemRegistry.Track( go, item, prefab, restoreId );
 		return go;
 	}
 
@@ -245,6 +255,7 @@ public sealed class WorldItem : Component, IInteractionHandler
 		{
 			// Marked before it is destroyed, so a second pickup in the same frame finds nothing left.
 			taken = true;
+			WorldItemRegistry.Forget( GameObject );
 			GameObject.Destroy();
 			crime?.Tell( CrimeResult.Success( total > 1 ? $"Picked up {total} {item.Name}." : $"Picked up {item.Name}." ) );
 			return;
@@ -253,6 +264,7 @@ public sealed class WorldItem : Component, IInteractionHandler
 		var rest = item.Clone();
 		rest.Count = total - got;
 		Set( rest );
+		WorldItemRegistry.SetItem( GameObject, rest );
 		crime?.Tell( CrimeResult.Success( $"Picked up {got} of {total} {item.Name}. {rest.Count} left on the ground." ) );
 	}
 }

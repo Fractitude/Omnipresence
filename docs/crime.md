@@ -134,7 +134,7 @@ Items stack only up to their kind's `MaxStack` (256 for the drugs' items). Hold 
 - Each accepted order keeps its `Personality` and the `PackedQuality`; `MinQuality` is the asked quality.
 - `Trays` (by the tray object's id; each has a `Kind`, the drug planted. A tray saved before there were two drugs has none and loads as Static, as does an unknown id), `Orders` (accepted, with state), `Parcels`, `Cashouts`, `Reviews` (last 20), reputation counters, `MailboxId`, `Started`.
 - Not saved: the open orders on the board. They start fresh at every start (what a player accepted is in their record).
-- Next to the records (`progress/`): `_pending.json`, the ids of players with work waiting on the clock; each file also has a `.bak` copy of its previous write. In the data folder: `mailboxes.json` (which player owns which mailbox) and `world.json` (the game clock).
+- Next to the records (`progress/`): `_pending.json`, the ids of players with work waiting on the clock; each file also has a `.bak` copy of its previous write. In the data folder: `mailboxes.json` (which player owns which mailbox), `world.json` (the game clock) and `world_items.json` (the dropped items, see `docs/world-items.md`).
 
 Old saves load: the section defaults to empty, and `Sanitize` clamps everything.
 
@@ -179,7 +179,7 @@ Same rules as the apps in AGENTS.md.
 - **Not tested on a second client.** The wallet and crime components reach clients by a network refresh made on the host; this was checked on the host (singleplayer) only. Check that a client sees its own cash and the tray labels.
 - **The Hush panel was drawn and its text read, but not clicked** by a real mouse. Its view model and all the rules were driven directly.
 - **Ordinary inventory items are still not saved**, only crime batches.
-- **Dropped items are not saved.** A `WorldItem` lies on the ground only until the game restarts (`docs/world-items.md`).
+- **Dropped items are saved by the host** in `world_items.json` and come back at the next start (`docs/world-items.md`, "Saved between sessions"). Nothing wipes them on its own: a season wipe must call `WorldItemRegistry.Wipe`.
 - No buyer messages in the Messages app yet (`NaviNpcs`), no Hot flag, no tutorial order, no sounds. Quality is a random placeholder. One home, one mailbox, the first claimant.
 - Two drugs (Static, Haze); one order asks for one kind. Haze's use effect (Numb) waits for the consumables.
 - A cash-out waits in the save until the wallet can hold it; the player is not told when it lands.
