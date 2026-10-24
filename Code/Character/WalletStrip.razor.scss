@@ -1,0 +1,61 @@
+WalletStrip
+{
+	flex-direction: column;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.wallet-title
+{
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	opacity: 0.6;
+}
+
+.wallet-row
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	height: 30px;
+	padding: 0 10px;
+	border-radius: 6px;
+	background-color: rgba(8, 8, 16, 0.5);
+
+	i
+	{
+		font-family: Material Icons;
+		font-size: 20px;
+		opacity: 0.8;
+	}
+
+	.name
+	{
+		flex-grow: 1;
+		font-size: 14px;
+	}
+
+	.amount
+	{
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	&.cash
+	{
+		pointer-events: all;
+		cursor: pointer;
+
+		i, .amount
+		{
+			color: #7dffb0;
+		}
+
+		&:hover
+		{
+			background-color: rgba(125, 255, 176, 0.14);
+		}
+	}
+}

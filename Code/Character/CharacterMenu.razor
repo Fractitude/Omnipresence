@@ -12,6 +12,7 @@
 					<ScenePanel @ref="View" class="view" RenderScene=@scene/>
 				</div>
 				<div class="hint">Drag to turn your character.</div>
+				<WalletStrip/>
 			</div>
 			<InventoryGrid class="inventory"/>
 		</div>
@@ -99,7 +100,9 @@
 				return;
 			}
 
-			if ( Input.EscapePressed || Input.Pressed( "CharacterMenu" ) || NaviInputCapture.Current is not null )
+			// The drop dialog on top of it takes Escape and the key.
+			if ( !DropCashMenu.IsOpen
+			     && (Input.EscapePressed || Input.Pressed( "CharacterMenu" ) || NaviInputCapture.Current is not null) )
 			{
 				Input.EscapePressed = false;
 				Close();
@@ -170,6 +173,7 @@
 		GameMenus.SetOpen( "character", false );
 		dragging = false;
 		InventoryGrid.Cancel();
+		WalletStrip.Cancel();
 		FreeControls( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}

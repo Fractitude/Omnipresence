@@ -30,6 +30,13 @@ The game has three currencies. Each belongs to a place, and credits never mix wi
 - `PlayerProgress` creates the `PlayerWallet` on the host if the player prefab doesn't have one, then refreshes the network object so clients receive it. No prefab edit is needed.
 - Dev commands: `progress_give_money`, `progress_give_credits`, `progress_give_crypto` (editor only, host checks); money and crypto go through `PlayerWallet.GrantUntracked`.
 
+## Cash on the ground
+
+Only **cash** can be dropped: crypto and credits are digital. A dropped amount is a world item of the kind `cash` (`ItemCatalog.Cash`) that carries its dollars in `ItemData.Amount` (a long, because a balance reaches a trillion; `Count` stays 1). Cash is never in the bag: the balance stays in `PlayerWallet`, and there is no cash slot. Code: `CashDrops` and `CashRules` (`Code/Wallet`).
+
+- **Drop** (the Character menu: right-click the Cash row, Drop, type an amount). The client sends only the amount (`CashDrops.DropRpc`); the host takes the player from the connection and checks the amount is a whole number from 1 to the balance, the player is alive and in the real world (not the Wired), the scene has room (`WorldItem.MaxInScene`) and the player drops at most `CashRules.DropsPerMinute` (20) a minute. The dollars leave the wallet as a `Transactions.Pay` to the `world` party (kind `DropCash`, so it is in the history and the ledger), the pile is made in front of the player (`WorldItem.SpawnFrom`), and if that fails the dollars are given back (`Transactions.Receive`, kind `Refund`). Nothing is lost or made. The player is told in chat: "You dropped $250."
+- **Pick up** is the **second exempt path** besides console commands: `CashDrops.Pickup` calls `PlayerWallet.GrantUntracked` with `UntrackedReason.GroundPickup`, because whoever picks a pile up is not who dropped it, so it is no transfer between two parties. It has no history entry and no ledger line (the stats log hears of it). So `Transactions.NetOf( "world", Cash )` only counts what was dropped, never what was picked up again. The prompt reads "Pick up $1,250". Under the wallet cap only the part that fits is taken and the rest stays on the ground ("Picked up $100 of $250. $150 left on the ground."); with a full wallet the pickup is refused. The bag is never asked.
+- **Persistence.** The pile is a normal world item (`world_items.json`, see [world-items.md](world-items.md)). Because the wallet and the file change together, a drop and a pickup write the world file at once (`WorldItemRegistry.Flush`) instead of three seconds later, so a crash cannot lose the dollars.
 
 ## Reward items
 

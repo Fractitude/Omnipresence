@@ -1,0 +1,171 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+@* The "Drop cash" dialog. Opened from the Character menu's wallet (right-click the cash, Drop), on top of it. *@
+
+<root class="menu-root @( IsOpen ? "open" : "" )">
+	@if ( IsOpen )
+	{
+		var balance = Balance;
+		var amount = CashRules.Parse( text );
+		var valid = CashRules.CheckDrop( amount, balance ) is null;
+
+		<MenuWindow Title="Drop cash" Width=@( 380 ) OnClose=@Close Hint="Enter drops it. Escape cancels.">
+			<ChildContent>
+				<div class="balance">
+					<div class="label">You have</div>
+					<div class="value">@CashRules.Format( balance )</div>
+				</div>
+				<div class="amount-row">
+					<div class="currency">$</div>
+					<TextEntry @ref=Entry class="amount" Value=@text Placeholder="Amount" MaxLength=@( 13 )
+					           OnTextEdited=@Edited @onsubmit=@Submit/>
+				</div>
+				<div class="after">
+					@( amount > 0 && amount <= balance ? $"You will have {CashRules.Format( balance - amount )} left." : " " )
+				</div>
+				<div class="chips">
+					<div class="chip" @onclick=@( () => SetAmount( balance / 4 ) )>25%</div>
+					<div class="chip" @onclick=@( () => SetAmount( balance / 2 ) )>50%</div>
+					<div class="chip" @onclick=@( () => SetAmount( balance ) )>All</div>
+				</div>
+				<div class="error">@( string.IsNullOrEmpty( error ) ? " " : error )</div>
+				<div class="buttons">
+					<div class="menu-button drop @( valid ? "" : "disabled" )" @onclick=@Submit>Drop</div>
+					<div class="menu-button" @onclick=@Close>Cancel</div>
+				</div>
+			</ChildContent>
+		</MenuWindow>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the dialog is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's events and this component's updates are not always on the same instance.
+	static string text = "";
+	static string error = "";
+	static bool wantFocus;
+	static TextEntry Entry { get; set; }
+
+	static long Balance => PlayerWallet.Local?.Cash ?? 0;
+
+	/// <summary>
+	/// Open the dialog for the local player's cash. Does nothing without any.
+	/// </summary>
+	public static void Open()
+	{
+		if ( IsOpen || Balance < 1 )
+			return;
+
+		text = "";
+		error = "";
+		wantFocus = true;
+		IsOpen = true;
+		GameMenus.SetOpen( "dropcash", true );
+	}
+
+	public static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		Entry = null;
+		GameMenus.SetOpen( "dropcash", false );
+
+		// The Character menu under it keeps the controls and the mouse.
+		if ( CharacterMenu.IsOpen )
+			return;
+
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Digits only, no leading zeros, and never more than the player has: a bigger number is cut to the balance and the
+	/// player is told.
+	/// </summary>
+	static void Edited( string typed )
+	{
+		var value = CashRules.Parse( typed );
+		var balance = Balance;
+		error = "";
+
+		if ( value > balance )
+		{
+			value = balance;
+			error = $"You only have {CashRules.Format( balance )}.";
+		}
+
+		Write( value );
+	}
+
+	static void SetAmount( long value )
+	{
+		error = "";
+		Write( System.Math.Max( value, 1 ) );
+	}
+
+	static void Write( long value )
+	{
+		text = value > 0 ? value.ToString() : "";
+
+		if ( Entry is { IsValid: true } && Entry.Text != text )
+			Entry.Text = text;
+	}
+
+	static void Submit()
+	{
+		var amount = CashRules.Parse( text );
+
+		if ( CashRules.CheckDrop( amount, Balance ) is { } refusal )
+		{
+			error = refusal;
+			return;
+		}
+
+		// Only the amount goes to the host, which checks it again and tells the player in chat.
+		CashDrops.DropRpc( amount );
+		Close();
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		if ( Input.EscapePressed )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		// Dying, or the menu below going away, ends it.
+		if ( !Players.LocalController.IsValid() || NaviInputCapture.Current is not null || Balance < 1 )
+		{
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+
+		if ( wantFocus && Entry is { IsValid: true } )
+		{
+			wantFocus = false;
+			Entry.Focus();
+		}
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() =>
+		System.HashCode.Combine( IsOpen, text, error, PlayerWallet.Local?.Version ?? 0 );
+}

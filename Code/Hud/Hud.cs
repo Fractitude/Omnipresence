@@ -95,7 +95,9 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<PlantingMenu>();
 		hud.Attach<PressMenu>();
 		hud.Attach<StorageMenu>();
+		hud.Attach<DropCashMenu>();
 		hud.Attach<ContextMenu>();
+		hud.Attach<OrgInviteMenu>();
 
 		// The hotbar draws above the menus, and the dragged icon above both.
 		hud.Attach<AbilityMenu>();

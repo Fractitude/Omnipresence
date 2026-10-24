@@ -1,0 +1,48 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace Sandbox
+
+@* The player's money in the Character menu. Cash can be dropped (right-click it); crypto and credits are digital. *@
+
+<root class="wallet">
+	<div class="wallet-title">Wallet</div>
+	@if ( PlayerWallet.Local is { } wallet )
+	{
+		<div class="wallet-row cash" @onrightclick=@( () => OpenMenu( wallet.Cash ) )>
+			<i>payments</i>
+			<div class="name">Cash</div>
+			<div class="amount">@CashRules.Format( wallet.Cash )</div>
+		</div>
+		<div class="wallet-row">
+			<i>currency_bitcoin</i>
+			<div class="name">Crypto</div>
+			<div class="amount">@wallet.Crypto.ToString( "N0" )</div>
+		</div>
+		<div class="wallet-row">
+			<i>bolt</i>
+			<div class="name">Credits</div>
+			<div class="amount">@wallet.Credits.ToString( "N0" )</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	const string MenuName = "wallet";
+
+	/// <summary>
+	/// Right click on the cash: a menu with Drop, which opens the amount dialog. Crypto and credits are digital and have no
+	/// menu.
+	/// </summary>
+	static void OpenMenu( long cash )
+	{
+		ContextMenu.Show( MenuName, "Cash", [new ContextEntry( "drop", "Drop", "arrow_downward", cash > 0, DropCashMenu.Open )] );
+	}
+
+	/// <summary>
+	/// Close the right-click menu, e.g. when the Character menu closes.
+	/// </summary>
+	public static void Cancel() => ContextMenu.HideFor( MenuName );
+
+	protected override int BuildHash() => System.HashCode.Combine( PlayerWallet.Local?.Version ?? -1 );
+}

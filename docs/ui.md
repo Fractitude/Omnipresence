@@ -14,7 +14,7 @@ menus, in **one shared window**. A new piece should not copy the size rules or m
   dedicated server and the Character menu's preview scene. Don't write another `GameObjectSystem` that makes a
   `new GameObject` with a `ScreenPanel`.
 - The pieces share the HUD's screen panel, so a ScreenPanel's ZIndex does not order them. **The draw order is the CSS
-  `z-index` on a piece's root**, from `Code/Hud/_layers.scss`: `$z-menu` (200), `$z-hotbar` (300), `$z-drag`
+  `z-index` on a piece's root**, from `Code/Hud/_layers.scss`: `$z-menu` (200, also the organization invitation window `OrgInviteMenu`), `$z-hotbar` (300), `$z-drag`
   (400), `$z-fade` (1000). Import it (`@import "../Hud/_layers.scss";`) and use the variable. A piece with no z-index
   (the readouts, the crosshair) draws below all of them. A menu covers the screen, so it is above the readouts and below
   the ability bar.
@@ -86,5 +86,6 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
    `static`. See the pitfalls in [AGENTS.md](../AGENTS.md).
 5. Attach it with one line in `HudSystem.Add`. The hotbar (`$z-hotbar`) draws above the window, so keep the window
    clear of it (the bottom margin does that).
-6. The Character menu and the Ability menu predate `MenuWindow` and have their own layout; they still use
+6. **A dialog opened from another window** (`DropCashMenu`, the amount dialog of the Character menu's wallet) is a `MenuWindow` piece like the rest, `menu-root` at `$z-menu`, so it draws over the Character menu, which has no z-index; the right-click menu (`$z-context`) draws above both. It registers as `dropcash` and takes the mouse and the keys while open: the Character menu does not close on Escape or its key while `DropCashMenu.IsOpen`, and the dialog gives the controls back on close only if the Character menu is not open under it. A text field is a `TextEntry` (digits only, the handler cleans the text and writes it back; `@onsubmit` is Enter); focus it once the panel exists. The Character menu's `WalletStrip` lists cash, crypto and credits; right-clicking the cash row opens the context menu with Drop.
+7. The Character menu and the Ability menu predate `MenuWindow` and have their own layout; they still use
    `GameMenus` and `MenuControls`.

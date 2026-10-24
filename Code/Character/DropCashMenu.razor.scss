@@ -1,0 +1,100 @@
+@import "../Hud/_hud.scss";
+
+// The window and its buttons are MenuWindow's. This is the dialog's own content.
+
+.balance
+{
+	flex-shrink: 0;
+	flex-direction: row;
+	align-items: baseline;
+	justify-content: space-between;
+
+	.label
+	{
+		font-size: 14px;
+		opacity: 0.7;
+	}
+
+	.value
+	{
+		font-size: 22px;
+		font-weight: 700;
+		color: #7dffb0;
+	}
+}
+
+.amount-row
+{
+	flex-shrink: 0;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	height: 48px;
+	border-radius: 8px;
+	background-color: rgba(8, 8, 16, 0.6);
+	border: 1px solid rgba(242, 238, 226, 0.25);
+
+	.currency
+	{
+		font-size: 22px;
+		font-weight: 700;
+		opacity: 0.7;
+	}
+
+	.amount
+	{
+		flex-grow: 1;
+		font-size: 22px;
+		font-weight: 700;
+		color: #f2eee2;
+		background-color: transparent;
+	}
+}
+
+.after
+{
+	flex-shrink: 0;
+	min-height: 20px;
+	font-size: 14px;
+	opacity: 0.75;
+}
+
+.chips
+{
+	flex-shrink: 0;
+	flex-direction: row;
+	gap: 8px;
+
+	.chip
+	{
+		flex-grow: 1;
+		justify-content: center;
+		padding: 6px 0;
+		font-size: 15px;
+		border-radius: 6px;
+		border: 1px solid rgba(242, 238, 226, 0.3);
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: rgba(125, 255, 176, 0.18);
+		}
+	}
+}
+
+.error
+{
+	flex-shrink: 0;
+	min-height: 20px;
+	font-size: 14px;
+	color: #ff8a7a;
+}
+
+.buttons
+{
+	flex-shrink: 0;
+	flex-direction: row;
+	gap: 10px;
+	justify-content: flex-end;
+}
