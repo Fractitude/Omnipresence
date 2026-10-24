@@ -73,8 +73,20 @@ scraps at the source, and the light does what the flash used to.
 
 A sparking camera is only half there without the noise, so the spark emitter came with a crackle of its own:
 `Assets/sounds/effects/sparks.sound`, a `SoundEvent` holding three short takes. `SoundEvent` picks one at random
-(`SelectionMode: Random`) and varies it (`Volume: 0.15 0.25`, `Pitch: 0.9 1.15`), so a camera that sparks for a minute
-doesn't sound like a loop. Distance attenuation over 700 units, with occlusion on.
+(`SelectionMode: Random`) and varies it (`Volume: 0.2 0.3`, `Pitch: 0.9 1.15`), so a camera that sparks for a minute
+doesn't sound like a loop.
+
+- **`UI` is the 2D switch, and its default is the reason a sound is heard across the map.** `SoundEvent.UI` is "is this
+  sound 2D?": with it on there is no position and no distance attenuation, so every knob below does nothing. The crackle
+  had it on, copied from another sound; it is off now.
+- **It carries 220 units — about 5.5 m** (`Distance`), and its falloff is steep: half at 2% of the way out, gone by 30%.
+  A spark is a noise for the player at the camera.
+- **3D audio is switched on in code, not in the asset**, so each emitter can be given its own range: the handle gets
+  `SpacialBlend` 1 (fully 3D), `OcclusionEnabled` (walls block it), `AirAbsorption` (distance dulls the top of it) and
+  `ReverbEnabled` (it traces reflections, so it reaches you round a corner off a wall), with `Reverb` 0.35 so it doesn't
+  fill the room. Reflections need surfaces with acoustic properties — an `AudioSurface` on the material — to bounce off;
+  the map has none yet, so today it is occlusion. The emitter's `HearingRange` sets the distance and `CrackleVolume` the
+  playback level.
 
 The takes are made, not found: `tools/audio/make_spark_crackle.py` writes `Assets/sounds/effects/sparks_{1,2,3}.wav` —
 a burst of bright noise that dies in tens of milliseconds, a handful of small ticks across its first tenth of a second,

@@ -78,9 +78,19 @@ public sealed class SparkEmitter : Component
 	/// </summary>
 	[Property] public SoundEvent Crackle { get; set; }
 
-	/// <summary>How loud the crackle is, 0 to 1, on top of the sound's own volume.</summary>
+	/// <summary>
+	/// How loud the crackle is, 0 to 1. It is a small noise at the camera, not a siren: 0.2 is about right, and it is
+	/// the volume the sound is played at, so the sound asset's own volume only sets how it sounds next to its neighbours.
+	/// </summary>
 	[Property, Range( 0f, 1f )]
-	public float CrackleVolume { get; set; } = 1f;
+	public float CrackleVolume { get; set; } = 0.2f;
+
+	/// <summary>
+	/// How far the crackle carries, in units. A spark is a sound for the player standing at the camera, so it is short
+	/// (220 is about 5.5 m): past that it is not heard at all.
+	/// </summary>
+	[Property, Range( 50f, 2000f )]
+	public float HearingRange { get; set; } = 220f;
 
 	/// <summary>
 	/// The shortest gap between two crackles, in seconds. The first one plays the moment the sparks start, and then the
@@ -254,8 +264,17 @@ public sealed class SparkEmitter : Component
 
 	/// <summary>
 	/// Play the crackle, if enough has passed since the last one. The sound is picked, pitched and levelled a little
-	/// differently every time, by the sound asset and here, so a sparking camera doesn't sound like a loop.
+	/// differently every time, so a sparking camera doesn't sound like a loop.
 	/// </summary>
+	/// <remarks>
+	/// The engine's 3D audio is switched on here rather than in the asset, so an emitter can be given its own range and
+	/// nobody has to edit a shared sound file to change it: the crackle is placed in the world
+	/// (<see cref="SoundHandle.SpacialBlend"/> 1), geometry blocks it (<see cref="SoundHandle.OcclusionEnabled"/>), the
+	/// air soaks up the top of it (<see cref="SoundHandle.AirAbsorption"/>), and <see cref="SoundHandle.ReverbEnabled"/>
+	/// lets it trace reflections so it reaches the player round a corner off a wall rather than only in a straight line.
+	/// That tracing needs surfaces with acoustic properties (<c>AudioSurface</c>) to bounce off; without them it is simply
+	/// occluded.
+	/// </remarks>
 	void CrackleSound()
 	{
 		if ( sinceCrackle < CrackleGap )
@@ -263,14 +282,24 @@ public sealed class SparkEmitter : Component
 
 		sinceCrackle = 0;
 
-		var handle = Crackle is not null
-			? Sound.Play( Crackle, WorldPosition )
-			: Sound.Play( DefaultCrackle, WorldPosition );
+		var volume = CrackleVolume * (0.8f + System.Random.Shared.NextSingle() * 0.2f);
 
-		if ( handle is null )
+		var handle = Crackle is not null
+			? Sound.Play( Crackle, WorldPosition, volume )
+			: Sound.Play( DefaultCrackle, WorldPosition, volume );
+
+		if ( handle is null || !handle.IsValid() )
 			return;
 
-		handle.Volume = CrackleVolume * (0.8f + System.Random.Shared.NextSingle() * 0.3f);
+		handle.Distance = HearingRange;
+		handle.SpacialBlend = 1f;
+		handle.OcclusionEnabled = true;
+		handle.AirAbsorption = true;
+		handle.ReverbEnabled = true;
+
+		// A crackle is a dry noise: let it be heard off the walls, but don't have it fill the room with reverb.
+		handle.Reverb = 0.35f;
+
 		handle.Pitch = 0.92f + System.Random.Shared.NextSingle() * 0.2f;
 	}
 

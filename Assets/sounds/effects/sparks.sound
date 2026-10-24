@@ -1,8 +1,8 @@
 {
-  "UI": true,
-  "Volume": "0.15 0.25",
+  "UI": false,
+  "Volume": "0.2 0.3",
   "Pitch": "0.9 1.15",
-  "Decibels": 70,
+  "Decibels": 60,
   "SelectionMode": "Random",
   "Sounds": [
     "sounds/effects/sparks_1.vsnd",
@@ -10,31 +10,38 @@
     "sounds/effects/sparks_3.vsnd"
   ],
   "Occlusion": true,
-  "AirAbsorption": false,
+  "AirAbsorption": true,
   "Transmission": false,
   "OcclusionRadius": 32,
   "DistanceAttenuation": true,
-  "Distance": 700,
+  "Distance": 220,
   "Falloff": [
     {
       "x": 0,
       "y": 1,
       "in": 0,
-      "out": -1.8,
-      "mode": "Mirrored"
-    },
-    {
-      "x": 0.05,
-      "y": 0.22,
-      "in": 3.5,
       "out": -3.5,
       "mode": "Mirrored"
     },
     {
-      "x": 0.2,
-      "y": 0.04,
-      "in": 0.16,
-      "out": -0.16,
+      "x": 0.02,
+      "y": 0.45,
+      "in": 3.0,
+      "out": -3.0,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.12,
+      "y": 0.06,
+      "in": 0.5,
+      "out": -0.5,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.3,
+      "y": 0,
+      "in": 0,
+      "out": 0,
       "mode": "Mirrored"
     },
     {
@@ -46,5 +53,7 @@
     }
   ],
   "__references": [],
-  "__version": 1
+  "__version": 1,
+  "Reflections": true,
+  "ReverbEnabled": true
 }
