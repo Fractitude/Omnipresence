@@ -221,6 +221,8 @@
 	/// </summary>
 	static void Store( int slot )
 	{
+		CancelDrag();
+
 		if ( target.IsValid() && PlayerInventory.Local?.At( slot ) is not null )
 			target.RequestStore( slot );
 	}
@@ -230,16 +232,24 @@
 	/// </summary>
 	static void Take( int slot )
 	{
+		CancelDrag();
+
 		if ( target.IsValid() && target.ViewAt( slot ) is not null )
 			target.RequestTake( slot );
 	}
 
 	/// <summary>
-	/// The left button went down on a slot: if it holds an item, start dragging it. Other buttons do nothing here.
+	/// A button went down on a slot: if it holds an item, start dragging it. A right press is a right click and does not
+	/// drag.
 	/// </summary>
 	static void BeginDrag( bool fromBox, int slot, PanelEvent e )
 	{
-		if ( !string.Equals( e.Button, "mouseleft", System.StringComparison.OrdinalIgnoreCase ) || !target.IsValid() )
+		// The button's name on this event is not reliable (the untyped event can leave it empty), so only a button that
+		// is known to be the right one is turned away: a right press is a right click, not a drag.
+		var button = e?.Button ?? "";
+
+		if ( !target.IsValid() || button.Contains( "right", System.StringComparison.OrdinalIgnoreCase )
+		     || button.Contains( "2" ) )
 			return;
 
 		var item = fromBox ? target.ViewAt( slot ) : PlayerInventory.Local?.At( slot );
