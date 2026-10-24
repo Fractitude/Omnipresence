@@ -372,7 +372,8 @@ public static class OrgRegistry
 			{
 				var before = credit.Amount;
 				var record = await PlayerProgression.LoadAsync( credit.MemberId );
-				var given = OrgPayouts.CreditRecord( record, credit.Currency, credit.Amount );
+				var given = OrgPayouts.CreditRecord(
+					credit.MemberId, record, credit.Currency, credit.Amount, $"{credit.OrgName}: waiting share" );
 
 				if ( given > 0 )
 					await PlayerProgression.SaveAsync( credit.MemberId );

@@ -38,11 +38,13 @@ public static class PlaceableShop
 		if ( delivery is null )
 			return CrimeResult.Fail( "Too many deliveries are on their way." );
 
-		if ( !PlayerWallet.For( buyer ).TrySpendCash( item.Price ) )
+		if ( !PlayerWallet.For( buyer ).TrySpendCash( item.Price, StatMechanic.Shop, $"Depot: {item.Name}" ) )
 		{
 			PlacedObjectRegistry.Cancel( delivery );
 			return CrimeResult.Fail( "Not enough cash." );
 		}
+
+		StatsLog.Purchase( buyer, "placeable", item.Id, item.Name, item.Price );
 
 		return CrimeResult.Success(
 			$"Bought a {item.Name} for ${item.Price:N0}. It will be delivered at {WorldClock.TimeOfDayOf( delivery.ArriveAt )}." );

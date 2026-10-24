@@ -16,7 +16,15 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_give_crypto <amount>` | Give yourself crypto. |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
-| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json`, the storage claims in `storage_test.json`, the dropped items in `world_items_test.json` and the organizations in `orgs_test.json`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
+| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json`, the storage claims in `storage_test.json`, the dropped items in `world_items_test.json` the organizations in `orgs_test.json` and the stats log in `stats_test/`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
+
+## Stats
+
+Read the stats log ([stats.md](stats.md)). Host only. Code: `Code/Stats/StatsCommands.cs`.
+
+| Command | What it does |
+| --- | --- |
+| `stats_show [steamId]` | Log one player's totals: playtime, joins, kills (by weapon), deaths, kicks, bans, transactions, purchases and last balances. Yourself without an id. |
 
 ## Crime
 

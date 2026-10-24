@@ -60,6 +60,7 @@ public static class ProgressCommands
 		StorageRegistry.UseFile( test ? "storage_test.json" : "storage.json" );
 		WorldItemRegistry.UseFile( test ? "world_items_test.json" : "world_items.json" );
 		OrgRegistry.UseFile( test ? "orgs_test.json" : "orgs.json" );
+		StatsLog.UseFolder( test ? "stats_test" : StatsLog.DefaultFolder );
 		PlacedObjectRegistry.UseFile( test ? "placed_objects_test.json" : "placed_objects.json" );
 		Log.Info( test ? "Test data: progress_test/ and world_test.json" : "Real data: progress/ and world.json" );
 	}

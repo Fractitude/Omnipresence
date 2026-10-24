@@ -96,26 +96,30 @@ public sealed class PlayerWallet : Component
 		Record?.CanHoldCrypto( amount ) ?? Crypto + amount <= ProgressRecord.MaxCrypto;
 
 	/// <summary>
-	/// Give dollars. Host only. Zero and negative amounts are ignored.
+	/// Give dollars. Host only. Zero and negative amounts are ignored. <paramref name="mechanic"/> (a
+	/// <see cref="StatMechanic"/>) and <paramref name="detail"/> say where the money came from, for the stats log.
 	/// </summary>
-	public void AddCash( long amount )
+	public void AddCash( long amount, string mechanic = null, string detail = null )
 	{
 		if ( !CanChange || amount <= 0 )
 			return;
 
+		var before = Record.Money;
 		Record.AddCash( amount );
+		Logged( StatsLog.MoneyCash, Record.Money - before, Record.Money, mechanic, detail );
 		Changed();
 	}
 
 	/// <summary>
 	/// Take dollars if there are enough. Host only. Returns whether they were taken.
 	/// </summary>
-	public bool TrySpendCash( long amount )
+	public bool TrySpendCash( long amount, string mechanic = null, string detail = null )
 	{
 		if ( !CanChange || amount <= 0 || Record.Money < amount )
 			return false;
 
 		Record.Money -= amount;
+		Logged( StatsLog.MoneyCash, -amount, Record.Money, mechanic, detail );
 		Changed();
 		return true;
 	}
@@ -123,24 +127,27 @@ public sealed class PlayerWallet : Component
 	/// <summary>
 	/// Give credits. Host only.
 	/// </summary>
-	public void AddCredits( long amount )
+	public void AddCredits( long amount, string mechanic = null, string detail = null )
 	{
 		if ( !CanChange || amount <= 0 )
 			return;
 
+		var before = Record.Credits;
 		Record.AddCredits( amount );
+		Logged( StatsLog.MoneyCredits, Record.Credits - before, Record.Credits, mechanic, detail );
 		Changed();
 	}
 
 	/// <summary>
 	/// Take credits if there are enough. Host only. Returns whether they were taken.
 	/// </summary>
-	public bool TrySpendCredits( long amount )
+	public bool TrySpendCredits( long amount, string mechanic = null, string detail = null )
 	{
 		if ( !CanChange || amount <= 0 || Record.Credits < amount )
 			return false;
 
 		Record.Credits -= amount;
+		Logged( StatsLog.MoneyCredits, -amount, Record.Credits, mechanic, detail );
 		Changed();
 		return true;
 	}
@@ -148,27 +155,36 @@ public sealed class PlayerWallet : Component
 	/// <summary>
 	/// Give crypto. Host only.
 	/// </summary>
-	public void AddCrypto( long amount )
+	public void AddCrypto( long amount, string mechanic = null, string detail = null )
 	{
 		if ( !CanChange || amount <= 0 )
 			return;
 
+		var before = Record.Crypto;
 		Record.AddCrypto( amount );
+		Logged( StatsLog.MoneyCrypto, Record.Crypto - before, Record.Crypto, mechanic, detail );
 		Changed();
 	}
 
 	/// <summary>
 	/// Take crypto if there are enough. Host only. Returns whether it was taken.
 	/// </summary>
-	public bool TrySpendCrypto( long amount )
+	public bool TrySpendCrypto( long amount, string mechanic = null, string detail = null )
 	{
 		if ( !CanChange || amount <= 0 || Record.Crypto < amount )
 			return false;
 
 		Record.Crypto -= amount;
+		Logged( StatsLog.MoneyCrypto, -amount, Record.Crypto, mechanic, detail );
 		Changed();
 		return true;
 	}
+
+	/// <summary>
+	/// Write a balance change in the stats log (every wallet method that changes a balance ends here).
+	/// </summary>
+	void Logged( string currency, long delta, long balance, string mechanic, string detail, Connection other = null ) =>
+		StatsLog.Money( Progress.Owner, currency, delta, balance, mechanic ?? "unknown", detail, other );
 
 	/// <summary>
 	/// Move dollars from this player to another, and write it in both payment histories (the Payments app). Host only.
@@ -191,6 +207,8 @@ public sealed class PlayerWallet : Component
 
 		Progress.AddPayment( new() { At = at, PeerId = target.SteamId.ToString(), PeerName = target.DisplayName, Amount = -amount } );
 		to.Progress.AddPayment( new() { At = at, PeerId = from.SteamId.ToString(), PeerName = from.DisplayName, Amount = amount } );
+		Logged( StatsLog.MoneyCash, -amount, Record.Money, StatMechanic.Payment, null, target );
+		to.Logged( StatsLog.MoneyCash, amount, to.Record.Money, StatMechanic.Payment, null, from );
 		Changed();
 		to.Changed();
 		return true;
@@ -227,6 +245,8 @@ public sealed class PlayerWallet : Component
 			Currency = PaymentCurrency.Crypto,
 		} );
 
+		Logged( StatsLog.MoneyCrypto, -amount, Record.Crypto, StatMechanic.Payment, null, target );
+		to.Logged( StatsLog.MoneyCrypto, amount, to.Record.Crypto, StatMechanic.Payment, null, from );
 		Changed();
 		to.Changed();
 		return true;
@@ -242,8 +262,8 @@ public sealed class PlayerWallet : Component
 		if ( !Application.IsEditor || Rpc.Caller != (Network.Owner ?? Connection.Local) )
 			return;
 
-		AddCash( cash );
-		AddCredits( credits );
-		AddCrypto( crypto );
+		AddCash( cash, StatMechanic.ConsoleCommand );
+		AddCredits( credits, StatMechanic.ConsoleCommand );
+		AddCrypto( crypto, StatMechanic.ConsoleCommand );
 	}
 }

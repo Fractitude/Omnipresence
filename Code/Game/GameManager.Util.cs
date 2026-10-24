@@ -40,9 +40,10 @@ public sealed partial class GameManager
 	}
 
 	/// <summary>
-	/// Kicks a connected player with an optional reason.
+	/// Kicks a connected player with an optional reason, and writes it in the stats log. <paramref name="by"/> is the
+	/// admin who asked, or null for the server itself. The engine's own <c>kick</c> command skips this.
 	/// </summary>
-	public void Kick( Connection connection, string reason = "Kicked" )
+	public void Kick( Connection connection, string reason = "Kicked", Connection by = null )
 	{
 		Assert.True( Networking.IsHost, "Only the host may kick players." );
 
@@ -50,6 +51,8 @@ public sealed partial class GameManager
 			? $"{connection.DisplayName} was kicked"
 			: $"{connection.DisplayName} was kicked: {reason}" );
 
+		StatsLog.Kicked( connection, reason == "Kicked" ? null : reason, by );
+		StatsLog.Flush();
 		connection.Kick( reason );
 	}
 
@@ -61,7 +64,7 @@ public sealed partial class GameManager
 	{
 		if ( !Rpc.Caller.HasPermission( "admin" ) ) return;
 
-		Current?.Kick( target, reason );
+		Current?.Kick( target, reason, Rpc.Caller );
 	}
 
 	/// <summary>

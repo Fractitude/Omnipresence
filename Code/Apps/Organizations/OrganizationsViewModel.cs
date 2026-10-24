@@ -226,7 +226,7 @@ public sealed class OrganizationsViewModel
 
 		var fee = OrgCatalog.RegistrationFee;
 
-		if ( fee > 0 && (wallet is null || !wallet.TrySpendCash( fee )) )
+		if ( fee > 0 && (wallet is null || !wallet.TrySpendCash( fee, StatMechanic.Fee, "Organization registration" )) )
 		{
 			notice = $"Registering costs ${fee:N0}.";
 			return;
@@ -236,7 +236,7 @@ public sealed class OrganizationsViewModel
 
 		// The fee is only kept for an organization that was made.
 		if ( !result.Ok && fee > 0 )
-			wallet?.AddCash( fee );
+			wallet?.AddCash( fee, StatMechanic.Refund, "Organization registration" );
 
 		notice = result.Message;
 

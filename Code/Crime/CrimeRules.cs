@@ -49,7 +49,7 @@ public static class CrimeRules
 		result.Changed |= PostalSystem.Tick( crime, now, parcel => OnParcelDelivered( steamId, crime, parcel ) );
 		result.Changed |= PostalSystem.TickDeliveries( crime, now );
 		result.Changed |= CheckOrders( steamId, record, now, result );
-		result.Changed |= Exchange.Settle( record, now );
+		result.Changed |= Exchange.Settle( steamId, record, now );
 
 		if ( result.Changed )
 			TidyReviews( crime );

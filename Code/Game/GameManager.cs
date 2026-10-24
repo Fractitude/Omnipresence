@@ -251,6 +251,10 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 
 		playerData.Deaths++;
 
+		var weapon = dmg.Weapon.IsValid() ? dmg.Weapon.Name : null;
+		var killerConnection = source is PlayerHealth { } shooter && shooter != player ? shooter.Network.Owner : null;
+		StatsLog.Death( player.Network.Owner, killerConnection, source?.DisplayName, weapon, dmg.Tags?.ToString() );
+
 		if ( source is null )
 		{
 			Log.Info( $"{player.Network.Owner?.DisplayName ?? "Unknown"} died (tags: {dmg.Tags})" );
@@ -268,6 +272,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 			var killEvent = new PlayerKillEvent { Player = killer, Victim = player.GameObject, DamageInfo = dmg };
 			Local.IPlayerEvents.PostToGameObject( killer.GameObject, x => x.OnKill( killEvent ) );
 			Global.IPlayerEvents.Post( x => x.OnPlayerKill( killEvent ) );
+			StatsLog.Kill( killer.Network.Owner, player.Network.Owner, weapon );
 		}
 
 		var victimName = player.Network.Owner?.DisplayName ?? "Unknown";

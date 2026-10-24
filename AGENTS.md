@@ -37,6 +37,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `docs/world-items.md` is how an item is dropped into the world and picked up again (`WorldItem`, `PickupRules`, the merge rule `StackRules.CanMerge`). Read it before changing the inventory's add, drop or stack code.
 - `docs/organizations.md` is how organizations work: teammates grouped in the Organizations Navi app, with roles, shares and invitations, and `OrgPayouts.Distribute`, the one function a revenue source calls to share a payment. Read it before adding a source of money.
 - `docs/depot.md` is how big objects (storage box, grow tray, press bench, packing table) are bought in the Depot app, delivered and kept between sessions (`Code/Placeables/`, `PlacedObject` ids). Read it before adding something the player places in the world.
+- `docs/stats.md` is the server's log of what players do over time (joins, playtime, kills, deaths, every money movement, purchases, kicks, bans): `StatsLog`, the files it writes and how to log a new source of money. Read it before adding a source or sink of money, a purchase or a way to remove a player.
 - `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 
 ## Vehicles

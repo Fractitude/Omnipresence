@@ -294,7 +294,7 @@ public sealed class PlayerProgress : Component
 		if ( hackXp > 0 )
 			record.HackXp = System.Math.Min( record.HackXp + hackXp, HackingCurve.MaxXp );
 
-		Wallet?.AddCredits( credits );
+		Wallet?.AddCredits( credits, StatMechanic.Hacking, $"Intrusion {serverId}" );
 		Changed( ProgressChange.Intrusions );
 		return true;
 	}
@@ -327,7 +327,7 @@ public sealed class PlayerProgress : Component
 		var paidBonus = ghosted ? ghostBonus : 0;
 
 		record.HackXp = System.Math.Min( record.HackXp + System.Math.Max( hackXp, 0 ), HackingCurve.MaxXp );
-		Wallet?.AddCredits( paidCredits + paidBonus );
+		Wallet?.AddCredits( paidCredits + paidBonus, StatMechanic.Hacking, $"Operation {operationId}" );
 
 		Changed( ProgressChange.Operations );
 		return new OperationPayout( hackXp, paidCredits, paidBonus, first );
@@ -342,9 +342,11 @@ public sealed class PlayerProgress : Component
 		if ( !CanChange || string.IsNullOrWhiteSpace( itemId ) || price <= 0 || Wallet is not { } wallet )
 			return false;
 
-		if ( record.Shipments.Count >= ShipmentRecord.MaxKept || !wallet.TrySpendCash( price ) )
+		if ( record.Shipments.Count >= ShipmentRecord.MaxKept
+		     || !wallet.TrySpendCash( price, StatMechanic.Shop, $"Hardware store: {itemId}" ) )
 			return false;
 
+		StatsLog.Purchase( Owner, "hardware", itemId, itemId, price );
 		AddShipment( itemId, deliverySeconds, "order" );
 		return true;
 	}

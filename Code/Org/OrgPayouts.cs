@@ -37,7 +37,7 @@ public static class OrgPayouts
 			if ( amount > RoomOf( record, currency ) )
 				return false;
 
-			CreditRecord( record, currency, amount );
+			CreditRecord( receiver, record, currency, amount, reason );
 			return true;
 		}
 
@@ -51,7 +51,7 @@ public static class OrgPayouts
 			if ( done.Kept > RoomOf( record, currency ) )
 				return false;
 
-			CreditRecord( record, currency, done.Kept );
+			CreditRecord( receiver, record, currency, done.Kept, $"{org.Name}: {reason}" );
 			return true;
 		}
 
@@ -76,11 +76,11 @@ public static class OrgPayouts
 		foreach ( var (memberId, share) in split.Credits )
 		{
 			var member = org.MemberOf( memberId );
-			CreditMember( memberId, currency, share, org, orderId );
+			CreditMember( memberId, currency, share, org, orderId, reason );
 			payout.Splits.Add( new() { MemberId = memberId, Name = member is null ? "" : OrgRegistry.NameOf( member ), Amount = share } );
 		}
 
-		CreditRecord( record, currency, split.Kept );
+		CreditRecord( receiver, record, currency, split.Kept, $"{org.Name}: {reason}" );
 
 		if ( org.MemberOf( receiver ) is { } receiverMember )
 			receiverMember.Name = payout.ReceiverName;
@@ -106,9 +106,11 @@ public static class OrgPayouts
 		: ProgressRecord.MaxMoney - record.Money;
 
 	/// <summary>
-	/// Add as much of <paramref name="amount"/> as fits under the cap to a record. Returns what was added.
+	/// Add as much of <paramref name="amount"/> as fits under the cap to a record, and write it in the stats log as
+	/// <paramref name="steamId"/>'s. Returns what was added.
 	/// </summary>
-	internal static long CreditRecord( ProgressRecord record, OrgCurrency currency, long amount )
+	internal static long CreditRecord(
+		ulong steamId, ProgressRecord record, OrgCurrency currency, long amount, string detail )
 	{
 		var given = System.Math.Clamp( amount, 0, System.Math.Max( RoomOf( record, currency ), 0 ) );
 
@@ -116,6 +118,10 @@ public static class OrgPayouts
 			record.AddCrypto( given );
 		else
 			record.AddCash( given );
+
+		var crypto = currency == OrgCurrency.Crypto;
+		StatsLog.Money( steamId, Exchange.SteamName( steamId ), crypto ? StatsLog.MoneyCrypto : StatsLog.MoneyCash, given,
+			crypto ? record.Crypto : record.Money, StatMechanic.OrgPayout, detail );
 
 		return given;
 	}
@@ -136,7 +142,8 @@ public static class OrgPayouts
 	static long MemberRoom( ulong steamId, OrgCurrency currency ) =>
 		LiveRecord( steamId ) is { } record ? RoomOf( record, currency ) : long.MaxValue;
 
-	static void CreditMember( ulong steamId, OrgCurrency currency, long amount, OrgRecord org, string orderId )
+	static void CreditMember(
+		ulong steamId, OrgCurrency currency, long amount, OrgRecord org, string orderId, string reason )
 	{
 		var connection = ConnectionOf( steamId );
 
@@ -144,13 +151,13 @@ public static class OrgPayouts
 	     && PlayerWallet.For( connection ) is { } wallet )
 		{
 			if ( currency == OrgCurrency.Crypto )
-				wallet.AddCrypto( amount );
+				wallet.AddCrypto( amount, StatMechanic.OrgPayout, $"{org.Name}: {reason}" );
 			else
-				wallet.AddCash( amount );
+				wallet.AddCash( amount, StatMechanic.OrgPayout, $"{org.Name}: {reason}" );
 		}
 		else if ( PlayerProgression.Cache.Peek( steamId ) is { } record )
 		{
-			CreditRecord( record, currency, amount );
+			CreditRecord( steamId, record, currency, amount, $"{org.Name}: {reason}" );
 			_ = PlayerProgression.SaveAsync( steamId );
 		}
 		else

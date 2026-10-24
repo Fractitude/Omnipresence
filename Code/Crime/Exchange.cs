@@ -34,10 +34,10 @@ public static class Exchange
 			if ( !wallet.CanHoldCash( cash ) )
 				return CrimeResult.Fail( "Your account can't hold that much." );
 
-			if ( !wallet.TrySpendCrypto( crypto ) )
+			if ( !wallet.TrySpendCrypto( crypto, StatMechanic.Exchange, $"Sold at {venue.Name}" ) )
 				return CrimeResult.Fail( "Not enough crypto." );
 
-			wallet.AddCash( cash );
+			wallet.AddCash( cash, StatMechanic.Exchange, $"Sold crypto at {venue.Name}" );
 			return CrimeResult.Success( $"Sold {crypto:N0} crypto for ${cash:N0}." );
 		}
 
@@ -48,7 +48,7 @@ public static class Exchange
 		if ( crime.Cashouts.Count >= CrimeRecord.MaxEntries )
 			return CrimeResult.Fail( "Too many cash-outs waiting." );
 
-		if ( !wallet.TrySpendCrypto( crypto ) )
+		if ( !wallet.TrySpendCrypto( crypto, StatMechanic.Exchange, $"Sold at {venue.Name}, cash-out waiting" ) )
 			return CrimeResult.Fail( "Not enough crypto." );
 
 		crime.Cashouts.Add( new() { Cash = cash, ReadyAt = WorldClock.Now + venue.CashoutDelaySeconds } );
@@ -78,18 +78,24 @@ public static class Exchange
 		if ( !wallet.CanHoldCrypto( crypto ) )
 			return CrimeResult.Fail( "Your wallet can't hold that much crypto." );
 
-		if ( !wallet.TrySpendCash( cash ) )
+		if ( !wallet.TrySpendCash( cash, StatMechanic.Exchange, $"Bought crypto at {venue.Name}" ) )
 			return CrimeResult.Fail( "Not enough dollars." );
 
-		wallet.AddCrypto( crypto );
+		wallet.AddCrypto( crypto, StatMechanic.Exchange, $"Bought at {venue.Name}" );
 		return CrimeResult.Success( $"Bought {crypto:N0} crypto for ${cash:N0}." );
 	}
+
+	/// <summary>
+	/// The name of a connected player for the stats log, or empty.
+	/// </summary>
+	internal static string SteamName( ulong steamId ) =>
+		Connection.All.FirstOrDefault( x => x.SteamId == steamId )?.DisplayName ?? "";
 
 	/// <summary>
 	/// Pay the cash-outs whose delay is over by <paramref name="now"/>, into the record. Needs no player: the offline
 	/// processor calls it too. A payment the record cannot hold yet waits. Returns whether any was paid. Host only.
 	/// </summary>
-	public static bool Settle( ProgressRecord record, long now )
+	public static bool Settle( ulong steamId, ProgressRecord record, long now )
 	{
 		if ( !Networking.IsHost || record?.Crime is null )
 			return false;
@@ -98,7 +104,10 @@ public static class Exchange
 
 		foreach ( var cashout in due )
 		{
+			var before = record.Money;
 			record.AddCash( cashout.Cash );
+			StatsLog.Money( steamId, SteamName( steamId ), StatsLog.MoneyCash, record.Money - before, record.Money,
+				StatMechanic.Exchange, "Cash-out arrived" );
 			record.Crime.Cashouts.Remove( cashout );
 		}
 
