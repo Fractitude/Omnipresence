@@ -83,14 +83,14 @@ public sealed class SparkEmitter : Component
 	/// the volume the sound is played at, so the sound asset's own volume only sets how it sounds next to its neighbours.
 	/// </summary>
 	[Property, Range( 0f, 1f )]
-	public float CrackleVolume { get; set; } = 0.2f;
+	public float CrackleVolume { get; set; } = 1f;
 
 	/// <summary>
 	/// How far the crackle carries, in units. A spark is a sound for the player standing at the camera, so it is short
 	/// (220 is about 5.5 m): past that it is not heard at all.
 	/// </summary>
 	[Property, Range( 50f, 2000f )]
-	public float HearingRange { get; set; } = 220f;
+	public float HearingRange { get; set; } = 400f;
 
 	/// <summary>
 	/// The shortest gap between two crackles, in seconds. The first one plays the moment the sparks start, and then the
@@ -293,9 +293,12 @@ public sealed class SparkEmitter : Component
 
 		handle.Distance = HearingRange;
 		handle.SpacialBlend = 1f;
-		handle.OcclusionEnabled = true;
 		handle.AirAbsorption = true;
 		handle.ReverbEnabled = true;
+
+		// Occlusion off: the emitter sits inside the camera's own housing, and a sound traced from in there comes out
+		// blocked by the object it belongs to. A crackle is a noise at the surface anyway.
+		handle.OcclusionEnabled = false;
 
 		// A crackle is a dry noise: let it be heard off the walls, but don't have it fill the room with reverb.
 		handle.Reverb = 0.35f;
