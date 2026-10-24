@@ -3,14 +3,16 @@ using System;
 namespace Sandbox;
 
 /// <summary>
-/// Electric sparks: short-lived bright scraps that fly out, fall, and crackle out, thrown in clumps the way a short
-/// circuit throws them rather than one at a time. Drop it on anything that should spark — a broken camera, a cut cable,
-/// a machine with a bad earth — and set <see cref="Emitting"/> to turn it on and off.
+/// Electric sparks: short-lived bright scraps that fly out, fall and crackle out, thrown the way a short circuit throws
+/// them. Drop it on anything that should spark — a broken camera, a cut cable, a machine with a bad earth — and set
+/// <see cref="Emitting"/> to turn it on and off.
 /// </summary>
 /// <remarks>
-/// Like the smoke, the sparks are made here rather than in the scene: each is a billboard that destroys itself, marked
-/// not saved and never networked, so every machine makes the sparks it sees. The optional light is a single point light
-/// on the emitter, flickering with the clumps, which is what makes the sparks read at night.
+/// The sparks are the engine's, not ours: this component builds a <see cref="ParticleEffect"/> with a
+/// <see cref="ParticleSpriteRenderer"/> and a <see cref="ParticleSphereEmitter"/> on its own GameObject, and only maps
+/// the handful of properties below onto them. It also plays the crackle, from <c>sounds/effects/sparks.sound</c>, and
+/// keeps the point light that makes the sparks read at night. Nothing about it is saved or sent, so every machine makes
+/// the sparks it sees.
 /// </remarks>
 [Title( "Spark Emitter" ), Icon( "bolt" )]
 public sealed class SparkEmitter : Component
@@ -30,7 +32,7 @@ public sealed class SparkEmitter : Component
 
 	/// <summary>How many sparks are in a clump.</summary>
 	[Property, Range( 1, 30 )]
-	public int Count { get; set; } = 14;
+	public int Count { get; set; } = 20;
 
 	/// <summary>How long a spark lives, in seconds. Each one differs a little from this.</summary>
 	[Property, Range( 0.05f, 2f )]
@@ -44,32 +46,25 @@ public sealed class SparkEmitter : Component
 	[Property, Range( 0f, 1000f )]
 	public float Gravity { get; set; } = 600f;
 
-	/// <summary>
-	/// How much of every spark's direction is up, from 0 (anywhere) to 1 (straight up): a little makes them arc out of
-	/// the emitter like a short, none makes them spray every way.
-	/// </summary>
-	[Property, Range( 0f, 1f )]
-	public float UpBias { get; set; } = 0.05f;
-
 	/// <summary>How far from the emitter a spark may start, in units.</summary>
 	[Property, Range( 0f, 50f )]
 	public float Spread { get; set; } = 2.5f;
 
 	/// <summary>How big a spark is when it appears, and when it goes out, in units across.</summary>
 	[Property, Range( 0.5f, 100f )]
-	public float StartSize { get; set; } = 1.8f;
+	public float StartSize { get; set; } = 1f;
 
 	[Property, Range( 0.2f, 100f )]
-	public float EndSize { get; set; } = 0.4f;
+	public float EndSize { get; set; } = 0.25f;
 
 	/// <summary>
 	/// How many times taller than wide a spark is drawn: a streak rather than a dot, which is what a fast spark looks
 	/// like. 1 makes it round.
 	/// </summary>
 	[Property, Range( 1f, 12f )]
-	public float Stretch { get; set; } = 2f;
+	public float Stretch { get; set; } = 2.5f;
 
-	/// <summary>The sparks' colour. Drawn additively, so a whiter colour reads as a hotter spark.</summary>
+	/// <summary>The sparks' colour.</summary>
 	[Property] public Color Tint { get; set; } = new( 1f, 0.88f, 0.6f, 1f );
 
 	/// <summary>
@@ -100,12 +95,6 @@ public sealed class SparkEmitter : Component
 	/// </summary>
 	[Property] public bool Additive { get; set; }
 
-	/// <summary>
-	/// Whether each clump also flashes where it was thrown from: one large spark that lives a few frames. It is what
-	/// reads as the arc itself, with the sparks as what it throws off.
-	/// </summary>
-	[Property] public bool Flash { get; set; } = true;
-
 	/// <summary>Whether the sparks light what is around them, with one point light on the emitter.</summary>
 	[Property] public bool Light { get; set; } = true;
 
@@ -113,17 +102,110 @@ public sealed class SparkEmitter : Component
 	[Property, Range( 0f, 1000f ), ShowIf( nameof( Light ), true )]
 	public float LightRadius { get; set; } = 90f;
 
-	/// <summary>How much of the next clump has been earned, so the clumps come out evenly.</summary>
-	float pending;
+	ParticleEffect effect;
+	ParticleSpriteRenderer renderer;
+	ParticleSphereEmitter emitter;
+	Sprite defaultSprite;
+	PointLight bulb;
 
 	/// <summary>How long since the last crackle, so one clump in a burst is the one that is heard.</summary>
 	RealTimeSince sinceCrackle = float.MaxValue;
 
-	Sprite defaultSprite;
+	protected override void OnEnabled()
+	{
+		Build();
+	}
 
-	PointLight bulb;
+	protected override void OnUpdate()
+	{
+		if ( !emitter.IsValid() )
+			Build();
 
-	protected override void OnEnabled() => pending = Interval;
+		if ( !emitter.IsValid() )
+			return;
+
+		emitter.Enabled = Emitting;
+
+		if ( !Emitting )
+		{
+			Flicker( 0f );
+
+			return;
+		}
+
+		CrackleSound();
+		Flicker( 0.55f + System.Random.Shared.NextSingle() * 0.45f );
+	}
+
+	/// <summary>
+	/// Make the particle components the sparks are drawn by, or find the ones already on the object, and set them up.
+	/// Safe to call again: it only ever rewrites their numbers.
+	/// </summary>
+	public void Build()
+	{
+		if ( !GameObject.IsValid() )
+			return;
+
+		var picture = Picture;
+
+		if ( !picture.IsValid() )
+			return;
+
+		effect = Find<ParticleEffect>();
+		renderer = Find<ParticleSpriteRenderer>();
+		emitter = Find<ParticleSphereEmitter>();
+
+		// The engine emits at a rate, not in clumps: Count sparks every Interval is Count / Interval a second, which
+		// looks the same once they are flying and costs nothing to hold there.
+		var rate = Math.Clamp( Count / MathF.Max( Interval, 0.01f ), 1f, 2000f );
+
+		effect.MaxParticles = Math.Clamp( (int)MathF.Ceiling( rate * Lifetime * 1.4f ) + 16, 8, 1024 );
+		effect.Lifetime = new ParticleFloat( Lifetime * 0.6f, Lifetime * 1.4f );
+		effect.StartVelocity = new ParticleFloat( Speed * 0.45f, Speed * 1.15f );
+		effect.Damping = 1.2f;
+		effect.ApplyColor = true;
+		effect.ApplyAlpha = true;
+		effect.ApplyShape = true;
+		effect.Tint = Tint;
+		effect.Stretch = Stretch;
+
+		effect.Force = Gravity > 0.01f;
+		effect.ForceDirection = Vector3.Down;
+		effect.ForceScale = Gravity / 100f;
+
+		var size = new Curve();
+		size.AddPoint( 0f, StartSize );
+		size.AddPoint( 1f, EndSize );
+		effect.Scale = SmokeEmitter.OverLife( size );
+
+		var fade = new Curve();
+		fade.AddPoint( 0f, 1f );
+		fade.AddPoint( 0.7f, 0.8f );
+		fade.AddPoint( 1f, 0f );
+		effect.Alpha = SmokeEmitter.OverLife( fade );
+
+		renderer.ParticleEffect = effect;
+		renderer.Sprite = picture;
+		renderer.Additive = Additive;
+		renderer.Lighting = false;
+		renderer.Shadows = false;
+
+		// A spark is moving fast enough to smear: the engine draws the streak, so there is nothing to draw by hand.
+		renderer.FaceVelocity = Stretch > 1.01f;
+		renderer.MotionBlur = false;
+		renderer.LeadingTrail = Stretch > 1.01f;
+
+		emitter.Radius = Spread;
+		emitter.Loop = true;
+		// No duration and looping: the engine reads that as "for ever".
+		emitter.Duration = 0f;
+		emitter.Rate = rate;
+		emitter.Enabled = Emitting;
+	}
+
+	/// <summary>The particle component of that kind already on this object, or a new one.</summary>
+	T Find<T>() where T : Component, new() =>
+		GameObject.Components.Get<T>() ?? GameObject.Components.Create<T>();
 
 	Sprite Picture => Sprite ?? (defaultSprite ??= Sprite.FromTexture( MakeSparkTexture() ));
 
@@ -159,82 +241,6 @@ public sealed class SparkEmitter : Component
 		return bitmap.ToTexture();
 	}
 
-	protected override void OnUpdate()
-	{
-		if ( !Emitting )
-		{
-			pending = 0f;
-			Flicker( 0f );
-
-			return;
-		}
-
-		pending += Time.Delta;
-
-		while ( pending >= Interval )
-		{
-			pending -= Interval;
-			Clump();
-		}
-
-		Flicker( 0.55f + System.Random.Shared.NextSingle() * 0.45f );
-	}
-
-	void Clump()
-	{
-		if ( !Picture.IsValid() )
-			return;
-
-		CrackleSound();
-
-		if ( Flash )
-			MakeSpark( FlashSize, FlashLifetime );
-
-		for ( var i = 0; i < Count; i++ )
-			MakeSpark( StartSize, Lifetime * (0.6f + System.Random.Shared.NextSingle() * 0.8f) );
-
-		Flicker( 1.6f );
-	}
-
-	/// <summary>How big the flash is, and how long it lasts.</summary>
-	const float FlashSize = 9f, FlashLifetime = 0.05f;
-
-	void MakeSpark( float size, float lifetime )
-	{
-		var go = new GameObject( true, "Spark" );
-		go.Flags |= GameObjectFlags.NotSaved;
-		go.NetworkMode = NetworkMode.Never;
-
-		go.WorldPosition = WorldPosition + new Vector3(
-			System.Random.Shared.NextSingle() * 2f - 1f,
-			System.Random.Shared.NextSingle() * 2f - 1f,
-			System.Random.Shared.NextSingle() * 2f - 1f ) * Spread;
-
-		var renderer = go.Components.Create<SpriteRenderer>();
-		renderer.Sprite = Picture;
-		renderer.Size = new Vector2( size, size * Stretch );
-		renderer.Color = Tint;
-		renderer.Additive = Additive;
-		renderer.Lighting = false;
-		renderer.Shadows = false;
-		renderer.AlphaCutoff = 0f;
-
-		var direction = new Vector3(
-			System.Random.Shared.NextSingle() * 2f - 1f,
-			System.Random.Shared.NextSingle() * 2f - 1f,
-			System.Random.Shared.NextSingle() * 2f - 1f ).Normal + Vector3.Up * UpBias;
-
-		var spark = go.Components.Create<SparkPuff>();
-		spark.Renderer = renderer;
-		spark.Lifetime = lifetime;
-		spark.StartSize = size;
-		spark.EndSize = size * (EndSize / MathF.Max( StartSize, 0.01f ));
-		spark.Stretch = Stretch;
-		spark.Gravity = Gravity;
-		spark.Tint = Tint;
-		spark.Velocity = direction.Normal * Speed * (0.55f + System.Random.Shared.NextSingle() * 0.75f);
-	}
-
 	/// <summary>
 	/// Play the crackle, if enough has passed since the last one. The sound is picked, pitched and levelled a little
 	/// differently every time, by the sound asset and here, so a sparking camera doesn't sound like a loop.
@@ -257,7 +263,7 @@ public sealed class SparkEmitter : Component
 		handle.Pitch = 0.92f + System.Random.Shared.NextSingle() * 0.2f;
 	}
 
-	/// <summary>A single bulb for all the sparks, brightened as a clump goes off.</summary>
+	/// <summary>A single bulb for all the sparks, brightened as they fly.</summary>
 	void Flicker( float brightness )
 	{
 		if ( !Light || !GameObject.IsValid() )

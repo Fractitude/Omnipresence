@@ -1,9 +1,14 @@
 # Effects: smoke and sparks
 
 `Code/Effects/` holds the small effects the game makes itself rather than borrowing a particle file. Both are the same
-shape: an emitter component you drop on anything, and one tiny billboard per particle that grows or falls, fades, and
-destroys itself. Neither is saved and neither is networked — every machine makes the particles it sees, the way each
-client draws its own camera feed.
+shape: an emitter component you drop on anything, which builds the engine's own particle system on its GameObject — a
+`ParticleEffect` for the particles, a `ParticleSpriteRenderer` for their picture, a `ParticleSphereEmitter` for where
+they come from — and maps a handful of readable properties onto it. Nothing about them is saved and nothing is
+networked: every machine makes the particles it sees, the way each client draws its own camera feed.
+
+The engine does the simulation and the drawing. There is no GameObject per particle, nothing to destroy, and no code
+ticking particles forward: turn the emitter component's `Enabled` off and the particles already in the air finish their
+life on their own.
 
 ## `SmokeEmitter`
 
@@ -14,44 +19,55 @@ Smoke: puffs that rise, drift, grow and fade. A broken chimney, a wreck, a fire 
 | `Emitting` | On or off. Turning it off lets the puffs already in the air finish their life instead of vanishing. |
 | `Rate` | Puffs a second. |
 | `Lifetime` | How long a puff lives, in seconds. |
-| `Rise` | How fast a puff climbs, in units a second. |
-| `Wind` | How far it may wander sideways, in units a second. |
-| `Spread` | How far from the emitter a puff may start, in units. |
+| `Rise` | How hard a puff is pushed up, in units a second squared. |
+| `Wind` | How hard it is pushed sideways, in units a second squared, along the emitter's right. |
+| `Spread` | How far from the emitter a puff may start, in units (the sphere emitter's radius). |
 | `StartSize`, `EndSize` | How big a puff is when it appears and when it goes, in units across. |
-| `Tint` | The smoke's colour, alpha included: lower alpha is thinner smoke. |
+| `Thickness` | How thick the smoke is where it is thickest, 0 to 1. Lower is wispier. |
+| `Tint` | The smoke's colour. Its alpha multiplies `Thickness`. |
 | `Sprite` | What a puff is drawn with. Empty uses the puff the emitter makes: a soft ragged disc, 128 px, so the sizes mean what they say. |
 
 ## `SparkEmitter`
 
-Electric sparks: short-lived bright scraps thrown in clumps, the way a short circuit throws them, falling under gravity
-and crackling out. A camera with a bad earth, a cut cable, a machine burning out.
+Electric sparks: short-lived bright scraps that fly out, fall under gravity and crackle out. A camera with a bad earth, a
+cut cable, a machine burning out.
 
 | Property | What it is |
 |---|---|
 | `Emitting` | On or off. |
-| `Interval`, `Count` | How often a clump is thrown, in seconds, and how many sparks are in it. |
+| `Interval`, `Count` | How often a clump is thrown, in seconds, and how many sparks are in it. The engine emits at a rate, so `Count / Interval` sparks a second — 285 with the defaults — which looks the same once they are flying. |
 | `Lifetime` | How long a spark lives, in seconds; each one differs a little from this. |
 | `Speed`, `Gravity` | How fast it leaves, in units a second, and how hard it is pulled down. |
-| `UpBias` | How much of its direction is up, 0 to 1: a little makes the sparks arc out, none sprays them every way. |
 | `Spread` | How far from the emitter a spark may start, in units. |
-| `StartSize`, `EndSize`, `Stretch` | How big a spark is at each end of its life, and how many times taller than wide it is drawn. |
+| `StartSize`, `EndSize`, `Stretch` | How big a spark is at each end of its life, and how many times taller than wide the engine draws it. Above 1 the renderer also trails it along its motion, which is what makes a fast spark a streak rather than a dot. |
 | `Tint` | The sparks' colour. |
 | `Additive` | Additive is the hotter look on a dark background, but it disappears against a bright sky. Off, the sparks keep their own colour anywhere — the default, because this game is played outdoors in daylight. |
-| `Flash` | Whether each clump also flashes where it was thrown from, one big spark that lives a few frames. That flash is what reads as the arc itself, with the sparks as what it throws off. |
-| `Light`, `LightRadius` | One point light on the emitter, flickering with the clumps, which is what makes sparks read at night. |
+| `Light`, `LightRadius` | One point light on the emitter, flickering while the sparks fly, which is what makes them read at night. |
+| `Crackle`, `CrackleVolume`, `CrackleGap` | The sound, how loud, and the shortest gap between two of them. See below. |
 | `Sprite` | What a spark is drawn with. Empty uses a hard-edged hot dot the emitter makes, 32 px. |
+
+There is no `UpBias` any more: the engine's emitters throw particles outward from the shape they are given, and a sphere
+with a small radius and a speed range already sprays like a short. `Flash` went too — the sparks themselves are bright
+scraps at the source, and the light does what the flash used to.
 
 ## What both get wrong if you don't tune them
 
-- **`SpriteRenderer.AlphaCutoff` has to be 0.** At its default of 0.5 the rim of a particle is clipped, and the effect
-  reads as a string of speckled bubbles instead of smoke or sparks.
-- **`Lighting` and `Shadows` off.** A particle is its own light; a lit billboard goes dark in a corner it should not be
-  dark in, and casts a shadow nothing asked for.
-- **Small and many beats big and few.** A smoke puff is 10 to 44 units across over its life; a spark is under two and
-  gone in a fifth of a second. Much bigger, close to the camera, blooms into a glowing petal.
+- **`ForceScale` is in hundreds of units a second squared.** `Rise` and `Gravity` are in units a second squared, and the
+  components divide by 100 before handing them over, which is the convention the engine's own smoke template uses.
+- **Damping eats the force.** A `Damping` of 2 against a small rise leaves a puff with a terminal speed of a dozen units a
+  second and a plume that looks like it is standing still. Smoke is damped at 0.8, and rises at 120.
+- **`Duration` of 0 and looping means for ever.** A one-second loop looks fine for sparks and leaves a visible gap in a
+  smoke plume every second, so both emitters set 0.
+- **`Lighting` and `Shadows` off.** A particle is its own light; a lit one goes dark in a corner it should not be dark
+  in, and casts a shadow nothing asked for.
+- **Small and many beats big and few.** A smoke puff is 12 to 55 units across over its life; a spark is about one unit
+  and gone in a fifth of a second. Much bigger, close to the camera, blooms into a glowing petal.
 - **The sprite is made, not loaded.** The engine's smoke sheets are 2048 px with a small wisp inside them, so a sprite
   cut from one is mostly empty and the sizes stop meaning anything. Both emitters build a texture that fills its own
-  square.
+  square, and a puff that fades all the way through from its centre reads as a smudge — solid in the middle is smoke.
+- **The components are found, not added twice.** `Build()` takes an existing `ParticleEffect`, renderer or emitter on the
+  GameObject if there is one, so a prefab that already carries a tuned particle system keeps it and only has its numbers
+  rewritten.
 
 ## The sparks' sound
 
@@ -65,9 +81,9 @@ a burst of bright noise that dies in tens of milliseconds, a handful of small ti
 and a little low body so it reads as a spark rather than a hiss. Run it by hand and let the editor compile the wavs; it
 is not part of the build, and the wavs are committed so the game doesn't depend on Python.
 
-`SparkEmitter` plays it from `Clump`: `Crackle` (empty means the asset above), `CrackleVolume` on top of the sound's own
-volume, and `CrackleGap` — the shortest time between two crackles, 0.15 s by default. A clump every 0.07 s would
-machine-gun the sample; the gap keeps the sound to the clumps that matter and lets the rest be silent sparks.
+`SparkEmitter` plays it while it emits: `Crackle` (empty means the asset above), `CrackleVolume` on top of the sound's
+own volume, and `CrackleGap` — the shortest time between two crackles, 0.15 s by default. Sparks leave at 285 a second;
+without the gap they would machine-gun the sample.
 
 ## The broken camera's sparks
 

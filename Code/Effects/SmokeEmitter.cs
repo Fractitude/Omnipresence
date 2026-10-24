@@ -8,9 +8,10 @@ namespace Sandbox;
 /// life rather than vanishing with it.
 /// </summary>
 /// <remarks>
-/// The smoke is made here, not in the scene: each puff is a billboard that destroys itself when its life runs out, and
-/// nothing about them is saved or sent, so every machine makes the smoke it sees. A plume at the default rate costs a
-/// dozen billboards at most.
+/// The puffs are the engine's, not ours: this component builds a <see cref="ParticleEffect"/> with a
+/// <see cref="ParticleSpriteRenderer"/> and a <see cref="ParticleSphereEmitter"/> on its own GameObject, and only maps
+/// the handful of properties below onto them. Nothing about the plume is saved or sent, so every machine makes the
+/// smoke it sees.
 /// </remarks>
 [Title( "Smoke Emitter" ), Icon( "cloud" )]
 public sealed class SmokeEmitter : Component
@@ -26,19 +27,19 @@ public sealed class SmokeEmitter : Component
 
 	/// <summary>How many puffs a second.</summary>
 	[Property, Range( 0.1f, 40f )]
-	public float Rate { get; set; } = 10f;
+	public float Rate { get; set; } = 12f;
 
-	/// <summary>How long a puff lives, in seconds.</summary>
+	/// <summary>How long a puff lives, in seconds. Each one differs a little from this.</summary>
 	[Property, Range( 0.2f, 10f )]
 	public float Lifetime { get; set; } = 2.4f;
 
-	/// <summary>How fast a puff climbs, in units a second.</summary>
+	/// <summary>How hard a puff is pushed up, in units a second squared.</summary>
 	[Property, Range( 0f, 400f )]
-	public float Rise { get; set; } = 26f;
+	public float Rise { get; set; } = 120f;
 
-	/// <summary>How far a puff may wander sideways, in units a second.</summary>
+	/// <summary>How hard a puff is pushed sideways, in units a second squared.</summary>
 	[Property, Range( 0f, 200f )]
-	public float Wind { get; set; } = 6f;
+	public float Wind { get; set; } = 10f;
 
 	/// <summary>How far from the emitter a puff may start, in units.</summary>
 	[Property, Range( 0f, 100f )]
@@ -46,30 +47,120 @@ public sealed class SmokeEmitter : Component
 
 	/// <summary>How big a puff is when it appears, and when it goes, in units across.</summary>
 	[Property, Range( 1f, 200f )]
-	public float StartSize { get; set; } = 10f;
+	public float StartSize { get; set; } = 12f;
 
 	[Property, Range( 1f, 400f )]
-	public float EndSize { get; set; } = 44f;
+	public float EndSize { get; set; } = 55f;
 
-	/// <summary>The smoke's colour, alpha included: lower alpha is thinner smoke.</summary>
-	[Property] public Color Tint { get; set; } = new( 0.24f, 0.23f, 0.22f, 0.75f );
+	/// <summary>How thick the smoke is where it is thickest, 0 to 1: lower is wispier.</summary>
+	[Property, Range( 0f, 1f )]
+	public float Thickness { get; set; } = 0.85f;
+
+	/// <summary>The smoke's colour. Its alpha multiplies <see cref="Thickness"/>.</summary>
+	[Property] public Color Tint { get; set; } = new( 0.24f, 0.23f, 0.22f, 1f );
 
 	/// <summary>
-	/// The picture a puff is drawn with. Leave it empty for the engine's smoke sheet; a spark, dust or ash sprite works
-	/// just as well.
+	/// The picture a puff is drawn with. Leave it empty for the soft ragged disc the emitter makes itself; any sprite
+	/// works.
 	/// </summary>
 	[Property] public Sprite Sprite { get; set; }
 
-	/// <summary>How much of the next puff has been earned by the rate, so it comes out evenly.</summary>
-	float pending;
-
+	ParticleEffect effect;
+	ParticleSpriteRenderer renderer;
+	ParticleSphereEmitter emitter;
 	Sprite defaultSprite;
+
+	protected override void OnEnabled()
+	{
+		Build();
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !emitter.IsValid() )
+			Build();
+
+		if ( emitter.IsValid() )
+			emitter.Enabled = Emitting;
+	}
+
+	/// <summary>
+	/// Make the particle components this plume is drawn by, or find the ones already on the object, and set them up.
+	/// Safe to call again: it only ever rewrites their numbers.
+	/// </summary>
+	public void Build()
+	{
+		if ( !GameObject.IsValid() )
+			return;
+
+		var picture = Picture;
+
+		if ( !picture.IsValid() )
+			return;
+
+		effect = Find<ParticleEffect>();
+		renderer = Find<ParticleSpriteRenderer>();
+		emitter = Find<ParticleSphereEmitter>();
+
+		effect.MaxParticles = Math.Clamp( (int)MathF.Ceiling( Rate * Lifetime ) + 8, 8, 512 );
+		effect.Lifetime = new ParticleFloat( Lifetime * 0.85f, Lifetime * 1.15f );
+		effect.StartVelocity = new ParticleFloat( 2f, 12f );
+		effect.Damping = 0.8f;
+		effect.ApplyColor = true;
+		effect.ApplyAlpha = true;
+		effect.ApplyShape = true;
+		effect.Tint = Tint;
+
+		// Rise and wind are one force, because the engine has one: up, leaning the way the emitter leans.
+		var push = Vector3.Up * Rise + WorldRotation.Right * Wind;
+		var leaning = push.Length > 0.01f;
+
+		effect.Force = leaning;
+		effect.ForceDirection = leaning ? push.Normal : Vector3.Up;
+		effect.ForceScale = push.Length / 100f;
+
+		var size = new Curve();
+		size.AddPoint( 0f, StartSize );
+		size.AddPoint( 1f, EndSize );
+		effect.Scale = OverLife( size );
+
+		// A puff comes in thin, thickens as it leaves the vent, then thins out as it climbs.
+		var fade = new Curve();
+		fade.AddPoint( 0f, 0f );
+		fade.AddPoint( 0.25f, Thickness );
+		fade.AddPoint( 1f, 0f );
+		effect.Alpha = OverLife( fade );
+
+		renderer.ParticleEffect = effect;
+		renderer.Sprite = picture;
+
+		// Smoke is its own light: lit particles go dark in a corner and cast shadows nothing asked for.
+		renderer.Lighting = false;
+		renderer.Shadows = false;
+		renderer.Additive = false;
+
+		emitter.Radius = Spread;
+		emitter.Loop = true;
+		// No duration and looping: the engine reads that as "for ever", and one loop restarting every second
+		// leaves a gap in the plume.
+		emitter.Duration = 0f;
+		emitter.Rate = Rate;
+		emitter.Enabled = Emitting;
+	}
+
+	/// <summary>A curve that is read over the particle's life instead of being one number.</summary>
+	internal static ParticleFloat OverLife( Curve curve ) =>
+		new() { Type = ParticleFloat.ValueType.Curve, Evaluation = ParticleFloat.EvaluationType.Life, CurveA = curve };
+
+	/// <summary>The particle component of that kind already on this object, or a new one.</summary>
+	T Find<T>() where T : Component, new() =>
+		GameObject.Components.Get<T>() ?? GameObject.Components.Create<T>();
 
 	Sprite Picture => Sprite ?? (defaultSprite ??= Sprite.FromTexture( MakePuffTexture() ));
 
 	/// <summary>
 	/// The puff a plume uses when it is given no sprite: a soft ragged disc, with the edges torn up so a cloud of them
-	/// doesn't read as a string of bubbles. Made here rather than loaded, so it fills its own square and the sizes below
+	/// doesn't read as a string of bubbles. Made here rather than loaded, so it fills its own square and the sizes above
 	/// mean what they say.
 	/// </summary>
 	static Texture MakePuffTexture()
@@ -91,8 +182,9 @@ public sealed class SmokeEmitter : Component
 					+ 0.05f * MathF.Sin( angle * 3f - 1.4f )
 					+ 0.03f * MathF.Sin( angle * 5f + 2.6f );
 
+				// Solid in the middle, soft at the rim: a disc that fades all the way through reads as a smudge.
 				var fill = Math.Clamp( 1f - distance / rim, 0f, 1f );
-				var alpha = fill * fill * (0.75f + 0.25f * System.Random.Shared.NextSingle());
+				var alpha = MathF.Pow( fill, 0.6f ) * (0.85f + 0.15f * System.Random.Shared.NextSingle());
 
 				var grey = 0.82f + 0.18f * System.Random.Shared.NextSingle();
 				bitmap.SetPixel( x, y, new Color( grey, grey, grey, Math.Clamp( alpha, 0f, 1f ) ) );
@@ -100,64 +192,5 @@ public sealed class SmokeEmitter : Component
 		}
 
 		return bitmap.ToTexture();
-	}
-
-	protected override void OnUpdate()
-	{
-		if ( !Emitting || Rate <= 0f )
-		{
-			pending = 0f;
-
-			return;
-		}
-
-		pending += Rate * Time.Delta;
-
-		while ( pending >= 1f )
-		{
-			pending -= 1f;
-			MakePuff();
-		}
-	}
-
-	void MakePuff()
-	{
-		if ( !Picture.IsValid() )
-			return;
-
-		var go = new GameObject( true, "Smoke Puff" );
-		go.Flags |= GameObjectFlags.NotSaved;
-		go.NetworkMode = NetworkMode.Never;
-
-		var jitter = new Vector3(
-			System.Random.Shared.NextSingle() * 2f - 1f,
-			System.Random.Shared.NextSingle() * 2f - 1f,
-			System.Random.Shared.NextSingle() * 2f - 1f );
-
-		go.WorldPosition = WorldPosition + jitter * Spread;
-
-		var renderer = go.Components.Create<SpriteRenderer>();
-		renderer.Sprite = Picture;
-		renderer.Size = new Vector2( StartSize, StartSize );
-		renderer.Color = Tint;
-
-		// Smoke is its own light: lit billboards go dark in a corner and cast shadows nothing asked for.
-		renderer.Lighting = false;
-		renderer.Shadows = false;
-
-		// No cutout: the puff is soft all the way to its edge, and a cutout turns its faint rim into speckles.
-		renderer.AlphaCutoff = 0f;
-
-		var angle = System.Random.Shared.NextSingle() * MathF.PI * 2f;
-
-		var puff = go.Components.Create<SmokePuff>();
-		puff.Renderer = renderer;
-		puff.Lifetime = Lifetime;
-		puff.StartSize = StartSize;
-		puff.EndSize = EndSize;
-		puff.Rise = Rise;
-		puff.Tint = Tint;
-		var drift = Wind * (0.4f + System.Random.Shared.NextSingle() * 0.6f);
-		puff.Velocity = new Vector3( MathF.Cos( angle ), MathF.Sin( angle ), 0f ) * drift;
 	}
 }
