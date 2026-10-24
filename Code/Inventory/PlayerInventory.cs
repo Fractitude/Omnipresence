@@ -232,6 +232,62 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
+	/// Combine or split with a drag (<see cref="StackRules"/>): the stack in <paramref name="from"/> is added to the
+	/// stack in <paramref name="to"/> (Combine), or half of it is moved to an empty slot or added to the stack there
+	/// (Split, or both). Checked in full before anything changes, written in one step. On the player's client this asks
+	/// the host.
+	/// </summary>
+	public void Stack( int from, int to, StackMode mode )
+	{
+		if ( IsAuthority )
+			DoStack( from, to, mode );
+		else
+			HostStack( from, to, (int)mode );
+	}
+
+	/// <summary>
+	/// Combine or split between two bag slots. Returns null when it worked, else the reason it did not, and then
+	/// nothing has changed. Host only.
+	/// </summary>
+	public string TryStack( int from, int to, StackMode mode )
+	{
+		if ( !CheckAuthority( nameof( TryStack ) ) )
+			return "Nothing happens.";
+
+		Resize();
+
+		if ( from == to || from < 0 || to < 0 || from >= slots.Length || to >= slots.Length )
+			return "Nothing happens.";
+
+		if ( !StackRules.Plan( slots[from], slots[to], mode, out var newFrom, out var newTo, out var error ) )
+			return error;
+
+		slots[from] = newFrom;
+		slots[to] = newTo;
+		Changed();
+		return null;
+	}
+
+	/// <summary>
+	/// Put an item in a slot, or empty it with null, replacing what is there. For code that has already checked a move
+	/// as a whole (<see cref="StorageRules.Stack"/>). Host only.
+	/// </summary>
+	public bool SetSlot( int slot, ItemData item )
+	{
+		if ( !CheckAuthority( nameof( SetSlot ) ) )
+			return false;
+
+		Resize();
+
+		if ( slot < 0 || slot >= slots.Length )
+			return false;
+
+		slots[slot] = item;
+		Changed();
+		return true;
+	}
+
+	/// <summary>
 	/// Take the item out of a slot and drop it. On the player's client this asks the host.
 	/// </summary>
 	public void Drop( int slot )
@@ -247,6 +303,13 @@ public sealed class PlayerInventory : Component
 	{
 		if ( IsOwnerCalling() )
 			DoMove( from, to );
+	}
+
+	[Rpc.Host]
+	void HostStack( int from, int to, int mode )
+	{
+		if ( IsOwnerCalling() )
+			DoStack( from, to, (StackMode)mode );
 	}
 
 	[Rpc.Host]
@@ -274,6 +337,17 @@ public sealed class PlayerInventory : Component
 
 		(slots[from], slots[to]) = (slots[to], slots[from]);
 		Changed();
+	}
+
+	void DoStack( int from, int to, StackMode mode )
+	{
+		if ( !StackRules.IsMode( (int)mode ) )
+			return;
+
+		// Say why it did not work, to the player who asked, in chat.
+		if ( TryStack( from, to, mode ) is { } error && Network.Owner is { } owner
+		     && PlayerCrime.For( owner ) is { } player )
+			player.Tell( CrimeResult.Fail( error ) );
 	}
 
 	void DoDrop( int slot )

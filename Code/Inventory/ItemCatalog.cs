@@ -54,6 +54,15 @@ public static class ItemCatalog
 	public static ItemDef Find( string id ) => items.FirstOrDefault( x => x.Id == id );
 
 	/// <summary>
+	/// Whether batches of a kind can be combined and split (<see cref="StackRules"/>): the products of the drugs and
+	/// their raw materials. Seeds and cultures, parcels and ordinary items cannot. A new drug in the
+	/// <see cref="ProductCatalog"/> is included without further change.
+	/// </summary>
+	public static bool IsCombinable( string kind ) =>
+		!string.IsNullOrEmpty( kind ) && (ProductCatalog.OfRaw( kind ) is not null
+		                                  || ProductCatalog.OfProduct( kind ) is not null);
+
+	/// <summary>
 	/// The icon glyph for an item with no model: its kind's icon, or the plain box for an ordinary item.
 	/// </summary>
 	public static string IconFor( ItemData item ) => Find( item?.Kind )?.Icon ?? "inventory_2";
