@@ -32,6 +32,10 @@ Prefabs under `Assets/items/` are a box model with a tint, a box collider, a `Ri
 change the model and size, and name it in the kind's `ItemDef.WorldPrefab`. The generic one is tinted with the kind's
 `ItemDef.Color` at run time.
 
+The root is Network Mode **Object** and the `Model` child is Network Mode **Snapshot**, never Never: a `Never` child of a
+network object is not sent, so clients got every dropped item with no model (invisible, while the host saw it). Any child
+a client must have — the model, the collider — has to be Snapshot, the way `mailbox.prefab` has it.
+
 ## Picking up
 
 The Pick up option runs on the host (the `Interactable` re-checks reach and line of sight from the caller's eye).

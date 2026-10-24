@@ -53,7 +53,7 @@
         "Scale": "1.4,0.9,0.6",
         "Tags": "",
         "Enabled": true,
-        "NetworkMode": 0,
+        "NetworkMode": 2,
         "NetworkFlags": 0,
         "NetworkOrphaned": 0,
         "NetworkTransmit": true,
