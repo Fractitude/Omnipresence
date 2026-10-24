@@ -1,0 +1,123 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: Assets/navi/system/security.napp, so always installed, with root. *@
+@* It is shared: the host's copy lists the cameras in range and holds which one is enlarged. A client's window draws *@
+@* the host's state and its own pictures: see SecurityFeeds. *@
+
+<root>
+	<div class="bar">
+		<div class="heading">@UiState.Heading</div>
+		<div class="count">@UiState.CountText</div>
+		<div class="grow"></div>
+
+		@if ( UiState.IsEnlarged )
+		{
+			<div class="button" @onclick=@( () => Navi.Act( SecurityViewModel.GridAction ) )>
+				<i>grid_view</i>
+				All cameras
+			</div>
+		}
+	</div>
+
+	@if ( !UiState.HasCameras )
+	{
+		<div class="empty">
+			<i>videocam_off</i>
+			<div class="hint">No cameras in range. Place a security camera within range of this computer.</div>
+		</div>
+	}
+	else if ( UiState.Selected is { } selected )
+	{
+		<div class="enlarged">
+			<div class="side">
+				@foreach ( var other in UiState.Others )
+				{
+					<div class="row" @onclick=@( () => Navi.Act( SecurityViewModel.SelectAction, other.Id ) )>
+						<div class="row-name">@other.Name</div>
+						<div class="row-detail">@other.Detail</div>
+					</div>
+				}
+			</div>
+
+			<div class="stage">
+				@if ( Feeds.Picture( selected.Id ) is { } big )
+				{
+					<Image class="feed" Texture=@big/>
+				}
+				else
+				{
+					<div class="waiting">Connecting...</div>
+				}
+
+				<div class="live">
+					<div class="dot"></div>
+					LIVE
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<div class="grid">
+			@foreach ( var camera in UiState.Cameras )
+			{
+				<div class="cell" @onclick=@( () => Navi.Act( SecurityViewModel.SelectAction, camera.Id ) )>
+					@if ( Feeds.Picture( camera.Id ) is { } picture )
+					{
+						<Image class="feed" Texture=@picture/>
+					}
+					else
+					{
+						<div class="waiting">Connecting...</div>
+					}
+
+					<div class="caption">
+						<div class="caption-name">@camera.Name</div>
+						<div class="caption-detail">@camera.Detail</div>
+					</div>
+				</div>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The computer comes from the window this panel is in.
+	/// </summary>
+	SecurityViewModel ViewModel => field ??= new( GetComputer );
+
+	/// <summary>
+	/// This client's own pictures, asked for every frame. Not part of the state, which goes to every player.
+	/// </summary>
+	SecurityFeeds Feeds => field ??= new( () => GetComputer()?.Scene );
+
+	/// <summary>
+	/// What this window draws: the host's state for a viewer, this copy's own for the user.
+	/// </summary>
+	SecurityUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<SecurityUiState>() ?? SecurityUiState.Empty : ViewModel.UiState;
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		// Either copy asks for the pictures: a viewer's window shows the feed too, from its own world.
+		Feeds.Keep( UiState );
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => System.HashCode.Combine( UiState.Revision, Feeds.Revision );
+}

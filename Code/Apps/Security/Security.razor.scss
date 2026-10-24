@@ -1,0 +1,256 @@
+Security
+{
+	// The default size: three cameras across in the grid, and the enlarged one beside its list. The window can be resized.
+	width: 680px;
+	height: 360px;
+	flex-direction: column;
+	padding: 8px;
+	gap: 8px;
+	background-color: #05090b;
+	color: #cbe4dc;
+	font-size: 12px;
+}
+
+i
+{
+	font-family: Material Icons;
+}
+
+.bar
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	height: 24px;
+
+	.heading
+	{
+		font-size: 14px;
+		font-weight: 700;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.count
+	{
+		color: #4e7a72;
+		font-size: 11px;
+		white-space: nowrap;
+	}
+
+	.grow
+	{
+		flex-grow: 1;
+	}
+
+	.button
+	{
+		flex-direction: row;
+		align-items: center;
+		flex-shrink: 0;
+		gap: 4px;
+		height: 22px;
+		padding: 0 10px;
+		border: 1px solid #1d4a45;
+		color: #8fd8cb;
+		cursor: pointer;
+
+		i
+		{
+			font-size: 14px;
+		}
+
+		&:hover
+		{
+			background-color: #0d2320;
+			border-color: #37b3a0;
+		}
+	}
+}
+
+// One live picture. The camera draws 16 by 9 and the panel never stretches it out of shape.
+.feed
+{
+	object-fit: contain;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.waiting
+{
+	align-items: center;
+	justify-content: center;
+	color: #3d6b63;
+	background-color: #000;
+}
+
+// The grid of every camera, three across. More rows than fit scroll.
+.grid
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: 8px;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+}
+
+.cell
+{
+	width: 212px;
+	flex-direction: column;
+	flex-shrink: 0;
+	border: 1px solid #14322e;
+	background-color: #000;
+	cursor: pointer;
+
+	.feed,
+	.waiting
+	{
+		width: 100%;
+		height: 119px;
+	}
+
+	&:hover
+	{
+		border-color: #37b3a0;
+	}
+}
+
+.caption
+{
+	flex-direction: column;
+	padding: 3px 6px;
+	gap: 1px;
+	background-color: #08120f;
+
+	.caption-name
+	{
+		font-weight: 700;
+	}
+
+	.caption-detail
+	{
+		color: #4e7a72;
+		font-size: 10px;
+	}
+}
+
+// One camera enlarged, the rest in a list on its left. The list scrolls; the picture does not.
+.enlarged
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	flex-grow: 1;
+	min-height: 0;
+}
+
+.side
+{
+	width: 196px;
+	flex-direction: column;
+	flex-shrink: 0;
+	align-self: stretch;
+	gap: 6px;
+	overflow-y: scroll;
+}
+
+.row
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 1px;
+	padding: 6px 8px;
+	border: 1px solid #14322e;
+	background-color: #08120f;
+	cursor: pointer;
+
+	.row-name
+	{
+		font-weight: 700;
+	}
+
+	.row-detail
+	{
+		color: #4e7a72;
+		font-size: 10px;
+	}
+
+	&:hover
+	{
+		background-color: #0d2320;
+		border-color: #37b3a0;
+	}
+}
+
+.stage
+{
+	position: relative;
+	flex-grow: 1;
+	min-width: 0;
+	max-height: 100%;
+
+	// A feed is 16 by 9, so the box it is drawn in is too: otherwise the picture sits at the top of a taller
+	// box with black under it, and the engine can't centre a texture it fits into a box.
+	aspect-ratio: 1.7778;
+	align-items: center;
+	justify-content: center;
+	background-color: #000;
+	border: 1px solid #14322e;
+
+	.feed
+	{
+		width: 100%;
+		height: 100%;
+	}
+
+	.live
+	{
+		position: absolute;
+		left: 8px;
+		top: 8px;
+		flex-direction: row;
+		align-items: center;
+		gap: 5px;
+		padding: 2px 6px;
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 1px;
+		color: #ff6b6b;
+		background-color: rgba( 0, 0, 0, 0.55 );
+
+		.dot
+		{
+			width: 6px;
+			height: 6px;
+			border-radius: 3px;
+			background-color: #ff3b3b;
+		}
+	}
+}
+
+.empty
+{
+	flex-direction: column;
+	flex-grow: 1;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	text-align: center;
+	color: #3d6b63;
+
+	i
+	{
+		font-size: 34px;
+	}
+
+	.hint
+	{
+		max-width: 320px;
+	}
+}

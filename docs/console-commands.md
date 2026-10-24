@@ -73,6 +73,14 @@ Code: `Code/Health/`.
 | `spawn_buggy` | Spawn a buggy in front of you. Walk up to it and press Use to drive: WASD, Shift to boost, Space for the handbrake, F to switch the headlights. |
 | `omni.screenshake <0..2>` | How hard the camera shakes, such as in a fast vehicle. Default 0.3. Saved. |
 
+## Security
+
+A camera watches a place and gives a live picture to the Security System app on a nearby computer. See [security.md](security.md). Code: `Code/Security/`.
+
+| Command | What it does |
+|---|---|
+| `spawn_security_camera` | Put a security camera where you stand, at eye height, looking where you look. It appears in the Security System app of a computer within its signal range. |
+
 ## World clock
 
 The game's own time. A new world starts at 12:00 on Day 1, which is a Monday, and the host saves it to `world.json`. Same rules as above: editor only, and the host moves the clock for everyone (the host in the editor moves it itself, so it works while your player is away). Clients follow on the next sync. Moving the clock back delays shipments; moving it forward makes them arrive.

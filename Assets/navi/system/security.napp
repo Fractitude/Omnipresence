@@ -1,0 +1,16 @@
+{
+  "Title": "Security System",
+  "Description": "Watch the cameras around the building.",
+  "Icon": "videocam",
+  "Color": "#1b3a34",
+  "PanelType": "OmnipresenceApps.Security",
+  "CanMinimize": true,
+  "CanMaximize": true,
+  "CanResize": true,
+  "MinSize": "480,320",
+  "Shared": true,
+  "Permissions": [],
+  "IsSystem": true,
+  "__references": [],
+  "__version": 0
+}
