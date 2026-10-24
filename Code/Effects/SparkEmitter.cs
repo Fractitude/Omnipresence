@@ -86,11 +86,11 @@ public sealed class SparkEmitter : Component
 	public float CrackleVolume { get; set; } = 1f;
 
 	/// <summary>
-	/// How far the crackle carries, in units. A spark is a sound for the player standing at the camera, so it is short
-	/// (220 is about 5.5 m): past that it is not heard at all.
+	/// How far the crackle carries, in units. It is a sound for inside the house: 350 units is the width of it, and past
+	/// that it is not heard at all.
 	/// </summary>
 	[Property, Range( 50f, 2000f )]
-	public float HearingRange { get; set; } = 5000f;
+	public float HearingRange { get; set; } = 350f;
 
 	/// <summary>
 	/// The shortest gap between two crackles, in seconds. The first one plays the moment the sparks start, and then the

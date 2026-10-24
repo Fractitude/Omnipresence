@@ -14,18 +14,39 @@
   "Transmission": false,
   "OcclusionRadius": 32,
   "DistanceAttenuation": true,
-  "Distance": 5000,
+  "Distance": 350,
   "Falloff": [
     {
       "x": 0,
       "y": 1,
       "in": 0,
-      "out": 0,
+      "out": -1.6,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.15,
+      "y": 0.8,
+      "in": 1.2,
+      "out": -1.2,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.5,
+      "y": 0.4,
+      "in": 0.7,
+      "out": -0.7,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.85,
+      "y": 0.12,
+      "in": 0.3,
+      "out": -0.3,
       "mode": "Mirrored"
     },
     {
       "x": 1,
-      "y": 1,
+      "y": 0,
       "in": 0,
       "out": 0,
       "mode": "Mirrored"
