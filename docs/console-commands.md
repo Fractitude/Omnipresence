@@ -24,7 +24,7 @@ Testing only, for the grow, press, post and Hush loop. They ask the host, which 
 
 | Command | What it does |
 | --- | --- |
-| `crime_give <kind> [count] [quality]` | Give yourself a batch: kind is any item of the catalogue: `static_culture`, `static_raw`, `static_tab`, `haze_seed`, `haze_raw`, `haze_vial` or `parcel` (a wrong kind logs the list). Count defaults to 1, quality to 50. |
+| `crime_give <kind> [count] [quality]` | Give yourself a batch: kind is any item of the catalogue: `static_culture`, `static_raw`, `static_tab`, `haze_seed`, `haze_raw`, `haze_vial` or `parcel` (a wrong kind logs the list). Count defaults to 1, quality to 50. A count above the kind's stack size makes several stacks: `crime_give static_tab 600 50` gives 256 + 256 + 88 (it says so if the bag lacks the slots, and gives nothing). |
 | `crime_tray_ready` | Every tray you planted is ready to harvest now. |
 | `crime_postal_now` | The mailman, the escrow release and the Exchange cash-outs are all due now. |
 | `crime_orders [count]` | Put more orders on the Hush board (up to 10). |
