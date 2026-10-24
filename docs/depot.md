@@ -43,7 +43,7 @@ resting place at the next start.
 ## Moving it
 
 A bought object has a `Rigidbody`, so the Physgun moves it. It can also go in a vehicle: with a vehicle that has a
-cargo within 400 units and in clear sight, the object offers "Load into <vehicle>" (one row per vehicle, by type name), and the cargo window
+cargo area within 50 units (`VehicleCargo.LoadReach`) and in clear sight, the object offers "Load into <vehicle>" (one row per vehicle, by type name), and the cargo window
 unloads it behind the vehicle with the same id ([storage.md](storage.md), "Vehicle cargo").
 
 ## Ownership

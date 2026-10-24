@@ -15,7 +15,7 @@ namespace Sandbox;
 /// nothing: a box is still claimed by first use.
 /// <para>
 /// It also adds the option "Load into vehicle" to the object's <see cref="Interactable"/>: one row for each vehicle with a
-/// cargo within <see cref="VehicleCargo.LoadRange"/> (at most <see cref="MaxLoadOptions"/>, nearest first), labelled with
+/// cargo area within <see cref="VehicleCargo.LoadReach"/> (at most <see cref="MaxLoadOptions"/>, nearest first), labelled with
 /// the vehicle's type name. The rows are fixed options <c>load_0</c>, <c>load_1</c>, ... that hide themselves while no
 /// vehicle fills them, because an Interactable's list of options cannot change at run time.
 /// </para>
@@ -122,11 +122,11 @@ public sealed class PlacedObject : Component, IInteractionHandler
 			return new InteractionInfo( "" );
 
 		var vehicle = vehicles[index];
-		var meters = vehicle.DistanceTo( WorldPosition ) / 39.37f;
+		var meters = vehicle.ReachTo( GameObject ) / 39.37f;
 		var label = $"Load into {vehicle.VehicleName}";
 
 		return vehicle.HasObjectRoom
-			? new InteractionInfo( label, "local_shipping", $"Put the {DisplayName} in its cargo. {meters:0} m away." )
+			? new InteractionInfo( label, "local_shipping", $"Put the {DisplayName} in its cargo. {meters:0.0} m from the cargo area." )
 			: new InteractionInfo( label, "local_shipping", "Its cargo is full.", false );
 	}
 

@@ -43,7 +43,7 @@ public static class CargoMath
 	/// length, then again farther out; and last one spot above the vehicle. A ground candidate never overlaps the vehicle's
 	/// own box. The host drops each to the floor and tests it for room.
 	/// </summary>
-	public static List<UnloadCandidate> UnloadCandidates( Transform vehicle, BBox localBounds, Vector3 half, float gap = 40f )
+	public static List<UnloadCandidate> UnloadCandidates( Transform vehicle, BBox localBounds, Vector3 half, float gap = 20f )
 	{
 		var spots = new List<UnloadCandidate>();
 		var lateralStep = half.y * 2f + gap * 0.5f;
@@ -102,6 +102,17 @@ public static class CargoMath
 		return local.x + half.x > localBounds.Mins.x && local.x - half.x < localBounds.Maxs.x
 		       && local.y + half.y > localBounds.Mins.y && local.y - half.y < localBounds.Maxs.y
 		       && local.z + half.z > localBounds.Mins.z && local.z < localBounds.Maxs.z;
+	}
+
+	/// <summary>
+	/// The gap between two boxes: 0 when they touch or overlap, else the length of the shortest line from one to the other.
+	/// </summary>
+	public static float DistanceBetween( BBox a, BBox b )
+	{
+		var dx = System.Math.Max( 0f, System.Math.Max( a.Mins.x - b.Maxs.x, b.Mins.x - a.Maxs.x ) );
+		var dy = System.Math.Max( 0f, System.Math.Max( a.Mins.y - b.Maxs.y, b.Mins.y - a.Maxs.y ) );
+		var dz = System.Math.Max( 0f, System.Math.Max( a.Mins.z - b.Maxs.z, b.Mins.z - a.Maxs.z ) );
+		return System.MathF.Sqrt( dx * dx + dy * dy + dz * dz );
 	}
 
 	/// <summary>

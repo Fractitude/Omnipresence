@@ -45,8 +45,11 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// <summary>How far, in world units, a player may stand from the vehicle's box and still use its cargo.</summary>
 	public const float ReachDistance = 250f;
 
-	/// <summary>How far a big object may be from the vehicle's box and still be loaded into it.</summary>
-	public const float LoadRange = 400f;
+	/// <summary>
+	/// How far, in world units, a big object's box may be from the vehicle's cargo area (the cargo bed's box, not the vehicle's
+	/// origin or whole body) and still be loaded into it. A thing set down right behind the vehicle is well inside it.
+	/// </summary>
+	public const float LoadReach = 50f;
 
 	/// <summary>The most big objects one cargo holds.</summary>
 	public const int MaxBigObjects = 3;
@@ -125,6 +128,37 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	/// </summary>
 	public float DistanceTo( Vector3 position ) => CargoMath.DistanceToBounds( WorldBounds, position );
 
+	/// <summary>
+	/// How far an object is from the cargo area (0 when they touch or overlap). Measured in the vehicle's own space, so the
+	/// vehicle's turn does not widen the cargo area's box: the area is the bed's box as it is, and the object is its own
+	/// box, corners carried over into the vehicle's space.
+	/// </summary>
+	public float ReachTo( GameObject thing )
+	{
+		var bed = GameObject.Children.FirstOrDefault( x => x.Name == VehicleCargoSystem.BedName );
+		var box = bed.IsValid() ? bed.Components.Get<BoxCollider>() : null;
+		var area = GameObject.GetLocalBounds();
+
+		if ( box.IsValid() )
+		{
+			var centre = bed.LocalPosition + bed.LocalRotation * box.Center;
+			area = new BBox( centre - box.Scale * 0.5f, centre + box.Scale * 0.5f );
+		}
+
+		var local = thing.GetLocalBounds();
+		var corners = new[] { local.Mins.x, local.Maxs.x }
+			.SelectMany( x => new[] { local.Mins.y, local.Maxs.y }.SelectMany( y =>
+				new[] { local.Mins.z, local.Maxs.z }.Select( z => new Vector3( x, y, z ) ) ) )
+			.Select( c => WorldTransform.PointToLocal( thing.WorldTransform.PointToWorld( c ) ) )
+			.ToList();
+
+		var other = new BBox(
+			new Vector3( corners.Min( c => c.x ), corners.Min( c => c.y ), corners.Min( c => c.z ) ),
+			new Vector3( corners.Max( c => c.x ), corners.Max( c => c.y ), corners.Max( c => c.z ) ) );
+
+		return CargoMath.DistanceBetween( area, other );
+	}
+
 	public override void ClearView()
 	{
 		base.ClearView();
@@ -186,27 +220,27 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 	// -- Vehicles near a point ----------------------------------------------------------------------------------------
 
 	/// <summary>
-	/// The vehicles with a cargo that are within <see cref="LoadRange"/> of a point, nearest first. The same list on every
+	/// The vehicles with a cargo whose cargo area is within <see cref="LoadReach"/> of an object, nearest first. The same list on every
 	/// machine, so "the n-th" in an option means the same vehicle on the client and on the host.
 	/// </summary>
-	public static List<VehicleCargo> Near( Scene scene, Vector3 position )
+	public static List<VehicleCargo> Near( Scene scene, GameObject thing )
 	{
 		if ( !scene.IsValid() )
 			return [];
 
 		var all = scene.GetAllComponents<VehicleCargo>().Where( x => x.IsValid() ).ToList();
-		var order = CargoMath.NearestWithin( all.Select( x => x.DistanceTo( position ) ).ToList(), LoadRange );
+		var order = CargoMath.NearestWithin( all.Select( x => x.ReachTo( thing ) ).ToList(), LoadReach );
 		return order.Select( i => all[i] ).ToList();
 	}
 
 	// -- Loading ------------------------------------------------------------------------------------------------------
 
 	/// <summary>
-	/// The vehicles an object can be loaded into: within <see cref="LoadRange"/> and in clear sight, nearest first. The host
+	/// The vehicles an object can be loaded into: within <see cref="LoadReach"/> of its cargo area and in clear sight, nearest first. The host
 	/// asks this again when the option is used.
 	/// </summary>
 	public static List<VehicleCargo> LoadTargets( PlacedObject placed ) =>
-		!placed.IsValid() ? [] : Near( placed.Scene, placed.WorldPosition ).Where( x => x.CanSee( placed ) ).ToList();
+		!placed.IsValid() ? [] : Near( placed.Scene, placed.GameObject ).Where( x => x.CanSee( placed ) ).ToList();
 
 	/// <summary>
 	/// Whether a ray from the middle of the object's box to the middle of the vehicle's box is clear: it ignores the
@@ -249,7 +283,7 @@ public sealed class VehicleCargo : ItemContainer, IInteractionHandler
 		if ( !HasObjectRoom )
 			return CrimeResult.Fail( $"The {VehicleName.ToLowerInvariant()}'s cargo is full." );
 
-		if ( !CargoMath.CanLoad( DistanceTo( placed.WorldPosition ), LoadRange, true ) )
+		if ( !CargoMath.CanLoad( ReachTo( placed.GameObject ), LoadReach, true ) )
 			return CrimeResult.Fail( $"Move it closer to the {VehicleName.ToLowerInvariant()}." );
 
 		if ( !CanSee( placed ) )

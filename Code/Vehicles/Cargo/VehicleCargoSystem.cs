@@ -11,6 +11,9 @@ namespace Sandbox;
 /// </remarks>
 public sealed class VehicleCargoSystem : GameObjectSystem<VehicleCargoSystem>
 {
+	/// <summary>The name of the cargo area's child object.</summary>
+	public const string BedName = "cargo_bed";
+
 	RealTimeSince sinceTick;
 
 	public VehicleCargoSystem( Scene scene ) : base( scene )
@@ -68,7 +71,7 @@ public sealed class VehicleCargoSystem : GameObjectSystem<VehicleCargoSystem>
 		var length = bounds.Size.x;
 		var height = bounds.Size.z;
 
-		var bed = new GameObject( true, "cargo_bed" )
+		var bed = new GameObject( true, BedName )
 		{
 			Parent = vehicle,
 			LocalPosition = new Vector3( bounds.Mins.x + length * 0.15f, bounds.Center.y, bounds.Mins.z + height * 0.45f ),
