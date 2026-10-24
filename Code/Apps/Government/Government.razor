@@ -1,0 +1,416 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own system app, part of the OS: described by Assets/navi/system/government.napp, so it is always *@
+@* installed and has root. Organizations: register one, run it (invite, roles, shares), answer invitations, read *@
+@* the payouts. It is shared: the host's copy keeps the organizations, and every player sees the same window. *@
+@* Whoever acts is the player in the seat, worked out on the host, never from what the panel sends. *@
+
+<root>
+	@if ( UiState.OfflineHint is not null )
+	{
+		<div class="offline">
+			<i>wifi_off</i>
+			<div class="offline-heading">No internet access</div>
+			<div class="offline-hint">@UiState.OfflineHint</div>
+		</div>
+	}
+	else if ( !UiState.HasAccount )
+	{
+		<div class="offline">
+			<i>account_balance</i>
+			<div class="offline-heading">Government</div>
+			<div class="offline-hint">@UiState.Message</div>
+		</div>
+	}
+	else
+	{
+		<div class="header">
+			<div class="logo"><i>account_balance</i>government</div>
+			@if ( UiState.Org is { } header )
+			{
+				<div class="org-chip">
+					<div class="mini" style=@( $"background-color: {Soft( header.Color )}; color: {header.Color};" )>
+						<i>@header.Glyph</i>
+					</div>
+					<div class="org-chip-name">@header.Name</div>
+				</div>
+			}
+		</div>
+
+		<div class="tabs">
+			@foreach ( var tab in Tabs )
+			{
+				<div class="tab @( UiState.Tab == tab ? "active" : "" )"
+				     @onclick=@( () => Navi.Act( GovernmentViewModel.TabAction, tab.ToString() ) )>
+					@TabLabel( tab )
+				</div>
+			}
+		</div>
+
+		@if ( UiState.Notice != "" )
+		{
+			<div class="notice">@UiState.Notice</div>
+		}
+
+		<div class="body">
+			@if ( UiState.Tab == GovernmentTab.Organization )
+			{
+				@if ( UiState.Org is null || UiState.Editing )
+				{
+					<div class="heading">@( UiState.Editing ? "Edit the organization" : "Register an organization" )</div>
+
+					<div class="preview">
+						<div class="emblem" style=@( $"background-color: {Soft( DraftColor )}; color: {DraftColor};" )>
+							<i>@DraftGlyph</i>
+						</div>
+						<div class="preview-text">
+							<div class="preview-name">@( UiState.Draft.Name == "" ? "Your organization" : UiState.Draft.Name )</div>
+							<div class="meta">@( UiState.Editing ? "Owner only" : $"Registration: {UiState.Draft.Fee}" )</div>
+						</div>
+					</div>
+
+					<TextEntry Value=@( UiState.Draft.Name ) Placeholder="Name (3 to 24 characters)" MaxLength=@( 24 )
+					           OnTextEdited=@NameEdited/>
+
+					<div class="heading">Icon</div>
+					<div class="icons">
+						@foreach ( var icon in OrgCatalog.Icons )
+						{
+							<div class="icon-tile @( UiState.Draft.IconId == icon.Id ? "active" : "" )" tooltip=@icon.Label
+							     @onclick=@( () => Navi.Act( GovernmentViewModel.IconAction, icon.Id ) )>
+								<i>@icon.Glyph</i>
+							</div>
+						}
+					</div>
+
+					<div class="heading">Colour</div>
+					<div class="swatches">
+						@foreach ( var color in OrgCatalog.Palette )
+						{
+							<div class="swatch @( UiState.Draft.Color == color ? "active" : "" )"
+							     style=@( $"background-color: {color};" )
+							     @onclick=@( () => Navi.Act( GovernmentViewModel.ColorAction, color ) )></div>
+						}
+					</div>
+					<div class="hex-row">
+						<TextEntry Value=@( UiState.Draft.ColorText ) Placeholder="#b48cff" MaxLength=@( 7 )
+						           OnTextEdited=@ColorEdited/>
+						<div class="meta">@( UiState.Draft.Color == "" ? "Not a hex colour" : "" )</div>
+					</div>
+
+					<div class="actions">
+						@if ( UiState.Editing )
+						{
+							<div class="button" @onclick=@( () => Navi.Act( GovernmentViewModel.EditSaveAction ) )>Save</div>
+							<div class="button ghost" @onclick=@( () => Navi.Act( GovernmentViewModel.EditCancelAction ) )>
+								Cancel
+							</div>
+						}
+						else
+						{
+							<div class="button" @onclick=@( () => Navi.Act( GovernmentViewModel.RegisterAction ) )>Register</div>
+						}
+					</div>
+				}
+				else if ( UiState.Org is { } org )
+				{
+					<div class="org-card">
+						<div class="emblem" style=@( $"background-color: {Soft( org.Color )}; color: {org.Color};" )>
+							<i>@org.Glyph</i>
+						</div>
+						<div class="org-info">
+							<div class="org-name">@org.Name</div>
+							<div class="meta">@( $"Your role: {org.YourRole}. Your share: {org.YourShare}%." )</div>
+							<div class="meta">@( $"{org.SharedTotal}% of every payout is shared. Founded {org.Founded}." )</div>
+						</div>
+					</div>
+
+					<div class="heading">Members</div>
+					<div class="table">
+						<div class="table-head">
+							<div class="col-name">Name</div>
+							<div class="col-role">Role</div>
+							<div class="col-share">Share</div>
+						</div>
+						@foreach ( var member in org.Members )
+						{
+							<div class="member @( member.Selected ? "active" : "" ) @( org.CanManage ? "clickable" : "" )"
+							     @onclick=@( () => Navi.Act( GovernmentViewModel.SelectAction, member.Id ) )>
+								<div class="col-name">@( member.IsYou ? $"{member.Name} (you)" : member.Name )</div>
+								<div class="col-role">@member.Role</div>
+								<div class="col-share">@( $"{member.Share}%" )</div>
+							</div>
+						}
+					</div>
+
+					@if ( org.Edit is { } edit )
+					{
+						<div class="card">
+							<div class="card-title">@( $"{edit.Name}: {edit.Role}, {edit.Share}%" )</div>
+							<div class="chips">
+								@foreach ( var role in edit.Roles )
+								{
+									<div class="chip @( role.Current ? "active" : "" ) @( role.Allowed ? "" : "disabled" )"
+									     @onclick=@( () => Navi.Act( GovernmentViewModel.MemberRoleAction, role.Role ) )>
+										@role.Role
+									</div>
+								}
+							</div>
+							@if ( edit.CanShare )
+							{
+								<div class="stepper">
+									<div class="meta">Share</div>
+									@foreach ( var step in GovernmentViewModel.ShareSteps )
+									{
+										<div class="step" @onclick=@( () => Navi.Act( GovernmentViewModel.MemberShareAction, step.ToString() ) )>
+											@( step > 0 ? $"+{step}" : step.ToString() )
+										</div>
+									}
+									<div class="share-value">@( $"{edit.Share}%" )</div>
+								</div>
+							}
+							@if ( edit.CanKick )
+							{
+								@if ( UiState.Confirm == "kick" )
+								{
+									<div class="actions">
+										<div class="button danger" @onclick=@( () => Navi.Act( GovernmentViewModel.YesAction ) )>
+											Remove @edit.Name
+										</div>
+										<div class="button ghost" @onclick=@( () => Navi.Act( GovernmentViewModel.NoAction ) )>
+											Cancel
+										</div>
+									</div>
+								}
+								else
+								{
+									<div class="button ghost danger-text"
+									     @onclick=@( () => Navi.Act( GovernmentViewModel.AskAction, "kick" ) )>
+										Remove from organization
+									</div>
+								}
+							}
+						</div>
+					}
+
+					@if ( org.Invite is { } invite )
+					{
+						<div class="heading">Invite a player</div>
+						<div class="card">
+							@if ( invite.Candidates.Count == 0 )
+							{
+								<div class="empty">No other player is online who is free to join.</div>
+							}
+							<div class="filters">
+								@foreach ( var candidate in invite.Candidates )
+								{
+									<div class="filter @( candidate.Picked ? "active" : "" )"
+									     @onclick=@( () => Navi.Act( GovernmentViewModel.PickAction, candidate.Id ) )>
+										@candidate.Name
+									</div>
+								}
+							</div>
+							<div class="chips">
+								@foreach ( var role in invite.Roles )
+								{
+									<div class="chip @( role.Current ? "active" : "" ) @( role.Allowed ? "" : "disabled" )"
+									     @onclick=@( () => Navi.Act( GovernmentViewModel.InviteRoleAction, role.Role ) )>
+										@role.Role
+									</div>
+								}
+							</div>
+							<div class="stepper">
+								<div class="meta">Share</div>
+								@foreach ( var step in GovernmentViewModel.ShareSteps )
+								{
+									<div class="step" @onclick=@( () => Navi.Act( GovernmentViewModel.InviteShareAction, step.ToString() ) )>
+										@( step > 0 ? $"+{step}" : step.ToString() )
+									</div>
+								}
+								<div class="share-value">@( $"{invite.Share}%" )</div>
+							</div>
+							<div class="button @( invite.CanSend ? "" : "disabled" )"
+							     @onclick=@( () => Navi.Act( GovernmentViewModel.InviteSendAction ) )>
+								Send invitation
+							</div>
+							@foreach ( var sent in invite.Sent )
+							{
+								<div class="sent">
+									<div class="sent-text">
+										@( $"{sent.Name} as {sent.Role}, {sent.Share}%. Runs out in {sent.Expires}." )
+									</div>
+									<div class="step" @onclick=@( () => Navi.Act( GovernmentViewModel.InviteCancelAction, sent.Id ) )>
+										Cancel
+									</div>
+								</div>
+							}
+						</div>
+					}
+
+					@if ( org.CanRestyle )
+					{
+						<div class="button ghost" @onclick=@( () => Navi.Act( GovernmentViewModel.EditStartAction ) )>
+							Edit name, icon and colour
+						</div>
+					}
+
+					@if ( org.CanDisband )
+					{
+						@if ( UiState.Confirm == "disband" )
+						{
+							<div class="actions">
+								<div class="button danger" @onclick=@( () => Navi.Act( GovernmentViewModel.YesAction ) )>
+									Disband for good
+								</div>
+								<div class="button ghost" @onclick=@( () => Navi.Act( GovernmentViewModel.NoAction ) )>Cancel</div>
+							</div>
+						}
+						else
+						{
+							<div class="button ghost danger-text"
+							     @onclick=@( () => Navi.Act( GovernmentViewModel.AskAction, "disband" ) )>
+								Disband the organization
+							</div>
+						}
+					}
+
+					@if ( org.CanLeave )
+					{
+						@if ( UiState.Confirm == "leave" )
+						{
+							<div class="actions">
+								<div class="button danger" @onclick=@( () => Navi.Act( GovernmentViewModel.YesAction ) )>
+									Leave @org.Name
+								</div>
+								<div class="button ghost" @onclick=@( () => Navi.Act( GovernmentViewModel.NoAction ) )>Cancel</div>
+							</div>
+						}
+						else
+						{
+							<div class="button ghost danger-text"
+							     @onclick=@( () => Navi.Act( GovernmentViewModel.AskAction, "leave" ) )>
+								Leave the organization
+							</div>
+						}
+					}
+				}
+			}
+			else if ( UiState.Tab == GovernmentTab.Invitations )
+			{
+				<div class="heading">Your invitations</div>
+
+				@if ( UiState.Incoming.Count == 0 )
+				{
+					<div class="empty">No invitations. Joining changes your income, so you are always asked first.</div>
+				}
+
+				@foreach ( var invite in UiState.Incoming )
+				{
+					<div class="card">
+						<div class="org-card">
+							<div class="emblem small" style=@( $"background-color: {Soft( invite.Color )}; color: {invite.Color};" )>
+								<i>@invite.Glyph</i>
+							</div>
+							<div class="org-info">
+								<div class="org-name">@invite.OrgName</div>
+								<div class="meta">@( $"{invite.From} invites you as {invite.Role}, with {invite.Share}% of every payout." )</div>
+								<div class="meta">@( $"Runs out in {invite.Expires}." )</div>
+							</div>
+						</div>
+						<div class="actions">
+							<div class="button" @onclick=@( () => Navi.Act( GovernmentViewModel.AcceptAction, invite.Id ) )>Accept</div>
+							<div class="button ghost" @onclick=@( () => Navi.Act( GovernmentViewModel.DeclineAction, invite.Id ) )>
+								Decline
+							</div>
+						</div>
+					</div>
+				}
+			}
+			else
+			{
+				<div class="heading">Recent payouts</div>
+
+				@if ( UiState.Payouts.Count == 0 )
+				{
+					<div class="empty">
+						@( UiState.Org is null
+							? "Join or register an organization to see how its payouts are shared."
+							: "Nothing has been shared yet. Orders paid to a member with a share would show here." )
+					</div>
+				}
+
+				@foreach ( var payout in UiState.Payouts )
+				{
+					<div class="card">
+						<div class="card-top">
+							<div class="card-title">@payout.Title</div>
+							<div class="price">@payout.Total</div>
+						</div>
+						<div class="meta">@( $"{payout.When}. You got {payout.Yours}." )</div>
+						@foreach ( var line in payout.Lines )
+						{
+							<div class="split @( line.IsYou ? "you" : "" )">
+								<div>@line.Name</div>
+								<div>@line.Amount</div>
+							</div>
+						}
+					</div>
+				}
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	// A property, not a static field: a hot reload keeps a static array of the assembly's own enum.
+	static GovernmentTab[] Tabs => System.Enum.GetValues<GovernmentTab>();
+
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	GovernmentViewModel ViewModel => field ??= new( GetSeat, GetComputer );
+
+	GovernmentUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<GovernmentUiState>() ?? GovernmentUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	/// <summary>The colour of the preview: the typed colour when it is one, else the default.</summary>
+	string DraftColor => UiState.Draft.Color == "" ? OrgCatalog.DefaultColor : UiState.Draft.Color;
+
+	string DraftGlyph => OrgCatalog.IconOf( UiState.Draft.IconId )?.Glyph ?? "shield";
+
+	/// <summary>A faint version of an emblem colour, for its tile.</summary>
+	static string Soft( string color ) => color.Length == 7 ? color + "33" : color;
+
+	string TabLabel( GovernmentTab tab ) => tab switch
+	{
+		GovernmentTab.Invitations => UiState.InviteCount > 0 ? $"Invitations ({UiState.InviteCount})" : "Invitations",
+		_ => tab.ToString(),
+	};
+
+	void NameEdited( string text ) => Navi.Act( GovernmentViewModel.NameAction, text );
+
+	void ColorEdited( string text ) => Navi.Act( GovernmentViewModel.ColorAction, text );
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Navi.IsViewer )
+			return;
+
+		ViewModel.Tick();
+		Navi.Publish( ViewModel.UiState );
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}

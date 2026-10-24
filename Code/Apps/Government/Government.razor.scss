@@ -1,0 +1,561 @@
+Government
+{
+	// The default size. The window can be resized: the app then fills it.
+	width: 600px;
+	height: 460px;
+	flex-direction: column;
+	padding: 12px;
+	gap: 8px;
+	background-color: #0d0f14;
+	color: #e1e5ee;
+	font-size: 12px;
+}
+
+i
+{
+	font-family: Material Icons;
+}
+
+// Shown in place of the app when it can't work: offline, nobody in the seat.
+.offline
+{
+	flex-grow: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	text-align: center;
+
+	i
+	{
+		font-size: 40px;
+		color: #667086;
+	}
+
+	.offline-heading
+	{
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	.offline-hint
+	{
+		color: #667086;
+	}
+}
+
+.header
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
+	.logo
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 8px;
+		font-size: 18px;
+		font-weight: 700;
+		letter-spacing: 3px;
+		color: #8fb4ff;
+
+		i
+		{
+			font-size: 22px;
+		}
+	}
+
+	.org-chip
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 6px;
+
+		.org-chip-name
+		{
+			font-weight: 700;
+		}
+	}
+}
+
+.mini
+{
+	width: 24px;
+	height: 24px;
+	justify-content: center;
+	align-items: center;
+	border-radius: 6px;
+	flex-shrink: 0;
+
+	i
+	{
+		font-size: 16px;
+	}
+}
+
+.tabs
+{
+	flex-direction: row;
+	gap: 4px;
+	flex-shrink: 0;
+
+	.tab
+	{
+		flex-grow: 1;
+		justify-content: center;
+		padding: 6px 0;
+		border-radius: 8px;
+		background-color: #151922;
+		color: #8791a7;
+		font-weight: 600;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #1d2330;
+		}
+
+		&.active
+		{
+			background-color: #27406b;
+			color: white;
+		}
+	}
+}
+
+.notice
+{
+	padding: 6px 10px;
+	border-radius: 8px;
+	background-color: rgba( 143, 180, 255, 0.14 );
+	color: #c3d6ff;
+	flex-shrink: 0;
+}
+
+.body
+{
+	flex-direction: column;
+	flex-grow: 1;
+	min-height: 0;
+	overflow-y: scroll;
+	gap: 6px;
+}
+
+.heading
+{
+	margin-top: 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #667086;
+	flex-shrink: 0;
+}
+
+.empty, .meta
+{
+	color: #667086;
+	flex-shrink: 0;
+}
+
+TextEntry
+{
+	flex-shrink: 0;
+	min-height: 30px;
+	padding: 4px 8px;
+	border-radius: 8px;
+	background-color: #151922;
+	border: 1px solid #252c3b;
+	color: #e1e5ee;
+}
+
+// The emblem of an organization: its icon in its colour.
+.emblem
+{
+	width: 56px;
+	height: 56px;
+	justify-content: center;
+	align-items: center;
+	border-radius: 14px;
+	flex-shrink: 0;
+
+	i
+	{
+		font-size: 36px;
+	}
+
+	&.small
+	{
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
+
+		i
+		{
+			font-size: 26px;
+		}
+	}
+}
+
+.preview, .org-card
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+
+	.preview-text, .org-info
+	{
+		flex-direction: column;
+		gap: 2px;
+		flex-grow: 1;
+		min-width: 0;
+	}
+
+	.preview-name, .org-name
+	{
+		font-size: 16px;
+		font-weight: 700;
+	}
+}
+
+.icons
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+	flex-shrink: 0;
+
+	.icon-tile
+	{
+		width: 40px;
+		height: 40px;
+		justify-content: center;
+		align-items: center;
+		flex-shrink: 0;
+		border-radius: 8px;
+		background-color: #151922;
+		border: 1px solid #252c3b;
+		color: #aab3c8;
+		cursor: pointer;
+
+		i
+		{
+			font-size: 24px;
+		}
+
+		&:hover
+		{
+			background-color: #1d2330;
+		}
+
+		&.active
+		{
+			border-color: #8fb4ff;
+			background-color: #27406b;
+			color: white;
+		}
+	}
+}
+
+.swatches
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+	flex-shrink: 0;
+
+	.swatch
+	{
+		width: 26px;
+		height: 26px;
+		flex-shrink: 0;
+		border-radius: 13px;
+		border: 2px solid transparent;
+		cursor: pointer;
+
+		&.active
+		{
+			border-color: white;
+		}
+	}
+}
+
+.hex-row
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+
+	TextEntry
+	{
+		width: 110px;
+	}
+}
+
+.actions
+{
+	flex-direction: row;
+	gap: 6px;
+	flex-shrink: 0;
+}
+
+.button
+{
+	padding: 6px 16px;
+	justify-content: center;
+	align-items: center;
+	border-radius: 8px;
+	font-weight: 700;
+	color: #0b0f18;
+	background-color: #8fb4ff;
+	cursor: pointer;
+	flex-shrink: 0;
+
+	&:hover
+	{
+		background-color: #b2cbff;
+	}
+
+	&.disabled
+	{
+		opacity: 0.35;
+	}
+
+	&.ghost
+	{
+		color: #c3cde0;
+		background-color: #151922;
+		border: 1px solid #252c3b;
+
+		&:hover
+		{
+			background-color: #1d2330;
+		}
+	}
+
+	&.danger-text
+	{
+		color: #ff8a8a;
+	}
+
+	&.danger
+	{
+		color: white;
+		background-color: #b8343f;
+
+		&:hover
+		{
+			background-color: #d4444f;
+		}
+	}
+}
+
+.table
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	border-radius: 10px;
+	background-color: #151922;
+	border: 1px solid #252c3b;
+
+	.table-head, .member
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 10px;
+		flex-shrink: 0;
+	}
+
+	.table-head
+	{
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		color: #667086;
+	}
+
+	.member
+	{
+		border-top: 1px solid #1d2330;
+
+		&.clickable
+		{
+			cursor: pointer;
+
+			&:hover
+			{
+				background-color: #1d2330;
+			}
+		}
+
+		&.active
+		{
+			background-color: #27406b;
+		}
+	}
+
+	.col-name
+	{
+		flex-grow: 1;
+		flex-basis: 0;
+		min-width: 0;
+	}
+
+	.col-role
+	{
+		width: 80px;
+		flex-shrink: 0;
+	}
+
+	.col-share
+	{
+		width: 50px;
+		flex-shrink: 0;
+		justify-content: flex-end;
+	}
+}
+
+.card
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background-color: #151922;
+	border: 1px solid #252c3b;
+
+	.card-top
+	{
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.card-title
+	{
+		font-weight: 700;
+	}
+
+	.price
+	{
+		font-weight: 700;
+		color: #8fb4ff;
+	}
+}
+
+.filters, .chips
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 4px;
+	flex-shrink: 0;
+
+	.filter, .chip
+	{
+		padding: 4px 10px;
+		border-radius: 12px;
+		background-color: #0d0f14;
+		border: 1px solid #252c3b;
+		color: #8791a7;
+		font-weight: 600;
+		cursor: pointer;
+		flex-shrink: 0;
+
+		&:hover
+		{
+			background-color: #1d2330;
+		}
+
+		&.active
+		{
+			background-color: #27406b;
+			border-color: #8fb4ff;
+			color: white;
+		}
+
+		&.disabled
+		{
+			opacity: 0.3;
+		}
+	}
+}
+
+.stepper
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+
+	.step
+	{
+		padding: 4px 8px;
+		border-radius: 8px;
+		background-color: #0d0f14;
+		border: 1px solid #252c3b;
+		font-weight: 700;
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: #1d2330;
+		}
+	}
+
+	.share-value
+	{
+		margin-left: 8px;
+		font-weight: 700;
+		color: #8fb4ff;
+	}
+}
+
+.sent
+{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	color: #8791a7;
+
+	.sent-text
+	{
+		flex-grow: 1;
+		flex-basis: 0;
+		min-width: 0;
+	}
+
+	.step
+	{
+		padding: 3px 8px;
+		border-radius: 8px;
+		background-color: #0d0f14;
+		border: 1px solid #252c3b;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+}
+
+.split
+{
+	flex-direction: row;
+	justify-content: space-between;
+	gap: 8px;
+	flex-shrink: 0;
+	color: #8791a7;
+
+	&.you
+	{
+		color: #8fb4ff;
+		font-weight: 700;
+	}
+}
