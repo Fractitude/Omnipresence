@@ -234,6 +234,74 @@ public static class StorageRules
 		return CrimeResult.Success();
 	}
 
+	/// <summary>The side of a move that is the player's bag.</summary>
+	public const int SideBag = 0;
+
+	/// <summary>The side of a move that is the storage box.</summary>
+	public const int SideBox = 1;
+
+	/// <summary>
+	/// Combine or split with a drag (<see cref="StackRules"/>) between any two slots of the bag and the box: bag to
+	/// box, box to bag, inside the box and inside the bag. The result is planned and checked in full first (indices,
+	/// kinds, counts, the cap, a free box record); only then are the two slots written, and neither write can fail, so
+	/// the total is kept exactly and a refusal changes nothing. Sides are <see cref="SideBag"/> and
+	/// <see cref="SideBox"/>.
+	/// </summary>
+	public static CrimeResult Stack(
+		CrimeRecord crime, string boxId, int capacity, PlayerInventory bag,
+		int fromSide, int from, int toSide, int to, StackMode mode )
+	{
+		var nothing = CrimeResult.Fail( "Nothing happens." );
+
+		if ( crime is null || bag is null || !StackRules.IsMode( (int)mode ) || fromSide is not (SideBag or SideBox)
+		     || toSide is not (SideBag or SideBox) || (fromSide == toSide && from == to) )
+			return nothing;
+
+		var box = Find( crime, boxId );
+
+		// A slot of the bag must exist. In the box the source may be any slot (a box made smaller keeps its items
+		// reachable), the target must be inside the box's size.
+		if ( !SlotOk( bag, fromSide, from, MaxSlots ) || !SlotOk( bag, toSide, to, capacity ) )
+			return nothing;
+
+		var source = fromSide == SideBag ? bag.At( from ) : At( box, from );
+		var target = toSide == SideBag ? bag.At( to ) : At( box, to );
+
+		if ( source is null )
+			return CrimeResult.Fail( "There is nothing in that slot." );
+
+		if ( !StackRules.Plan( source, target, mode, out var newFrom, out var newTo, out var error ) )
+			return CrimeResult.Fail( error );
+
+		if ( toSide == SideBox && box is null )
+		{
+			if ( crime.Storage.Count >= MaxBoxes )
+				return CrimeResult.Fail( "You cannot keep things in any more boxes." );
+
+			box = new StorageBoxRecord { Id = boxId };
+			crime.Storage.Add( box );
+		}
+
+		// Everything is checked: write both slots. The bag's writes only fail on a bad index, checked above.
+		if ( !Write( bag, box, fromSide, from, newFrom ) || !Write( bag, box, toSide, to, newTo ) )
+			return nothing;
+
+		Tidy( crime, box );
+		return CrimeResult.Success();
+	}
+
+	static bool SlotOk( PlayerInventory bag, int side, int slot, int boxLimit ) =>
+		slot >= 0 && slot < (side == SideBag ? bag.SlotCount : System.Math.Min( boxLimit, MaxSlots ));
+
+	static bool Write( PlayerInventory bag, StorageBoxRecord box, int side, int slot, ItemData item )
+	{
+		if ( side == SideBag )
+			return bag.SetSlot( slot, item );
+
+		Set( box, slot, item );
+		return true;
+	}
+
 	/// <summary>
 	/// Take the parcels of an order out of every box, since nobody wants them. Returns how many went. For a cancelled
 	/// order, whether its player is there or away.

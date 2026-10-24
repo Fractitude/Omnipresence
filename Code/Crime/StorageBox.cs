@@ -209,6 +209,21 @@ public sealed class StorageBox : Component, IInteractionHandler
 	}
 
 	/// <summary>
+	/// Combine or split with a drag (<see cref="StackRules"/>), between any two slots of the bag and the box. Sides are
+	/// <see cref="StorageRules.SideBag"/> (0) and <see cref="StorageRules.SideBox"/> (1); the mode is a
+	/// <see cref="StackMode"/> (1 combine, 2 split, 3 both). The host checks all of it, so only indices travel.
+	/// </summary>
+	[Rpc.Host]
+	public void RequestStack( int fromSide, int from, int toSide, int to, int mode )
+	{
+		if ( Begin() is not { } who || !StackRules.IsMode( mode ) )
+			return;
+
+		Reply( who, StorageRules.Stack(
+			who.Crime, BoxId, Capacity, who.Bag, fromSide, from, toSide, to, (StackMode)mode ) );
+	}
+
+	/// <summary>
 	/// Who is asking, once the host has checked they may.
 	/// </summary>
 	sealed record Asker( Connection Caller, PlayerCrime Player, PlayerProgress Progress, CrimeRecord Crime )
