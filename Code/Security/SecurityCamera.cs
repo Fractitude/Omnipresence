@@ -222,7 +222,7 @@ public sealed class SecurityCamera : Component, Component.IDamageable, IInteract
 
 		// Red while it works, black when it is off. The LED stays where it is: a dead light, not a missing one.
 		ledLit = !Offline;
-		led.Tint = Offline ? Color.Black : new Color( 1f, 0.12f, 0.12f );
+		led.Tint = Offline ? Color.Black : new Color( 1f, 0f, 0f );
 	}
 
 	void Component.IDamageable.OnDamage( in DamageInfo damage )
