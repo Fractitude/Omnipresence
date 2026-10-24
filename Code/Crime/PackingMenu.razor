@@ -26,12 +26,12 @@
 						<div class="order @( id == selectedId ? "selected" : "" )" @onclick=@( () => Select( id ) )>
 							<div class="line">
 								<div class="handle">@order.Handle</div>
-								<div class="left">
-									@InteractionSetup.Countdown( order.Deadline - WorldClock.Now ) left to send
+								<div class="left @CrimeCatalog.DeadlineClass( order.Deadline - WorldClock.Now )">
+									@( $"{InteractionSetup.Countdown( order.Deadline - WorldClock.Now )} left to send" )
 								</div>
 							</div>
 							<div class="what">
-								@order.Count x @ProductName( order.Kind ), asked quality @order.Asked+
+								@( $"{order.Count} x {ProductName( order.Kind )}, asked quality {order.Asked}+" )
 							</div>
 						</div>
 					}
@@ -64,7 +64,7 @@
 
 							<div class="batch">
 								<div class="info">
-									<div class="size">@item.Count x @item.Name, quality @item.Quality</div>
+									<div class="size">@( $"{item.Count} x {item.Name}, quality {item.Quality}" )</div>
 									<div class="compare @compare.Class">@compare.Text</div>
 								</div>
 								<div class="button" @onclick=@( () => Pack( orderId, index ) )>Pack</div>
@@ -74,7 +74,7 @@
 						@if ( found == 0 )
 						{
 							<div class="empty">
-								You have no batch of @selected.Count or more @ProductName( selected.Kind ).
+								@( $"You have no batch of {selected.Count} or more {ProductName( selected.Kind )}." )
 							</div>
 						}
 					}

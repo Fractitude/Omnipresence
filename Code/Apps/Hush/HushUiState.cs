@@ -105,7 +105,8 @@ public sealed record OpenOrderRow(
 	string PriceEach,
 	string Total,
 	string Expires,
-	bool CanAccept );
+	bool CanAccept,
+	string Urgency = "" );
 
 public enum MyOrderStatus
 {
@@ -132,7 +133,8 @@ public sealed record MyOrderRow(
 	int MinQuality,
 	string Total,
 	MyOrderStatus Status,
-	string Detail );
+	string Detail,
+	string Urgency = "" );
 
 /// <summary>One thing for sale. Reason says why it can't be bought now, or is empty.</summary>
 public sealed record HushShopRow( string Id, string Name, string Description, string PriceEach, string Total,

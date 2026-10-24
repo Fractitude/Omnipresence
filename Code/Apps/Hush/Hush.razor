@@ -80,10 +80,10 @@
 							<div class="handle">@order.Handle</div>
 							<div class="price">@order.Total crypto</div>
 						</div>
-						<div class="what">@order.Count x @order.Product, asked quality @order.MinQuality+</div>
+						<div class="what">@( $"{order.Count} x {order.Product}, asked quality {order.MinQuality}+" )</div>
 						<div class="note">"@order.Note"</div>
 						<div class="card-bottom">
-							<div class="meta">@order.PriceEach each. Leaves in @order.Expires</div>
+							<div class="meta @order.Urgency">@( $"{order.PriceEach} each. Leaves in {order.Expires}" )</div>
 							@if ( order.CanAccept )
 							{
 								<div class="button" @onclick=@( () => Navi.Act( HushViewModel.AcceptAction, order.Id ) )>
@@ -122,9 +122,9 @@
 							<div class="handle">@order.Handle</div>
 							<div class="price">@order.Total crypto</div>
 						</div>
-						<div class="what">@order.Count x @order.Product, asked quality @order.MinQuality+</div>
+						<div class="what">@( $"{order.Count} x {order.Product}, asked quality {order.MinQuality}+" )</div>
 						<div class="card-bottom">
-							<div class="meta">@order.Detail</div>
+							<div class="meta @order.Urgency">@order.Detail</div>
 						</div>
 					</div>
 				}

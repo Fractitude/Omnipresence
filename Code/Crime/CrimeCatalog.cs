@@ -66,6 +66,19 @@ public static class CrimeCatalog
 	/// <summary>The stars a buyer gives an order that never arrived.</summary>
 	public const int CancelStars = 1;
 
+	/// <summary>A deadline with this many seconds or fewer left is shown in orange.</summary>
+	public const long DeadlineWarnSeconds = 600;
+
+	/// <summary>A deadline with this many seconds or fewer left is shown in red.</summary>
+	public const long DeadlineUrgentSeconds = 180;
+
+	/// <summary>
+	/// The style class for a deadline that is this many seconds away: "" when there is time, "warn" (orange) when it is
+	/// getting low, "urgent" (red) when it is nearly gone or past.
+	/// </summary>
+	public static string DeadlineClass( long secondsLeft ) =>
+		secondsLeft <= DeadlineUrgentSeconds ? "urgent" : secondsLeft <= DeadlineWarnSeconds ? "warn" : "";
+
 	// The shop in Hush: supplies bought with crypto, delivered to the mailbox.
 
 	/// <summary>The most one purchase can hold.</summary>

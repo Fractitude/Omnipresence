@@ -131,6 +131,19 @@ PackingMenu
 	{
 		font-size: 13px;
 		opacity: 0.7;
+
+		// A deadline that is running low.
+		&.warn
+		{
+			color: #ffb347;
+			opacity: 1;
+		}
+
+		&.urgent
+		{
+			color: #ff5c5c;
+			opacity: 1;
+		}
 	}
 
 	.what

@@ -144,6 +144,17 @@ i
 	flex-shrink: 0;
 }
 
+// A deadline that is running low.
+.meta.warn
+{
+	color: #ffb347;
+}
+
+.meta.urgent
+{
+	color: #ff5c5c;
+}
+
 // The order cards: in columns when the window is wide, one when it is narrow.
 .cards
 {

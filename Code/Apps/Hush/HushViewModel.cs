@@ -324,7 +324,8 @@ public sealed class HushViewModel
 				$"{x.PriceEach:N0}",
 				$"{x.Total:N0}",
 				InteractionSetup.Countdown( x.ExpiresAt - now ),
-				!full ) );
+				!full,
+				CrimeCatalog.DeadlineClass( x.ExpiresAt - now ) ) );
 		}
 
 		return rows;
@@ -367,7 +368,10 @@ public sealed class HushViewModel
 			order.MinQuality,
 			$"{order.Total:N0}",
 			status,
-			detail );
+			detail,
+			status is MyOrderStatus.ToPack or MyOrderStatus.ToSend
+				? CrimeCatalog.DeadlineClass( order.Deadline - now )
+				: "" );
 	}
 
 	static IReadOnlyList<HushShipmentRow> BuildShipments( PlayerCrime crime )
