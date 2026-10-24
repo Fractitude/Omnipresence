@@ -24,7 +24,8 @@ Read the stats log ([stats.md](stats.md)). Host only. Code: `Code/Stats/StatsCom
 
 | Command | What it does |
 | --- | --- |
-| `stats_show [steamId]` | Log one player's totals: playtime, joins, kills (by weapon), deaths, kicks, bans, transactions, purchases and last balances. Yourself without an id. |
+| `stats_show` | List every saved player: id, name, last seen and playtime, most recent first. |
+| `stats_show <steamId>` | Log one player's totals: playtime, joins, kills (by weapon), deaths, kicks, bans, transactions, purchases and last balances. |
 
 ## Crime
 

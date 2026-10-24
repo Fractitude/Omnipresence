@@ -279,6 +279,40 @@ public static class StatsLog
 		return TryLoad( steamId );
 	}
 
+	/// <summary>
+	/// The totals of every player the log has seen, from memory and from disk, most recently seen first. Writes what is
+	/// waiting first. Host only.
+	/// </summary>
+	public static List<PlayerStatsSummary> SavedPlayers()
+	{
+		if ( !Active )
+			return new();
+
+		Flush();
+
+		var ids = new HashSet<ulong>( summaries.Keys );
+
+		try
+		{
+			var dir = $"{folder}/players";
+
+			if ( Data.DirectoryExists( dir ) )
+			{
+				foreach ( var file in Data.FindFile( dir, "*.json" ) )
+				{
+					if ( ulong.TryParse( System.IO.Path.GetFileNameWithoutExtension( file ), out var id ) )
+						ids.Add( id );
+				}
+			}
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( $"Stats: can't list the saved players: {e.Message}" );
+		}
+
+		return ids.Select( Find ).Where( x => x is not null ).OrderByDescending( x => x.LastSeen ).ToList();
+	}
+
 	// -- Writing ------------------------------------------------------------------------------------------------------
 
 	static void Write( StatEvent e )
