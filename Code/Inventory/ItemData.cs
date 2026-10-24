@@ -37,6 +37,12 @@ public sealed class ItemData
 	public int Quality { get; set; }
 
 	/// <summary>
+	/// For cash (<see cref="ItemCatalog.Cash"/>): the dollars it holds. A long, because a balance reaches a trillion and
+	/// <see cref="Count"/> is an int; <see cref="Count"/> stays 1. 0 for everything else.
+	/// </summary>
+	public long Amount { get; set; }
+
+	/// <summary>
 	/// For a parcel: the id of the order it was packed for. Empty for everything else.
 	/// </summary>
 	public string OrderId { get; set; } = "";
@@ -98,6 +104,7 @@ public sealed class ItemData
 		Kind = Kind,
 		Count = Count,
 		Quality = Quality,
+		Amount = Amount,
 		OrderId = OrderId,
 		To = To,
 		SenderId = SenderId,

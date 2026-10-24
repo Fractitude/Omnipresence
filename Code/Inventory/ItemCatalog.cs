@@ -46,6 +46,12 @@ public static class ItemCatalog
 	public const string Parcel = "parcel";
 
 	/// <summary>
+	/// Dollars lying in the world. Never a bag item: dropping cash makes one, picking it up puts the dollars back in the
+	/// wallet (see <see cref="CashDrops"/>). Its dollars are <see cref="ItemData.Amount"/>.
+	/// </summary>
+	public const string Cash = "cash";
+
+	/// <summary>
 	/// The prefab for a dropped item whose kind names no world prefab of its own, and for an ordinary item.
 	/// </summary>
 	public const string WorldFallbackPrefab = "items/world_item.prefab";
@@ -65,6 +71,8 @@ public static class ItemCatalog
 		.. ProductCatalog.Items,
 		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox.", 0,
 			Icon: "redeem", Color: "#c9a27a" ),
+		new( Cash, "Cash", "Dollars. Pick them up to put them in your wallet.", 0,
+			Icon: "payments", Color: "#5fbf6f", WorldPrefab: "items/cash.prefab" ),
 	];
 
 	public static IReadOnlyList<ItemDef> Items => items;
@@ -111,7 +119,8 @@ public static class ItemCatalog
 	/// </summary>
 	public static ItemData Make( string kind, int count, int quality, string orderId = "" )
 	{
-		if ( Find( kind ) is not { } def || count < 1 )
+		// Cash is not a batch: it has no count and never goes in a bag (MakeCash).
+		if ( kind == Cash || Find( kind ) is not { } def || count < 1 )
 			return null;
 
 		return new ItemData
@@ -126,6 +135,26 @@ public static class ItemCatalog
 	}
 
 	/// <summary>
+	/// A pile of cash worth <paramref name="amount"/> dollars (cut to the wallet's cap), or null for less than a dollar.
+	/// </summary>
+	public static ItemData MakeCash( long amount )
+	{
+		if ( amount < 1 )
+			return null;
+
+		var def = Find( Cash );
+
+		return new ItemData
+		{
+			Name = def.Name,
+			Description = def.Description,
+			Kind = Cash,
+			Count = 1,
+			Amount = System.Math.Min( amount, ProgressRecord.MaxMoney ),
+		};
+	}
+
+	/// <summary>
 	/// As many full stacks of a kind as <paramref name="count"/> needs, then the remainder, all with the same quality.
 	/// Empty for an unknown kind or a count below one. The total is cut to <see cref="MaxCount"/>.
 	/// </summary>
@@ -133,7 +162,7 @@ public static class ItemCatalog
 	{
 		var stacks = new List<ItemData>();
 
-		if ( Find( kind ) is null )
+		if ( kind == Cash || Find( kind ) is null )
 			return stacks;
 
 		var left = System.Math.Min( count, MaxCount );
@@ -162,6 +191,9 @@ public static class ItemCatalog
 	/// </summary>
 	public static IReadOnlyList<string> DescribeLines( ItemData item )
 	{
+		if ( item.Kind == Cash )
+			return [CashRules.Format( item.Amount )];
+
 		if ( item.Kind != Parcel )
 		{
 			var count = MaxStackOf( item.Kind ) > 1 ? $"x{item.Count} / {MaxStackOf( item.Kind )}" : $"x{item.Count}";

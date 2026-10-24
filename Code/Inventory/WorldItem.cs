@@ -210,6 +210,9 @@ public sealed class WorldItem : Component, IInteractionHandler
 		if ( e.Option?.Id != PickupId || Data is not { } item )
 			return null;
 
+		if ( item.Kind == ItemCatalog.Cash )
+			return DescribeCash( e, item );
+
 		var title = item.Count > 1 ? $"Pick up {item.Name} x{item.Count}" : $"Pick up {item.Name}";
 		var details = item.IsBatch || string.IsNullOrEmpty( item.Description )
 			? ItemCatalog.Describe( item )
@@ -228,14 +231,89 @@ public sealed class WorldItem : Component, IInteractionHandler
 			: new InteractionInfo( title, "back_hand", details );
 	}
 
-	bool IInteractionHandler.CanInteract( InteractionEvent e ) =>
-		e.Option?.Id != PickupId || e.Interactor?.Components.Get<PlayerInventory>() is not { } inventory
-		|| Data is not { } item || inventory.RoomFor( item ) > 0;
+	/// <summary>
+	/// The prompt for a pile of cash: it goes in the wallet, not the bag, so only the wallet's cap can stop it.
+	/// </summary>
+	static InteractionInfo DescribeCash( InteractionEvent e, ItemData item )
+	{
+		var title = $"Pick up {CashRules.Format( item.Amount )}";
+
+		if ( e.Interactor?.Components.Get<PlayerWallet>() is not { } wallet )
+			return new InteractionInfo( title, "payments", "Cash" );
+
+		var (taken, left) = CashRules.Pickup( item.Amount, wallet.Cash );
+
+		if ( taken < 1 )
+			return new InteractionInfo( title, "payments", "Your wallet is full.", false );
+
+		return left > 0
+			? new InteractionInfo( title, "payments", $"Only {CashRules.Format( taken )} fit in your wallet." )
+			: new InteractionInfo( title, "payments", "Cash" );
+	}
+
+	bool IInteractionHandler.CanInteract( InteractionEvent e )
+	{
+		if ( e.Option?.Id != PickupId || Data is not { } item )
+			return true;
+
+		// Cash goes in the wallet, so only its cap can refuse.
+		if ( item.Kind == ItemCatalog.Cash )
+			return e.Interactor?.Components.Get<PlayerWallet>() is not { } wallet
+			       || CashRules.Pickup( item.Amount, wallet.Cash ).Taken > 0;
+
+		return e.Interactor?.Components.Get<PlayerInventory>() is not { } inventory || inventory.RoomFor( item ) > 0;
+	}
+
+	/// <summary>
+	/// A pile of cash goes into the interactor's wallet (as much as the cap allows), not their bag. All of it: the pile
+	/// is taken and destroyed. Part of it: the pile stays with what did not fit. Host only.
+	/// </summary>
+	void PickUpCash( InteractionEvent e, ItemData item )
+	{
+		var crime = e.Interactor.Components.Get<PlayerCrime>();
+
+		if ( e.Interactor.Components.Get<PlayerWallet>() is not { } wallet )
+			return;
+
+		var total = item.Amount;
+		var got = CashDrops.Pickup( wallet, item );
+
+		if ( got < 1 )
+		{
+			crime?.Tell( CrimeResult.Fail( "Your wallet is full." ) );
+			return;
+		}
+
+		if ( got >= total )
+		{
+			// Marked before it is destroyed, so a second pickup in the same frame finds nothing left.
+			taken = true;
+			WorldItemRegistry.Forget( GameObject );
+			GameObject.Destroy();
+			WorldItemRegistry.Flush();
+			crime?.Tell( CrimeResult.Success( $"Picked up {CashRules.Format( total )}." ) );
+			return;
+		}
+
+		var rest = item.Clone();
+		rest.Amount = total - got;
+		Set( rest );
+		WorldItemRegistry.SetItem( GameObject, rest );
+		WorldItemRegistry.Flush();
+		crime?.Tell( CrimeResult.Success(
+			$"Picked up {CashRules.Format( got )} of {CashRules.Format( total )}. {CashRules.Format( rest.Amount )} left on the ground." ) );
+	}
 
 	void IInteractionHandler.OnInteract( InteractionEvent e )
 	{
 		if ( e.Option?.Id != PickupId || taken || !GameObject.IsValid() || Data is not { } item )
 			return;
+
+		if ( item.Kind == ItemCatalog.Cash )
+		{
+			PickUpCash( e, item );
+			return;
+		}
 
 		if ( e.Interactor?.Components.Get<PlayerInventory>() is not { } inventory )
 			return;
