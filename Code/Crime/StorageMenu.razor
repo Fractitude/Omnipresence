@@ -2,14 +2,14 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="menu-root @( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
+<root class="menu-root @( IsOpen ? "open" : "" )" @onmouseup=@( ( PanelEvent e ) => EndDrag( e ) )>
 	@if ( IsOpen && target.IsValid() && PlayerCrime.Local is { } crime && PlayerInventory.Local is { } bag )
 	{
 		var used = bag.SlotCount - bag.FreeSlots;
 
 		<MenuWindow Title="Storage box" OnClose=@Close
 		            Notice=@( crime.ToldCount > toldAtOpen ? crime.LastTold : null )
-		            Hint="Drag with left mouse to move. Right click to send to the other side.">
+		            Hint="Drag to move. Shift: combine stacks. Ctrl: split half. Right click: send to the other side.">
 			<ChildContent>
 				<div class="body">
 					<div class="column">
@@ -82,6 +82,10 @@
 			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px">
 				<ItemIcon PrefabPath=@dragged.PrefabPath ModelPath=@dragged.ModelPath
 				          Icon=@ItemCatalog.IconFor( dragged ) Color=@ItemCatalog.ColorFor( dragged )/>
+				@if ( DropLabel is { } label )
+				{
+					<div class="ghost-label">@label</div>
+				}
 			</div>
 		}
 		else if ( Hovered is { } hovered )
@@ -146,6 +150,33 @@
 	static ItemData Dragged => !dragging ? null
 		: dragFromBox ? (target.IsValid() ? target.ViewAt( dragSlot ) : null)
 		: PlayerInventory.Local?.At( dragSlot );
+
+	/// <summary>
+	/// The item in a slot of the bag or the box as this player sees it, or null.
+	/// </summary>
+	static ItemData ItemAt( bool inBox, int slot ) =>
+		inBox ? (target.IsValid() ? target.ViewAt( slot ) : null) : PlayerInventory.Local?.At( slot );
+
+	/// <summary>
+	/// Whether the mouse is on a slot other than the one being dragged.
+	/// </summary>
+	static bool OverOther => dragging && overSlot >= 0 && !(overBox == dragFromBox && overSlot == dragSlot);
+
+	/// <summary>
+	/// The label beside the dragged icon while Shift or Ctrl is held ("Combine", "Split half", ...), or null.
+	/// </summary>
+	static string DropLabel
+	{
+		get
+		{
+			var mode = StackDrag.Held();
+
+			if ( Dragged is not { } dragged || mode == StackMode.None )
+				return null;
+
+			return StackDrag.Label( dragged, OverOther ? ItemAt( overBox, overSlot ) : null, mode, OverOther );
+		}
+	}
 
 	/// <summary>
 	/// The item under the mouse while nothing is dragged, or null.
@@ -272,7 +303,7 @@
 	/// The mouse button came up: drop the dragged item on the slot under the mouse. Nothing under the mouse, or the
 	/// slot it came from (a plain click), changes nothing. Only slot numbers go to the host, which checks everything.
 	/// </summary>
-	static void EndDrag()
+	static void EndDrag( PanelEvent e )
 	{
 		if ( !dragging )
 			return;
@@ -284,6 +315,18 @@
 		if ( !target.IsValid() || !SlotAt( Mouse.Position, out var toBox, out var to )
 		     || (fromBox == toBox && from == to) )
 			return;
+
+		// With Shift or Ctrl held a drop combines or splits, or does nothing: it never swaps.
+		var mode = StackDrag.Held( e );
+
+		if ( mode != StackMode.None )
+		{
+			if ( StackDrag.Worth( ItemAt( toBox, to ), mode ) )
+				target.RequestStack( fromBox ? StorageRules.SideBox : StorageRules.SideBag, from,
+					toBox ? StorageRules.SideBox : StorageRules.SideBag, to, (int)mode );
+
+			return;
+		}
 
 		if ( fromBox && toBox )
 			target.RequestMoveInBox( from, to );
@@ -335,7 +378,13 @@
 			return "";
 
 		var marks = dragFromBox == inBox && dragSlot == slot ? "dragged " : "";
-		return overBox == inBox && overSlot == slot && marks == "" ? "target" : marks;
+
+		if ( overBox != inBox || overSlot != slot || marks != "" )
+			return marks;
+
+		// A held key only marks a slot its drop would work on.
+		var mode = StackDrag.Held();
+		return mode == StackMode.None || StackDrag.Works( Dragged, ItemAt( inBox, slot ), mode ) ? "target" : "";
 	}
 
 	static void HoverBag( int slot, int leaving = -1 )
@@ -408,7 +457,7 @@
 		return System.HashCode.Combine(
 			IsOpen, target.IsValid() ? target.ViewVersion : 0, PlayerInventory.Local?.Version,
 			PlayerCrime.Local?.ToldCount, System.HashCode.Combine( hoverBag, hoverBox, dragging, dragSlot, overSlot ),
-			overBox,
+			overBox, dragging ? StackDrag.Held() : StackMode.None,
 			following ? Mouse.Position : default );
 	}
 }

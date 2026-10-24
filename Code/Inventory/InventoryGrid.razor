@@ -4,6 +4,7 @@
 
 <root>
 	<div class="heading">Inventory</div>
+	<div class="hint">@StackDrag.Hint</div>
 	@if ( Inventory is { } inventory )
 	{
 		<div @ref="Grid" class="grid" style="width: @( inventory.Columns * (SlotSize + Gap) - Gap )px">
@@ -11,7 +12,7 @@
 			{
 				var slot = i;
 				var item = inventory.At( slot );
-				<div class="slot @( item is null ? "empty" : "" ) @( DragFrom == slot ? "dragged" : "" )"
+				<div class="slot @( item is null ? "empty" : "" ) @( Marks( slot ) )"
 				     @onmousedown=@( () => BeginDrag( slot ) )
 				     @onmouseover=@( () => Hovered = slot )
 				     @onmouseout=@( () => { if ( Hovered == slot ) Hovered = -1; } )>
@@ -66,7 +67,45 @@
 	/// <summary>
 	/// A hash of what the grid shows, for the menu that draws the dragged icon and the details.
 	/// </summary>
-	public static int State => System.HashCode.Combine( PlayerInventory.Local?.Version, dragFrom, hovered );
+	public static int State => System.HashCode.Combine(
+		PlayerInventory.Local?.Version, dragFrom, hovered, dragFrom >= 0 ? StackDrag.Held() : StackMode.None );
+
+	/// <summary>
+	/// The label beside the dragged icon while Shift or Ctrl is held ("Combine", "Split half", ...), or null.
+	/// </summary>
+	public static string DropLabel
+	{
+		get
+		{
+			var mode = StackDrag.Held();
+
+			if ( Dragged is not { } dragged || mode == StackMode.None )
+				return null;
+
+			var to = SlotAt( Mouse.Position );
+			var over = to >= 0 && to != dragFrom ? PlayerInventory.Local?.At( to ) : null;
+			return StackDrag.Label( dragged, over, mode, to >= 0 && to != dragFrom );
+		}
+	}
+
+	/// <summary>
+	/// The style class of a slot: the one being dragged, or the one a held key's drop would work on.
+	/// </summary>
+	static string Marks( int slot )
+	{
+		var mode = StackDrag.Held();
+
+		if ( dragFrom < 0 )
+			return "";
+
+		if ( slot == dragFrom )
+			return "dragged";
+
+		if ( mode == StackMode.None || SlotAt( Mouse.Position ) != slot )
+			return "";
+
+		return StackDrag.Works( Dragged, PlayerInventory.Local?.At( slot ), mode ) ? "target" : "";
+	}
 
 	PlayerInventory Inventory => PlayerInventory.Local;
 
@@ -102,7 +141,7 @@
 	/// The mouse button came up: drop the dragged item on the slot under the mouse, or on the floor when the mouse is
 	/// outside the whole window. Dropped on the window but not on a slot, it stays where it was.
 	/// </summary>
-	public static void EndDrag( Vector2 mouse, Rect window )
+	public static void EndDrag( Vector2 mouse, Rect window, PanelEvent e = null )
 	{
 		var from = dragFrom;
 		dragFrom = -1;
@@ -111,6 +150,16 @@
 			return;
 
 		var to = SlotAt( mouse );
+		var mode = StackDrag.Held( e );
+
+		// With Shift or Ctrl held a drop combines or splits, or does nothing: it never swaps or throws the stack away.
+		if ( mode != StackMode.None )
+		{
+			if ( to >= 0 && to != from && StackDrag.Worth( inventory.At( to ), mode ) )
+				inventory.Stack( from, to, mode );
+
+			return;
+		}
 
 		if ( to >= 0 )
 			inventory.Move( from, to );

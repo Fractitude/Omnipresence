@@ -9,6 +9,12 @@ InventoryGrid
 		font-weight: 700;
 	}
 
+	.hint
+	{
+		font-size: 12px;
+		color: rgba(242, 238, 226, 0.6);
+	}
+
 	.grid
 	{
 		flex-direction: row;
@@ -34,6 +40,12 @@ InventoryGrid
 		&.dragged
 		{
 			opacity: 0.35;
+		}
+
+		&.target
+		{
+			border-color: rgba(127, 209, 255, 0.9);
+			background-color: rgba(127, 209, 255, 0.18);
 		}
 
 		.count

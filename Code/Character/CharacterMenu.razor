@@ -2,7 +2,7 @@
 @inherits PanelComponent
 @namespace Sandbox
 
-<root class="@( IsOpen ? "open" : "" )" @onmouseup=@EndDrag>
+<root class="@( IsOpen ? "open" : "" )" @onmouseup=@( ( PanelEvent e ) => EndDrag( e ) )>
 	@if ( IsOpen )
 	{
 		<div @ref="Window" class="window">
@@ -21,6 +21,10 @@
 			var position = Mouse.Position * Panel.ScaleFromScreen;
 			<div class="ghost" style="left: @( position.x )px; top: @( position.y )px">
 				<ItemIcon PrefabPath=@dragged.PrefabPath ModelPath=@dragged.ModelPath Icon=@ItemCatalog.IconFor( dragged ) Color=@ItemCatalog.ColorFor( dragged )/>
+				@if ( InventoryGrid.DropLabel is { } label )
+				{
+					<div class="ghost-label">@label</div>
+				}
 			</div>
 		}
 		else if ( InventoryGrid.HoveredItem is { } hovered )
@@ -133,12 +137,12 @@
 		lastMouseX = Mouse.Position.x * (View?.ScaleFromScreen ?? 1);
 	}
 
-	void EndDrag()
+	void EndDrag( PanelEvent e )
 	{
 		dragging = false;
 
 		if ( Window is { IsValid: true } )
-			InventoryGrid.EndDrag( Mouse.Position, Window.Box.Rect );
+			InventoryGrid.EndDrag( Mouse.Position, Window.Box.Rect, e );
 		else
 			InventoryGrid.Cancel();
 	}

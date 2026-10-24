@@ -76,6 +76,21 @@ CharacterMenu
 	pointer-events: none;
 }
 
+.ghost-label
+{
+	position: absolute;
+	left: 70px;
+	top: 20px;
+	padding: 2px 8px;
+	white-space: nowrap;
+	font-size: 13px;
+	font-weight: 700;
+	color: #f2eee2;
+	background-color: rgba(8, 8, 16, 0.85);
+	border: 1px solid rgba(127, 209, 255, 0.7);
+	border-radius: 4px;
+}
+
 .details
 {
 	position: absolute;
