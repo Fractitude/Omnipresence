@@ -1,0 +1,32 @@
+// Shared by every full-screen HUD layer. Import it with @import "../Hud/_hud.scss" (path from the importing file).
+
+// The draw order of the HUD pieces that share the HUD's screen panel: a higher number draws, and is clicked, above a
+// lower one. Menus cover the screen, so the hotbar has to sit above them and the dragged icon above both.
+$z-menu: 200;
+$z-hotbar: 300;
+$z-drag: 400;
+$z-fade: 1000;
+
+// The root of a menu that covers the screen: nothing until it is open, then a dim backdrop that takes the mouse.
+// Put the class menu-root on the menu's <root>.
+.menu-root
+{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: $z-menu;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	font-family: Poppins;
+	color: #f2eee2;
+	text-shadow: 1px 1px 2px #1b1a2e;
+
+	&.open
+	{
+		pointer-events: all;
+		background-color: rgba(27, 26, 46, 0.35);
+	}
+}

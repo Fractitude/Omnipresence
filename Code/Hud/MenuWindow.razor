@@ -1,0 +1,49 @@
+@using Sandbox.UI
+@inherits Panel
+@namespace Sandbox
+
+<root class="menu-window @( Width > 0 ? "" : "fit" )" style="@( Width > 0 ? $"width: {Width}px" : "" )">
+	<div class="menu-header">
+		<div class="menu-title">@Title</div>
+		<div class="menu-close" @onclick=@OnClose>Close</div>
+	</div>
+	@ChildContent
+	@if ( !string.IsNullOrEmpty( Notice ) )
+	{
+		<div class="menu-notice">@Notice</div>
+	}
+	@if ( !string.IsNullOrEmpty( Hint ) )
+	{
+		<div class="menu-hint">@Hint</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The window's title, in the header.
+	/// </summary>
+	public string Title { get; set; }
+
+	/// <summary>
+	/// A fixed width in pixels. 0 (the default) fits the window to its content, up to most of the screen.
+	/// </summary>
+	public int Width { get; set; }
+
+	/// <summary>
+	/// A line from the game under the content, such as what a host answer said. Empty hides it.
+	/// </summary>
+	public string Notice { get; set; }
+
+	/// <summary>
+	/// A dim line of advice at the bottom. Empty hides it.
+	/// </summary>
+	public string Hint { get; set; }
+
+	/// <summary>
+	/// Called by the header's Close button.
+	/// </summary>
+	public Action OnClose { get; set; }
+
+	protected override int BuildHash() => HashCode.Combine( Title, Width, Notice, Hint );
+}
