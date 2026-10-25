@@ -4,15 +4,42 @@ A sent is a prefab published to the cloud as a package of type `sent` (the asset
 `.sent`). Facepunch's sandbox game spawns them; this game can too. Code: `Code/Sents/`. Ported from the sandbox game's
 `ScriptedEntity`, `EntitySpawner` and `CloudSpawnList`, much smaller.
 
-- `ScriptedEntity` (`ScriptedEntity.cs`) has the same class name and extension as upstream, because the cloud packages
-  are made of that type. It has no `IDefinitionResource` (that marker lives in the sandbox project, not the engine).
-- `Sents.Spawn( ident )` (`spawn_sent org.package`, `Sents.cs`) asks the host. The host checks the ident
-  (`org.package` only, never a path), loads the package with `Cloud.Load<ScriptedEntity>( ident, true )`, clones its
-  prefab where the player looks (500 units, stood on the floor) and `NetworkSpawn`s it.
-- `SentBrowser` (`sents` command, a HUD piece) searches the cloud (`Package.FindAsync( "sort:popular type:sent <text>" )`)
-  and shows tiles with thumbnail, title and author. Clicking one spawns it and closes the window; right-click copies its ident
-  or opens its package page. The sidebar filters by tag (`#vehicle`, `#weapon`, `#npc`, `#explosives`; `tag:` finds nothing), and the list loads the
-  next 40 when scrolled near the bottom.
+Files in `Code/Sents/`, each with one job:
+
+- `ScriptedEntity.cs`: the same class name and extension as upstream, because the cloud packages are made of that type.
+  It has no `IDefinitionResource` (that marker lives in the sandbox project, not the engine).
+- `Sents.cs`: `spawn_sent org.package`. Asks the host, which checks who is asking (`CanSpawn`), the ident (`org.package`
+  only, never a path), a half-second gap between one player's spawns, and that the player has a body; then loads the
+  package (`Cloud.Load<ScriptedEntity>( ident, true )`), builds it where the player looks (500 units, stood on the floor)
+  and `NetworkSpawn`s it. A failure is logged with the ident, never thrown.
+- `SentBuilder.cs`: the one place that turns a prefab into an object (below).
+- `SentPackage.cs`: `[SentPackage( ident, namespaces )]` and `SentPackages`, what the game knows about imported code.
+- `SentCatalog.cs` and `SentBrowser.razor` (`sents` command, a HUD piece): the cloud search, and the window that draws it.
+  The catalog searches `Package.FindAsync( "sort:popular type:sent <text>" )` a page of 40 at a time; the window shows tiles
+  with thumbnail, title and author. Clicking one spawns it and closes the window; right-click copies its ident or opens its
+  package page. The sidebar filters by tag (`#vehicle`, `#weapon`, `#npc`, `#explosives`; `tag:` finds nothing), and the
+  next page loads when the list is scrolled near the bottom.
+- `Ported/`: types a sent needs and its author never published (`ClaymoreMine`).
+- `Imported/<ident>/`: the code of imported sents (below).
+
+## How a sent is built
+
+`SentBuilder.Build` has two ways, and a sent takes the first that gives all of its components:
+
+1. **Clone** the prefab, as the sandbox game does. It is checked: a component the clone lacks means the engine had the prefab
+   cached before its code was imported (the clone has it as `MissingComponent`, no restart needed), or the sent's own
+   package failed to compile (the component is left out without a trace, as with the friendly FPV drone, which shares code
+   with the enemy).
+2. **Build from the prefab's data**, which looks every type up again. Always used for an imported sent that declares
+   namespaces. It first gives every object and component a **new id** and rewrites every reference to it: a prefab keeps its
+   own ids, its components refer to each other by them (an NPC's `Renderer`), and a second copy built with the same ids
+   found them taken, got new ones, and had references into the first copy. The second NPC A-posed on the first one's
+   renderer and could not die. `GameObject.Clone` does this itself; building from data does not.
+
+**Two sents with the same type name.** In the sandbox game each sent is its own package, so four Combine sents can each have
+a `CombineNpc`. Here they share one assembly, and a prefab's plain `"CombineNpc"` finds only one. `sent_import` writes a
+`SentPackage.cs` beside the code with the namespaces the package declares, and the data build names each component by the
+first of them that has the type (`Hl2Metrocop.CombineNpc`). Nothing is kept by hand.
 
 ## Who may spawn
 
@@ -31,15 +58,18 @@ fix is to compile it as part of this game:
 
 1. Spawn the sent once (`spawn_sent org.package`), so the engine has downloaded it.
 2. `sent_import org.package` (editor console, `Editor/SentImporter.cs`) writes its source to
-   `Code/Sents/Imported/org.package/`. Files another import already has, unchanged, are skipped, because one author's
-   sents often share a library. Tested on `crosschainer.takeda_ascend`, which shares all 14 files with Hokuto Boxer: nothing is written twice.
+   `Code/Sents/Imported/org.package/`, and the `SentPackage.cs` manifest. Files another import already has, unchanged, are
+   skipped, because one author's sents often share a library (`takeda_ascend` shares all 14 files with Hokuto Boxer: nothing is
+   written twice). It is safe to run again: a folder that exists gets only the manifest and a report of what the package has
+   that the folder has not (`new`) or has changed (`edited`); `sent_import org.package update` also writes the new files. **A
+   file edited here is never overwritten**, so the hand fixes below survive.
 3. Read the code. It runs in the game with no sandbox, and it is now in the repo, so review it before committing.
 4. Fix what does not compile. Most of a sent's code only uses the engine, and then it just works. Where it uses a type
    of the sandbox game (`Player`, `Ownable`, `GameManager`, a sandbox tool), that type has to exist here under the same
    name and members: port it from the sandbox clone, as the weapons were.
 
-`Sents.SpawnAsync` builds the object from the prefab's data when the engine's cached copy of the prefab still has the
-components as missing (the prefab was loaded before the import), so no restart is needed.
+If a sent is spawned with components the game does not have, the log says so and, for a sent with code that was never
+imported, names the command.
 
 Not every sent can work: one whose code depends on much of the sandbox game (its NPC system, its tools, its save
 system) needs that part ported first. Props and models with no code, and code that only uses the engine, work as they are.
@@ -49,14 +79,11 @@ system) needs that part ported first. Props and models with no code, and code th
 - `crosschainer.hokuto_boxer` (and `takeda_ascend`, same author, the same `CuratedVehicles` code): a driveable car.
   Its `VehicleSeat` is an engine `BaseChair`, which is itself a `Component.IPressable`, so the player's Use key sits in it
   without our `Interactable`. `CuratedVehicle` implements `IVehicleGauges` (added by hand after the import) and so shows the game's own speedometer
-  (`Code/Vehicles/Hud/VehicleHud.razor`, shared with the buggy). The package's own HUD was not kept; running `sent_import` again would bring it back as a duplicate `VehicleHud`, so delete that copy. The dial picture and the
+  (`Code/Vehicles/Hud/VehicleHud.razor`, shared with the buggy). The package's own HUD was not kept (running `sent_import ... update` would bring it back as a duplicate `VehicleHud`, so do not use `update` on it). The dial picture and the
   sounds are assets of the package and come with it.
 - `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at and explodes on its target. It needed no edits once our player was named `Player` like upstream's.
 - `gmk.aura`: a weapon (`AuraWeapon` on the engine's weapon base; click toggles the aura, which heals the holder and throws things away). Two edits: `Owner` is the engine's `PlayerController` here (upstream's is `Player`), so the heal looks the `Player` up, and upstream's `OnPrimaryDown` hook is not ported, so it overrides `PrimaryAttack` instead.
 - `hl2npcs.metrocop`, `combine_soldier`, `combine_elite`, `combine_prisonguard` and `manhack` (one author, one codebase in five variants): Half-Life 2 NPCs (`CombineNpc` and `ManhackNpc`). No edits: the `TaskStatus` clash is a global alias in `Assembly.cs`, and `Feed` / `IKillIcon` (the kill feed) exist as empty types in `Code/Game/Feed.cs`. A metrocop spawned before the import stays broken (`AnimationLayer` NullReference, its `Npc` is a missing component): delete it and spawn a new one.
-- **Two sents with the same type name** (the four Combine variants each have a `CombineNpc`, in their own namespace): in the sandbox game each sent is its own package, here they share one assembly, and a prefab's `"CombineNpc"` finds only one. `Sents.TypeNamespaces` lists the namespace of each such sent; `SpawnAsync` builds those from the prefab's data with the full type names. Add a sent there when its imported code clashes with another's.
-- **Built from data means new ids.** A prefab keeps its object and component ids, and its components refer to each other by them (an NPC's `Renderer`). `GameObject.Clone` makes new ones; building from the data does not, so a second copy found the ids taken and its references pointed into the first copy: the second NPC A-posed on the first's renderer and could not die. `Sents.FreshGuids` replaces them first.
-- A sent whose package failed to compile (the friendly drone, which shares code with the enemy) loses its code components from the clone without leaving a missing one; `Sents.SpawnAsync` notices the clone has fewer components than the prefab lists and builds it from the prefab's data.
 
 ### Known not working
 

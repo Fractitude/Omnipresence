@@ -1,5 +1,4 @@
 @using Sandbox.UI
-@using System.Threading.Tasks
 @inherits PanelComponent
 @namespace Sandbox
 
@@ -11,31 +10,31 @@
 		            Hint="Entities made by the community. Some bring their own code, which runs in the game.">
 			<ChildContent>
 				<div class="search-bar">
-					<TextEntry class="search" Placeholder="Search" Value:bind=@Filter/>
-					@foreach ( var mode in Modes )
+					<TextEntry class="search" Placeholder="Search" Value:bind=@SentCatalog.Filter/>
+					@foreach ( var mode in SentCatalog.Modes )
 					{
 						var m = mode;
-						<div class="menu-button @( m == sort ? "active" : "" )" @onclick=@( () => SetSort( m ) )>@m</div>
+						<div class="menu-button @( m == SentCatalog.Sort ? "active" : "" )" @onclick=@( () => SentCatalog.SetSort( m ) )>@m</div>
 					}
 				</div>
 				<div class="sents-body">
 					<div class="categories">
-						@foreach ( var category in Categories )
+						@foreach ( var category in SentCatalog.Categories )
 						{
 							var c = category;
-							<div @key=@c.Name class="category @( c.Tag == tag ? "active" : "" )" @onclick=@( () => SetCategory( c ) )>
+							<div @key=@c.Name class="category @( c.Tag == SentCatalog.Tag ? "active" : "" )" @onclick=@( () => SentCatalog.SetCategory( c ) )>
 								<i>@c.Icon</i>
 								<div class="label">@c.Name</div>
 							</div>
 						}
 					</div>
 					<div class="menu-list">
-						@if ( Entries.Count == 0 )
+						@if ( SentCatalog.Entries.Count == 0 )
 						{
-							<div class="menu-empty">@( Loading ? "Loading..." : "No sents found." )</div>
+							<div class="menu-empty">@( SentCatalog.Loading ? "Loading..." : "No sents found." )</div>
 						}
 						<div class="tiles">
-							@foreach ( var entry in Entries )
+							@foreach ( var entry in SentCatalog.Entries )
 							{
 								var e = entry;
 								<div @key=@e.Ident class="tile" @onclick=@( () => Pick( e ) ) @onrightclick=@( () => OpenMenu( e ) )>
@@ -45,7 +44,7 @@
 								</div>
 							}
 						</div>
-						@if ( Entries.Count > 0 && Loading )
+						@if ( SentCatalog.Entries.Count > 0 && SentCatalog.Loading )
 						{
 							<div class="menu-empty">Loading...</div>
 						}
@@ -58,32 +57,12 @@
 
 @code
 {
-	/// <summary>
-	/// A package in the list.
-	/// </summary>
-	record Entry( string Ident, string Title, string Org, string Thumb );
-
-	static readonly string[] Modes = ["popular", "newest", "trending"];
-
-	/// <summary>
-	/// A group in the sidebar: the packages that carry this tag. An empty tag is all of them.
-	/// </summary>
-	record Category( string Name, string Icon, string Tag );
-
-	static readonly Category[] Categories =
-	[
-		new( "All", "apps", "" ),
-		new( "Vehicles", "directions_car", "vehicle" ),
-		new( "Weapons", "gps_fixed", "weapon" ),
-		new( "NPCs", "smart_toy", "npc" ),
-		new( "Explosives", "local_fire_department", "explosives" ),
-	];
-
-	// A page of results, and how close to the end of the list the next one starts loading, in pixels.
-	const int PageSize = 40;
-	const float LoadAhead = 300f;
-
 	const string MenuName = "sents";
+
+	/// <summary>
+	/// How close to the end of the list, in pixels, the next page starts loading.
+	/// </summary>
+	const float LoadAhead = 300f;
 
 	/// <summary>
 	/// Whether the panel is open on this computer.
@@ -91,53 +70,8 @@
 	public static bool IsOpen { get; private set; }
 
 	// Static: the panel's mouse events and this component's updates are not always on the same instance.
-	static List<Entry> Entries = [];
-	static bool Loading;
-	static int search;
-	static int version;
-	static string sort = "popular";
-	static string filter = "";
-	static string tag = "";
-	static int total;
-	static Panel ListPanel;
-
-	static string Filter
-	{
-		get => filter;
-		set
-		{
-			if ( filter == value )
-				return;
-
-			filter = value;
-			_ = Search();
-		}
-	}
-
-	static void SetSort( string mode )
-	{
-		sort = mode;
-		_ = Search();
-	}
-
-	static void SetCategory( Category category )
-	{
-		if ( category.Tag == tag )
-			return;
-
-		tag = category.Tag;
-		_ = Search();
-	}
-
-	// Right-click on a tile: the ident to paste somewhere, or the package's page.
-	static void OpenMenu( Entry entry )
-	{
-		ContextMenu.Show( MenuName, entry.Title,
-		[
-			new ContextEntry( "copy", "Copy ident", "content_copy", true, () => Clipboard.SetText( entry.Ident ) ),
-			new ContextEntry( "page", "Open package page", "open_in_new", true, () => Game.Overlay.ShowPackageModal( entry.Ident ) ),
-		] );
-	}
+	static Panel listPanel;
+	static int searchesSeen;
 
 	/// <summary>
 	/// Open the browser. Does nothing with another menu open.
@@ -150,7 +84,7 @@
 
 		IsOpen = true;
 		GameMenus.SetOpen( MenuName, true );
-		_ = Search();
+		_ = SentCatalog.Refresh();
 	}
 
 	static void Close()
@@ -165,7 +99,7 @@
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}
 
-	static void Pick( Entry entry )
+	static void Pick( SentCatalog.Entry entry )
 	{
 		if ( !Sents.CanSpawn )
 			return;
@@ -174,71 +108,27 @@
 		Close();
 	}
 
-	static string Query()
+	// Right-click on a tile: the ident to paste somewhere, or the package's page.
+	static void OpenMenu( SentCatalog.Entry entry )
 	{
-		var query = $"sort:{sort} type:sent";
-
-		if ( !string.IsNullOrEmpty( tag ) )
-			query += $" #{tag}";
-
-		if ( !string.IsNullOrWhiteSpace( filter ) )
-			query += $" {filter.Trim()}";
-
-		return query;
+		ContextMenu.Show( MenuName, entry.Title,
+		[
+			new ContextEntry( "copy", "Copy ident", "content_copy", true, () => Clipboard.SetText( entry.Ident ) ),
+			new ContextEntry( "page", "Open package page", "open_in_new", true, () => Game.Overlay.ShowPackageModal( entry.Ident ) ),
+		] );
 	}
 
-	static async Task Search()
+	/// <summary>
+	/// Scrolled near the bottom: time for the next page.
+	/// </summary>
+	static bool NearEnd()
 	{
-		var mine = ++search;
-		Loading = true;
-		version++;
-
-		var result = await Package.FindAsync( Query(), PageSize, 0 );
-
-		// A newer search replaced this one.
-		if ( mine != search )
-			return;
-
-		Entries = result?.Packages?.Select( ToEntry ).ToList() ?? [];
-		total = result?.TotalCount ?? Entries.Count;
-		Loading = false;
-		version++;
-		if ( ListPanel.IsValid() )
-			ListPanel.ScrollTo( Vector2.Zero );
-	}
-
-	// The next page, added below the ones shown. A new search while it loads drops it.
-	static async Task LoadMore()
-	{
-		var mine = search;
-		Loading = true;
-		version++;
-
-		var result = await Package.FindAsync( Query(), PageSize, Entries.Count );
-
-		if ( mine != search )
-			return;
-
-		var more = result?.Packages?.Select( ToEntry ).Where( x => Entries.All( e => e.Ident != x.Ident ) ).ToList() ?? [];
-		Entries = [.. Entries, .. more];
-
-		// A page with nothing new is the end, whatever the total said.
-		total = more.Count == 0 ? Entries.Count : result.TotalCount;
-		Loading = false;
-		version++;
-	}
-
-	static Entry ToEntry( Package x ) => new( x.FullIdent, x.Title, x.Org?.Title, x.Thumb );
-
-	// Scrolled near the bottom: time for the next page.
-	static bool WantsMore()
-	{
-		if ( Loading || Entries.Count == 0 || Entries.Count >= total || !ListPanel.IsValid() )
+		if ( !listPanel.IsValid() )
 			return false;
 
 		// ScrollSize is the height of everything in the list; zero is a list that has not been laid out yet.
-		var content = ListPanel.ScrollSize.y;
-		return content > 0 && ListPanel.ScrollOffset.y + ListPanel.Box.Rect.Height >= content - LoadAhead;
+		var content = listPanel.ScrollSize.y;
+		return content > 0 && listPanel.ScrollOffset.y + listPanel.Box.Rect.Height >= content - LoadAhead;
 	}
 
 	protected override void OnUpdate()
@@ -264,15 +154,24 @@
 		Mouse.Visibility = MouseVisibility.Visible;
 		MenuControls.Free( false );
 
-		// The scrolling list, found here: the @ref above was null after the panel was rebuilt.
-		if ( !ListPanel.IsValid() )
-			ListPanel = Panel?.Descendants.FirstOrDefault( x => x.HasClass( "menu-list" ) && x.Parent.HasClass( "sents-body" ) );
+		// The scrolling list: found each time it is gone, as the window rebuilds its panels.
+		if ( !listPanel.IsValid() )
+			listPanel = Panel?.Descendants.FirstOrDefault( x => x.HasClass( "menu-list" ) && x.Parent.HasClass( "sents-body" ) );
 
-		if ( WantsMore() )
-			_ = LoadMore();
+		// A new search starts at the top.
+		if ( searchesSeen != SentCatalog.Searches )
+		{
+			searchesSeen = SentCatalog.Searches;
+
+			if ( listPanel.IsValid() )
+				listPanel.ScrollTo( Vector2.Zero );
+		}
+
+		if ( SentCatalog.HasMore && NearEnd() )
+			_ = SentCatalog.LoadMore();
 	}
 
 	protected override void OnDisabled() => Close();
 
-	protected override int BuildHash() => System.HashCode.Combine( IsOpen, version, sort, tag );
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, SentCatalog.Version, SentCatalog.Sort, SentCatalog.Tag );
 }
