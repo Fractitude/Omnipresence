@@ -3,7 +3,7 @@
     "__guid": "42a9cbac-b7da-4d24-bb21-bdabe09173c1",
     "__version": 2,
     "Flags": 0,
-    "Name": "player controller",
+    "Name": "player",
     "Position": "0,0,0",
     "Rotation": "0,0,0,1",
     "Scale": "1,1,1",
@@ -232,9 +232,9 @@
         "EyeAlign": 0.5,
         "EyeColor": 0,
         "HeadShape": 0.5,
-        "ManualAge": 0.5,
-        "ManualHeight": 0.5,
-        "ManualTint": 0.5,
+        "ManualAge": 0,
+        "ManualHeight": 1,
+        "ManualTint": 0,
         "NeckSize": 0,
         "NoseSize": 0,
         "OnComponentDestroy": null,
@@ -244,7 +244,7 @@
         "OnComponentStart": null,
         "OnComponentUpdate": null,
         "RemoveUnownedItems": true,
-        "Source": "LocalUser",
+        "Source": "OwnerConnection",
         "WaistSize": 0.5,
         "WorkshopItems": []
       },
@@ -399,7 +399,7 @@
             "OnComponentUpdate": null,
             "Parameters": {
               "floats": {
-                "scale_height": 1,
+                "scale_height": 1.2,
                 "scale_heel": 0
               }
             },
@@ -422,7 +422,7 @@
         ],
         "Children": [
           {
-            "__guid": "efeadcdd-4336-4c77-bd1a-3178c3327ebd",
+            "__guid": "ea3cef83-eae1-41d1-b31e-3094d5f8f9c0",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - y_front_pants_white",
@@ -439,7 +439,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "53b8b574-6f42-429c-b582-3f783a7f914f",
+                "__guid": "854e76a1-1688-4d29-bd8a-3d844d0da21e",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
