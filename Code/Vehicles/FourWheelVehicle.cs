@@ -82,6 +82,11 @@ public sealed partial class FourWheelVehicle : Component, IPlayerControllable
 	[Sync( SyncFlags.FromHost )] public bool Boosting { get; private set; }
 
 	/// <summary>
+	/// The boost can be used: it isn't burning or recharging.
+	/// </summary>
+	[Sync( SyncFlags.FromHost )] public bool BoostReady { get; private set; } = true;
+
+	/// <summary>
 	/// Fastest a wheel is sliding over the ground, in/s.
 	/// </summary>
 	[Sync( SyncFlags.FromHost )] public float SkidSpeed { get; private set; }
@@ -258,6 +263,7 @@ public sealed partial class FourWheelVehicle : Component, IPlayerControllable
 		ThrottleDown = IsEngineOn && (_throttleDown || revving);
 		Reversing = _controls.Throttle < 0;
 		Boosting = IsBoosting();
+		BoostReady = _boostSecondsUntilReady <= 0;
 		SkidSpeed = _state.SkidSpeed;
 		Speed = _state.Speed;
 	}

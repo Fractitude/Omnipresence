@@ -29,7 +29,13 @@ public interface IVehicleGauges
 	string GaugeMode { get; }
 
 	/// <summary>
-	/// The shortcuts in the row under the dial: the key's label and what it does.
+	/// The shortcuts in the row under the dial.
 	/// </summary>
-	IEnumerable<(string Key, string Label)> GaugePrompts { get; }
+	IEnumerable<VehiclePrompt> GaugePrompts { get; }
 }
+
+/// <summary>
+/// One shortcut in the speedometer's row: the key's label and what it does. A shortcut that can't be used right now
+/// (a boost that is recharging) is <see cref="Enabled"/> false and drawn faded.
+/// </summary>
+public readonly record struct VehiclePrompt( string Key, string Label, bool Enabled = true );

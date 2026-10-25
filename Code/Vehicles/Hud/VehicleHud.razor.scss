@@ -186,6 +186,11 @@ VehicleHud
 			text-transform: uppercase;
 			white-space: nowrap;
 			flex-shrink: 0;
+
+			&.disabled
+			{
+				opacity: 0.35;
+			}
 		}
 
 		.key

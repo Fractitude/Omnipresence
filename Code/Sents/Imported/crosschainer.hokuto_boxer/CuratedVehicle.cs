@@ -50,10 +50,10 @@ public sealed partial class CuratedVehicle : Component, IVehicleGauges
 	string IVehicleGauges.GaugeGear => Gear < 0 ? "R" : Gear == 0 ? "N" : Gear.ToString();
 	string IVehicleGauges.GaugeMode => Drift ? "DRIFT MODE" : "GRIP MODE";
 
-	IEnumerable<(string Key, string Label)> IVehicleGauges.GaugePrompts =>
+	IEnumerable<VehiclePrompt> IVehicleGauges.GaugePrompts =>
 	[
-		("B", "DRIVING MODE"),
-		("L", "LIGHTS"),
+		new( "B", "DRIVING MODE" ),
+		new( "L", "LIGHTS" ),
 	];
 	private readonly Vector3[] hubs = new Vector3[4];
 	private TimeSince sinceShift;

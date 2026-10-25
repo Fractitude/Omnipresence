@@ -38,9 +38,9 @@
 			}
 			</div>
 			<div class="driving-prompts">
-				@foreach ( var (key, label) in Source.GaugePrompts )
+				@foreach ( var prompt in Source.GaugePrompts )
 				{
-					<div><label class="key">@KeyName( key )</label><label>@label</label></div>
+					<div class="@( prompt.Enabled ? "" : "disabled" )"><label class="key">@KeyName( prompt.Key )</label><label>@prompt.Label</label></div>
 				}
 			</div>
 		</div>
@@ -111,8 +111,8 @@
 		var hash = HashCode.Combine( Math.Round( Source.GaugeSpeed ), Math.Round( Source.GaugeRpm / 25 ),
 			Source.GaugeGear, Source.GaugeMode );
 
-		foreach ( var (key, label) in Source.GaugePrompts )
-			hash = HashCode.Combine( hash, key, label );
+		foreach ( var prompt in Source.GaugePrompts )
+			hash = HashCode.Combine( hash, prompt );
 
 		return hash;
 	}
