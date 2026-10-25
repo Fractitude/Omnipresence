@@ -37,3 +37,7 @@ With no spare magazines left and the gun empty, the NPC switches to its melee we
 Pistols (hold type `pistol`) and any weapon not set to automatic are fired one shot per 0.25-0.45 s (`FireWeapon.SemiAutoInterval`); the weapon prefabs all have `PrimaryAutomatic` on, so the hold type decides.
 
 `MeleeChoices` must be declared before `WeaponChoices` in `CombatNpc`: the NPC is armed when `WeaponChoices` loads, and a property loaded after it is still empty at that point. A gunman placed by hand in a scene keeps the values it was saved with, so replace it after changing the prefab.
+
+## Not shoving heavy objects
+
+A walking NPC is a kinematic body (its Rigidbody motion is off while it is on the ground), so its mass does nothing and it would push a car out of the way. `Npc.Movement.cs` takes over the body's movement: the nav agent no longer teleports the body (`UpdatePosition` is off), and `MoveBody` moves it to the agent's position each frame after sweeping its box along the step. If that sweep hits a rigidbody heavier than `MaxPushMass` (300) the NPC drops the part of the step into it and slides along it, or, walking straight at it, goes round on whichever side it is on; lighter objects are still shoved. The agent is moved back to the body when the body was held back. Rigidbody mass 75 only matters once an NPC is off its feet (thrown, physgunned, ragdolled).

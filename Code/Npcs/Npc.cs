@@ -37,6 +37,7 @@ public partial class Npc : Component, IKillSource, Component.IDamageable
 		GameObject.Tags.Add( "npc" );
 		_rigidbody = GetComponent<Rigidbody>();
 		_navAgent = GetComponent<NavMeshAgent>();
+		TakeOverMovement();
 		Scene.GetSystem<NpcSystem>().Register( this );
 	}
 
@@ -57,6 +58,8 @@ public partial class Npc : Component, IKillSource, Component.IDamageable
 		// No thinking in mid-air - the schedule picks up again once we land
 		if ( !IsAirborne )
 			TickSchedule();
+
+		MoveBody();
 
 		if ( ShowDebugOverlay )
 		{
