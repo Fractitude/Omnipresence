@@ -1,5 +1,6 @@
 // The package's own stylesheet was not part of its published code, so this is written here to fit VehicleHud.razor:
-// a 302.4px dial (its centre is at 151.2px, which the tick and number positions assume).
+// a 302.4px dial (its centre is at 151.2px, which the tick and number positions assume), in Barlow Condensed (the
+// font files come with the package).
 
 VehicleHud
 {
@@ -15,11 +16,13 @@ VehicleHud
 {
 	position: absolute;
 	right: 48px;
-	bottom: 48px;
+	bottom: 96px;
 	width: 302.4px;
 	height: 302.4px;
-	font-family: Poppins;
+	font-family: "Barlow Condensed";
+	font-weight: 700;
 	color: white;
+	text-shadow: 0 1px 3px rgba( 0, 0, 0, 0.45 );
 
 	.speedometer-dial
 	{
@@ -30,6 +33,7 @@ VehicleHud
 		height: 100%;
 	}
 
+	// The band along the ring that fills up with the RPM. Solid, so the slices it is drawn in leave no seams.
 	.rpm-active-sector
 	{
 		position: absolute;
@@ -37,7 +41,7 @@ VehicleHud
 		top: 0;
 		width: 100%;
 		height: 100%;
-		background-color: rgba( 255, 255, 255, 0.28 );
+		background-color: white;
 	}
 
 	.rpm-tick
@@ -45,7 +49,7 @@ VehicleHud
 		position: absolute;
 		width: 12px;
 		height: 2px;
-		background-color: rgba( 255, 255, 255, 0.8 );
+		background-color: rgba( 255, 255, 255, 0.9 );
 
 		&.redline
 		{
@@ -56,8 +60,9 @@ VehicleHud
 	.rpm-number
 	{
 		position: absolute;
-		font-size: 14px;
-		font-weight: 600;
+		font-size: 17px;
+		font-weight: 700;
+		letter-spacing: 1px;
 		transform: translate( -50%, -50% );
 
 		&.redline-text
@@ -77,36 +82,41 @@ VehicleHud
 		align-items: center;
 		justify-content: center;
 
-		// Above the dial, so it does not draw over the 4 on the RPM scale.
+		// Inside the dial, between the 3 and the 4.
 		.rpm-label
 		{
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: -10px;
+			top: 28%;
 			justify-content: center;
 			text-align: center;
-			font-size: 12px;
-			opacity: 0.7;
+			font-size: 13px;
+			font-weight: 500;
+			letter-spacing: 1px;
+			opacity: 0.9;
 		}
 
 		.speed
 		{
-			font-size: 64px;
-			font-weight: 700;
-			line-height: 64px;
+			font-size: 74px;
+			font-weight: 800;
+			font-style: italic;
+			line-height: 70px;
 		}
 
 		.speed-unit
 		{
-			font-size: 14px;
-			opacity: 0.7;
+			font-size: 15px;
+			font-weight: 500;
+			letter-spacing: 2px;
+			opacity: 0.9;
 		}
 
 		.gear
 		{
-			margin-top: 6px;
-			font-size: 26px;
+			margin-top: 4px;
+			font-size: 30px;
 			font-weight: 700;
 		}
 	}
@@ -116,42 +126,52 @@ VehicleHud
 		position: absolute;
 		left: 0;
 		right: 0;
-		bottom: -26px;
+		bottom: 2px;
 		text-align: center;
-		font-size: 13px;
-		letter-spacing: 2px;
+		justify-content: center;
+		font-size: 17px;
+		font-weight: 500;
+		letter-spacing: 4px;
 	}
 
+	// The shortcuts in one row under the dial.
 	.driving-prompts
 	{
 		position: absolute;
-		right: 100%;
-		bottom: 0;
-		margin-right: 24px;
-		flex-direction: column;
-		gap: 6px;
+		left: -70px;
+		right: -70px;
+		top: 100%;
+		margin-top: 14px;
+		flex-direction: row;
+		justify-content: center;
+		gap: 22px;
 
 		div
 		{
 			align-items: center;
 			gap: 8px;
-			font-size: 13px;
+			font-size: 16px;
+			font-weight: 500;
+			letter-spacing: 1px;
+			text-transform: uppercase;
+			white-space: nowrap;
+			flex-shrink: 0;
 		}
 
 		.key
 		{
-			min-width: 26px;
-			height: 26px;
+			min-width: 24px;
+			height: 24px;
 			padding: 0 6px;
 			justify-content: center;
 			align-items: center;
 			text-align: center;
-			// No line-height: the label centres its text with the flex alignment above, and a line height taller than the
-			// text pushes it to the top of its line box.
 			line-height: 1;
 			padding-top: 1px;
-			border: 1px solid rgba( 255, 255, 255, 0.7 );
-			border-radius: 4px;
+			border-radius: 3px;
+			background-color: rgba( 238, 238, 224, 0.95 );
+			color: #2a2a26;
+			text-shadow: none;
 			font-weight: 700;
 		}
 	}

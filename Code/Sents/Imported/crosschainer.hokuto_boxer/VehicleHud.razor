@@ -39,16 +39,18 @@
 	private static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
 	private static string PointStyle( double angle, double radius ) => $"left: {Css(151.2 + Math.Cos(angle * Math.PI / 180) * radius)}px; top: {Css(151.2 + Math.Sin(angle * Math.PI / 180) * radius)}px;";
 	private static string ArcStyle( double angle ) => $"{PointStyle(angle, 104.76)} transform: translate(-50%, -50%) rotate({Css(angle)}deg);";
-	// The active part of the RPM scale is drawn as thin wedges (a polygon of three points each, the form that renders),
-	// from the dial's centre out to the dial's outer ring (41.5% of the box, measured from its picture): the slices are small enough that the
-	// chord at their outer end looks like the arc, and nothing reaches past the dial.
-	private const float SliceDegrees = 15;
+	// The active part of the RPM scale is a band along the dial's outer ring, drawn as small quads (the polygon's four
+	// corners) so the edge follows the ring. Radii are fractions of the box (the ring is 41.5% of it, measured from the
+	// dial's picture); each slice is small enough that its straight edges look like the arc.
+	private const float SliceDegrees = 6;
+	private const double OuterRadius = 41.6;
+	private const double InnerRadius = 39.6;
 	private static string SectorStyle( double startAngle, double endAngle )
 	{
-		const double radius = 41.5;
 		var start = startAngle * Math.PI / 180;
 		var end = endAngle * Math.PI / 180;
-		return $"border-shape: polygon(50% 50%, {Css(50 + Math.Cos(start) * radius)}% {Css(50 + Math.Sin(start) * radius)}%, {Css(50 + Math.Cos(end) * radius)}% {Css(50 + Math.Sin(end) * radius)}%);";
+		string P( double angle, double radius ) => $"{Css(50 + Math.Cos(angle) * radius)}% {Css(50 + Math.Sin(angle) * radius)}%";
+		return $"border-shape: polygon({P(start, OuterRadius)}, {P(end, OuterRadius)}, {P(end, InnerRadius)}, {P(start, InnerRadius)});";
 	}
 	protected override int BuildHash() => Vehicle.IsValid()
 		? HashCode.Combine( Math.Round(Vehicle.Speed), Math.Round(Vehicle.Rpm / 25), Vehicle.Gear, Vehicle.Mode, Vehicle.LocalDriver ) : 0;
