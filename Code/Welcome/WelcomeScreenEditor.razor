@@ -6,22 +6,9 @@
 	@if ( IsOpen && !rebuilding && draft is { } d )
 	{
 		<MenuWindow Title="Edit the welcome screen" Width=@( 760 ) OnClose=@Close Notice=@notice
-		            Hint="Save sends the text to every player. Escape discards your changes.">
+		            Hint="Save sends the text to every player and shows it again to those who saw an older one. Escape discards your changes.">
 			<ChildContent>
 				<div @ref=List class="menu-list editor">
-					<div class="section">
-						<div class="menu-heading">Version</div>
-						<div class="version-row">
-							<div class="menu-button small" @onclick=@( () => ChangeVersion( -1 ) )>-</div>
-							<div class="version">@d.Version</div>
-							<div class="menu-button small" @onclick=@( () => ChangeVersion( 1 ) )>+</div>
-							<div class="note">
-								Raise it when this text changed and returning players should read it again. They are
-								shown the screen on joining only if they have not seen this version.
-							</div>
-						</div>
-					</div>
-
 					<div class="section">
 						<div class="menu-heading">Text</div>
 						<div class="caption">Window title</div>
@@ -183,6 +170,9 @@
 		if ( draft is null )
 			return;
 
+		// Every save is a new version: players who saw the last one are shown the screen again.
+		draft.Version = WelcomeContent.Data.Version + 1;
+
 		if ( WelcomeContent.Save( draft ) )
 			Close();
 		else
@@ -191,22 +181,13 @@
 
 	static void ResetText()
 	{
-		// The version stays: it must not go back and hide the change from players who saw a higher one.
-		var version = draft?.Version ?? 1;
-		draft = new() { Version = version };
+		draft = new();
 		Rebuild();
 	}
 
-	// Between the version the players have now and one more: lowering it would hide the change from those who saw
-	// it, and a save raises it by one at most.
-	static void ChangeVersion( int by )
-	{
-		var saved = WelcomeContent.Data.Version;
-		draft.Version = System.Math.Clamp( draft.Version + by, saved, saved + 1 );
-	}
-
 	static void AddEntry() =>
-		draft.Changelog.Insert( 0, new() { Version = draft.Version, Title = "", Changes = new() { "" } } );
+		draft.Changelog.Insert(
+			0, new() { Version = WelcomeContent.Data.Version + 1, Title = "", Changes = new() { "" } } );
 
 	static void Remove<T>( List<T> list, int index )
 	{
@@ -262,6 +243,6 @@
 	protected override void OnDisabled() => Close();
 
 	protected override int BuildHash() => System.HashCode.Combine(
-		IsOpen, rebuilding, notice, draft?.Version, draft?.Rules.Count, draft?.Changelog.Count,
+		IsOpen, rebuilding, notice, draft?.Rules.Count, draft?.Changelog.Count,
 		draft?.Changelog.Sum( x => x.Changes.Count ) );
 }

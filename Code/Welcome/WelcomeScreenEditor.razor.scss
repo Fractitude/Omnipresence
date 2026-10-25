@@ -78,30 +78,6 @@
 	border-radius: 6px;
 }
 
-.version-row
-{
-	flex-direction: row;
-	flex-shrink: 0;
-	align-items: center;
-	gap: 10px;
-
-	.version
-	{
-		font-size: 20px;
-		font-weight: 700;
-		min-width: 36px;
-		justify-content: center;
-	}
-
-	.note
-	{
-		flex-grow: 1;
-		flex-basis: 0;
-		font-size: 12px;
-		opacity: 0.7;
-	}
-}
-
 .add
 {
 	align-self: flex-end;

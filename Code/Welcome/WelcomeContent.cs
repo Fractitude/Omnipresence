@@ -17,7 +17,7 @@ public sealed class ChangelogEntry
 public sealed class WelcomeData
 {
 	/// <summary>
-	/// The version of these contents. Raised by hand by the host: a player who has not seen it is shown the screen on
+	/// The version of these contents. Raised by 1 on every save in the editor: a player who has not seen it is shown the screen on
 	/// joining, and the changelog entries newer than the version they saw are listed.
 	/// </summary>
 	public int Version { get; set; } = 1;
