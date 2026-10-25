@@ -56,17 +56,23 @@ not have, so its code fails to compile here and its components load as **missing
 package.facepunch.sandbox`, then `Missing Component`). The source is inside the package the engine downloaded, so the
 fix is to compile it as part of this game:
 
-1. Spawn the sent once (`spawn_sent org.package`), so the engine has downloaded it.
-2. `sent_import org.package` (editor console, `Editor/SentImporter.cs`) writes its source to
+1. `sent_import org.package` (editor console, `Editor/SentImporter.cs`) downloads the package if it is not there, and writes its source to
    `Code/Sents/Imported/org.package/`, and the `SentPackage.cs` manifest. Files another import already has, unchanged, are
    skipped, because one author's sents often share a library (`takeda_ascend` shares all 14 files with Hokuto Boxer: nothing is
    written twice). It is safe to run again: a folder that exists gets only the manifest and a report of what the package has
    that the folder has not (`new`) or has changed (`edited`); `sent_import org.package update` also writes the new files. **A
    file edited here is never overwritten**, so the hand fixes below survive.
-3. Read the code. It runs in the game with no sandbox, and it is now in the repo, so review it before committing.
-4. Fix what does not compile. Most of a sent's code only uses the engine, and then it just works. Where it uses a type
+   Then it waits for the game to build and reports what does not compile (`Editor/SentDiagnosis.cs`): each kind of error once,
+   with how many, and what to do. For a type the code uses that this game lacks, it looks it up in the sandbox clone
+   (`omni.sandbox_clone`) and names the file to port it from; a hook of a sandbox base class that was not ported is named as
+   such.
+2. Read the code. It runs in the game with no sandbox, and it is now in the repo, so review it before committing.
+3. Fix what does not compile. Most of a sent's code only uses the engine, and then it just works. Where it uses a type
    of the sandbox game (`Player`, `Ownable`, `GameManager`, a sandbox tool), that type has to exist here under the same
    name and members: port it from the sandbox clone, as the weapons were.
+
+4. `sent_test org.package` (the game playing) spawns it, watches it for ten seconds and says whether it works: did it
+   spawn, are components missing, did anything throw or log an error (`Editor/SentTest.cs`). Repeat 3 and 4 until it says OK.
 
 If a sent is spawned with components the game does not have, the log says so and, for a sent with code that was never
 imported, names the command.

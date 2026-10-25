@@ -4,14 +4,16 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Sandbox;
 
 /// <summary>
 /// Brings the code of a sent into this game. A sent that carries code (<c>IncludeCode</c>) was compiled against the
 /// sandbox game, so it cannot compile here and its components load as missing. Its source is inside the package the
-/// engine downloaded, so <c>sent_import org.package</c> writes it to <c>Code/Sents/Imported/org.package/</c>, where the
-/// game compiles it like its own. Spawn the sent once first, so the engine has downloaded it. See docs/sents.md.
+/// engine downloads, so <c>sent_import org.package</c> fetches the package if it is not there yet, writes the source to
+/// <c>Code/Sents/Imported/org.package/</c>, where the game compiles it like its own, and then says what did not compile
+/// and what to do about it (<see cref="SentDiagnosis"/>). See docs/sents.md.
 /// <para>
 /// Safe to run again: the first run writes the files, and every later run only reports what the package has that the
 /// folder has not (<c>new</c>) or has changed (<c>edited</c>) and writes nothing but the manifest. <c>sent_import
@@ -48,7 +50,9 @@ public static class SentImporter
 	}
 
 	[ConCmd( "sent_import" )]
-	public static void Import( string ident, string mode = null )
+	public static void Import( string ident, string mode = null ) => _ = ImportAsync( ident, mode );
+
+	static async Task ImportAsync( string ident, string mode )
 	{
 		ident = ident?.Trim().ToLowerInvariant();
 
@@ -58,11 +62,11 @@ public static class SentImporter
 			return;
 		}
 
-		var package = FindPackage( ident );
+		var package = FindPackage( ident ) ?? await Download( ident );
 
 		if ( package is null )
 		{
-			Log.Warning( $"sent_import: {ident} is not downloaded. Spawn it once (spawn_sent {ident}) and try again." );
+			Log.Warning( $"sent_import: could not get {ident} from the cloud: is it a sent, and is the ident right?" );
 			return;
 		}
 
@@ -111,6 +115,63 @@ public static class SentImporter
 			summary += $", {waiting.Count} new in the package and not written ({string.Join( ", ", waiting )}): sent_import {ident} update";
 
 		Log.Info( summary + ". Read the code before you keep it: it runs in the game with no sandbox." );
+
+		if ( written > 0 )
+			await Diagnose( ident, target );
+	}
+
+	/// <summary>
+	/// Has the engine download the package (as spawning it would), then finds the file.
+	/// </summary>
+	static async Task<FileInfo> Download( string ident )
+	{
+		Log.Info( $"sent_import: downloading {ident}..." );
+
+		try
+		{
+			await Cloud.Load<ScriptedEntity>( ident, true );
+		}
+		catch ( Exception e )
+		{
+			Log.Warning( $"sent_import: the download of {ident} failed: {e.Message}" );
+			return null;
+		}
+
+		// The file is written as the load finishes, or a moment after.
+		for ( var i = 0; i < 20; i++ )
+		{
+			if ( FindPackage( ident ) is { } package )
+				return package;
+
+			await Task.Delay( 500 );
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Waits for the game to build with the new code, and says what is wrong with it.
+	/// </summary>
+	static async Task Diagnose( string ident, string target )
+	{
+		var problems = await SentDiagnosis.WaitForErrors( target );
+
+		if ( problems is null )
+		{
+			Log.Warning( $"sent_import: the game did not finish building in time; check the console for {ident}." );
+			return;
+		}
+
+		if ( problems.Count == 0 )
+		{
+			Log.Info( $"sent_import: {ident} builds with the game. Try it with sent_test {ident}." );
+			return;
+		}
+
+		var report = string.Join( Environment.NewLine, SentDiagnosis.Report( problems ) );
+		var files = problems.Select( x => x.File ).Distinct().Count();
+
+		Log.Warning( $"sent_import: {ident} does not build yet: {problems.Count} error(s) in {files} file(s).{Environment.NewLine}{report}" );
 	}
 
 	/// <summary>
