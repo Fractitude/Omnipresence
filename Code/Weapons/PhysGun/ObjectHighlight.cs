@@ -50,6 +50,8 @@ public static class ObjectHighlight
 	{
 		if ( !outline.IsValid() ) return;
 
+		EnsureCamera( outline.Scene );
+
 		outline.Material = Material;
 		outline.OverrideTargets = true;
 		outline.Color = style.Color;
@@ -97,6 +99,18 @@ public static class ObjectHighlight
 		flash.Duration = duration;
 		flash.Brightness = brightness;
 		flash.Play( outline );
+	}
+
+	/// <summary>
+	/// Outlines are drawn by the <see cref="Highlight"/> component on the camera, which this scene's camera doesn't
+	/// carry, so add it to the main camera the first time something is outlined.
+	/// </summary>
+	static void EnsureCamera( Scene scene )
+	{
+		var camera = scene?.Camera;
+		if ( !camera.IsValid() ) return;
+
+		camera.GameObject.GetOrAddComponent<Highlight>();
 	}
 
 	static void AddRenderers( GameObject o, List<Renderer> renderers )
