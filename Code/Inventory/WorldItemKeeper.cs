@@ -1,8 +1,10 @@
 namespace Sandbox;
 
 /// <summary>
-/// Put on every world item by <see cref="WorldItemRegistry.Track"/>, on the host only (it is added after the network
-/// spawn, so clients never get it). It carries the item's id, and tells the registry where the item came to rest: not
+/// Put on a world item by <see cref="WorldItemRegistry.Track"/> once the game saves it, on the host only (it is added
+/// after the network spawn, so clients never get it). Every item the game spawns (a drop, a restore) is tracked at once; a
+/// <see cref="WorldItem"/> placed by hand in the editor has none until it is moved, frozen or held, when it becomes a
+/// saved item (see docs/world-items.md). It carries the item's id, and tells the registry where the item came to rest: not
 /// while it moves, but once it has been still for a moment, and again if it is pushed somewhere else later.
 /// </summary>
 [Hide]
