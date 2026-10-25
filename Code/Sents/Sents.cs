@@ -100,6 +100,19 @@ public static class Sents
 	{
 		try
 		{
+			// An integrated sent is ours: its prefab and code are in the project, the workshop only gives its assets.
+			if ( SentLocal.Find( ident ) is { } local )
+			{
+				await SentLocal.Mount( ident );
+
+				var placed = SentBuilder.BuildLocal( local, new Transform( StandOnFloor( local, position ), rotation ) );
+				placed.NetworkSpawn( true, null );
+
+				Log.Info( $"spawn_sent: {caller.DisplayName} spawned {ident} (integrated)" );
+				WarnAboutCode( ident, ident, false, placed );
+				return;
+			}
+
 			var entity = await Cloud.Load<ScriptedEntity>( ident, true );
 
 			if ( entity?.Prefab is null )
@@ -108,11 +121,11 @@ public static class Sents
 				return;
 			}
 
-			var go = SentBuilder.Build( entity, ident, new Transform( StandOnFloor( entity, position ), rotation ) );
+			var go = SentBuilder.Build( entity, ident, new Transform( StandOnFloor( entity.Prefab, position ), rotation ) );
 			go.NetworkSpawn( true, null );
 
 			Log.Info( $"spawn_sent: {caller.DisplayName} spawned {entity.Title ?? ident}" );
-			WarnAboutCode( entity, ident, go );
+			WarnAboutCode( entity.Title ?? ident, ident, entity.IncludeCode, go );
 		}
 		catch ( Exception e )
 		{
@@ -123,22 +136,22 @@ public static class Sents
 	/// <summary>
 	/// The point moved up so the sent's lowest part rests on it.
 	/// </summary>
-	static Vector3 StandOnFloor( ScriptedEntity entity, Vector3 position ) =>
-		position + Vector3.Up * -SceneUtility.GetPrefabScene( entity.Prefab ).GetLocalBounds().Mins.z;
+	static Vector3 StandOnFloor( PrefabFile prefab, Vector3 position ) =>
+		position + Vector3.Up * -SceneUtility.GetPrefabScene( prefab ).GetLocalBounds().Mins.z;
 
 	/// <summary>
 	/// Says why a sent with code does nothing, and what to do about it.
 	/// </summary>
-	static void WarnAboutCode( ScriptedEntity entity, string ident, GameObject go )
+	static void WarnAboutCode( string title, string ident, bool includeCode, GameObject go )
 	{
 		var missing = SentBuilder.MissingCount( go );
 
 		if ( missing == 0 )
 			return;
 
-		Log.Warning( entity.IncludeCode && !SentPackages.IsImported( ident )
-			? $"spawn_sent: {entity.Title ?? ident} has {missing} component(s) from its own code, which this game does not have. "
+		Log.Warning( includeCode && !SentPackages.IsImported( ident )
+			? $"spawn_sent: {title} has {missing} component(s) from its own code, which this game does not have. "
 			  + $"Import it with sent_import {ident} (docs/sents.md)."
-			: $"spawn_sent: {entity.Title ?? ident} has {missing} component(s) this game does not have, so parts of it will not work." );
+			: $"spawn_sent: {title} has {missing} component(s) this game does not have, so parts of it will not work." );
 	}
 }

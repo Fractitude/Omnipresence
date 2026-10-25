@@ -19,8 +19,33 @@ Files in `Code/Sents/`, each with one job:
   with thumbnail, title and author. Clicking one spawns it and closes the window; right-click copies its ident or opens its
   package page. The sidebar filters by tag (`#vehicle`, `#weapon`, `#npc`, `#explosives`; `tag:` finds nothing), and the
   next page loads when the list is scrolled near the bottom.
+- `SentLocal.cs`: the integrated sents (below): where their prefab is, and mounting their assets.
 - `Ported/`: types a sent needs and its author never published (`ClaymoreMine`).
 - `Imported/<ident>/`: the code of imported sents (below).
+
+## Integrating a sent (making it ours)
+
+A sent spawned from the Workshop Entities window is loaded from the workshop each time: its prefab and, if `IncludeCode`,
+its code are the author's current ones. **Integrate** keeps a copy of both in the project, so the author's updates change
+nothing here and we can edit it freely. Right-click a tile and choose *Integrate into project* (editor only), or run
+`sent_integrate org.package` (`Editor/SentIntegrator.cs`). It:
+
+1. imports the code if the sent has any (`sent_import`: `Code/Sents/Imported/<ident>/`, builds, reports errors);
+2. saves the prefab as `Assets/sents/<ident>/sent.prefab`, with each component type named in full (`Hl2Metrocop.CombineNpc`), so
+   a plain clone finds its types. It is only written if it is not there, so edits to it are never overwritten; delete it to
+   take the workshop's again;
+3. writes `Assets/sents/<ident>/source.json`: title, **author**, **workshop page link**, the workshop version and date it was
+   taken from, the date integrated, the code folder, namespaces, and the assets it still needs from the workshop. The code's
+   `SentPackage.cs` carries a `// Source:` line with the same origin. Keep this for anything brought in.
+
+`spawn_sent` (`Sents.SpawnAsync`) uses `SentLocal.Find( ident )` first: an integrated sent is cloned from our prefab, and the
+tile in the window shows a green check. The cloud copy is used only for a sent that was not integrated.
+
+**What stays on the workshop: the assets** (models, materials, sounds, textures). A package ships them compiled, with no
+source files, so they cannot be kept as files of ours; the sent's own folder in the package (`hl2_metrocop/...`) is mounted
+from the engine's downloaded copy when it is spawned (`SentLocal.Mount`, `Package.MountAsync( false )`: assets, no code).
+`source.json` lists them (`assetsFromWorkshop`). If the author deletes a package, a machine that never downloaded it loses
+those; one that has it keeps the cached copy.
 
 ## How a sent is built
 

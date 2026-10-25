@@ -46,6 +46,24 @@ public static class SentBuilder
 	}
 
 	/// <summary>
+	/// The object of an integrated sent (<see cref="SentLocal"/>): its prefab is ours, with the component types already
+	/// named in full, so a plain clone is all it takes.
+	/// </summary>
+	public static GameObject BuildLocal( PrefabFile prefab, Transform transform ) =>
+		GameObject.Clone( prefab, new CloneConfig { Transform = transform, StartEnabled = false } );
+
+	/// <summary>
+	/// A prefab's data with each component type named in full, by the first of <paramref name="namespaces"/> that has it
+	/// (<paramref name="exists"/> says whether a type does). What <c>sent_integrate</c> saves as the sent's own prefab.
+	/// </summary>
+	public static JsonObject QualifiedData( PrefabFile prefab, IReadOnlyList<string> namespaces, Func<string, bool> exists )
+	{
+		var data = JsonNode.Parse( prefab.RootObject.ToJsonString() ).AsObject();
+		QualifyTypes( data, namespaces, exists );
+		return data;
+	}
+
+	/// <summary>
 	/// How many components of <paramref name="go"/> are missing: their type is not in this game.
 	/// </summary>
 	public static int MissingCount( GameObject go ) =>
@@ -88,7 +106,7 @@ public static class SentBuilder
 		var data = JsonNode.Parse( json ).AsObject();
 
 		if ( namespaces.Count > 0 )
-			QualifyTypes( data, namespaces );
+			QualifyTypes( data, namespaces, x => TypeLibrary.GetType( x ) is not null );
 
 		return data;
 	}
@@ -96,27 +114,27 @@ public static class SentBuilder
 	/// <summary>
 	/// Names every component type in full, by the first namespace that has it.
 	/// </summary>
-	static void QualifyTypes( JsonNode node, IReadOnlyList<string> namespaces )
+	static void QualifyTypes( JsonNode node, IReadOnlyList<string> namespaces, Func<string, bool> exists )
 	{
 		switch ( node )
 		{
 			case JsonObject obj:
 				if ( obj["__type"] is JsonValue type && type.TryGetValue<string>( out var name ) )
 				{
-					var full = namespaces.Select( x => $"{x}.{name}" ).FirstOrDefault( x => TypeLibrary.GetType( x ) is not null );
+					var full = namespaces.Select( x => $"{x}.{name}" ).FirstOrDefault( exists );
 
 					if ( full is not null )
 						obj["__type"] = full;
 				}
 
 				foreach ( var child in obj.Select( x => x.Value ).ToList() )
-					QualifyTypes( child, namespaces );
+					QualifyTypes( child, namespaces, exists );
 
 				break;
 
 			case JsonArray array:
 				foreach ( var child in array )
-					QualifyTypes( child, namespaces );
+					QualifyTypes( child, namespaces, exists );
 
 				break;
 		}

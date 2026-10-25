@@ -49,17 +49,24 @@ public static class SentImporter
 		Shared,
 	}
 
+	/// <summary>
+	/// What an import found: whether the package was got and read, the namespaces its code declares, and whether the
+	/// game built with it (null when nothing was written, so no build was waited for).
+	/// </summary>
+	public sealed record Result( bool Ok, IReadOnlyList<string> Namespaces, bool? Built );
+
 	[ConCmd( "sent_import" )]
 	public static void Import( string ident, string mode = null ) => _ = ImportAsync( ident, mode );
 
-	static async Task ImportAsync( string ident, string mode )
+	public static async Task<Result> ImportAsync( string ident, string mode )
 	{
+		var failed = new Result( false, [], null );
 		ident = ident?.Trim().ToLowerInvariant();
 
 		if ( !Sents.IsIdent( ident ) )
 		{
 			Log.Warning( "sent_import: give a cloud ident, e.g. sent_import crosschainer.hokuto_boxer" );
-			return;
+			return failed;
 		}
 
 		var package = FindPackage( ident ) ?? await Download( ident );
@@ -67,7 +74,7 @@ public static class SentImporter
 		if ( package is null )
 		{
 			Log.Warning( $"sent_import: could not get {ident} from the cloud: is it a sent, and is the ident right?" );
-			return;
+			return failed;
 		}
 
 		List<Document> documents;
@@ -79,7 +86,7 @@ public static class SentImporter
 		catch ( Exception e )
 		{
 			Log.Warning( $"sent_import: could not read {package.Name}: {e.Message}" );
-			return;
+			return failed;
 		}
 
 		var importedRoot = Path.Combine( Project.Current.GetRootPath(), "Code", "Sents", "Imported" );
@@ -99,7 +106,8 @@ public static class SentImporter
 			}
 		}
 
-		WriteManifest( target, ident, documents );
+		var namespaces = NamespacesOf( documents );
+		await WriteManifest( target, ident, namespaces );
 
 		var summary = $"sent_import: {ident}: {written} file(s) written to Code/Sents/Imported/{ident}, "
 		              + $"{fates.Count( x => x.Fate == Fate.Same )} already there, "
@@ -116,8 +124,12 @@ public static class SentImporter
 
 		Log.Info( summary + ". Read the code before you keep it: it runs in the game with no sandbox." );
 
+		bool? built = null;
+
 		if ( written > 0 )
-			await Diagnose( ident, target );
+			built = await Diagnose( ident, target );
+
+		return new Result( true, namespaces, built );
 	}
 
 	/// <summary>
@@ -152,26 +164,27 @@ public static class SentImporter
 	/// <summary>
 	/// Waits for the game to build with the new code, and says what is wrong with it.
 	/// </summary>
-	static async Task Diagnose( string ident, string target )
+	static async Task<bool> Diagnose( string ident, string target )
 	{
 		var problems = await SentDiagnosis.WaitForErrors( target );
 
 		if ( problems is null )
 		{
 			Log.Warning( $"sent_import: the game did not finish building in time; check the console for {ident}." );
-			return;
+			return false;
 		}
 
 		if ( problems.Count == 0 )
 		{
 			Log.Info( $"sent_import: {ident} builds with the game. Try it with sent_test {ident}." );
-			return;
+			return true;
 		}
 
 		var report = string.Join( Environment.NewLine, SentDiagnosis.Report( problems ) );
 		var files = problems.Select( x => x.File ).Distinct().Count();
 
 		Log.Warning( $"sent_import: {ident} does not build yet: {problems.Count} error(s) in {files} file(s).{Environment.NewLine}{report}" );
+		return false;
 	}
 
 	/// <summary>
@@ -308,14 +321,15 @@ public static class SentImporter
 	/// <c>SentPackage.cs</c>: tells the game which package the folder came from and which namespaces the package's
 	/// source declares, for <see cref="SentPackages"/>. Written on every run, from the whole package.
 	/// </summary>
-	static void WriteManifest( string target, string ident, List<Document> documents )
-	{
-		var namespaces = documents
-			.SelectMany( x => NamespacePattern.Matches( x.Text ).Select( m => m.Groups[1].Value ) )
-			.Distinct()
-			.OrderBy( x => x )
-			.ToList();
+	static List<string> NamespacesOf( List<Document> documents ) => documents
+		.SelectMany( x => NamespacePattern.Matches( x.Text ).Select( m => m.Groups[1].Value ) )
+		.Distinct()
+		.OrderBy( x => x )
+		.ToList();
 
+	static async Task WriteManifest( string target, string ident, List<string> namespaces )
+	{
+		var package = await SentSource.Fetch( ident );
 		var arguments = string.Join( ", ", namespaces.Prepend( ident ).Select( x => $"\"{x}\"" ) );
 		var name = "SentPackage_" + Regex.Replace( ident, @"\W", "_" );
 
@@ -323,6 +337,7 @@ public static class SentImporter
 		File.WriteAllText( Path.Combine( target, "SentPackage.cs" ), string.Join( "\r\n",
 			"// Written by sent_import: which package this folder came from and which namespaces its code declares.",
 			"// The game reads it to name a sent's components in full (Sents/SentPackage.cs). Written again on every import.",
+			$"// Source: {SentSource.Describe( package )}",
 			"namespace Sandbox;",
 			"",
 			$"[SentPackage( {arguments} )]",

@@ -74,6 +74,7 @@
 
 .tile
 {
+	position: relative;
 	flex-shrink: 0;
 	flex-direction: column;
 	width: 160px;
@@ -85,6 +86,21 @@
 	&:hover
 	{
 		background-color: rgba( white, 0.16 );
+	}
+
+	&.integrated .thumb
+	{
+		border: 2px solid rgba( #6fcf7f, 0.8 );
+	}
+
+	.badge
+	{
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		font-family: Material Icons;
+		font-size: 22px;
+		color: #6fcf7f;
 	}
 
 	.thumb
