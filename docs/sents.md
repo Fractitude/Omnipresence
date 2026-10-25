@@ -20,12 +20,32 @@ plugin. So the **host's own player** is the only one who may spawn a sent, unles
 Never add a way to spawn a sent that skips that check. This is part of the known limit in AGENTS.md (a package's code
 can reach everything).
 
-## What works
+## A sent that carries code
 
-Tested with `crosschainer.hokuto_boxer`: the package loads and the prefab spawns. A sent written for the sandbox game
-often has code that references `facepunch.sandbox` (its own components such as `CuratedVehicles.CuratedVehicle`). That
-package does not exist here, so its code fails to compile (`Couldn't find reference package.facepunch.sandbox`) and the
-components show as missing: the model spawns but does nothing. Only sents whose code stays inside the engine, or whose
-prefab is just props, work as they are. To use a sandbox-only one the code has to be ported into this game.
+A sent with `IncludeCode` was compiled against the sandbox game (`package.facepunch.sandbox`), a package this game does
+not have, so its code fails to compile here and its components load as **missing** (`Couldn't find reference
+package.facepunch.sandbox`, then `Missing Component`). The source is inside the package the engine downloaded, so the
+fix is to compile it as part of this game:
 
-A sent's prefab children must be Network Mode Snapshot to reach clients (see AGENTS.md); we cannot fix a package's prefab.
+1. Spawn the sent once (`spawn_sent org.package`), so the engine has downloaded it.
+2. `sent_import org.package` (editor console, `Editor/SentImporter.cs`) writes its source to
+   `Code/Sents/Imported/org.package/`. Files another import already has, unchanged, are skipped, because one author's
+   sents often share a library. **Not tested yet**: `crosschainer.hokuto_boxer` was copied there by hand.
+3. Read the code. It runs in the game with no sandbox, and it is now in the repo, so review it before committing.
+4. Fix what does not compile. Most of a sent's code only uses the engine, and then it just works. Where it uses a type
+   of the sandbox game (`Player`, `Ownable`, `GameManager`, a sandbox tool), that type has to exist here under the same
+   name and members: port it from the sandbox clone, as the weapons were.
+
+`Sents.SpawnAsync` builds the object from the prefab's data when the engine's cached copy of the prefab still has the
+components as missing (the prefab was loaded before the import), so no restart is needed.
+
+Not every sent can work: one whose code depends on much of the sandbox game (its NPC system, its tools, its save
+system) needs that part ported first. Props and models with no code, and code that only uses the engine, work as they are.
+
+### Imported so far
+
+- `crosschainer.hokuto_boxer` (and `takeda_ascend`, same author, the same `CuratedVehicles` code): a driveable car.
+  Its `VehicleSeat` is an engine `BaseChair`, which is itself a `Component.IPressable`, so the player's Use key sits in it
+  without our `Interactable`. `CuratedVehicle` creates its own speedometer (`VehicleHud.razor`) for the driver. The
+  package's stylesheet was not in its published code, so `VehicleHud.razor.scss` is ours. The dial picture and the
+  sounds are assets of the package and come with it.

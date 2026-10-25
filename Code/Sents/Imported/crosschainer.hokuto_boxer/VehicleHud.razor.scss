@@ -1,0 +1,149 @@
+// The package's own stylesheet was not part of its published code, so this is written here to fit VehicleHud.razor:
+// a 302.4px dial (its centre is at 151.2px, which the tick and number positions assume).
+
+VehicleHud
+{
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.speedometer
+{
+	position: absolute;
+	right: 48px;
+	bottom: 48px;
+	width: 302.4px;
+	height: 302.4px;
+	font-family: Poppins;
+	color: white;
+
+	.speedometer-dial
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.rpm-active-sector
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba( 255, 255, 255, 0.28 );
+	}
+
+	.rpm-tick
+	{
+		position: absolute;
+		width: 12px;
+		height: 2px;
+		background-color: rgba( 255, 255, 255, 0.8 );
+
+		&.redline
+		{
+			background-color: #ff3b3b;
+		}
+	}
+
+	.rpm-number
+	{
+		position: absolute;
+		font-size: 14px;
+		font-weight: 600;
+		transform: translate( -50%, -50% );
+
+		&.redline-text
+		{
+			color: #ff3b3b;
+		}
+	}
+
+	.speed-reading
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+
+		.rpm-label
+		{
+			font-size: 11px;
+			opacity: 0.6;
+		}
+
+		.speed
+		{
+			font-size: 64px;
+			font-weight: 700;
+			line-height: 64px;
+		}
+
+		.speed-unit
+		{
+			font-size: 14px;
+			opacity: 0.7;
+		}
+
+		.gear
+		{
+			margin-top: 6px;
+			font-size: 26px;
+			font-weight: 700;
+		}
+	}
+
+	.handling-label
+	{
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -26px;
+		text-align: center;
+		font-size: 13px;
+		letter-spacing: 2px;
+	}
+
+	.driving-prompts
+	{
+		position: absolute;
+		right: 100%;
+		bottom: 0;
+		margin-right: 24px;
+		flex-direction: column;
+		gap: 6px;
+
+		div
+		{
+			align-items: center;
+			gap: 8px;
+			font-size: 13px;
+		}
+
+		.key
+		{
+			min-width: 24px;
+			padding: 2px 6px;
+			justify-content: center;
+			border: 1px solid rgba( 255, 255, 255, 0.7 );
+			border-radius: 4px;
+			font-weight: 700;
+		}
+	}
+
+	&.at-redline .speed
+	{
+		color: #ff6b6b;
+	}
+}

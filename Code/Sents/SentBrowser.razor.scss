@@ -23,6 +23,8 @@
 
 .tiles
 {
+	// The list shrinks and scrolls; a wrapped grid that shrank with it would never overflow, so nothing would scroll.
+	flex-shrink: 0;
 	flex-wrap: wrap;
 	gap: 8px;
 }

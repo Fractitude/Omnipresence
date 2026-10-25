@@ -84,11 +84,20 @@ public static class Sents
 		var bounds = SceneUtility.GetPrefabScene( entity.Prefab ).GetLocalBounds();
 		position += Vector3.Up * -bounds.Mins.z;
 
-		var go = GameObject.Clone( entity.Prefab, new CloneConfig
+		var transform = new Transform( position, rotation );
+		var go = GameObject.Clone( entity.Prefab, new CloneConfig { Transform = transform, StartEnabled = false } );
+
+		// The engine keeps a prefab's scene once loaded. If it was loaded before this game had the code of its
+		// components (a sent imported while the editor was open), the clone has them as missing: build it from the
+		// prefab's data instead, which looks the types up again.
+		if ( go.Components.GetAll( FindMode.EverythingInSelfAndDescendants ).Any( x => x is MissingComponent ) )
 		{
-			Transform = new Transform( position, rotation ),
-			StartEnabled = false
-		} );
+			go.Destroy();
+			go = new GameObject( false, entity.Title ?? ident );
+			go.Deserialize( entity.Prefab.RootObject.AsObject() );
+			go.WorldTransform = transform;
+		}
+
 		go.NetworkSpawn( true, null );
 
 		Log.Info( $"spawn_sent: {caller.DisplayName} spawned {entity.Title ?? ident}" );

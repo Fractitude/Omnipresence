@@ -99,6 +99,7 @@ Sandbox entity packages from the cloud. Code: `Code/Sents/`. See [sents.md](sent
 |---|---|
 | `sents` | Open the sent browser: search the cloud, click one to spawn it where you look. |
 | `spawn_sent <org.package>` | Spawn a sent by its cloud ident, e.g. `spawn_sent crosschainer.hokuto_boxer`. Host only unless `omni.sent_everyone` is on. |
+| `sent_import <org.package>` | Editor only. Write the source of a downloaded sent into `Code/Sents/Imported/`. See [sents.md](sents.md). |
 | `omni.sent_everyone <0/1>` | Let every player spawn sents, not only the host. A sent can bring code that runs in the game. Default 0. Saved. |
 
 ## Vehicles
