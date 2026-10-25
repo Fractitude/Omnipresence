@@ -62,7 +62,8 @@
         "__enabled": true,
         "Flags": 0,
         "MotionEnabled": true,
-        "Gravity": true
+        "Gravity": true,
+        "MassOverride": 5
       }
     ],
     "Children": [

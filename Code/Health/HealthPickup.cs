@@ -46,7 +46,10 @@ public sealed class HealthPickup : Component, IInteractionHandler
 		if ( !player.IsValid() || !CanPickup( player ) )
 			return;
 
+		var before = player.Health;
 		player.Health = (player.Health + HealthGive).Clamp( 0, player.MaxHealth );
+
+		PickupNotices.Item( player.GameObject, "Health", (int)(player.Health - before) );
 
 		PlayPickupEffects( player );
 		DestroyGameObject();
