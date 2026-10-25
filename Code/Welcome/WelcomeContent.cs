@@ -39,20 +39,8 @@ public sealed class WelcomeData
 
 	public string PlayButton { get; set; } = "Play";
 
-	/// <summary>The releases, newest first.</summary>
-	public List<ChangelogEntry> Changelog { get; set; } = new()
-	{
-		new()
-		{
-			Version = 1,
-			Title = "Welcome screen",
-			Changes = new()
-			{
-				"A welcome screen opens when you join. It tells you about the game, the rules and what changed.",
-				"Type welcome in the console to open it again.",
-			},
-		},
-	};
+	/// <summary>The releases. None to begin with: the host adds them.</summary>
+	public List<ChangelogEntry> Changelog { get; set; } = new();
 
 	/// <summary>The highest release number in the changelog, 0 with none.</summary>
 	public int LatestRelease() => Changelog.Count == 0 ? 0 : Changelog.Max( x => x.Version );
@@ -117,14 +105,28 @@ public static class WelcomeContent
 	}
 
 	/// <summary>
-	/// Replace the text and save it; clients are told by <see cref="WelcomeSystem"/>. Host only.
+	/// Replace the text and save it; clients are told by <see cref="WelcomeSystem"/>. Host only. Refuses, and says why in
+	/// <paramref name="error"/>, text with a release that has no title or no change.
 	/// </summary>
-	public static bool Save( WelcomeData edited )
+	public static bool Save( WelcomeData edited, out string error )
 	{
-		if ( !Networking.IsHost || edited is null )
-			return false;
+		error = null;
 
-		data = Clean( edited );
+		if ( !Networking.IsHost || edited is null )
+		{
+			error = "Only the host can save the welcome screen.";
+			return false;
+		}
+
+		var cleaned = Clean( edited );
+
+		if ( Problem( cleaned ) is { } problem )
+		{
+			error = problem;
+			return false;
+		}
+
+		data = cleaned;
 		ready = true;
 		Revision++;
 
@@ -139,6 +141,23 @@ public static class WelcomeContent
 		}
 
 		return true;
+	}
+
+	/// <summary>
+	/// What is wrong with some cleaned text, if anything: every release needs a title and at least one change.
+	/// </summary>
+	static string Problem( WelcomeData d )
+	{
+		foreach ( var entry in d.Changelog )
+		{
+			if ( entry.Title.Length == 0 )
+				return $"Release {entry.Version} needs a title.";
+
+			if ( entry.Changes.Count == 0 )
+				return $"Release {entry.Version} needs at least one change.";
+		}
+
+		return null;
 	}
 
 	/// <summary>

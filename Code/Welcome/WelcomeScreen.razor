@@ -9,6 +9,7 @@
 		var text = WelcomeContent.Data;
 		var news = text.Since( releaseSeenAtOpen ).ToList();
 		var returning = seenAtOpen > 0;
+		// With no releases at all the changelog is not shown.
 		// A returning player sees every release newer than the newest they saw. A new player, or one who has seen them
 		// all, sees only the latest release.
 		var shownNews = news.Count > 0 && returning;
@@ -37,22 +38,25 @@
 						}
 					</div>
 
-					<div class="section">
-						<div class="menu-heading">@( shownNews ? NewHeading : LatestHeading )</div>
-						@foreach ( var entry in shown )
-						{
-							<div class="release">
-								<div class="release-title">@( $"Version {entry.Version}: {entry.Title}" )</div>
-								@foreach ( var change in entry.Changes )
-								{
-									<div class="rule">
-										<i class="bullet">fiber_manual_record</i>
-										<div class="rule-text">@change</div>
-									</div>
-								}
-							</div>
-						}
-					</div>
+					@if ( shown.Count > 0 )
+					{
+						<div class="section">
+							<div class="menu-heading">@( shownNews ? NewHeading : LatestHeading )</div>
+							@foreach ( var entry in shown )
+							{
+								<div class="release">
+									<div class="release-title">@( $"Version {entry.Version}: {entry.Title}" )</div>
+									@foreach ( var change in entry.Changes )
+									{
+										<div class="rule">
+											<i class="bullet">fiber_manual_record</i>
+											<div class="rule-text">@change</div>
+										</div>
+									}
+								</div>
+							}
+						</div>
+					}
 				</div>
 				<div class="footer">
 					@if ( Networking.IsHost )

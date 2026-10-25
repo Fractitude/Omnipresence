@@ -211,18 +211,28 @@
 		if ( draft is null )
 			return;
 
+		notice = null;
 		var data = Collect();
 
 		// Every save is a new version: players who saw the last one are shown the screen again.
 		data.Version = WelcomeContent.Data.Version + 1;
 
-		if ( WelcomeContent.Save( data ) )
+		if ( WelcomeContent.Save( data, out var error ) )
 			Close();
 		else
-			notice = "Could not save. See the console.";
+			notice = error ?? "Could not save. See the console.";
 	}
 
-	static void ResetText() => Begin( new() );
+	/// <summary>
+	/// Put the text back to the default. The changelog is not text of the default: its releases are the host's own work,
+	/// so they are kept as they are.
+	/// </summary>
+	static void ResetText()
+	{
+		var kept = releases;
+		Begin( new() );
+		releases = kept;
+	}
 
 	/// <summary>
 	/// Add a release at the top. Its number is the highest there is plus one, so a number freed by removing the newest
