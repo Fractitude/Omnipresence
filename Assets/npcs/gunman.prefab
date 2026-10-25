@@ -103,6 +103,13 @@
         "SightRange": 1500,
         "SpeedVariation": 0.05,
         "Weapon": null,
+        "SpareMagazines": 2,
+        "MeleeChoices": [
+          {
+            "_type": "gameobject",
+            "prefab": "weapons/crowbar/crowbar.prefab"
+          }
+        ],
         "WeaponChoices": [
           {
             "_type": "gameobject",

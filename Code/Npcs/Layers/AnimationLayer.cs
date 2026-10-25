@@ -561,6 +561,15 @@ public sealed partial class AnimationLayer : BaseNpcLayer
 	}
 
 	/// <summary>
+	/// Broadcasts the reload gesture to all clients, like <see cref="TriggerAttack"/>.
+	/// </summary>
+	[Rpc.Broadcast]
+	public void TriggerReload()
+	{
+		_renderer?.Set( "b_reload", true );
+	}
+
+	/// <summary>
 	/// Sets the holdtype so the NPC poses its arms for the held item - an option name on the
 	/// animgraph's holdtype enum (e.g. "pistol"). Synced to all clients via HoldType.
 	/// </summary>
@@ -584,6 +593,7 @@ public sealed partial class AnimationLayer : BaseNpcLayer
 		_lastYaw = float.NaN;
 
 		_renderer.Set( "b_attack", false );
+		_renderer.Set( "b_reload", false );
 		_renderer.Set( "holdtype", "none" );
 		_renderer.Set( "move_speed", 0f );
 		_renderer.Set( "move_groundspeed", 0f );

@@ -27,3 +27,13 @@ Changed from upstream: `Player` is the engine's `PlayerController`, no `Ownable`
 - **NPCs walk on the navmesh**, so the scene's NavMesh must be enabled. It is on in `playground.scene` and off in the other scenes.
 - A player counts as hostile only if its root has the tag `player`.
 - Change the gun by editing `WeaponChoices` on the prefab; the weapon needs `UsableByNpcs` / the `Npc` usage settings of the engine `BaseCombatWeapon`.
+
+## Ammo, reloading and melee
+
+An NPC's gun is never added to an inventory, so the engine never fills its magazine and treats it as unlimited. `CombatNpc` loads it on spawn (`Weapon.Clip1`) and `FireWeapon` takes a round off the magazine after each shot, since the engine only spends rounds on the holder's side. A burst ends when the magazine is dry, and the engage schedule then runs `ReloadWeapon`: it plays the reload gesture, waits the weapon's `ReloadTime`, and refills the magazine from `SpareMagazines` (default 2, one used per reload; there is no ammo reserve, so the engine's own reload isn't used).
+
+With no spare magazines left and the gun empty, the NPC switches to its melee weapon (`MeleeChoices`, the gunman carries the crowbar; `UsingMelee` is synced, `ApplyHeld` swaps the world model on every peer) and chases its target to within 0.4 of the weapon's range. It doesn't strafe away or rest long. Both weapons are dropped on death.
+
+Pistols (hold type `pistol`) and any weapon not set to automatic are fired one shot per 0.25-0.45 s (`FireWeapon.SemiAutoInterval`); the weapon prefabs all have `PrimaryAutomatic` on, so the hold type decides.
+
+`MeleeChoices` must be declared before `WeaponChoices` in `CombatNpc`: the NPC is armed when `WeaponChoices` loads, and a property loaded after it is still empty at that point. A gunman placed by hand in a scene keeps the values it was saved with, so replace it after changing the prefab.

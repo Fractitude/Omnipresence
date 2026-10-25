@@ -1,5 +1,6 @@
 using Sandbox.Npcs.Layers;
 using Sandbox.Npcs.Schedules;
+using Sandbox.Npcs.Tasks;
 
 namespace Sandbox.Npcs.CombatNpc;
 
@@ -40,11 +41,41 @@ public class CombatNpc : Npc, Component.IPressable
 	public BaseSandboxWeapon Weapon { get; set; }
 
 	/// <summary>
+	/// Melee weapon prefabs, one of which this NPC carries as well (picked at random when it spawns). It switches to
+	/// it when its gun is empty and it has no spare magazines left. Empty means no melee weapon. Declared before <see cref="WeaponChoices"/>:
+	/// arming runs when that one is loaded, so this one has to be loaded first.
+	/// </summary>
+	[Property]
+	public List<GameObject> MeleeChoices { get; set; } = [];
+
+	/// <summary>
 	/// Weapon prefabs to arm this NPC with - one is picked at random when it spawns, replacing
 	/// <see cref="Weapon"/>. Empty keeps the prefab's weapon.
 	/// </summary>
 	[Property]
 	public List<GameObject> WeaponChoices { get; set; } = [];
+
+	/// <summary>
+	/// The carried melee weapon, cloned from <see cref="MeleeChoices"/> when the NPC spawns.
+	/// </summary>
+	[Property]
+	public BaseSandboxWeapon Melee { get; set; }
+
+	/// <summary>
+	/// Full magazines carried besides the one in the gun. Each reload uses one; with none left and the gun empty the
+	/// NPC switches to its melee weapon.
+	/// </summary>
+	[Property, Group( "Balance" )]
+	public int SpareMagazines { get; set; } = 2;
+
+	/// <summary>
+	/// True while the melee weapon is in hand instead of the gun. Set by the host, followed on every peer.
+	/// </summary>
+	[Sync( SyncFlags.FromHost ), Change( nameof(OnUsingMeleeChanged) )]
+	public bool UsingMelee { get; private set; }
+
+	// The gun the NPC was armed with. Weapon is whichever of the gun and the melee weapon is in hand.
+	private BaseSandboxWeapon _gun;
 
 	/// <summary>
 	/// Skill multiplier on the weapon's NPC spread - 1 is a average shot, lower is more accurate.
@@ -220,7 +251,75 @@ public class CombatNpc : Npc, Component.IPressable
 		// its spawn snapshot and every client sees the same one. Not in the editor or the cached
 		// prefab itself, not on clients.
 		if ( Game.IsPlaying && Scene.IsValid() && !Scene.IsEditor && Scene is not PrefabScene && Networking.IsHost && !GameObject.Network.Active )
+		{
 			ArmWithRandomWeapon();
+			ArmWithMelee();
+		}
+	}
+
+	/// <summary>
+	/// Clone one of <see cref="MeleeChoices"/> onto the NPC, holstered.
+	/// </summary>
+	private void ArmWithMelee()
+	{
+		if ( MeleeChoices is not { Count: > 0 } )
+			return;
+
+		var prefab = MeleeChoices[Game.Random.Int( 0, MeleeChoices.Count - 1 )];
+		if ( !prefab.IsValid() )
+			return;
+
+		var go = prefab.Clone( new CloneConfig { Parent = GameObject, Transform = global::Transform.Zero, StartEnabled = true } );
+		var weapon = go?.GetComponent<BaseSandboxWeapon>( true );
+		if ( !weapon.IsValid() )
+		{
+			go?.Destroy();
+			Log.Warning( $"{DisplayName}: '{prefab.Name}' isn't a weapon prefab, no melee weapon." );
+			return;
+		}
+
+		Melee?.GameObject.DestroyImmediate();
+		Melee = weapon;
+	}
+
+	/// <summary>
+	/// Put the melee weapon in hand. Host only; the gun is not used again.
+	/// </summary>
+	private void UseMelee()
+	{
+		if ( IsProxy || UsingMelee || !Melee.IsValid() )
+			return;
+
+		UsingMelee = true;
+		ApplyHeld();
+	}
+
+	private void OnUsingMeleeChanged( bool oldValue, bool newValue ) => ApplyHeld();
+
+	/// <summary>
+	/// Make the world model, hold type and <see cref="Weapon"/> match <see cref="UsingMelee"/>, on this peer.
+	/// </summary>
+	private void ApplyHeld()
+	{
+		var held = UsingMelee ? Melee : _gun;
+		var other = UsingMelee ? _gun : Melee;
+
+		if ( !held.IsValid() || !Renderer.IsValid() )
+			return;
+
+		if ( other.IsValid() && other.WorldModel.IsValid() )
+			other.WorldModel.Destroy();
+
+		if ( !held.WorldModel.IsValid() )
+			held.CreateWorldModel( Renderer );
+
+		Weapon = held;
+
+		if ( !IsProxy )
+		{
+			Animation.SetHoldType( held.HoldType );
+			EndCurrentSchedule();
+		}
 	}
 
 	/// <summary>
@@ -258,12 +357,27 @@ public class CombatNpc : Npc, Component.IPressable
 		_post = WorldPosition;
 		_postForward = WorldRotation.Forward;
 
+		_gun = Weapon;
+
+		// Found on a client by what the spawn snapshot brought
+		if ( !Melee.IsValid() )
+			Melee = Components.GetAll<BaseSandboxWeapon>( FindMode.EverythingInChildren ).FirstOrDefault( x => x is MeleeWeapon );
+
+		// Holstered: no pickup model or physics until it is dropped
+		if ( !IsProxy && Melee.IsValid() )
+			Melee.IsDropped = false;
+
 		if ( Weapon.IsValid() && Renderer.IsValid() )
 		{
 			Weapon.CreateWorldModel( Renderer );
 
 			// The weapon says how forgiving it is in NPC hands; we say how good we are with it.
 			Weapon.SpreadScale = Weapon.Npc.SpreadScale * AimSpreadScale;
+
+			// A gun nobody was given through an inventory has no magazine and never runs dry. Load it, so the
+			// NPC has to reload like anyone else (see ReloadWeapon).
+			if ( !IsProxy && Weapon.UsesPrimaryClip )
+				Weapon.Clip1 = Weapon.PrimaryClipSize;
 
 			if ( !IsProxy )
 				Animation.SetHoldType( Weapon.HoldType );
@@ -401,6 +515,10 @@ public class CombatNpc : Npc, Component.IPressable
 
 	public override ScheduleBase GetSchedule()
 	{
+		// Dry, nothing left to reload with: hit them with the melee weapon instead
+		if ( !UsingMelee && Melee.IsValid() && SpareMagazines <= 0 && ReloadWeapon.IsEmpty( Weapon ) )
+			UseMelee();
+
 		var visible = Senses.GetBestTarget();
 
 		if ( visible.IsValid() && Weapon.IsValid() )
@@ -528,14 +646,19 @@ public class CombatNpc : Npc, Component.IPressable
 	/// </summary>
 	private void DropWeapon()
 	{
-		if ( !Weapon.IsValid() )
+		DropWeapon( _gun );
+		DropWeapon( Melee );
+	}
+
+	private void DropWeapon( BaseSandboxWeapon weapon )
+	{
+		if ( !weapon.IsValid() )
 			return;
 
-		var position = Weapon.WorldModel.IsValid()
-			? Weapon.WorldModel.WorldPosition
+		var position = weapon.WorldModel.IsValid()
+			? weapon.WorldModel.WorldPosition
 			: WorldPosition + Vector3.Up * 32f;
 
-		var weapon = Weapon;
 		weapon.DropIntoWorld( position, Vector3.Up * 50f );
 
 		// The timer lives on the weapon - this NPC is about to be destroyed

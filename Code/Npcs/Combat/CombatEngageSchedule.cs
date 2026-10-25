@@ -114,12 +114,16 @@ public class CombatEngageSchedule : ScheduleBase
 			AddTask( new AwaitReaction( this ) );
 
 		// Advance to comfortably inside the weapon's reach, not right on the edge of it.
-		AddTask( new MoveTo( Target, Weapon.Npc.MaxRange * 0.8f ) { Speed = EngageSpeed, FaceTarget = Target } );
+		AddTask( new MoveTo( Target, Weapon is MeleeWeapon melee ? melee.Range * 0.4f : Weapon.Npc.MaxRange * 0.8f ) { Speed = EngageSpeed, FaceTarget = Target } );
 		AddTask( new FireWeapon( Weapon, Target ) );
+		AddTask( new ReloadWeapon( Weapon ) );
+
+		// A melee fighter keeps on top of its target: a short breath, no strafing away from it
+		var isMelee = Weapon is MeleeWeapon;
 
 		// Rest between bursts, as the weapon dictates - with a random combat taunt sometimes
-		var rest = Game.Random.Float( Weapon.Npc.RestMin, Weapon.Npc.RestMax );
-		if ( Npc.Speech.CanSpeak && Game.Random.Float() < 0.4f )
+		var rest = isMelee ? 0.2f : Game.Random.Float( Weapon.Npc.RestMin, Weapon.Npc.RestMax );
+		if ( !isMelee && Npc.Speech.CanSpeak && Game.Random.Float() < 0.4f )
 			AddTask( new Say( Game.Random.FromArray( TauntLines ), rest, Target )
 			{
 				Tags = ["combat", "taunt"]
@@ -128,7 +132,7 @@ public class CombatEngageSchedule : ScheduleBase
 			AddTask( new Wait( rest ) );
 
 		// Now and then, strafe to a new spot - most of the time hold position and keep shooting
-		if ( Game.Random.Float() < RepositionChance )
+		if ( !isMelee && Game.Random.Float() < RepositionChance )
 			AddTask( new MoveTo( GetFlankPosition(), 20f ) { Speed = StrafeSpeed, FaceTarget = Target } );
 	}
 

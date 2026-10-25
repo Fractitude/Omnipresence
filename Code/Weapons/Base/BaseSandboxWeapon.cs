@@ -19,7 +19,18 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	/// <summary>
 	/// The root GameObject to ignore when tracing from AimRay.
 	/// </summary>
-	public GameObject AimIgnoreRoot => HasOwner ? Owner.GameObject : GameObject;
+	public GameObject AimIgnoreRoot
+	{
+		get
+		{
+			if ( HasOwner )
+				return Owner.GameObject;
+
+			// Held by an NPC: its own body must not stop the shot or the swing
+			var npc = GetComponentInParent<Sandbox.Npcs.Npc>();
+			return npc.IsValid() ? npc.GameObject : GameObject;
+		}
+	}
 
 	/// <summary>
 	/// When true, a seated player aims it where the camera looks instead of along the muzzle. Override in weapons
