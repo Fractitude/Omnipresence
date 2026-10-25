@@ -84,6 +84,8 @@ Code: `Code/Health/`.
 | `god` | Toggle invulnerability (host, cheats). |
 | `omni.spawnprotection <seconds>` | Seconds of invulnerability after spawning. Default 5, 0 turns it off. Saved. |
 | `omni.noclip 0|1` | Let every player fly through the world with the Noclip key (N); the host always may. Default 0. Saved. |
+| `omni.carry 0|1` | Players can pick up light props with Use (attack throws, aim lets go, holding Use turns it). Default 1. Saved. |
+| `omni.carry.maxmass <kg>` | The heaviest prop that can be picked up. Default 80. Saved. |
 
 ## Weapons
 

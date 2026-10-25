@@ -16,6 +16,19 @@ public struct PlayerDamageParams
 }
 
 /// <summary>
+/// Fired from player's client when they try to pick up an object, and again on the instance that simulates it before it's moved for them. Set <see cref="Cancelled"/> to true to refuse, or change <see cref="MaxMass"/> to let them lift more or less. See <see cref="Player"/>'s carry.
+/// </summary>
+public class PlayerCarryEvent
+{
+	public Player Player { get; init; }
+	public GameObject Target { get; init; }
+	public Rigidbody Body { get; init; }
+	public float Mass { get; init; }
+	public float MaxMass { get; set; }
+	public bool Cancelled { get; set; }
+}
+
+/// <summary>
 /// Fired on the player's own machine when they press the flashlight key, before the flashlight toggles. Set
 /// <see cref="Cancelled"/> to true to keep the key for yourself - a vehicle can use it for its headlights.
 /// </summary>
@@ -74,6 +87,7 @@ public static partial class Local
 		void OnDamaging( PlayerDamageEvent e ) { }
 		void OnKill( PlayerKillEvent e ) { }
 		void OnFlashlight( PlayerFlashlightEvent e ) { }
+		void OnCarry( PlayerCarryEvent e ) { }
 	}
 }
 
@@ -92,5 +106,6 @@ public static partial class Global
 		void OnPlayerRespawning( PlayerRespawnEvent e ) { }
 		void OnPlayerKill( PlayerKillEvent e ) { }
 		void OnPlayerFlashlight( PlayerFlashlightEvent e ) { }
+		void OnPlayerCarry( PlayerCarryEvent e ) { }
 	}
 }

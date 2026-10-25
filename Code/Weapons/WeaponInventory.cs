@@ -100,6 +100,9 @@ public sealed class WeaponInventory : BaseInventoryComponent
 
 		if ( IsProxy || !controller.IsValid() ) return;
 
+		// Before the weapon reads input: carrying something can keep attack from it
+		GetComponent<Player>()?.ControlCarry();
+
 		// Sitting down at a computer puts the weapon away. It stays away after getting up, and no slot key
 		// draws one while seated.
 		var seated = Scene.GetAllComponents<NaviComputer>().Any( x => x.IsSeated );
