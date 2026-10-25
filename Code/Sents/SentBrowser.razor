@@ -203,7 +203,8 @@
 		total = result?.TotalCount ?? Entries.Count;
 		Loading = false;
 		version++;
-		ListPanel?.ScrollTo( Vector2.Zero );
+		if ( ListPanel.IsValid() )
+			ListPanel.ScrollTo( Vector2.Zero );
 	}
 
 	// The next page, added below the ones shown. A new search while it loads drops it.
