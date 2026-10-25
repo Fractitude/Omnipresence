@@ -123,9 +123,10 @@
 				SelectBucket( i == 0 ? 9 : i - 1 );
 		}
 
-		// A weapon that uses the wheel (the physgun's distance) clears it first, so only a free wheel reaches the menu.
-		if ( Input.MouseWheel.y != 0 )
-			Step( -(int)Input.MouseWheel.y );
+		// Only a free wheel reaches the menu: the physgun's distance and an interaction menu hold it at a higher priority.
+		var wheel = InputClaims.Wheel( InputPriority.Default, this ).y;
+		if ( wheel != 0 )
+			Step( -(int)wheel );
 
 		if ( !IsSelecting )
 			return;

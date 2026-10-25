@@ -450,16 +450,20 @@ public partial class Physgun
 					return;
 				}
 
-				if ( AllowChangingDistance && !Input.MouseWheel.IsNearZeroLength )
+				if ( AllowChangingDistance )
 				{
-					var state = _state;
-					state.GrabDistance = (state.GrabDistance + Input.MouseWheel.y * 20.0f).Clamp( 0.0f, Range );
+					// While holding with the beam the wheel is the physgun's, not the weapon switcher's.
+					InputClaims.Claim( InputClaims.MouseWheel, InputPriority.Tool, this );
 
-					_state = default;
-					_state = state;
+					var wheel = Input.MouseWheel;
+					if ( !wheel.IsNearZeroLength )
+					{
+						var state = _state;
+						state.GrabDistance = (state.GrabDistance + wheel.y * 20.0f).Clamp( 0.0f, Range );
 
-					// stop processing this so inventory doesn't change
-					Input.MouseWheel = default;
+						_state = default;
+						_state = state;
+					}
 				}
 			}
 

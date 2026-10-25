@@ -211,15 +211,18 @@ public sealed class Interactable : Component, Component.IPressable
 	/// </summary>
 	void ScrollSelection()
 	{
-		var wheel = Input.MouseWheel.y;
-		if ( wheel == 0f )
-			return;
-
 		if ( Mouse.Visibility == MouseVisibility.Visible || GameMenus.IsAnyOpen )
 			return;
 
 		var entries = GetEntries();
 		if ( entries.Count < 2 )
+			return;
+
+		// The wheel is this menu's while it has rows to pick, so the weapon switcher leaves it alone.
+		InputClaims.Claim( InputClaims.MouseWheel, InputPriority.Interaction, this );
+
+		var wheel = InputClaims.Wheel( InputPriority.Interaction, this ).y;
+		if ( wheel == 0f )
 			return;
 
 		var position = entries.FindIndex( x => x.Index == GetSelected( entries ) );
