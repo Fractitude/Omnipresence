@@ -24,25 +24,25 @@
 
 					<div class="section">
 						<div class="menu-heading">Text</div>
-						<div class="label">Window title</div>
+						<div class="caption">Window title</div>
 						<TextEntry class="input" Value=@d.Title MaxLength=@( 120 ) OnTextEdited=@( ( string t ) => { d.Title = t; } )/>
-						<div class="label">Heading for a new player</div>
+						<div class="caption">Heading for a new player</div>
 						<TextEntry class="input" Value=@d.WelcomeHeading MaxLength=@( 120 )
 						           OnTextEdited=@( ( string t ) => { d.WelcomeHeading = t; } )/>
-						<div class="label">Heading for a returning player</div>
+						<div class="caption">Heading for a returning player</div>
 						<TextEntry class="input" Value=@d.WelcomeBackHeading MaxLength=@( 120 )
 						           OnTextEdited=@( ( string t ) => { d.WelcomeBackHeading = t; } )/>
-						<div class="label">About the game</div>
+						<div class="caption">About the game</div>
 						<TextEntry class="input tall" Multiline=@( true ) Value=@d.Intro MaxLength=@( 2000 )
 						           OnTextEdited=@( ( string t ) => { d.Intro = t; } )/>
-						<div class="label">Play button</div>
+						<div class="caption">Play button</div>
 						<TextEntry class="input" Value=@d.PlayButton MaxLength=@( 40 )
 						           OnTextEdited=@( ( string t ) => { d.PlayButton = t; } )/>
 					</div>
 
 					<div class="section">
 						<div class="menu-heading">Rules</div>
-						<div class="label">Heading</div>
+						<div class="caption">Heading</div>
 						<TextEntry class="input" Value=@d.RulesHeading MaxLength=@( 120 )
 						           OnTextEdited=@( ( string t ) => { d.RulesHeading = t; } )/>
 						@for ( var i = 0; i < d.Rules.Count; i++ )
@@ -59,13 +59,13 @@
 
 					<div class="section">
 						<div class="menu-heading">Changelog</div>
-						<div class="label">Heading over what a returning player has not seen</div>
+						<div class="caption">Heading over what a returning player has not seen</div>
 						<TextEntry class="input" Value=@d.NewHeading MaxLength=@( 120 )
 						           OnTextEdited=@( ( string t ) => { d.NewHeading = t; } )/>
-						<div class="label">Heading over the latest release</div>
+						<div class="caption">Heading over the latest release</div>
 						<TextEntry class="input" Value=@d.LatestHeading MaxLength=@( 120 )
 						           OnTextEdited=@( ( string t ) => { d.LatestHeading = t; } )/>
-						<div class="label">Text for a player who is up to date</div>
+						<div class="caption">Text for a player who is up to date</div>
 						<TextEntry class="input" Value=@d.UpToDateText MaxLength=@( 300 )
 						           OnTextEdited=@( ( string t ) => { d.UpToDateText = t; } )/>
 
@@ -75,7 +75,7 @@
 							var at = i;
 							<div class="entry">
 								<div class="line-row">
-									<div class="label fixed">Version</div>
+									<div class="caption fixed">Version</div>
 									<TextEntry class="input number" Value=@entry.Version.ToString() MaxLength=@( 6 )
 									           OnTextEdited=@( ( string t ) => { entry.Version = ParseVersion( t, entry.Version ); } )/>
 									<TextEntry class="input" Value=@entry.Title MaxLength=@( 120 ) Placeholder="Title"
