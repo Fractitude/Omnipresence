@@ -11,8 +11,7 @@
 		// A player who is up to date, or new, still sees the latest release.
 		var shown = news.Count > 0 && returning ? news : GameVersion.Changelog.Take( 1 ).ToList();
 
-		<MenuWindow Title="Omnipresence in the Wired" Width=@( 640 ) OnClose=@Close
-		            Hint="Escape closes this. Type welcome in the console to read it again.">
+		<MenuWindow Title="Omnipresence in the Wired" Width=@( 640 ) OnClose=@Close>
 			<ChildContent>
 				<div class="menu-list welcome">
 					<div class="section">
@@ -52,7 +51,6 @@
 					</div>
 				</div>
 				<div class="footer">
-					<div class="version">@( $"Version {GameVersion.Current}" )</div>
 					<div class="menu-button" @onclick=@Close>Play</div>
 				</div>
 			</ChildContent>

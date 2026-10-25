@@ -52,13 +52,7 @@
 .footer
 {
 	flex-shrink: 0;
-	justify-content: space-between;
+	justify-content: flex-end;
 	align-items: center;
 	margin-top: 10px;
-
-	.version
-	{
-		font-size: 13px;
-		opacity: 0.6;
-	}
 }
