@@ -21,11 +21,6 @@ public sealed class PlayerCustomizer : Component
 	const string VerifiedOnlyCookie = "player_customizer.verified_only";
 
 	/// <summary>
-	/// The outfit applied last is always put back on when the game starts; players cannot turn it off.
-	/// </summary>
-	public static bool RestoreLastOutfit => true;
-
-	/// <summary>
 	/// How the workshop list is sorted, remembered like the spawn menu's.
 	/// </summary>
 	public static PackageSortMode SortOrder
@@ -81,26 +76,9 @@ public sealed class PlayerCustomizer : Component
 	const string OpenAction = "Customizer";
 
 	/// <summary>
-	/// The outfit picked with Apply, put back on after a respawn. Null means the player's own avatar.
+	/// The saved outfit kept in the cookies by older versions is sent to the server once, if the server has none.
 	/// </summary>
-	public ClothingContainer AppliedOutfit { get; private set; }
-
-	/// <summary>
-	/// Tints picked with Apply, they go with the outfit.
-	/// </summary>
-	public Dictionary<string, Color> AppliedColors { get; private set; } = [];
-
-	Player _dressedPlayer;
-	RealTimeSince _playerChanged;
-	bool _redressPending;
-
-	protected override void OnStart()
-	{
-		_dressedPlayer = Player.FindLocalPlayer();
-
-		if ( RestoreLastOutfit && OutfitPresets.LastOutfit is { } last )
-			_ = Restore( last );
-	}
+	bool _migrated;
 
 	protected override void OnDisabled()
 	{
@@ -161,69 +139,44 @@ public sealed class PlayerCustomizer : Component
 			MenuControls.Free( false );
 		}
 
-		RedressAfterRespawn();
+		MigrateCookie();
 	}
 
-	void RedressAfterRespawn()
+	// From when the outfit was kept on the player's computer: the server has it now (PlayerCustomization).
+	void MigrateCookie()
 	{
-		var player = Player.FindLocalPlayer();
-		if ( player != _dressedPlayer )
-		{
-			_dressedPlayer = player;
-			_playerChanged = 0;
-			_redressPending = AppliedOutfit is not null;
-		}
-
-		if ( !player.IsValid() ) return;
-
-		// At once, in the first frame the new body exists: the body's own Dresser is stopped so it does not put the avatar
-		// on over this. Again half a second later, in case the Dresser had not started yet and dressed after all.
-		if ( _redressPending )
-		{
-			_redressPending = false;
-			_redressAgain = true;
-			Redress( player );
-		}
-		else if ( _redressAgain && _playerChanged >= 0.5f )
-		{
-			_redressAgain = false;
-			Redress( player );
-		}
-	}
-
-	void Redress( Player player )
-	{
-		if ( AppliedOutfit is null )
+		if ( _migrated || PlayerCustomization.Local is not { Loaded: true } customization )
 			return;
 
-		player.GetComponentInChildren<Dresser>( true )?.CancelDressing();
-		player.BroadcastOutfit( AppliedOutfit.Serialize(), OutfitColors.Serialize( AppliedColors ), WorkshopClothing.GetIdents( AppliedOutfit ) );
-	}
+		_migrated = true;
 
-	bool _redressAgain;
+		if ( customization.HasOutfit || OutfitPresets.LastOutfit is not { } last )
+		{
+			OutfitPresets.LastOutfit = null;
+			return;
+		}
+
+		_ = Restore( last );
+	}
 
 	async Task Restore( OutfitPreset last )
 	{
 		var (outfit, colors) = await OutfitPresets.Resolve( last );
 
 		// opened the panel and applied something else meanwhile
-		if ( !IsValid || AppliedOutfit is not null ) return;
+		if ( !IsValid || PlayerCustomization.Local is not { HasOutfit: false } ) return;
 
 		ApplyOutfit( outfit, colors );
+		OutfitPresets.LastOutfit = null;
 	}
 
 	/// <summary>
-	/// Dress the local player in this outfit for everyone, it stays on after respawns.
+	/// Dress the local player in this outfit for everyone. The server keeps it (cleaned under its rules) and puts it
+	/// back after a respawn or a new session.
 	/// </summary>
 	public void ApplyOutfit( ClothingContainer outfit, IReadOnlyDictionary<string, Color> colors )
 	{
-		AppliedOutfit = ClothingContainer.CreateFromJson( outfit.Serialize() );
-		AppliedColors = OutfitColors.Copy( colors );
-		OutfitPresets.LastOutfit = OutfitPresets.Capture( null, AppliedOutfit, AppliedColors );
-
-		var player = Player.FindLocalPlayer();
-		if ( player.IsValid() )
-			player.BroadcastOutfit( AppliedOutfit.Serialize(), OutfitColors.Serialize( AppliedColors ), WorkshopClothing.GetIdents( AppliedOutfit ) );
+		PlayerCustomization.Local?.Request( outfit.Serialize(), OutfitColors.Serialize( colors ), WorkshopClothing.GetIdents( outfit ) );
 	}
 
 	/// <summary>
@@ -231,13 +184,7 @@ public sealed class PlayerCustomizer : Component
 	/// </summary>
 	public void ApplyDefaultAvatar()
 	{
-		AppliedOutfit = null;
-		AppliedColors = [];
-		OutfitPresets.LastOutfit = null;
-
-		var player = Player.FindLocalPlayer();
-		if ( player.IsValid() )
-			player.BroadcastOutfit( null, null, null );
+		PlayerCustomization.Local?.Request( null, null, null );
 	}
 
 	/// <summary>
@@ -245,14 +192,14 @@ public sealed class PlayerCustomizer : Component
 	/// </summary>
 	public ClothingContainer GetCurrentOutfit()
 	{
-		var outfit = AppliedOutfit ?? ClothingContainer.CreateFromLocalUser();
-		return ClothingContainer.CreateFromJson( outfit.Serialize() );
+		var json = PlayerCustomization.Local is { HasOutfit: true } customization ? customization.OutfitJson : null;
+		return json is null ? ClothingContainer.CreateFromJson( ClothingContainer.CreateFromLocalUser().Serialize() ) : ClothingContainer.CreateFromJson( json );
 	}
 
-	public Dictionary<string, Color> GetCurrentColors() => OutfitColors.Copy( AppliedColors );
+	public Dictionary<string, Color> GetCurrentColors() => OutfitColors.Deserialize( PlayerCustomization.Local?.ColorsJson );
 
 	/// <summary>
-	/// Dress a player in a saved outfit, on this machine. Called for every machine by <see cref="Player.BroadcastOutfit"/>.
+	/// Dress a player in a saved outfit, on this machine. Called by <see cref="PlayerCustomization"/> on every machine.
 	/// </summary>
 	public static async Task Dress( Dresser dresser, string json, Dictionary<string, Color> colors, string workshopIdents )
 	{

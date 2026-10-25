@@ -69,6 +69,10 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 
 		UpdateFlashlight();
 
+		// The host gives every player a PlayerCustomization (the outfit the server keeps), also one who was here before it.
+		if ( Networking.IsHost )
+			PlayerCustomization.EnsureOn( this );
+
 		if ( !IsLocalPlayer )
 			return;
 
