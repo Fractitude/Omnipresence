@@ -40,7 +40,7 @@
 			<div class="driving-prompts">
 				@foreach ( var (key, label) in Source.GaugePrompts )
 				{
-					<div><label class="key">@key</label><label>@label</label></div>
+					<div><label class="key">@KeyName( key )</label><label>@label</label></div>
 				}
 			</div>
 		</div>
@@ -75,6 +75,10 @@
 			hud = null;
 		}
 	}
+
+	// "Left Shift" is just "Shift" on the key cap.
+	static string KeyName( string key ) =>
+		key is not null && key.StartsWith( "Left ", StringComparison.OrdinalIgnoreCase ) ? key[5..] : key;
 
 	static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
 
