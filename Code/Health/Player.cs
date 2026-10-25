@@ -33,6 +33,11 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 	static Player localPlayer;
 
 	/// <summary>
+	/// The view mode this client last used, put back on the next body it gets. Null until a body has been played.
+	/// </summary>
+	static bool? lastThirdPerson;
+
+	/// <summary>
 	/// The player this client controls, if it is alive.
 	/// </summary>
 	public static Player FindLocalPlayer() => localPlayer;
@@ -66,6 +71,10 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 
 		if ( !IsLocalPlayer )
 			return;
+
+		// Remembered so the next body (after a respawn) starts in the same view
+		if ( Controller.IsValid() )
+			lastThirdPerson = Controller.ThirdPerson;
 
 		// Getting into a vehicle ends noclip: a seat and a flying body do not go together
 		if ( IsNoclipping && IsSeated )
@@ -161,7 +170,12 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 		timeSinceSpawned = 0;
 
 		if ( IsLocalPlayer )
+		{
 			localPlayer = this;
+
+			if ( lastThirdPerson is { } thirdPerson && Controller.IsValid() )
+				Controller.ThirdPerson = thirdPerson;
+		}
 
 		// We don't care about spectating corpses once we spawn
 		foreach ( var target in Scene.GetAllComponents<DeathCameraTarget>()
