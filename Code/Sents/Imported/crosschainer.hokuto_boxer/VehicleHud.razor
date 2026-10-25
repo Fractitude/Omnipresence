@@ -20,7 +20,7 @@
 				var fraction = i * 1000 / Vehicle.MaxRpm;
 				var angle = 135 + fraction * 270;
 				<div class="rpm-tick @(fraction >= .9f ? "redline" : "")" style="@ArcStyle(angle)"></div>
-				<label class="rpm-number @(fraction >= .9f ? "redline-text" : "")" style="@PointStyle(angle, 108)">@i</label>
+				<label class="rpm-number @(fraction >= .9f ? "redline-text" : "")" style="@PointStyle(angle, 84.24)">@i</label>
 			}
 			<div class="speed-reading"><label class="rpm-label">RPM ×1000</label><label class="speed">@Math.Round(Vehicle.Speed)</label><label class="speed-unit">KM/H</label><label class="gear">@(Vehicle.Gear < 0 ? "R" : Vehicle.Gear == 0 ? "N" : Vehicle.Gear.ToString())</label></div>
 			<label class="handling-label">@(Vehicle.Drift ? "DRIFT MODE" : "GRIP MODE")</label>
@@ -38,13 +38,13 @@
 	[Property] public CuratedVehicle Vehicle { get; set; }
 	private static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
 	private static string PointStyle( double angle, double radius ) => $"left: {Css(151.2 + Math.Cos(angle * Math.PI / 180) * radius)}px; top: {Css(151.2 + Math.Sin(angle * Math.PI / 180) * radius)}px;";
-	private static string ArcStyle( double angle ) => $"{PointStyle(angle, 128)} transform: translate(-50%, -50%) rotate({Css(angle)}deg);";
+	private static string ArcStyle( double angle ) => $"{PointStyle(angle, 104.76)} transform: translate(-50%, -50%) rotate({Css(angle)}deg);";
 	// The active part of the RPM scale is a band along the dial's outer ring, drawn as small quads (the polygon's four
 	// corners) so the edge follows the ring. Radii are fractions of the box (the ring is 41.5% of it at the dial picture's own size, 49.9% once it is drawn 120% large; measured from the
 	// dial's picture); each slice is small enough that its straight edges look like the arc.
 	private const float SliceDegrees = 6;
-	private const double OuterRadius = 49.9;
-	private const double InnerRadius = 48.5;
+	private const double OuterRadius = 41.6;
+	private const double InnerRadius = 40.2;
 	private static string SectorStyle( double startAngle, double endAngle )
 	{
 		var start = startAngle * Math.PI / 180;

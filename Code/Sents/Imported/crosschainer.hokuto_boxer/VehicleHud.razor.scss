@@ -24,14 +24,13 @@ VehicleHud
 	color: white;
 	text-shadow: 0 1px 3px rgba( 0, 0, 0, 0.45 );
 
-	// Drawn 120% large, centred on the same point, so the ring is bigger than the box the numbers are laid out in.
 	.speedometer-dial
 	{
 		position: absolute;
-		left: -10%;
-		top: -10%;
-		width: 120%;
-		height: 120%;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
 	}
 
 	// The band along the ring that fills up with the RPM. Solid, so the slices it is drawn in leave no seams.
@@ -89,7 +88,7 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 66px;
+			top: 89px;
 			justify-content: center;
 			text-align: center;
 			font-size: 13px;
@@ -103,7 +102,7 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 104px;
+			top: 98px;
 			justify-content: center;
 			text-align: center;
 			font-size: 74px;
@@ -117,7 +116,7 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 191px;
+			top: 184px;
 			justify-content: center;
 			text-align: center;
 			font-size: 15px;
@@ -131,7 +130,7 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 218px;
+			top: 205px;
 			justify-content: center;
 			text-align: center;
 			font-size: 30px;
@@ -144,7 +143,7 @@ VehicleHud
 		position: absolute;
 		left: 0;
 		right: 0;
-		top: 300px;
+		top: 275px;
 		text-align: center;
 		justify-content: center;
 		font-size: 17px;
@@ -159,7 +158,7 @@ VehicleHud
 		left: -70px;
 		right: -70px;
 		top: 100%;
-		margin-top: 35px;
+		margin-top: 4px;
 		flex-direction: row;
 		justify-content: center;
 		gap: 22px;
