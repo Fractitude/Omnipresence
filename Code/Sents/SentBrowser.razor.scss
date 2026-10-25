@@ -21,6 +21,49 @@
 	}
 }
 
+// The categories on the left, the tiles on the right. The row takes what the window has left and the list in it scrolls.
+.sents-body
+{
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 0;
+	gap: 10px;
+}
+
+.categories
+{
+	flex-shrink: 0;
+	flex-direction: column;
+	width: 150px;
+	gap: 4px;
+}
+
+.category
+{
+	flex-shrink: 0;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	font-size: 14px;
+	background-color: rgba( white, 0.06 );
+	cursor: pointer;
+
+	i
+	{
+		font-size: 18px;
+	}
+
+	&:hover
+	{
+		background-color: rgba( white, 0.16 );
+	}
+
+	&.active
+	{
+		background-color: rgba( white, 0.25 );
+	}
+}
+
 .tiles
 {
 	// The list shrinks and scrolls; a wrapped grid that shrank with it would never overflow, so nothing would scroll.

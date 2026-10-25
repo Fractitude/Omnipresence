@@ -18,20 +18,36 @@
 						<div class="menu-button @( m == sort ? "active" : "" )" @onclick=@( () => SetSort( m ) )>@m</div>
 					}
 				</div>
-				<div class="menu-list">
-					@if ( Entries.Count == 0 )
-					{
-						<div class="menu-empty">@( Loading ? "Loading..." : "No sents found." )</div>
-					}
-					<div class="tiles">
-						@foreach ( var entry in Entries )
+				<div class="sents-body">
+					<div class="categories">
+						@foreach ( var category in Categories )
 						{
-							var e = entry;
-							<div @key=@e.Ident class="tile" @onclick=@( () => Pick( e ) )>
-								<div class="thumb" style="background-image: url( @e.Thumb )"></div>
-								<div class="title">@e.Title</div>
-								<div class="org">@e.Org</div>
+							var c = category;
+							<div @key=@c.Name class="category @( c.Tag == tag ? "active" : "" )" @onclick=@( () => SetCategory( c ) )>
+								<i>@c.Icon</i>
+								<div class="label">@c.Name</div>
 							</div>
+						}
+					</div>
+					<div class="menu-list">
+						@if ( Entries.Count == 0 )
+						{
+							<div class="menu-empty">@( Loading ? "Loading..." : "No sents found." )</div>
+						}
+						<div class="tiles">
+							@foreach ( var entry in Entries )
+							{
+								var e = entry;
+								<div @key=@e.Ident class="tile" @onclick=@( () => Pick( e ) ) @onrightclick=@( () => OpenMenu( e ) )>
+									<div class="thumb" style="background-image: url( @e.Thumb )"></div>
+									<div class="title">@e.Title</div>
+									<div class="org">@e.Org</div>
+								</div>
+							}
+						</div>
+						@if ( Entries.Count > 0 && Loading )
+						{
+							<div class="menu-empty">Loading...</div>
 						}
 					</div>
 				</div>
@@ -50,6 +66,26 @@
 	static readonly string[] Modes = ["popular", "newest", "trending"];
 
 	/// <summary>
+	/// A group in the sidebar: the packages that carry this tag. An empty tag is all of them.
+	/// </summary>
+	record Category( string Name, string Icon, string Tag );
+
+	static readonly Category[] Categories =
+	[
+		new( "All", "apps", "" ),
+		new( "Vehicles", "directions_car", "vehicle" ),
+		new( "Weapons", "gps_fixed", "weapon" ),
+		new( "NPCs", "smart_toy", "npc" ),
+		new( "Explosives", "local_fire_department", "explosives" ),
+	];
+
+	// A page of results, and how close to the end of the list the next one starts loading, in pixels.
+	const int PageSize = 40;
+	const float LoadAhead = 300f;
+
+	const string MenuName = "sents";
+
+	/// <summary>
 	/// Whether the panel is open on this computer.
 	/// </summary>
 	public static bool IsOpen { get; private set; }
@@ -61,6 +97,9 @@
 	static int version;
 	static string sort = "popular";
 	static string filter = "";
+	static string tag = "";
+	static int total;
+	static Panel ListPanel;
 
 	static string Filter
 	{
@@ -81,6 +120,25 @@
 		_ = Search();
 	}
 
+	static void SetCategory( Category category )
+	{
+		if ( category.Tag == tag )
+			return;
+
+		tag = category.Tag;
+		_ = Search();
+	}
+
+	// Right-click on a tile: the ident to paste somewhere, or the package's page.
+	static void OpenMenu( Entry entry )
+	{
+		ContextMenu.Show( MenuName, entry.Title,
+		[
+			new ContextEntry( "copy", "Copy ident", "content_copy", true, () => Clipboard.SetText( entry.Ident ) ),
+			new ContextEntry( "page", "Open package page", "open_in_new", true, () => Game.Overlay.ShowPackageModal( entry.Ident ) ),
+		] );
+	}
+
 	/// <summary>
 	/// Open the browser. Does nothing with another menu open.
 	/// </summary>
@@ -91,7 +149,7 @@
 			return;
 
 		IsOpen = true;
-		GameMenus.SetOpen( "sents", true );
+		GameMenus.SetOpen( MenuName, true );
 		_ = Search();
 	}
 
@@ -101,7 +159,8 @@
 			return;
 
 		IsOpen = false;
-		GameMenus.SetOpen( "sents", false );
+		ContextMenu.HideFor( MenuName );
+		GameMenus.SetOpen( MenuName, false );
 		MenuControls.Free( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}
@@ -115,32 +174,84 @@
 		Close();
 	}
 
+	static string Query()
+	{
+		var query = $"sort:{sort} type:sent";
+
+		if ( !string.IsNullOrEmpty( tag ) )
+			query += $" tag:{tag}";
+
+		if ( !string.IsNullOrWhiteSpace( filter ) )
+			query += $" {filter.Trim()}";
+
+		return query;
+	}
+
 	static async Task Search()
 	{
 		var mine = ++search;
 		Loading = true;
 		version++;
 
-		var query = $"sort:{sort} type:sent";
-
-		if ( !string.IsNullOrWhiteSpace( filter ) )
-			query += $" {filter.Trim()}";
-
-		var result = await Package.FindAsync( query );
+		var result = await Package.FindAsync( Query(), PageSize, 0 );
 
 		// A newer search replaced this one.
 		if ( mine != search )
 			return;
 
-		Entries = result?.Packages?.Select( x => new Entry( x.FullIdent, x.Title, x.Org?.Title, x.Thumb ) ).ToList() ?? [];
+		Entries = result?.Packages?.Select( ToEntry ).ToList() ?? [];
+		total = result?.TotalCount ?? Entries.Count;
 		Loading = false;
 		version++;
+		ListPanel?.ScrollTo( Vector2.Zero );
+	}
+
+	// The next page, added below the ones shown. A new search while it loads drops it.
+	static async Task LoadMore()
+	{
+		var mine = search;
+		Loading = true;
+		version++;
+
+		var result = await Package.FindAsync( Query(), PageSize, Entries.Count );
+
+		if ( mine != search )
+			return;
+
+		var more = result?.Packages?.Select( ToEntry ).Where( x => Entries.All( e => e.Ident != x.Ident ) ).ToList() ?? [];
+		Entries = [.. Entries, .. more];
+
+		// A page with nothing new is the end, whatever the total said.
+		total = more.Count == 0 ? Entries.Count : result.TotalCount;
+		Loading = false;
+		version++;
+	}
+
+	static Entry ToEntry( Package x ) => new( x.FullIdent, x.Title, x.Org?.Title, x.Thumb );
+
+	// Scrolled near the bottom: time for the next page.
+	static bool WantsMore()
+	{
+		if ( Loading || Entries.Count == 0 || Entries.Count >= total || !ListPanel.IsValid() )
+			return false;
+
+		// ScrollSize is the height of everything in the list; zero is a list that has not been laid out yet.
+		var content = ListPanel.ScrollSize.y;
+		return content > 0 && ListPanel.ScrollOffset.y + ListPanel.Box.Rect.Height >= content - LoadAhead;
 	}
 
 	protected override void OnUpdate()
 	{
 		if ( !IsOpen )
 			return;
+
+		// Escape closes the right-click menu first.
+		if ( ContextMenu.IsOpen && Input.EscapePressed )
+		{
+			Input.EscapePressed = false;
+			ContextMenu.Hide();
+			return;
+		}
 
 		if ( Input.EscapePressed || NaviInputCapture.Current is not null )
 		{
@@ -151,9 +262,16 @@
 
 		Mouse.Visibility = MouseVisibility.Visible;
 		MenuControls.Free( false );
+
+		// The scrolling list, found here: the @ref above was null after the panel was rebuilt.
+		if ( !ListPanel.IsValid() )
+			ListPanel = Panel?.Descendants.FirstOrDefault( x => x.HasClass( "menu-list" ) && x.Parent.HasClass( "sents-body" ) );
+
+		if ( WantsMore() )
+			_ = LoadMore();
 	}
 
 	protected override void OnDisabled() => Close();
 
-	protected override int BuildHash() => System.HashCode.Combine( IsOpen, version, sort );
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, version, sort, tag );
 }

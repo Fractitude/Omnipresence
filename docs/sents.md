@@ -10,7 +10,9 @@ A sent is a prefab published to the cloud as a package of type `sent` (the asset
   (`org.package` only, never a path), loads the package with `Cloud.Load<ScriptedEntity>( ident, true )`, clones its
   prefab where the player looks (500 units, stood on the floor) and `NetworkSpawn`s it.
 - `SentBrowser` (`sents` command, a HUD piece) searches the cloud (`Package.FindAsync( "sort:popular type:sent <text>" )`)
-  and shows tiles with thumbnail, title and author. Clicking one spawns it and closes the window.
+  and shows tiles with thumbnail, title and author. Clicking one spawns it and closes the window; right-click copies its ident
+  or opens its package page. The sidebar filters by tag (`tag:vehicle`, `weapon`, `npc`, `explosives`), and the list loads the
+  next 40 when scrolled near the bottom.
 
 ## Who may spawn
 
@@ -52,3 +54,8 @@ system) needs that part ported first. Props and models with no code, and code th
 - `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at
   and explodes on its target. It used sandbox's `Player`; those uses were changed by hand to the engine's `PlayerController` (eyes) and our
   `PlayerHealth`, so a new import of it needs the same edits.
+
+### Known not working
+
+- `sftatlas.claymoremine`: no code, only ActionGraphs compiled against the sandbox game (signals), which log errors from whatever
+  touches it (a drone's explosion shows them as `FixedUpdate on FpvDroneNpc`). It can't be imported; it needs sandbox's signal wiring ported.
