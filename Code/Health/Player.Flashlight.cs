@@ -29,9 +29,9 @@ public sealed partial class Player
 		flashlight = beam.Components.Create<SpotLight>();
 		flashlight.Attenuation = 1.0931175f;
 		flashlight.ConeInner = 19.676113f;
-		flashlight.ConeOuter = 42f;
-		flashlight.Radius = 1500f;
-		flashlight.LightColor = new Color( 12.68f, 11.64494f, 10.37991f );
+		flashlight.ConeOuter = 24f;
+		flashlight.Radius = 1200f;
+		flashlight.LightColor = new Color( 3f, 2.65f, 1.37f );
 		flashlight.Cookie = Texture.Load( "textures/lightcookies/lightcookies_01.vtex" );
 		flashlight.Shadows = true;
 		flashlight.Enabled = false;
@@ -41,9 +41,9 @@ public sealed partial class Player
 		fill.Parent = GameObject;
 
 		flashlightFill = fill.Components.Create<PointLight>();
-		flashlightFill.Attenuation = 24f;
+		flashlightFill.Attenuation = 18f;
 		flashlightFill.Radius = 128f;
-		flashlightFill.LightColor = new Color( 0.37209f, 0.32623f, 0.28037f );
+		flashlightFill.LightColor = new Color( 0.37f, 0.32f, 0.28f );
 		flashlightFill.Shadows = false;
 		flashlightFill.Enabled = false;
 	}
