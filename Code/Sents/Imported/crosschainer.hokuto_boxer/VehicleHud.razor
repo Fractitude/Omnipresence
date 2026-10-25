@@ -41,11 +41,19 @@
 	private static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
 	private static string PointStyle( double angle, double radius ) => $"left: {Css(151.2 + Math.Cos(angle * Math.PI / 180) * radius)}px; top: {Css(151.2 + Math.Sin(angle * Math.PI / 180) * radius)}px;";
 	private static string ArcStyle( double angle ) => $"{PointStyle(angle, 104.76)} transform: translate(-50%, -50%) rotate({Css(angle)}deg);";
+	// A wedge from the dial's centre out to the ring the ticks sit on (34.6% of the box), with the outer edge drawn as
+	// an arc of points rather than a chord, so it never reaches past the dial.
 	private static string SectorStyle( double startAngle, double endAngle )
 	{
-		var start = startAngle * Math.PI / 180;
-		var end = endAngle * Math.PI / 180;
-		return $"border-shape: polygon(50% 50%, {Css(50 + Math.Cos(start) * 75)}% {Css(50 + Math.Sin(start) * 75)}%, {Css(50 + Math.Cos(end) * 75)}% {Css(50 + Math.Sin(end) * 75)}%);";
+		const double radius = 34;
+		var points = new System.Text.StringBuilder( "50% 50%" );
+		var steps = Math.Max( 1, (int)Math.Ceiling( (endAngle - startAngle) / 4 ) );
+		for ( var i = 0; i <= steps; i++ )
+		{
+			var angle = (startAngle + (endAngle - startAngle) * i / steps) * Math.PI / 180;
+			points.Append( $", {Css( 50 + Math.Cos( angle ) * radius )}% {Css( 50 + Math.Sin( angle ) * radius )}%" );
+		}
+		return $"border-shape: polygon({points});";
 	}
 	protected override int BuildHash() => Vehicle.IsValid()
 		? HashCode.Combine( Math.Round(Vehicle.Speed), Math.Round(Vehicle.Rpm / 25), Vehicle.Gear, Vehicle.Mode, Vehicle.LocalDriver ) : 0;

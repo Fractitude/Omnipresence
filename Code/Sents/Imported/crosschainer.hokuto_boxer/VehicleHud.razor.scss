@@ -38,10 +38,6 @@ VehicleHud
 		width: 100%;
 		height: 100%;
 		background-color: rgba( 255, 255, 255, 0.28 );
-
-		// The sector's polygon reaches past the dial (VehicleHud.razor draws its points at 75% of the box). Keep only
-		// the part inside the ring the ticks sit on: 104.76px of the 151.2px half-width.
-		mask-image: radial-gradient( circle closest-side, black 68%, transparent 69% );
 	}
 
 	.rpm-tick
