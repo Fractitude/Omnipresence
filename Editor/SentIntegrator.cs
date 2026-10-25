@@ -10,7 +10,8 @@ namespace Sandbox;
 /// <summary>
 /// <c>sent_integrate org.package</c>: makes a workshop sent ours. Its code is brought in as <c>sent_import</c> does
 /// (<c>Code/Sents/Imported/&lt;ident&gt;/</c>), its prefab is saved as a file of the project
-/// (<c>Assets/sents/&lt;ident&gt;/sent.prefab</c>, component types named in full) and <c>source.json</c> beside it says
+/// (<c>Assets/sents/&lt;ident&gt;/&lt;name&gt;.prefab</c>, the name being the ident after the author's, component types
+/// named in full) and <c>source.json</c> beside it says
 /// who made it and where its page is. From then on <c>spawn_sent</c> uses our copy and an update by the author changes
 /// nothing; we are free to edit the prefab and the code. See <see cref="SentLocal"/> for what still comes from the
 /// workshop (the assets).
@@ -77,7 +78,7 @@ public static class SentIntegrator
 		}
 
 		var folder = Path.Combine( Project.Current.GetRootPath(), "Assets", "sents", ident );
-		var prefabFile = Path.Combine( folder, "sent.prefab" );
+		var prefabFile = Path.Combine( folder, $"{SentLocal.PrefabName( ident )}.prefab" );
 		var wrote = !File.Exists( prefabFile );
 
 		Directory.CreateDirectory( folder );

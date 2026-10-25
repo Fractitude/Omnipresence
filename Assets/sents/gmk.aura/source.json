@@ -1,0 +1,21 @@
+{
+  "ident": "gmk.aura",
+  "title": "Aura",
+  "author": "Archived Games",
+  "authorIdent": "gmk",
+  "page": "https://sbox.game/gmk/aura",
+  "workshopVersion": 426151,
+  "workshopUpdated": "2026-10-18",
+  "integrated": "2026-10-25",
+  "includesCode": true,
+  "code": "Code/Sents/Imported/gmk.aura/",
+  "namespaces": [],
+  "description": "",
+  "assetsFromWorkshop": [
+    "aura_weapon/aura.vmat",
+    "aura_weapon/icon.png",
+    "aura_weapon/music.sound",
+    "models/dev/box.vmdl",
+    "textures/generated/imagefile/eb5c32ad36976a8d.vtex"
+  ]
+}

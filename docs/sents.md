@@ -31,7 +31,7 @@ nothing here and we can edit it freely. Right-click a tile and choose *Integrate
 `sent_integrate org.package` (`Editor/SentIntegrator.cs`). It:
 
 1. imports the code if the sent has any (`sent_import`: `Code/Sents/Imported/<ident>/`, builds, reports errors);
-2. saves the prefab as `Assets/sents/<ident>/sent.prefab`, with each component type named in full (`Hl2Metrocop.CombineNpc`), so
+2. saves the prefab as `Assets/sents/<ident>/<name>.prefab` (the ident without its author, `metrocop` for `hl2npcs.metrocop`), with each component type named in full (`Hl2Metrocop.CombineNpc`), so
    a plain clone finds its types. It is only written if it is not there, so edits to it are never overwritten; delete it to
    take the workshop's again;
 3. writes `Assets/sents/<ident>/source.json`: title, **author**, **workshop page link**, the workshop version and date it was

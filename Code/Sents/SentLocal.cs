@@ -18,7 +18,13 @@ public static class SentLocal
 	/// <summary>
 	/// Where the prefab of an integrated sent lives, relative to <c>Assets/</c>.
 	/// </summary>
-	public static string PrefabPath( string ident ) => $"sents/{ident}/sent.prefab";
+	public static string PrefabPath( string ident ) => $"sents/{ident}/{PrefabName( ident )}.prefab";
+
+	/// <summary>
+	/// The file name of an integrated sent's prefab, without the extension: its ident without the author, so
+	/// <c>hl2npcs.metrocop</c> is <c>metrocop</c>.
+	/// </summary>
+	public static string PrefabName( string ident ) => ident[(ident.IndexOf( '.' ) + 1)..];
 
 	/// <summary>
 	/// The integrated prefab of <paramref name="ident"/>, or null if it was not integrated (or the editor has not
