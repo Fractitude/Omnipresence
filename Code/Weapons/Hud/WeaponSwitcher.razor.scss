@@ -94,10 +94,8 @@ WeaponSwitcher
 
 		.weapon-icon
 		{
-			width: 80%;
-			height: 80px;
-			object-fit: contain;
 			flex-shrink: 0;
+			background-repeat: no-repeat;
 		}
 
 		.name

@@ -27,7 +27,7 @@
 								<div class="content">
 									@if ( IconOf( weapon ) is { } icon )
 									{
-										<Image class="weapon-icon" Texture=@icon />
+										<Image class="weapon-icon" Texture=@icon style=@IconStyle( icon ) />
 									}
 									<label class="name">@weapon.DisplayName</label>
 								</div>
@@ -74,6 +74,19 @@
 	};
 
 	static Dictionary<string, Texture> iconCache = new();
+
+	/// <summary>
+	/// The icon at its own proportions inside the tile's picture area. The Image panel stretches to its box and a
+	/// texture that is wider than the box repeats, so the size is worked out here.
+	/// </summary>
+	static string IconStyle( Texture icon )
+	{
+		if ( icon.Width <= 0 || icon.Height <= 0 )
+			return "";
+
+		var fit = MathF.Min( 180f / icon.Width, 80f / icon.Height );
+		return $"width: {icon.Width * fit:0}px; height: {icon.Height * fit:0}px;";
+	}
 
 	static Texture IconOf( BaseSandboxWeapon weapon )
 	{
