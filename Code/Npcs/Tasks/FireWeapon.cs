@@ -21,9 +21,13 @@ public class FireWeapon : TaskBase
 	/// <summary>Seconds (min, max) between shots of a pistol or other semi-automatic - one trigger pull at a time.</summary>
 	public Vector2 SemiAutoInterval { get; set; } = new( 0.25f, 0.45f );
 
+	/// <summary>How long a melee fighter waits for its target to come back into reach before it goes after it again.</summary>
+	public float MeleeLoseReach { get; set; } = 0.4f;
+
 	private int _shotsLeft;
 	private TimeUntil _timeout;
 	private TimeUntil _nextShot;
+	private TimeSince _timeSinceInReach;
 
 	public FireWeapon( BaseSandboxWeapon weapon, GameObject target )
 	{
@@ -36,7 +40,9 @@ public class FireWeapon : TaskBase
 		if ( !Weapon.IsValid() )
 			return;
 
-		_shotsLeft = Game.Random.Int( Weapon.Npc.BurstMin, Weapon.Npc.BurstMax );
+		// A swing is one try: the schedule runs again (and walks to the target again) after every one
+		_shotsLeft = IsMelee ? 1 : Game.Random.Int( Weapon.Npc.BurstMin, Weapon.Npc.BurstMax );
+		_timeSinceInReach = 0;
 
 		// Shoot at the target, not wherever the animated barrel happens to point.
 		Weapon.NpcAimTarget = Target;
@@ -54,6 +60,8 @@ public class FireWeapon : TaskBase
 	/// </summary>
 	private bool IsSemiAuto => !Weapon.PrimaryAutomatic || string.Equals( Weapon.HoldType, "pistol", StringComparison.OrdinalIgnoreCase );
 
+	private bool IsMelee => Weapon is MeleeWeapon;
+
 	protected override TaskStatus OnUpdate()
 	{
 		if ( !Weapon.IsValid() )
@@ -68,6 +76,15 @@ public class FireWeapon : TaskBase
 
 		if ( _timeout )
 			return TaskStatus.Failed;
+
+		// The target ran out of reach: stop swinging at air, the schedule goes after it again
+		if ( IsMelee )
+		{
+			if ( InRange() )
+				_timeSinceInReach = 0;
+			else if ( _timeSinceInReach > MeleeLoseReach )
+				return TaskStatus.Success;
+		}
 
 		RotateBodyTowardTarget();
 
@@ -101,6 +118,11 @@ public class FireWeapon : TaskBase
 	private bool InRange()
 	{
 		var distance = Npc.WorldPosition.Distance( Target.WorldPosition );
+
+		// A melee weapon only hits what is in front of it: its own reach, not the engagement band of a gun
+		if ( Weapon is MeleeWeapon melee )
+			return distance <= melee.Range * 0.75f;
+
 		return distance >= Weapon.Npc.MinRange && distance <= Weapon.Npc.MaxRange;
 	}
 
