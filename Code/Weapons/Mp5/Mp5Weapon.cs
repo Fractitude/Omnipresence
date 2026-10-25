@@ -5,18 +5,18 @@ public sealed class Mp5Weapon : BaseBulletWeapon
 	/// The round the launcher fires - needs an <see cref="ImpactGrenade"/>. Its blast is tuned on the
 	/// prefab's own component (<c>weapons/mp5/mp5_projectile.prefab</c>), not here.
 	/// </summary>
-	[Property] public GameObject GrenadePrefab { get; set; }
+	[Property, Feature( "Ammo" )] public GameObject GrenadePrefab { get; set; }
 
 	/// <summary>
 	/// Launch speed of the grenade, in inches a second.
 	/// </summary>
-	[Property] public float GrenadeSpeed { get; set; } = 1000f;
+	[Property, Feature( "Ammo" )] public float GrenadeSpeed { get; set; } = 1000f;
 
 	/// <summary>
 	/// Reserve grenades granted on first pickup - reloads top the launcher's magazine up from these.
 	/// The ammo type's <see cref="Sandbox.BaseAmmoResource.MaxReserve"/> caps them (<c>ammo/grenade.ammo</c>).
 	/// </summary>
-	[Property] public int StartingGrenades { get; set; } = 6;
+	[Property, Feature( "Ammo" )] public int StartingGrenades { get; set; } = 6;
 
 	protected override void OnAdded( Sandbox.BaseInventoryComponent inventory )
 	{
