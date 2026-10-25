@@ -197,9 +197,13 @@
 		Rebuild();
 	}
 
-	// Never below the version the players have now: lowering it would hide the change from those who saw it.
-	static void ChangeVersion( int by ) =>
-		draft.Version = System.Math.Max( draft.Version + by, WelcomeContent.Data.Version );
+	// Between the version the players have now and one more: lowering it would hide the change from those who saw
+	// it, and a save raises it by one at most.
+	static void ChangeVersion( int by )
+	{
+		var saved = WelcomeContent.Data.Version;
+		draft.Version = System.Math.Clamp( draft.Version + by, saved, saved + 1 );
+	}
 
 	static void AddEntry() =>
 		draft.Changelog.Insert( 0, new() { Version = draft.Version, Title = "", Changes = new() { "" } } );
