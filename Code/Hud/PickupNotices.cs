@@ -29,8 +29,8 @@ public static class PickupNotices
 	const string WeaponKind = "weapon";
 	const string ItemKind = "item";
 
-	const float Seconds = 1.5f;
-	const int MaxLines = 4;
+	const float Seconds = 4f;
+	const int MaxLines = 6;
 
 	static List<PickupNotice> notices = new();
 
