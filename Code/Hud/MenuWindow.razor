@@ -5,7 +5,10 @@
 <root class="menu-window @( Width > 0 ? "" : "fit" )" style="@( Width > 0 ? $"width: {Width}px" : "" )">
 	<div class="menu-header">
 		<div class="menu-title">@Title</div>
-		<div class="menu-close" @onclick=@OnClose>Close</div>
+		@if ( ShowClose )
+		{
+			<div class="menu-close" @onclick=@OnClose>Close</div>
+		}
 	</div>
 	@ChildContent
 	@if ( !string.IsNullOrEmpty( Notice ) )
@@ -41,9 +44,14 @@
 	public string Hint { get; set; }
 
 	/// <summary>
+	/// Whether the header has a Close button. A window with its own buttons for leaving can hide it.
+	/// </summary>
+	public bool ShowClose { get; set; } = true;
+
+	/// <summary>
 	/// Called by the header's Close button.
 	/// </summary>
 	public Action OnClose { get; set; }
 
-	protected override int BuildHash() => HashCode.Combine( Title, Width, Notice, Hint );
+	protected override int BuildHash() => HashCode.Combine( Title, Width, Notice, Hint, ShowClose );
 }

@@ -5,7 +5,7 @@
 <root class="menu-root @( IsOpen ? "open" : "" )">
 	@if ( IsOpen && !rebuilding && draft is { } d )
 	{
-		<MenuWindow Title="Edit the welcome screen" Width=@( 760 ) OnClose=@Close Notice=@notice
+		<MenuWindow Title="Edit the welcome screen" Width=@( 760 ) OnClose=@Close ShowClose=@( false ) Notice=@notice
 		            Hint="Save sends the text to every player and shows it again to those who saw an older one. Escape discards your changes.">
 			<ChildContent>
 				<div @ref=List class="menu-list editor">

@@ -12,7 +12,7 @@
 		// A player who is up to date, or new, still sees the latest release.
 		var shown = news.Count > 0 && returning ? news : text.Changelog.Take( 1 ).ToList();
 
-		<MenuWindow Title=@text.Title Width=@( 640 ) OnClose=@Close>
+		<MenuWindow Title=@text.Title Width=@( 640 ) OnClose=@Close ShowClose=@( false )>
 			<ChildContent>
 				<div class="menu-list welcome">
 					<div class="section">

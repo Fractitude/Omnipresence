@@ -50,7 +50,7 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
 
 - `menu-root` (from `_hud.scss`) is the full-screen backdrop: no mouse until `open`, then a dim layer that takes it.
 - `MenuWindow` (`Code/Hud/MenuWindow.razor` and `.scss`) is the window: header with `Title` and a Close button
-  (`OnClose`), `Notice` (the host's last answer) and `Hint` (dim advice) under the content. `Width` is fixed pixels; leave it
+  (`OnClose`), `Notice` (the host's last answer) and `Hint` (dim advice) under the content. `ShowClose=@( false )` hides the header Close button for a window with its own way out (the Welcome screen and its editor). `Width` is fixed pixels; leave it
   out for a window that fits its content (up to 96% of the screen, like the storage window). The content goes in
   `<ChildContent>`: s&box needs the tag.
 - **The size rules live only in `MenuWindow.razor.scss`**: the window is at most 80% of the screen
