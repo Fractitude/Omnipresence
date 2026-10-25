@@ -13,6 +13,7 @@
 		var mode = Source.GaugeMode;
 
 		<div class="speedometer @( rpmFraction >= .9f ? "at-redline" : "" )">
+			<div class="dial">
 			<svg class="speedometer-dial" src="drift_district/ui/speedometer-dial.svg" />
 			@for ( var start = 135f; start < 135 + rpmFraction * 270; start += SliceDegrees )
 			{
@@ -35,6 +36,7 @@
 			{
 				<label class="handling-label">@mode</label>
 			}
+			</div>
 			<div class="driving-prompts">
 				@foreach ( var (key, label) in Source.GaugePrompts )
 				{

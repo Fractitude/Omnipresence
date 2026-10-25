@@ -17,12 +17,24 @@ VehicleHud
 	position: absolute;
 	right: 96px;
 	bottom: 96px;
-	width: 302.4px;
-	height: 302.4px;
+	width: 362.88px;
+	height: 362.88px;
 	font-family: "Barlow Condensed";
 	font-weight: 700;
 	color: white;
 	text-shadow: 0 1px 3px rgba( 0, 0, 0, 0.45 );
+
+	// The dial is laid out in a 302.4px box and drawn 1.2 times as large, so the shortcut row below keeps its size.
+	.dial
+	{
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 302.4px;
+		height: 302.4px;
+		transform-origin: 0 0;
+		transform: scale( 1.2 );
+	}
 
 	.speedometer-dial
 	{
