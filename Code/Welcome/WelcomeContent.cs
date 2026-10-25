@@ -22,20 +22,19 @@ public sealed class WelcomeData
 	/// </summary>
 	public int Version { get; set; } = 1;
 
-	public string Title { get; set; } = "Omnipresence in the Wired";
+	public string Title { get; set; } = "Omnipresence";
 
 	public string Intro { get; set; } =
-		"A game inspired by Serial Experiments Lain. You live in the real world and in the Wired, the network under "
+		"Omnipresence is a roleplaying game. You live in two world, the real one and the Wired, the network under "
 		+ "it. Earn, trade and hide your work, and reach the Wired from a computer.";
 
 	public string RulesHeading { get; set; } = "Rules";
 
 	public List<string> Rules { get; set; } = new()
 	{
-		"Be kind to other players. No harassment, hate or threats.",
-		"No cheating, exploits or griefing. If you find a bug, report it instead of using it.",
-		"Do not hurt people who are still starting out.",
-		"The host's word is final.",
+		"Be kind to people who are still starting out.",
+		"No harassment, hate or threats.",
+		"No cheating, exploits or griefing. Report bugs instead of using them.",
 	};
 
 	public string PlayButton { get; set; } = "Play";

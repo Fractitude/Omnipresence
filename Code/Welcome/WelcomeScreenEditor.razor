@@ -38,7 +38,10 @@
 					</div>
 
 					<div class="section">
-						<div class="menu-heading">Changelog</div>
+						<div class="heading-row">
+							<div class="menu-heading">Changelog</div>
+							<div class="menu-button" @onclick=@AddEntry>Add a release</div>
+						</div>
 
 						@for ( var i = 0; i < d.Changelog.Count; i++ )
 						{
@@ -64,7 +67,6 @@
 								<div class="menu-button add" @onclick=@( () => entry.Changes.Add( "" ) )>Add a change</div>
 							</div>
 						}
-						<div class="menu-button add" @onclick=@AddEntry>Add a release</div>
 					</div>
 				</div>
 				<div class="footer">

@@ -71,6 +71,15 @@
 	border-radius: 6px;
 }
 
+// A section title with a button at the right end.
+.heading-row
+{
+	flex-direction: row;
+	flex-shrink: 0;
+	justify-content: space-between;
+	align-items: center;
+}
+
 .add
 {
 	align-self: flex-end;
