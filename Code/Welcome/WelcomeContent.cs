@@ -57,8 +57,12 @@ public sealed class WelcomeData
 	/// <summary>The highest release number in the changelog, 0 with none.</summary>
 	public int LatestRelease() => Changelog.Count == 0 ? 0 : Changelog.Max( x => x.Version );
 
-	/// <summary>The entries newer than a version, in the order they are listed.</summary>
-	public IEnumerable<ChangelogEntry> Since( int version ) => Changelog.Where( x => x.Version > version );
+	/// <summary>The entries newer than a version, newest first whatever order they are stored in.</summary>
+	public IEnumerable<ChangelogEntry> Since( int version ) =>
+		Changelog.Where( x => x.Version > version ).OrderByDescending( x => x.Version );
+
+	/// <summary>The newest release alone (none with an empty changelog), by its number and not its place in the list.</summary>
+	public IEnumerable<ChangelogEntry> Latest() => Since( 0 ).Take( 1 );
 
 	/// <summary>A copy to edit, so nothing changes until it is saved.</summary>
 	public WelcomeData Copy() => Json.Deserialize<WelcomeData>( Json.Serialize( this ) ) ?? new();

@@ -9,9 +9,10 @@
 		var text = WelcomeContent.Data;
 		var news = text.Since( releaseSeenAtOpen ).ToList();
 		var returning = seenAtOpen > 0;
-		// A player who is up to date, or new, still sees the latest release.
+		// A returning player sees every release newer than the newest they saw. A new player, or one who has seen them
+		// all, sees only the latest release.
 		var shownNews = news.Count > 0 && returning;
-		var shown = shownNews ? news : text.Changelog.Take( 1 ).ToList();
+		var shown = shownNews ? news : text.Latest().ToList();
 
 		<MenuWindow Title=@text.Title Width=@( 640 ) OnClose=@Close ShowClose=@( false )>
 			<ChildContent>
