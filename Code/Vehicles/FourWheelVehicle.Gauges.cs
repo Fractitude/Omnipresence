@@ -38,7 +38,7 @@ public sealed partial class FourWheelVehicle : IVehicleGauges
 	IEnumerable<(string Key, string Label)> IVehicleGauges.GaugePrompts =>
 	[
 		(Input.GetButtonOrigin( "Run" ), "TURBO"),
-		(Input.GetButtonOrigin( "Flashlight" ), "LIGHTS"),
+		(Input.GetButtonOrigin( "VehicleLights" ), "LIGHTS"),
 	];
 
 	private void UpdateGauges() => VehicleHud.Update( this, ref _gaugesHud );

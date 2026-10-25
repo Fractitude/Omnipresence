@@ -16,7 +16,7 @@ public sealed class VehicleLights : Component
 
 	[Property] public FourWheelVehicle Vehicle { get; set; }
 
-	[Property, Group( "Input" )] public string SwitchAction { get; set; } = "Flashlight";
+	[Property, Group( "Input" )] public string SwitchAction { get; set; } = "VehicleLights";
 
 	/// <summary>
 	/// How long the key has to be held to switch beams, seconds. A shorter press switches the lights on or off.

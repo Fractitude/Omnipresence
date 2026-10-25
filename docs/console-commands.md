@@ -106,7 +106,7 @@ Sandbox entity packages from the cloud. Code: `Code/Sents/`. See [sents.md](sent
 
 | Command | What it does |
 |---|---|
-| `spawn_buggy` | Spawn a buggy in front of you. Walk up to it and press Use to drive: WASD, Shift to boost, Space for the handbrake, F to switch the headlights. |
+| `spawn_buggy` | Spawn a buggy in front of you. Walk up to it and press Use to drive: WASD, Shift to boost, Space for the handbrake, L to switch the headlights. |
 | `omni.screenshake <0..2>` | How hard the camera shakes, such as in a fast vehicle. Default 0.3. Saved. |
 
 ## Security

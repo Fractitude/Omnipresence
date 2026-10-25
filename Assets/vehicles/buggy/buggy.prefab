@@ -608,7 +608,7 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "SwitchAction": "Flashlight",
+        "SwitchAction": "VehicleLights",
         "SwitchOffSound": {
           "Id": "f50ca98a-6e4e-48e5-9b70-f21a7661e54b",
           "Path": "sounds/flashlight/flashlight-off.sound"
