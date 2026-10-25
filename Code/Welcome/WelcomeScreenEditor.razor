@@ -12,12 +12,6 @@
 						<div class="menu-heading">Text</div>
 						<div class="caption">Window title</div>
 						<TextEntry class="input" Multiline=@( true ) Value=@d.Title MaxLength=@( 120 ) OnTextEdited=@( ( string t ) => { d.Title = t; } )/>
-						<div class="caption">Heading for a new player</div>
-						<TextEntry class="input" Multiline=@( true ) Value=@d.WelcomeHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.WelcomeHeading = t; } )/>
-						<div class="caption">Heading for a returning player</div>
-						<TextEntry class="input" Multiline=@( true ) Value=@d.WelcomeBackHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.WelcomeBackHeading = t; } )/>
 						<div class="caption">About the server</div>
 						<TextEntry class="input tall" Multiline=@( true ) Value=@d.Intro MaxLength=@( 2000 )
 						           OnTextEdited=@( ( string t ) => { d.Intro = t; } )/>

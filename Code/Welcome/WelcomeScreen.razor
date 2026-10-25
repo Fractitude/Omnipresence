@@ -17,7 +17,7 @@
 			<ChildContent>
 				<div class="menu-list welcome">
 					<div class="section">
-						<div class="menu-heading">@( returning ? text.WelcomeBackHeading : text.WelcomeHeading )</div>
+						<div class="menu-heading">@WelcomeHeading</div>
 						@* A line break in the text is a line break on the screen; an empty line is a gap. *@
 						@foreach ( var line in text.Intro.Replace( "\r", "" ).Split( '\n' ) )
 						{
@@ -68,7 +68,8 @@
 
 @code
 {
-	// The changelog's headings are the game's, not the host's: they are not in the editor.
+	// The headings are the game's, not the host's: they are not in the editor.
+	const string WelcomeHeading = "Welcome";
 	const string NewHeading = "What's new since you last played";
 	const string LatestHeading = "Latest changes";
 

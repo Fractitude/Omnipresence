@@ -23,8 +23,6 @@ public sealed class WelcomeData
 	public int Version { get; set; } = 1;
 
 	public string Title { get; set; } = "Omnipresence in the Wired";
-	public string WelcomeHeading { get; set; } = "Welcome";
-	public string WelcomeBackHeading { get; set; } = "Welcome back";
 
 	public string Intro { get; set; } =
 		"A game inspired by Serial Experiments Lain. You live in the real world and in the Wired, the network under "
@@ -170,8 +168,6 @@ public static class WelcomeContent
 	{
 		d.Version = System.Math.Max( d.Version, 1 );
 		d.Title = Text( d.Title );
-		d.WelcomeHeading = Text( d.WelcomeHeading );
-		d.WelcomeBackHeading = Text( d.WelcomeBackHeading );
 		d.Intro = Text( d.Intro, keepLines: true );
 		d.RulesHeading = Text( d.RulesHeading );
 		d.PlayButton = Text( d.PlayButton );
