@@ -39,6 +39,7 @@ Use the `sbox` skill for s&box engine/editor specifics. `omnipresence.sbproj` en
 - `docs/depot.md` is how big objects (storage box, grow tray, press bench, packing table) are bought in the Depot app, delivered and kept between sessions (`Code/Placeables/`, `PlacedObject` ids). Read it before adding something the player places in the world.
 - `docs/stats.md` is the server's log of what players do over time (joins, playtime, kills, deaths, every money movement, purchases, kicks, bans): `StatsLog`, the files it writes and how to log a new source of money. Read it before adding a source or sink of money, a purchase or a way to remove a player.
 - `docs/transactions.md` is how cash and crypto move between players and system parties (`Transactions`, the history, the ledger file, the exempt paths). Read it before adding any place that pays or charges money.
+- `docs/sents.md` is how sandbox entity packages (sents) from the cloud are browsed and spawned (`Code/Sents/`), who may spawn them (the host, because a sent can bring code) and why sandbox-only ones may not work. Read it before changing sent spawning.
 - `docs/npcs.md` is the NPC system ported from Facepunch's sandbox (`Code/Npcs/`): factions, schedules, tasks, and the hostile test gunman (`spawn_gunman`). NPCs need the scene's NavMesh enabled. Read it before adding an NPC.
 - `docs/console-commands.md` lists every console command. When you add, rename or remove a `[ConCmd]`, update it.
 

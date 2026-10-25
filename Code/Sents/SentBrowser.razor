@@ -1,0 +1,159 @@
+@using Sandbox.UI
+@using System.Threading.Tasks
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="menu-root @( IsOpen ? "open" : "" )">
+	@if ( IsOpen )
+	{
+		<MenuWindow Title="Sents" Width=@( 760 ) OnClose=@Close
+		            Notice=@( Sents.CanSpawn ? null : "Only the host can spawn sents on this server." )
+		            Hint="Entities made by the community. Some bring their own code, which runs in the game.">
+			<ChildContent>
+				<div class="search-bar">
+					<TextEntry class="search" Placeholder="Search" Value:bind=@Filter/>
+					@foreach ( var mode in Modes )
+					{
+						var m = mode;
+						<div class="menu-button @( m == sort ? "active" : "" )" @onclick=@( () => SetSort( m ) )>@m</div>
+					}
+				</div>
+				<div class="menu-list">
+					@if ( Entries.Count == 0 )
+					{
+						<div class="menu-empty">@( Loading ? "Loading..." : "No sents found." )</div>
+					}
+					<div class="tiles">
+						@foreach ( var entry in Entries )
+						{
+							var e = entry;
+							<div @key=@e.Ident class="tile" @onclick=@( () => Pick( e ) )>
+								<div class="thumb" style="background-image: url( @e.Thumb )"></div>
+								<div class="title">@e.Title</div>
+								<div class="org">@e.Org</div>
+							</div>
+						}
+					</div>
+				</div>
+			</ChildContent>
+		</MenuWindow>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// A package in the list.
+	/// </summary>
+	record Entry( string Ident, string Title, string Org, string Thumb );
+
+	static readonly string[] Modes = ["popular", "newest", "trending"];
+
+	/// <summary>
+	/// Whether the panel is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	static List<Entry> Entries = [];
+	static bool Loading;
+	static int search;
+	static int version;
+	static string sort = "popular";
+	static string filter = "";
+
+	static string Filter
+	{
+		get => filter;
+		set
+		{
+			if ( filter == value )
+				return;
+
+			filter = value;
+			_ = Search();
+		}
+	}
+
+	static void SetSort( string mode )
+	{
+		sort = mode;
+		_ = Search();
+	}
+
+	/// <summary>
+	/// Open the browser. Does nothing with another menu open.
+	/// </summary>
+	[ConCmd( "sents" )]
+	public static void Open()
+	{
+		if ( IsOpen || GameMenus.IsAnyOpen || NaviInputCapture.Current is not null )
+			return;
+
+		IsOpen = true;
+		GameMenus.SetOpen( "sents", true );
+		_ = Search();
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "sents", false );
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	static void Pick( Entry entry )
+	{
+		if ( !Sents.CanSpawn )
+			return;
+
+		Sents.Spawn( entry.Ident );
+		Close();
+	}
+
+	static async Task Search()
+	{
+		var mine = ++search;
+		Loading = true;
+		version++;
+
+		var query = $"sort:{sort} type:sent";
+
+		if ( !string.IsNullOrWhiteSpace( filter ) )
+			query += $" {filter.Trim()}";
+
+		var result = await Package.FindAsync( query );
+
+		// A newer search replaced this one.
+		if ( mine != search )
+			return;
+
+		Entries = result?.Packages?.Select( x => new Entry( x.FullIdent, x.Title, x.Org?.Title, x.Thumb ) ).ToList() ?? [];
+		Loading = false;
+		version++;
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, version, sort );
+}

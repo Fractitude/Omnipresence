@@ -91,6 +91,16 @@ Code: `Code/Health/`.
 | `give <weapon>` | Give yourself a weapon by its short name: `m4a1`, `colt1911`, `glock`, `revolver`, `mp5`, `shotgun`, `sniper`, `rpg`, `grenade`, `crowbar`, `camera`, `physgun`. |
 | `omni.loadout "<weapons>"` | The weapons you spawn with, separated by spaces, e.g. `omni.loadout "m4a1 glock physgun"`. The default is `m4a1 glock crowbar physgun`. Saved. Applies from your next spawn. |
 
+## Sents
+
+Sandbox entity packages from the cloud. Code: `Code/Sents/`. See [sents.md](sents.md).
+
+| Command | What it does |
+|---|---|
+| `sents` | Open the sent browser: search the cloud, click one to spawn it where you look. |
+| `spawn_sent <org.package>` | Spawn a sent by its cloud ident, e.g. `spawn_sent crosschainer.hokuto_boxer`. Host only unless `omni.sent_everyone` is on. |
+| `omni.sent_everyone <0/1>` | Let every player spawn sents, not only the host. A sent can bring code that runs in the game. Default 0. Saved. |
+
 ## Vehicles
 
 | Command | What it does |

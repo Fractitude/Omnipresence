@@ -100,6 +100,7 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<DropCashMenu>();
 		hud.Attach<ContextMenu>();
 		hud.Attach<OrgInviteMenu>();
+		hud.Attach<SentBrowser>();
 		hud.Attach<WelcomeScreen>();
 		hud.Attach<WelcomeScreenEditor>();
 
