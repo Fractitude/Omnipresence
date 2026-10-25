@@ -10,7 +10,9 @@ $max-height: 80%;
 
 .menu-window
 {
+	position: relative;
 	max-height: $max-height;
+	max-width: 96%;
 	margin-bottom: $bar-clearance;
 	padding: 18px 20px;
 	flex-direction: column;
@@ -19,6 +21,12 @@ $max-height: 80%;
 	backdrop-filter-blur: 14px;
 	border: 1px solid rgba(242, 238, 226, 0.12);
 	border-radius: 10px;
+
+	// A height given: the window is that tall (up to the screen), and its list takes what is left.
+	&.sized
+	{
+		max-height: $max-height;
+	}
 
 	// No width given: as wide as the content needs, up to the edge of the screen.
 	&.fit
@@ -179,4 +187,24 @@ $max-height: 80%;
 {
 	color: #ff5c5c;
 	opacity: 1;
+}
+
+// The corner to drag a resizable window by.
+.menu-grip
+{
+	position: absolute;
+	right: 4px;
+	bottom: 4px;
+	width: 18px;
+	height: 18px;
+	cursor: se-resize;
+	border-right: 2px solid rgba(242, 238, 226, 0.5);
+	border-bottom: 2px solid rgba(242, 238, 226, 0.5);
+	border-radius: 0 0 6px 0;
+	opacity: 0.6;
+
+	&:hover
+	{
+		opacity: 1;
+	}
 }

@@ -2,7 +2,7 @@
 @inherits Panel
 @namespace Sandbox
 
-<root class="menu-window @( Width > 0 ? "" : "fit" )" style="@( Width > 0 ? $"width: {Width}px" : "" )">
+<root class="menu-window @( Width > 0 ? "" : "fit" ) @( Height > 0 ? "sized" : "" )" style="@Size">
 	<div class="menu-header">
 		<div class="menu-title">@Title</div>
 		@if ( ShowClose )
@@ -19,6 +19,10 @@
 	{
 		<div class="menu-hint">@Hint</div>
 	}
+	@if ( Resizable )
+	{
+		<div class="menu-grip" @onmousedown=@BeginResize></div>
+	}
 </root>
 
 @code
@@ -32,6 +36,28 @@
 	/// A fixed width in pixels. 0 (the default) fits the window to its content, up to most of the screen.
 	/// </summary>
 	public int Width { get; set; }
+
+	/// <summary>
+	/// A fixed height in pixels. 0 (the default) fits the window to its content, up to most of the screen.
+	/// </summary>
+	public int Height { get; set; }
+
+	/// <summary>
+	/// Whether the window has a grip in its corner to drag it to another size. The window does not keep the size: it
+	/// calls <see cref="OnResize"/> with the new one, and the menu passes it back as <see cref="Width"/> and
+	/// <see cref="Height"/> (and keeps it as long as it likes).
+	/// </summary>
+	public bool Resizable { get; set; }
+
+	/// <summary>
+	/// Called while the grip is dragged, with the width and height the window should have.
+	/// </summary>
+	public Action<Vector2> OnResize { get; set; }
+
+	/// <summary>
+	/// The smallest a window can be dragged to, in pixels.
+	/// </summary>
+	public Vector2 MinSize { get; set; } = new( 520, 320 );
 
 	/// <summary>
 	/// A line from the game under the content, such as what a host answer said. Empty hides it.
@@ -53,5 +79,48 @@
 	/// </summary>
 	public Action OnClose { get; set; }
 
-	protected override int BuildHash() => HashCode.Combine( Title, Width, Notice, Hint, ShowClose );
+	string Size => (Width > 0 ? $"width: {Width}px; " : "") + (Height > 0 ? $"height: {Height}px;" : "");
+
+	// Resizing: the window is centred, so it grows on both sides and the grip follows the mouse by twice its movement.
+	bool resizing;
+	Vector2 grabMouse;
+	Vector2 grabSize;
+
+	void BeginResize( PanelEvent e )
+	{
+		e.StopPropagation();
+
+		resizing = true;
+		grabMouse = Mouse.Position;
+		grabSize = new Vector2( Box.Rect.Width, Box.Rect.Height ) * ScaleFromScreen;
+		SetMouseCapture( true );
+	}
+
+	protected override void OnMouseUp( MousePanelEvent e )
+	{
+		base.OnMouseUp( e );
+
+		if ( !resizing )
+			return;
+
+		resizing = false;
+		SetMouseCapture( false );
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( !resizing )
+			return;
+
+		var screen = Screen.Size * ScaleFromScreen;
+		var wanted = grabSize + (Mouse.Position - grabMouse) * ScaleFromScreen * 2f;
+
+		// Not smaller than the content can use, not bigger than the screen allows (the window keeps clear of the bar).
+		var size = new Vector2( Math.Clamp( wanted.x, MinSize.x, screen.x * 0.96f ), Math.Clamp( wanted.y, MinSize.y, screen.y * 0.8f ) );
+		OnResize?.Invoke( new Vector2( MathF.Round( size.x ), MathF.Round( size.y ) ) );
+	}
+
+	protected override int BuildHash() => HashCode.Combine( Title, Width, Height, Resizable, Notice, Hint, ShowClose );
 }

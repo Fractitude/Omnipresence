@@ -5,7 +5,7 @@
 <root class="menu-root @( IsOpen ? "open" : "" )">
 	@if ( IsOpen )
 	{
-		<MenuWindow Title="Sents" Width=@( 760 ) OnClose=@Close
+		<MenuWindow Title="Workshop Entities" Width=@width Height=@height Resizable=@( true ) OnResize=@Resize OnClose=@Close
 		            Notice=@( Sents.CanSpawn ? null : "Only the host can spawn sents on this server." )
 		            Hint="Entities made by the community. Some bring their own code, which runs in the game.">
 			<ChildContent>
@@ -69,7 +69,15 @@
 	/// </summary>
 	public static bool IsOpen { get; private set; }
 
-	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	/// <summary>
+	/// The window's size when it is first opened: four columns of tiles, and tall enough to show a few rows.
+	/// </summary>
+	static readonly Vector2 DefaultSize = new( 890, 680 );
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance. The size is
+	// kept for the session, so the window comes back as it was left.
+	static int width = (int)DefaultSize.x;
+	static int height = (int)DefaultSize.y;
 	static Panel listPanel;
 	static int searchesSeen;
 
@@ -97,6 +105,12 @@
 		GameMenus.SetOpen( MenuName, false );
 		MenuControls.Free( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	static void Resize( Vector2 size )
+	{
+		width = (int)size.x;
+		height = (int)size.y;
 	}
 
 	static void Pick( SentCatalog.Entry entry )
@@ -173,5 +187,5 @@
 
 	protected override void OnDisabled() => Close();
 
-	protected override int BuildHash() => System.HashCode.Combine( IsOpen, SentCatalog.Version, SentCatalog.Sort, SentCatalog.Tag );
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, SentCatalog.Version, SentCatalog.Sort, SentCatalog.Tag, width, height );
 }

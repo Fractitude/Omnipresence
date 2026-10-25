@@ -64,11 +64,18 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 
 		UpdateFlashlight();
 
-		if ( !IsLocalPlayer || Input.Suppressed || Input.MouseCursorVisible )
+		if ( !IsLocalPlayer )
+			return;
+
+		// Getting into a vehicle ends noclip: a seat and a flying body do not go together
+		if ( IsNoclipping && IsSeated )
+			SetNoclip( false );
+
+		if ( Input.Suppressed || Input.MouseCursorVisible )
 			return;
 
 		// not from a seat
-		if ( Input.Pressed( "Noclip" ) && GetComponentInParent<ISitTarget>() is null )
+		if ( Input.Pressed( "Noclip" ) && !IsSeated )
 			ToggleNoclip();
 	}
 
@@ -77,9 +84,18 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 		if ( !AllowNoclip && Connection.Local?.IsHost != true )
 			return;
 
-		var noclip = GetComponent<NoclipMoveMode>( true ) ?? AddComponent<NoclipMoveMode>();
-		noclip.Enabled = IsNoclipping ? false : true;
-		IsNoclipping = noclip.Enabled;
+		SetNoclip( !IsNoclipping );
+	}
+
+	void SetNoclip( bool on )
+	{
+		var noclip = GetComponent<NoclipMoveMode>( true ) ?? (on ? AddComponent<NoclipMoveMode>() : null);
+
+		if ( noclip is null )
+			return;
+
+		noclip.Enabled = on;
+		IsNoclipping = on;
 	}
 
 	/// <summary>

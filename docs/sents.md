@@ -14,7 +14,7 @@ Files in `Code/Sents/`, each with one job:
   and `NetworkSpawn`s it. A failure is logged with the ident, never thrown.
 - `SentBuilder.cs`: the one place that turns a prefab into an object (below).
 - `SentPackage.cs`: `[SentPackage( ident, namespaces )]` and `SentPackages`, what the game knows about imported code.
-- `SentCatalog.cs` and `SentBrowser.razor` (`sents` command, a HUD piece): the cloud search, and the window that draws it.
+- `SentCatalog.cs` and `SentBrowser.razor` (`sents` command, a HUD piece): the cloud search, and the window that draws it, titled Workshop Entities, resizable, four columns of tiles at its default size.
   The catalog searches `Package.FindAsync( "sort:popular type:sent <text>" )` a page of 40 at a time; the window shows tiles
   with thumbnail, title and author. Clicking one spawns it and closes the window; right-click copies its ident or opens its
   package page. The sidebar filters by tag (`#vehicle`, `#weapon`, `#npc`, `#explosives`; `tag:` finds nothing), and the

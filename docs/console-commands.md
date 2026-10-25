@@ -100,7 +100,7 @@ Sandbox entity packages from the cloud. Code: `Code/Sents/`. See [sents.md](sent
 
 | Command | What it does |
 |---|---|
-| `sents` | Open the sent browser: search the cloud, click one to spawn it where you look. |
+| `sents` | Open the Workshop Entities window (the sent browser): search the cloud, click one to spawn it where you look. |
 | `spawn_sent <org.package>` | Spawn a sent by its cloud ident, e.g. `spawn_sent crosschainer.hokuto_boxer`. Host only unless `omni.sent_everyone` is on. |
 | `sent_import <org.package> [update]` | Editor only. Write the source of a downloaded sent into `Code/Sents/Imported/` the first time; after that it only writes the `SentPackage.cs` manifest and reports what is new or edited, and `update` also writes the new files. A file edited here is never overwritten. See [sents.md](sents.md). |
 | `sent_test <org.package> [seconds]` | Editor only, with the game playing. Spawn a sent, watch it for a few seconds (10 by default) and report whether it spawned, has missing components, or logged errors. See [sents.md](sents.md). |
