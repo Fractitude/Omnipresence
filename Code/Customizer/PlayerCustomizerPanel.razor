@@ -234,6 +234,8 @@
 
 	AvatarPreview Preview { get; set; }
 
+	AvatarPreview _dressedPreview;
+
 	ClothingContainer Draft { get; set; } = new();
 
 	Dictionary<string, Color> DraftColors { get; set; } = [];
@@ -286,6 +288,15 @@
 			ResetDraft();
 
 		_wasOpen = IsOpen;
+
+		// A preview that is new since the last dressing (the first draw after opening, or the panels rebuilt by a hot
+		// reload, which start as a default body) gets the draft put on.
+		if ( IsOpen && Preview.IsValid() && Preview != _dressedPreview )
+		{
+			_dressedPreview = Preview;
+			Preview.ZoomFocus = Focus;
+			Preview.SetOutfit( Draft, DraftColors );
+		}
 
 		UpdateWorkshopSearch();
 	}

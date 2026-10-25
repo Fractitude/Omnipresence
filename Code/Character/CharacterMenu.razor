@@ -71,9 +71,10 @@
 	PreviewFocus Focus { get; set; } = PreviewFocus.Head;
 
 	/// <summary>
-	/// Whether the preview has been dressed since the menu opened.
+	/// The preview that was last dressed: a new one (the menu opened, or the panels rebuilt by a hot reload) is a default
+	/// body until it is.
 	/// </summary>
-	bool dressed;
+	AvatarPreview dressed;
 
 	/// <summary>
 	/// Whether the scene only draws a preview (the character here or in the customizer, or an item icon). Game systems
@@ -114,9 +115,9 @@
 		ItemIcons.Spin();
 
 		// The preview's panel is made by the first draw after the menu opens.
-		if ( !dressed && Preview.IsValid() )
+		if ( Preview.IsValid() && Preview != dressed )
 		{
-			dressed = true;
+			dressed = Preview;
 			DressPreview();
 		}
 	}
@@ -159,7 +160,7 @@
 	void Open()
 	{
 		IsOpen = true;
-		dressed = false;
+		dressed = null;
 		GameMenus.SetOpen( "character", true );
 	}
 
