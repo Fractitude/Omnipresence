@@ -25,7 +25,7 @@
 							@if ( expanded )
 							{
 								<div class="content">
-									@if ( weapon.DisplayIcon is { } icon )
+									@if ( IconOf( weapon ) is { } icon )
 									{
 										<Image class="weapon-icon" Texture=@icon />
 									}
@@ -54,6 +54,38 @@
 	/// Seconds after the last selection change before the menu closes on its own, keeping the current weapon.
 	/// </summary>
 	[Property] public float SelectionTimeout { get; set; } = 1.5f;
+
+	// The prefabs embed their DisplayIcon, which draws as the missing texture in an Image panel, so the picture is loaded
+	// from its file by the weapon's prefab name instead.
+	static Dictionary<string, string> iconFiles = new()
+	{
+		["camera"] = "camera_icon",
+		["colt1911"] = "heritage__45_icon",
+		["crowbar"] = "crowbar_icon",
+		["glock"] = "up_45_icon",
+		["grenade"] = "grenade_icon",
+		["m4a1"] = "ar_4_icon",
+		["mp5"] = "sg_5_icon",
+		["physgun"] = "physgun_icon",
+		["revolver"] = "ironwood__357_icon",
+		["rpg"] = "ashford_r_7_icon",
+		["shotgun"] = "spaghelli_m4_icon",
+		["sniper"] = "m700_icon",
+	};
+
+	static Dictionary<string, Texture> iconCache = new();
+
+	static Texture IconOf( BaseSandboxWeapon weapon )
+	{
+		var name = System.IO.Path.GetFileNameWithoutExtension( weapon.GameObject.PrefabInstanceSource ?? "" ).ToLowerInvariant();
+		if ( !iconFiles.TryGetValue( name, out var file ) )
+			return weapon.DisplayIcon;
+
+		if ( !iconCache.TryGetValue( file, out var texture ) )
+			iconCache[file] = texture = Texture.Load( $"ui/weapons/{file}.png" );
+
+		return texture ?? weapon.DisplayIcon;
+	}
 
 	WeaponInventory inventory;
 	BaseSandboxWeapon selected;
