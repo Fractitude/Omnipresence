@@ -174,12 +174,33 @@ public sealed class PlayerCustomizer : Component
 			_redressPending = AppliedOutfit is not null;
 		}
 
-		// give the new body's own Dresser a moment to put the avatar on first
-		if ( !_redressPending || _playerChanged < 0.5f || !player.IsValid() ) return;
+		if ( !player.IsValid() ) return;
 
-		_redressPending = false;
+		// At once, in the first frame the new body exists: the body's own Dresser is stopped so it does not put the avatar
+		// on over this. Again half a second later, in case the Dresser had not started yet and dressed after all.
+		if ( _redressPending )
+		{
+			_redressPending = false;
+			_redressAgain = true;
+			Redress( player );
+		}
+		else if ( _redressAgain && _playerChanged >= 0.5f )
+		{
+			_redressAgain = false;
+			Redress( player );
+		}
+	}
+
+	void Redress( Player player )
+	{
+		if ( AppliedOutfit is null )
+			return;
+
+		player.GetComponentInChildren<Dresser>( true )?.CancelDressing();
 		player.BroadcastOutfit( AppliedOutfit.Serialize(), OutfitColors.Serialize( AppliedColors ), WorkshopClothing.GetIdents( AppliedOutfit ) );
 	}
+
+	bool _redressAgain;
 
 	async Task Restore( OutfitPreset last )
 	{
