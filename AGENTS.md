@@ -163,7 +163,7 @@ Found building the Character menu (`Code/Character/`). Each one froze the editor
 
 ## Game version and the Welcome screen
 
-`GameVersion.Current` (`Code/Welcome/GameVersion.cs`) is the game's version, a whole number. **When you finish a whole task, add 1 to it and put a `ChangelogEntry` for it on top of `GameVersion.Changelog`** (title and short lines for players: what they can do or see now). Commit the bump with the task. The Welcome screen (`WelcomeScreen`, opens when a player joins and on the `welcome` command) compares `Current` with the version the player last saw and lists the newer entries. Its rules and intro text are in `WelcomeScreen.razor`. See `docs/ui.md`.
+`GameVersion.Current` (`Code/Welcome/GameVersion.cs`) is the version of the Welcome screen's contents, a whole number. **Only the host raises it, by hand, when they change the Welcome screen** (rules, intro, changelog). **Do not raise it, or add a changelog entry, when you finish a task unless the user asks.** The screen (`WelcomeScreen`, also on the `welcome` command) opens by itself on joining only for a player who has not seen `Current` yet (a new player, or one who last saw an older version), and lists the changelog entries newer than the version they saw. Its rules and intro text are in `WelcomeScreen.razor`. See `docs/ui.md`.
 
 ## Code style
 

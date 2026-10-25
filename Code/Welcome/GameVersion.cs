@@ -6,14 +6,15 @@ namespace Sandbox;
 public sealed record ChangelogEntry( int Version, string Title, string[] Changes );
 
 /// <summary>
-/// The game's version number and its changelog. The Welcome screen compares <see cref="Current"/> with the last version
-/// the player saw and lists what is newer. **Every finished task adds one to <see cref="Current"/> and one entry on top
-/// of <see cref="Changelog"/>** (see AGENTS.md).
+/// The Welcome screen's version and its changelog. The screen opens by itself for a player who has not seen
+/// <see cref="Current"/> yet, and lists the entries newer than the version they saw. **Only the host raises
+/// <see cref="Current"/>, by hand, when the Welcome screen's contents change** and returning players should read it
+/// again (see AGENTS.md). Finishing a task does not.
 /// </summary>
 public static class GameVersion
 {
 	/// <summary>
-	/// The version of this build. A whole number, one more for every finished task.
+	/// The version of the Welcome screen's contents. A whole number, raised by hand by the host.
 	/// </summary>
 	public const int Current = 1;
 

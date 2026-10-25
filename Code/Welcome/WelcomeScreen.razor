@@ -166,11 +166,14 @@
 	{
 		if ( !IsOpen )
 		{
-			// Once per session, as soon as the player is standing in the world.
+			// Once per session, as soon as the player is standing in the world, and only if they have not seen this
+			// version of the screen: a new player has seen none.
 			if ( !shownOnJoin && CanShow() )
 			{
 				shownOnJoin = true;
-				Open();
+
+				if ( LoadSeen() < GameVersion.Current )
+					Open();
 			}
 
 			return;

@@ -95,7 +95,7 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
 
 ## The welcome screen
 
-`WelcomeScreen` (`Code/Welcome/`, one line in `HudSystem.Add`) opens by itself once per session, as soon as the player can be shown a window (same rule as `OrgInviteMenu`), and by the `welcome` console command. It shows an intro, the rules (`WelcomeScreen.Rules`) and the changelog.
+`WelcomeScreen` (`Code/Welcome/`, one line in `HudSystem.Add`) opens by itself once per session, as soon as the player can be shown a window (same rule as `OrgInviteMenu`) and only if they have not seen `GameVersion.Current`, and by the `welcome` console command at any time. It shows an intro, the rules (`WelcomeScreen.Rules`) and the changelog.
 
 - **Version**: `GameVersion.Current` is a whole number, and `GameVersion.Changelog` lists the releases newest first. The screen saves the version the player closed it on in `welcome_seen.txt` in their own computer's data folder, and next time lists the entries newer than that ("What's new since version N"). A new player, or one up to date, sees the latest entry only.
-- **Every finished task adds one to `GameVersion.Current` and one `ChangelogEntry` on top of the list**, written for players. See AGENTS.md.
+- **Only the host raises `GameVersion.Current`, by hand, when the screen's contents change**, with a `ChangelogEntry` on top of the list written for players. It is not raised per task. See AGENTS.md.
