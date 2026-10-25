@@ -1,6 +1,7 @@
 // The driver's speedometer, for any vehicle (IVehicleGauges). It began as Hokuto Boxer's, whose published code had no
 // stylesheet, so this one is written to fit VehicleHud.razor: a 302.4px dial (its centre is at 151.2px, which the tick
-// and number positions assume), in Barlow Condensed (the font files are in Assets/fonts).
+// and number positions assume), in Barlow Condensed (the font files are in Assets/fonts; the engine registers the
+// family as "Barlow", not "Barlow Condensed", so that is the name to ask for).
 
 VehicleHud
 {
@@ -19,7 +20,7 @@ VehicleHud
 	bottom: 96px;
 	width: 362.88px;
 	height: 362.88px;
-	font-family: "Barlow Condensed";
+	font-family: Barlow;
 	font-weight: 700;
 	color: white;
 	text-shadow: 0 1px 3px rgba( 0, 0, 0, 0.45 );
