@@ -8,7 +8,7 @@
 		<MenuWindow Title="Edit the welcome screen" Width=@( 760 ) OnClose=@Close Notice=@notice
 		            Hint="Save sends the text to every player. Escape discards your changes.">
 			<ChildContent>
-				<div class="menu-list editor">
+				<div @ref=List class="menu-list editor">
 					<div class="section">
 						<div class="menu-heading">Version</div>
 						<div class="version-row">
@@ -122,8 +122,12 @@
 	static WelcomeData draft;
 	static string notice;
 
-	// A removed line makes the panels below it hold the wrong text, so the list is drawn again from scratch.
+	// A removed line makes the panels below it hold the wrong text, so the list is drawn again from scratch. The list
+	// is scrolled back to where it was once it is there again.
 	static bool rebuilding;
+	static Vector2 scrolled;
+	static int restoreFrames;
+	static Panel List { get; set; }
 
 	/// <summary>
 	/// Whether this computer can edit the text: only the host can.
@@ -141,6 +145,7 @@
 
 		draft = WelcomeContent.Data.Copy();
 		notice = null;
+		restoreFrames = 0;
 		rebuilding = false;
 		IsOpen = true;
 		GameMenus.SetOpen( "welcomeeditor", true );
@@ -189,10 +194,12 @@
 		// The version stays: it must not go back and hide the change from players who saw a higher one.
 		var version = draft?.Version ?? 1;
 		draft = new() { Version = version };
-		rebuilding = true;
+		Rebuild();
 	}
 
-	static void ChangeVersion( int by ) => draft.Version = System.Math.Max( draft.Version + by, 1 );
+	// Never below the version the players have now: lowering it would hide the change from those who saw it.
+	static void ChangeVersion( int by ) =>
+		draft.Version = System.Math.Max( draft.Version + by, WelcomeContent.Data.Version );
 
 	static void AddEntry() =>
 		draft.Changelog.Insert( 0, new() { Version = draft.Version, Title = "", Changes = new() { "" } } );
@@ -203,6 +210,12 @@
 			return;
 
 		list.RemoveAt( index );
+		Rebuild();
+	}
+
+	static void Rebuild()
+	{
+		scrolled = List is { IsValid: true } ? List.ScrollOffset : default;
 		rebuilding = true;
 	}
 
@@ -224,7 +237,15 @@
 
 		// One frame with nothing drawn, so every row is made again from the list.
 		if ( rebuilding && wasRebuilding )
+		{
 			rebuilding = false;
+			restoreFrames = 3;
+		}
+		else if ( restoreFrames > 0 && List is { IsValid: true } )
+		{
+			List.ScrollOffset = scrolled;
+			restoreFrames--;
+		}
 
 		wasRebuilding = rebuilding;
 
