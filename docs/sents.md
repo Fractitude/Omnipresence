@@ -49,3 +49,6 @@ system) needs that part ported first. Props and models with no code, and code th
   without our `Interactable`. `CuratedVehicle` implements `IVehicleGauges` (added by hand after the import) and so shows the game's own speedometer
   (`Code/Vehicles/Hud/VehicleHud.razor`, shared with the buggy). The package's own HUD was not kept; running `sent_import` again would bring it back as a duplicate `VehicleHud`, so delete that copy. The dial picture and the
   sounds are assets of the package and come with it.
+- `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at
+  and explodes on its target. It used sandbox's `Player`; those uses were changed by hand to the engine's `PlayerController` (eyes) and our
+  `PlayerHealth`, so a new import of it needs the same edits.
