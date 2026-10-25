@@ -1,0 +1,64 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	@foreach ( var notice in Notices )
+	{
+		<div @key=@notice class="pickup">
+			@if ( notice.Amount > 1 || notice.Icon is null )
+			{
+				<label class="amount">+@notice.Amount</label>
+			}
+			<label class="name">@notice.Title</label>
+			@if ( notice.Icon is not null )
+			{
+				<Image class="pickup-icon" Texture=@notice.Icon style=@IconStyle( notice.Icon )/>
+			}
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The local player's recent pickups that have not expired (see <see cref="PickupNotices"/>). Nothing is drawn while a
+	/// Navi app or a menu has the screen.
+	/// </summary>
+	IEnumerable<PickupNotice> Notices
+	{
+		get
+		{
+			if ( NaviInputCapture.Current is not null || AbilityMenu.IsOpen || CharacterMenu.IsOpen )
+				return [];
+
+			return PickupNotices.Active;
+		}
+	}
+
+	/// <summary>
+	/// The icon at its own proportions, as tall as a line of text. The Image panel stretches to its box, so the size is
+	/// worked out here (a weapon's icon is much wider than an ammo type's).
+	/// </summary>
+	static string IconStyle( Texture icon )
+	{
+		if ( icon.Width <= 0 || icon.Height <= 0 )
+			return "";
+
+		var fit = MathF.Min( 72f / icon.Width, 24f / icon.Height );
+		return $"width: {icon.Width * fit:0}px; height: {icon.Height * fit:0}px;";
+	}
+
+	protected override int BuildHash()
+	{
+		var hash = new HashCode();
+
+		foreach ( var notice in Notices )
+		{
+			hash.Add( notice );
+			hash.Add( notice.Amount );
+		}
+
+		return hash.ToHashCode();
+	}
+}

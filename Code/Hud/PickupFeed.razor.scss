@@ -1,4 +1,4 @@
-AmmoPickupFeed
+PickupFeed
 {
 	position: absolute;
 	width: 100%;
@@ -23,7 +23,7 @@ AmmoPickupFeed
 	background-color: rgba(27, 26, 46, 0.75);
 	font-size: 16px;
 	font-weight: 600;
-	animation: ammo-pickup-in 0.25s ease-out 1;
+	animation: pickup-in 0.25s ease-out 1;
 
 	.amount
 	{
@@ -31,15 +31,15 @@ AmmoPickupFeed
 		font-weight: 700;
 	}
 
-	.icon
+	.pickup-icon
 	{
-		width: 22px;
-		height: 22px;
+		flex-shrink: 0;
+		background-repeat: no-repeat;
 		background-tint: #e8c872;
 	}
 }
 
-@keyframes ammo-pickup-in
+@keyframes pickup-in
 {
 	0% { opacity: 0; transform: translateX( 40px ); }
 	100% { opacity: 1; transform: translateX( 0px ); }

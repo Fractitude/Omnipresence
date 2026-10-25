@@ -513,6 +513,8 @@ public sealed class WorldItem : Component, IInteractionHandler
 			return;
 		}
 
+		PickupNotices.Item( e.Interactor, item.Name, got );
+
 		var total = item.Count;
 
 		if ( got >= total )
@@ -521,7 +523,6 @@ public sealed class WorldItem : Component, IInteractionHandler
 			taken = true;
 			WorldItemRegistry.Forget( GameObject );
 			GameObject.Destroy();
-			crime?.Tell( CrimeResult.Success( total > 1 ? $"Picked up {total} {item.Name}." : $"Picked up {item.Name}." ) );
 			return;
 		}
 

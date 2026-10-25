@@ -51,6 +51,8 @@ public class PickupItem : Component, IItem, IInteractionHandler
 		if ( !inventory.Add( this ) )
 			return;
 
+		PickupNotices.Item( e.Interactor, ItemName );
+
 		// A dropped one is no longer kept in the world file.
 		WorldItemRegistry.Forget( GameObject );
 		GameObject.Destroy();
