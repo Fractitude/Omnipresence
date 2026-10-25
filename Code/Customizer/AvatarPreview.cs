@@ -204,6 +204,8 @@ public sealed class AvatarPreview : Panel
 
 		if ( _body.IsValid() )
 			_body.WorldRotation = Rotation.FromYaw( _yaw );
+			// as tall as the player is, so the camera numbers (scaled the same) land on the same parts of the body
+			_body.GameObject.WorldScale = HeightScale;
 
 		UpdateCamera();
 	}
