@@ -18,11 +18,11 @@ Changed from upstream: `Player` is the engine's `PlayerController`, no `Ownable`
 
 ## Spawning
 
-`spawn_combat_npc`, `spawn_scientist` and `spawn_rollermine` clone `Assets/npcs/<name>.prefab` in front of you. The rollermine's effects and sound are in `Assets/entities/sents/npc/rollermine/` and its model in `Assets/entities/hoverball/`, both unchanged from upstream.
+`spawn_gunman`, `spawn_scientist` and `spawn_rollermine` clone `Assets/npcs/<name>.prefab` in front of you. The rollermine's effects and sound are in `Assets/entities/sents/npc/rollermine/` and its model in `Assets/entities/hoverball/`, both unchanged from upstream.
 
 ## The test NPC
 
-`spawn_combat_npc` spawns `Assets/npcs/combat_npc.prefab`, a hostile gunman with a Glock (`WeaponChoices`; the weapon is cloned onto the NPC before it is network spawned). It sees 1500 units (`CombatNpc.SightRange`), hates players, and closes in, fires bursts and sometimes strafes. Hurt NPCs turn on whoever hit them; a dead one drops its gun and a ragdoll.
+`spawn_gunman` spawns `Assets/npcs/gunman.prefab`, a hostile gunman with a Glock (`WeaponChoices`; the weapon is cloned onto the NPC before it is network spawned). It sees 1500 units (`CombatNpc.SightRange`), hates players, and closes in, fires bursts and sometimes strafes. Hurt NPCs turn on whoever hit them; a dead one drops its gun and a ragdoll.
 
 - **NPCs walk on the navmesh**, so the scene's NavMesh must be enabled. It is on in `playground.scene` and off in the other scenes.
 - A player counts as hostile only if its root has the tag `player`.

@@ -2,15 +2,15 @@ namespace Sandbox.Npcs;
 
 public static class NpcCommands
 {
-	const string CombatNpcPrefab = "npcs/combat_npc.prefab";
+	const string GunmanPrefab = "npcs/gunman.prefab";
 	const string ScientistPrefab = "npcs/scientist.prefab";
 	const string RollerPrefab = "npcs/rollermine.prefab";
 
 	/// <summary>
 	/// Spawns a hostile gunman a few steps in front of you.
 	/// </summary>
-	[ConCmd( "spawn_combat_npc" )]
-	public static void SpawnCombatNpc() => SpawnOnHost( CombatNpcPrefab, "Gunman", 600f );
+	[ConCmd( "spawn_gunman" )]
+	public static void SpawnGunman() => SpawnOnHost( GunmanPrefab, "Gunman", 600f );
 
 	/// <summary>
 	/// Spawns a scientist a few steps in front of you. Press Use on it to have it follow you.
