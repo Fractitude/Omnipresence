@@ -21,7 +21,7 @@
         "__enabled": true,
         "Flags": 0,
         "AttackSound": {
-          "Id": "dd47064c-fd1b-4f82-bd67-c82b1aedadc8",
+          "Id": "22848883-6b51-4f3e-a181-6f8e80df8128",
           "Path": "weapons/mp5/sounds/mp5_shoot.sound"
         },
         "AutoReload": true,
@@ -84,7 +84,7 @@
           "go": "4c0e80fa-adda-4379-9f2c-57d9fddc85f1"
         },
         "DryFireSound": {
-          "Id": "066c6fdf-2cb5-44dc-b97e-630b53d8ed25",
+          "Id": "32d40e4f-0b50-40f0-bc54-9e1f45be759e",
           "Path": "sounds/dry_fire.sound"
         },
         "FirstShellReloadTime": 0,
@@ -92,7 +92,7 @@
           "_type": "gameobject",
           "prefab": "weapons/mp5/mp5_projectile.prefab"
         },
-        "GrenadeSpeed": 1000,
+        "GrenadeSpeed": 100,
         "Handedness": "Both",
         "HoldBone": "hold_r",
         "HoldType": "Rifle",
@@ -115,7 +115,7 @@
         "OnComponentUpdate": null,
         "PreferredSlot": 2,
         "PrimaryAmmoType": {
-          "Id": "091bfde9-872e-46c2-b6ce-4a6948df5eea",
+          "Id": "f7b2ec6d-325b-4949-825d-98229bb6dd17",
           "Path": "ammo/9mm.ammo"
         },
         "PrimaryAutomatic": true,
@@ -127,17 +127,23 @@
         "ReloadStartTime": 0,
         "ReloadTime": 1.8,
         "SecondaryAmmoType": {
-          "Id": "cbc79196-3af3-4e66-bcf9-7439d1fd2322",
+          "Id": "521ec3e2-22bd-4dea-ac14-cfbd06c8ef8d",
           "Path": "ammo/grenade.ammo"
         },
         "SecondaryAutomatic": false,
         "SecondaryClipSize": 3,
         "SecondaryDefaultClip": -1,
         "SecondaryDelay": 1,
+        "SecondaryInput": {
+          "Action": null
+        },
         "ShootForce": 100000,
+        "ShootInput": {
+          "Action": null
+        },
         "SlotOrder": 0,
         "StartingAmmo": 90,
-        "StartingGrenades": 6,
+        "StartingGrenades": 20,
         "UsableByNpcs": true,
         "UsesAmmo": true,
         "UsesClips": true,
@@ -161,7 +167,7 @@
         "Friction": null,
         "IsTrigger": false,
         "Model": {
-          "Id": "7256b832-eb42-4d84-85d3-213f19e8ab97",
+          "Id": "5dc6ee2f-2a70-41ca-819b-1b165b23d2cd",
           "Path": "models/weapons/sbox_smg_mp5/w_mp5.vmdl"
         },
         "OnComponentDestroy": null,
@@ -282,7 +288,7 @@
             "MaterialOverride": null,
             "Materials": null,
             "Model": {
-              "Id": "7256b832-eb42-4d84-85d3-213f19e8ab97",
+              "Id": "5dc6ee2f-2a70-41ca-819b-1b165b23d2cd",
               "Path": "models/weapons/sbox_smg_mp5/w_mp5.vmdl"
             },
             "Morphs": {},
@@ -354,8 +360,8 @@
         "__version": 2,
         "Flags": 0,
         "Name": "Thumbnail Camera",
-        "Position": "27.552749,51.819184,12.474701",
-        "Rotation": "0.068575,-0.307688,0.796828,-0.515452",
+        "Position": "27.5527496,51.8191833,12.4747009",
+        "Rotation": "0.0685750023,-0.307687998,0.796827972,-0.515452027",
         "Scale": "1,1,1",
         "Tags": "",
         "Enabled": true,
@@ -372,6 +378,7 @@
             "Flags": 0,
             "FieldOfView": 12,
             "FitToBounds": true,
+            "Focus": "0.0799999982,0",
             "GizmoDistance": 60,
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
@@ -379,7 +386,6 @@
             "OnComponentFixedUpdate": null,
             "OnComponentStart": null,
             "OnComponentUpdate": null,
-            "Focus": "0.08,0",
             "Padding": 0.08,
             "Zoom": 1.5
           }

@@ -14,14 +14,23 @@ public sealed class Mp5Weapon : BaseBulletWeapon
 
 	/// <summary>
 	/// Reserve grenades granted on first pickup - reloads top the launcher's magazine up from these.
+	/// The ammo type's <see cref="Sandbox.BaseAmmoResource.MaxReserve"/> caps them (<c>ammo/grenade.ammo</c>).
 	/// </summary>
 	[Property] public int StartingGrenades { get; set; } = 6;
 
 	protected override void OnAdded( Sandbox.BaseInventoryComponent inventory )
 	{
-		// Seed the grenade reserve once, like the bullet reserve.
+		// Seed the grenade reserve once, like the bullet reserve. GiveAmmo clamps to the ammo type's
+		// MaxReserve, so a StartingGrenades above it arrives short - say so rather than letting the
+		// player wonder why they spawned with a handful.
 		if ( StartingGrenades > 0 && SecondaryAmmoType is not null && !inventory.HasAmmo( SecondaryAmmoType ) )
-			inventory.GiveAmmo( SecondaryAmmoType, StartingGrenades );
+		{
+			var added = inventory.GiveAmmo( SecondaryAmmoType, StartingGrenades );
+
+			if ( added < StartingGrenades )
+				Log.Warning( $"{DisplayName}: granted {added} of {StartingGrenades} {SecondaryAmmoType.Title} - "
+					+ $"{SecondaryAmmoType.ResourcePath} caps the reserve at {SecondaryAmmoType.MaxReserve}" );
+		}
 
 		base.OnAdded( inventory );
 	}
