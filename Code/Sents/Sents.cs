@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -19,6 +20,21 @@ public static class Sents
 	/// </summary>
 	[ConVar( "omni.sent_everyone", ConVarFlags.Saved )]
 	public static bool AllowEveryone { get; set; }
+
+	/// <summary>
+	/// The namespace of an imported sent's code, for the sents whose type names another import also has. In the sandbox
+	/// game every sent is its own package, so four Combine sents can each have a <c>CombineNpc</c>; here they share one
+	/// assembly, and a prefab's plain <c>"CombineNpc"</c> would find only one of them. These namespaces are written in
+	/// the sent's own source (<c>namespace Hl2Metrocop;</c>). Add a sent here when it is imported and its prefab names
+	/// a component that exists in more than one namespace.
+	/// </summary>
+	static readonly Dictionary<string, string> TypeNamespaces = new()
+	{
+		["hl2npcs.metrocop"] = "Hl2Metrocop",
+		["hl2npcs.combine_soldier"] = "Hl2Combine",
+		["hl2npcs.combine_elite"] = "Hl2CombineElite",
+		["hl2npcs.combine_prisonguard"] = "Hl2CombinePrisonGuard",
+	};
 
 	// A cloud ident is "org.package". Anything else (a path to a local file) is refused.
 	static readonly Regex IdentPattern = new( @"^[a-z0-9_]+\.[a-z0-9_]+$", RegexOptions.Compiled );
@@ -85,6 +101,23 @@ public static class Sents
 		position += Vector3.Up * -bounds.Mins.z;
 
 		var transform = new Transform( position, rotation );
+
+		// A sent whose type names are shared with another import is built from its data, with each component's type
+		// named in full, as the engine's own clone would look them up by the plain name and find the wrong one.
+		if ( TypeNamespaces.TryGetValue( ident, out var typeNamespace ) )
+		{
+			var data = FreshGuids( entity.Prefab.RootObject.ToJsonString() );
+			QualifyTypes( data, typeNamespace );
+
+			var built = new GameObject( false, entity.Title ?? ident );
+			built.Deserialize( data );
+			built.WorldTransform = transform;
+			built.NetworkSpawn( true, null );
+
+			Log.Info( $"spawn_sent: {caller.DisplayName} spawned {entity.Title ?? ident}" );
+			return;
+		}
+
 		var go = GameObject.Clone( entity.Prefab, new CloneConfig { Transform = transform, StartEnabled = false } );
 
 		// The engine keeps a prefab's scene once loaded. If it was loaded before this game had the code of its
@@ -100,12 +133,59 @@ public static class Sents
 		{
 			go.Destroy();
 			go = new GameObject( false, entity.Title ?? ident );
-			go.Deserialize( entity.Prefab.RootObject.AsObject() );
+			go.Deserialize( FreshGuids( entity.Prefab.RootObject.ToJsonString() ) );
 			go.WorldTransform = transform;
 		}
 
 		go.NetworkSpawn( true, null );
 
 		Log.Info( $"spawn_sent: {caller.DisplayName} spawned {entity.Title ?? ident}" );
+	}
+
+	/// <summary>
+	/// A prefab's data with every object and component id replaced by a new one, and every reference to them with it.
+	/// Building an object from the data (not <c>GameObject.Clone</c>, which does this) keeps the prefab's ids, so a
+	/// second copy would find them taken, get new ones, and its components that refer to each other by id (an NPC's
+	/// renderer) would point into the first copy: a second NPC in the world A-posed on the first one's renderer and
+	/// took the first one's damage.
+	/// </summary>
+	static JsonObject FreshGuids( string json )
+	{
+		var ids = Regex.Matches( json, @"""__guid"":\s*""([0-9a-fA-F-]{36})""" )
+			.Select( x => x.Groups[1].Value )
+			.Distinct( StringComparer.OrdinalIgnoreCase )
+			.ToList();
+
+		foreach ( var id in ids )
+			json = json.Replace( id, Guid.NewGuid().ToString(), StringComparison.OrdinalIgnoreCase );
+
+		return JsonNode.Parse( json ).AsObject();
+	}
+
+	/// <summary>
+	/// Puts the sent's namespace in front of every component type that exists there.
+	/// </summary>
+	static void QualifyTypes( JsonNode node, string typeNamespace )
+	{
+		if ( node is JsonObject obj )
+		{
+			if ( obj["__type"] is JsonValue type && type.TryGetValue<string>( out var name )
+			     && TypeLibrary.GetType( $"{typeNamespace}.{name}" ) is not null )
+				obj["__type"] = $"{typeNamespace}.{name}";
+
+			foreach ( var child in obj.Select( x => x.Value ).ToList() )
+			{
+				if ( child is not null )
+					QualifyTypes( child, typeNamespace );
+			}
+		}
+		else if ( node is JsonArray array )
+		{
+			foreach ( var child in array )
+			{
+				if ( child is not null )
+					QualifyTypes( child, typeNamespace );
+			}
+		}
 	}
 }
