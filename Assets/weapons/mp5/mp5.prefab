@@ -92,7 +92,7 @@
           "_type": "gameobject",
           "prefab": "weapons/mp5/mp5_projectile.prefab"
         },
-        "GrenadeSpeed": 100,
+        "GrenadeSpeed": 1500,
         "Handedness": "Both",
         "HoldBone": "hold_r",
         "HoldType": "Rifle",
@@ -131,7 +131,7 @@
           "Path": "ammo/grenade.ammo"
         },
         "SecondaryAutomatic": false,
-        "SecondaryClipSize": 3,
+        "SecondaryClipSize": 1,
         "SecondaryDefaultClip": -1,
         "SecondaryDelay": 1,
         "SecondaryInput": {
@@ -143,7 +143,7 @@
         },
         "SlotOrder": 0,
         "StartingAmmo": 90,
-        "StartingGrenades": 20,
+        "StartingGrenades": 6,
         "UsableByNpcs": true,
         "UsesAmmo": true,
         "UsesClips": true,

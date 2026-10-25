@@ -20,6 +20,7 @@
         "__guid": "9b2e7c41-5d8a-4a63-b0f4-2c7e81a9d356",
         "__enabled": true,
         "Flags": 0,
+        "ArmingDistance": 100,
         "ExplosionDamage": 100,
         "ExplosionForce": 0.5,
         "ExplosionRadius": 150,
@@ -135,7 +136,7 @@
         "ReverbEnabled": false,
         "ReverbOverride": false,
         "SoundEvent": {
-          "Id": "a22b1b22-1d82-4ea3-88d7-1672cbca01a3",
+          "Id": "16a9f1aa-5fca-4da4-a65f-652b47803ab1",
           "Path": "weapons/mp5/sounds/mp5_grenade_launcher_shoot.sound"
         },
         "SoundOverride": false,
@@ -176,7 +177,7 @@
             "MaterialOverride": null,
             "Materials": null,
             "Model": {
-              "Id": "9a10d641-194c-46f8-8947-a6af3edf024e",
+              "Id": "1942d65f-db61-49fe-99dc-3ab85edcaf52",
               "Path": "models/weapons/sbox_ammo/12g_shell/12g_shell.vmdl"
             },
             "OnComponentDestroy": null,

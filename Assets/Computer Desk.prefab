@@ -38,11 +38,11 @@
             "__enabled": true,
             "Flags": 0,
             "BodyGroups": 18446744073709551615,
-            "Health": 150,
+            "Health": 0,
             "IsStatic": true,
             "MaterialGroup": null,
             "Model": {
-              "Id": "488e3d00-f096-410c-8bbb-7c6d12ca02be",
+              "Id": "7165c1be-6212-470a-95a8-5feb4203fedf",
               "Path": "models/sbox_props/office_desk/office_desk.vmdl"
             },
             "OnComponentDestroy": null,
@@ -69,7 +69,7 @@
             "MaterialOverride": null,
             "Materials": null,
             "Model": {
-              "Id": "488e3d00-f096-410c-8bbb-7c6d12ca02be",
+              "Id": "7165c1be-6212-470a-95a8-5feb4203fedf",
               "Path": "models/sbox_props/office_desk/office_desk.vmdl"
             },
             "OnComponentDestroy": null,
@@ -97,7 +97,7 @@
             "Friction": null,
             "IsTrigger": false,
             "Model": {
-              "Id": "488e3d00-f096-410c-8bbb-7c6d12ca02be",
+              "Id": "7165c1be-6212-470a-95a8-5feb4203fedf",
               "Path": "models/sbox_props/office_desk/office_desk.vmdl"
             },
             "OnComponentDestroy": null,
@@ -143,7 +143,7 @@
                 "IsStatic": false,
                 "MaterialGroup": null,
                 "Model": {
-                  "Id": "42edb326-8e1a-49c7-877f-9b6b6e499210",
+                  "Id": "fd4fe9fa-7b4a-46d8-a242-f8e100dbe22d",
                   "Path": "models/game_room/pc.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -170,7 +170,7 @@
                 "MaterialOverride": null,
                 "Materials": null,
                 "Model": {
-                  "Id": "42edb326-8e1a-49c7-877f-9b6b6e499210",
+                  "Id": "fd4fe9fa-7b4a-46d8-a242-f8e100dbe22d",
                   "Path": "models/game_room/pc.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -198,7 +198,7 @@
                 "Friction": null,
                 "IsTrigger": false,
                 "Model": {
-                  "Id": "42edb326-8e1a-49c7-877f-9b6b6e499210",
+                  "Id": "fd4fe9fa-7b4a-46d8-a242-f8e100dbe22d",
                   "Path": "models/game_room/pc.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -432,7 +432,7 @@
                 "IsStatic": false,
                 "MaterialGroup": null,
                 "Model": {
-                  "Id": "82302a57-df46-4ceb-8e6f-0bb4f7e8e735",
+                  "Id": "5425d41c-03ba-4f55-964f-ad6b6350c36d",
                   "Path": "models/wirebox/seal_enthusiast/keyboard/keyboard.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -459,7 +459,7 @@
                 "MaterialOverride": null,
                 "Materials": null,
                 "Model": {
-                  "Id": "82302a57-df46-4ceb-8e6f-0bb4f7e8e735",
+                  "Id": "5425d41c-03ba-4f55-964f-ad6b6350c36d",
                   "Path": "models/wirebox/seal_enthusiast/keyboard/keyboard.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -487,7 +487,7 @@
                 "Friction": null,
                 "IsTrigger": false,
                 "Model": {
-                  "Id": "82302a57-df46-4ceb-8e6f-0bb4f7e8e735",
+                  "Id": "5425d41c-03ba-4f55-964f-ad6b6350c36d",
                   "Path": "models/wirebox/seal_enthusiast/keyboard/keyboard.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -570,7 +570,7 @@
                 "IsStatic": false,
                 "MaterialGroup": null,
                 "Model": {
-                  "Id": "d4f1e300-1930-471c-a465-c7cb55aa73e1",
+                  "Id": "19404b64-24c4-447a-a878-a8b816182390",
                   "Path": "models/mouse_sbox.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -597,7 +597,7 @@
                 "MaterialOverride": null,
                 "Materials": null,
                 "Model": {
-                  "Id": "d4f1e300-1930-471c-a465-c7cb55aa73e1",
+                  "Id": "19404b64-24c4-447a-a878-a8b816182390",
                   "Path": "models/mouse_sbox.vmdl"
                 },
                 "OnComponentDestroy": null,
@@ -625,7 +625,7 @@
                 "Friction": null,
                 "IsTrigger": false,
                 "Model": {
-                  "Id": "d4f1e300-1930-471c-a465-c7cb55aa73e1",
+                  "Id": "19404b64-24c4-447a-a878-a8b816182390",
                   "Path": "models/mouse_sbox.vmdl"
                 },
                 "OnComponentDestroy": null,

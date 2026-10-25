@@ -63,7 +63,7 @@
           "Roll": true
         },
         "MassCenterOverride": "0,0,36",
-        "MassOverride": 500,
+        "MassOverride": 75,
         "MinImpactDamageSpeed": 500,
         "MotionEnabled": true,
         "OnComponentDestroy": null,
@@ -197,7 +197,7 @@
         "BodyRadius": 16,
         "BrakePower": 1,
         "CameraCollisionIgnore": "",
-        "CameraOffset": "120,0,12",
+        "CameraOffset": "80,15,6",
         "ColliderObject": {
           "_type": "gameobject",
           "go": "f302936f-1bd2-4024-a6aa-3e28be6ecbd5"
@@ -422,7 +422,7 @@
         ],
         "Children": [
           {
-            "__guid": "8d65609c-9c46-4969-b808-44ad0ecc8b0a",
+            "__guid": "df7d648a-d8a1-4ba2-b136-d9689025f1cd",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - y_front_pants_white",
@@ -439,7 +439,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "7e19c79d-9822-4108-8a1b-60c75aa52cd1",
+                "__guid": "dcae1376-fcdc-4166-9645-a3f916583529",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
