@@ -7,6 +7,18 @@ namespace Sandbox.Npcs.CombatNpc;
 /// </summary>
 public class CombatPatrolSchedule : ScheduleBase
 {
+	private static readonly string[] PatrolLines =
+	{
+		"Stay sharp.",
+		"Keep moving.",
+		"All clear so far.",
+		"Eyes open.",
+		"Nothing yet.",
+		"Where'd they go...",
+		"Something's not right.",
+		"I'll check over here.",
+	};
+
 	/// <summary>
 	/// Maximum distance from current position to pick a patrol destination.
 	/// </summary>
@@ -22,7 +34,10 @@ public class CombatPatrolSchedule : ScheduleBase
 		var dest = GetPatrolDestination();
 		AddTask( new MoveTo( dest, 15f ) { Speed = Speed } );
 
-		AddTask( new Wait( Game.Random.Float( 3f, 7f ) ) );
+		if ( Npc.Speech.CanSpeak && Game.Random.Float() < 0.2f )
+			AddTask( new Say( Game.Random.FromArray( PatrolLines ), 2.5f ) );
+		else
+			AddTask( new Wait( Game.Random.Float( 3f, 7f ) ) );
 	}
 
 

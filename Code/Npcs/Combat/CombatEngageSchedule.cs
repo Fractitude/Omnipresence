@@ -8,6 +8,29 @@ namespace Sandbox.Npcs.CombatNpc;
 /// </summary>
 public class CombatEngageSchedule : ScheduleBase
 {
+	private static readonly string[] SpotLines =
+	{
+		"Contact!",
+		"There!",
+		"I see you!",
+		"Got one!",
+		"Enemy spotted!",
+		"Don't move!",
+		"Found you.",
+	};
+
+	private static readonly string[] TauntLines =
+	{
+		"You're not getting away!",
+		"Stay down!",
+		"Take cover!",
+		"Suppressing fire!",
+		"Keep the pressure on!",
+		"Don't let up!",
+		"That's for my squad!",
+		"You picked the wrong fight.",
+	};
+
 	/// <summary>
 	/// The player to engage.
 	/// </summary>
@@ -78,6 +101,13 @@ public class CombatEngageSchedule : ScheduleBase
 		var freshContact = ReactionTime > 0f;
 		_reacted = ReactionTime;
 
+		if ( freshContact && Npc.Speech.CanSpeak )
+			AddTask( new Say( Game.Random.FromArray( SpotLines ), 1.5f, Target )
+			{
+				Tags = ["combat", "spot"],
+				Priority = 2000
+			} );
+
 		AddTask( new LookAt( Target ) );
 
 		if ( freshContact )
@@ -87,8 +117,15 @@ public class CombatEngageSchedule : ScheduleBase
 		AddTask( new MoveTo( Target, Weapon.Npc.MaxRange * 0.8f ) { Speed = EngageSpeed, FaceTarget = Target } );
 		AddTask( new FireWeapon( Weapon, Target ) );
 
-		// Rest between bursts, as the weapon dictates
-		AddTask( new Wait( Game.Random.Float( Weapon.Npc.RestMin, Weapon.Npc.RestMax ) ) );
+		// Rest between bursts, as the weapon dictates - with a random combat taunt sometimes
+		var rest = Game.Random.Float( Weapon.Npc.RestMin, Weapon.Npc.RestMax );
+		if ( Npc.Speech.CanSpeak && Game.Random.Float() < 0.4f )
+			AddTask( new Say( Game.Random.FromArray( TauntLines ), rest, Target )
+			{
+				Tags = ["combat", "taunt"]
+			} );
+		else
+			AddTask( new Wait( rest ) );
 
 		// Now and then, strafe to a new spot - most of the time hold position and keep shooting
 		if ( Game.Random.Float() < RepositionChance )

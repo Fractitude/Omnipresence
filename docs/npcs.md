@@ -4,9 +4,21 @@ Ported from Facepunch's open-source sandbox game (`github.com/Facepunch/sandbox`
 
 ## What is ported
 
-The `Npc` base (health, ground and airborne handling, factions and dispositions, schedules), its four layers (senses, navigation, animation, speech), the shared tasks and schedules, and `CombatNpc` with its schedules. The roller, scientist, example NPC and outfits are not ported.
+All of upstream's `Code/Npcs`: the `Npc` base (health, ground and airborne handling, factions and dispositions, schedules), its four layers (senses, navigation, animation, speech), the shared tasks and schedules, `CombatNpc`, `ScientistNpc`, `RollerNpc`, `ExampleNpc` and `NpcOutfits`.
 
-Changed from upstream: no speech lines (the localized sound events don't exist here), no follow-on-press (`IPressable`), no `Ownable`, `Player` is the engine's `PlayerController`, and `GameManager.OnNpcDeath` only tells the attacker's `IKillSource` and logs. `BaseSandboxWeapon.NpcAimTarget` is added for aiming.
+Changed from upstream: `Player` is the engine's `PlayerController`, no `Ownable`, no per-player stats for the scientist, and `GameManager.OnNpcDeath` only tells the attacker's `IKillSource` and logs. `BaseSandboxWeapon.NpcAimTarget` is added for aiming. Upstream localizes the combat lines (`#npc.speech.combat.*`); this game has no localization, so they are plain English in the code.
+
+## Voice and subtitles
+
+`SpeechLayer.TrySay` plays a `SoundEvent` (a random clip of it) or just shows a line. The scientist talks with real clips, `Assets/sounds/npc/darren/` (follow, stay, scared, idle, stuck), set on the prefab's `Voice` group. Combat NPCs call out text only. `NpcSubtitles` (`Code/Npcs/`, one line in `HudSystem`) draws each speaking NPC's `Speech.CurrentSpeech` over its head, within 1500 units.
+
+## Outfits
+
+`NpcOutfits` picks one outfit and one face (head, hair, beard) at random on the host when the NPC is spawned, before it is network spawned, and puts them on its `Dresser`. The scientist prefab has six outfits and several faces.
+
+## Spawning
+
+`spawn_combat_npc`, `spawn_scientist` and `spawn_rollermine` clone `Assets/npcs/<name>.prefab` in front of you. The rollermine's effects and sound are in `Assets/entities/sents/npc/rollermine/` and its model in `Assets/entities/hoverball/`, both unchanged from upstream.
 
 ## The test NPC
 

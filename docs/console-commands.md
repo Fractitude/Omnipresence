@@ -113,6 +113,8 @@ Ported from Facepunch's sandbox game. See [npcs.md](npcs.md). Code: `Code/Npcs/`
 | Command | What it does |
 |---|---|
 | `spawn_combat_npc` | Spawn a hostile gunman with a Glock about 600 units ahead. It attacks players on sight. Needs the scene's navmesh enabled. |
+| `spawn_scientist` | Spawn a scientist in front of you. It flees from danger and talks; press Use on it to have it follow you. |
+| `spawn_rollermine` | Spawn a rollermine in front of you. It chases players and rams them. |
 
 ## World clock
 

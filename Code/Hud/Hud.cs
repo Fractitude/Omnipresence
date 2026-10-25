@@ -90,6 +90,7 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 
 		hud.Attach<HealthHud>();
 		hud.Attach<AmmoHud>();
+		hud.Attach<NpcSubtitles>();
 
 		hud.Attach<PackingMenu>();
 		hud.Attach<PlantingMenu>();

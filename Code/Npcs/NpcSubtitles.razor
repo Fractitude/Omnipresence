@@ -1,0 +1,64 @@
+@using Sandbox.UI
+@using Sandbox.Npcs
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	@foreach ( var line in lines )
+	{
+		<div class="subtitle" style="left: @( line.X )px; top: @( line.Y )px;">@line.Text</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// NPCs further than this don't show what they say.
+	/// </summary>
+	[Property] public float Range { get; set; } = 1500f;
+
+	record struct Line( string Text, int X, int Y );
+
+	readonly List<Line> lines = new();
+	int hash;
+
+	protected override void OnUpdate()
+	{
+		lines.Clear();
+
+		var camera = Scene.Camera;
+		var system = Scene.GetSystem<NpcSystem>();
+		if ( !camera.IsValid() || system is null || !Panel.IsValid() )
+			return;
+
+		// Screen pixels to this panel's own units
+		var scale = Panel.ScaleFromScreen;
+
+		foreach ( var npc in system.Npcs )
+		{
+			if ( !npc.IsValid() || !npc.Speech.IsValid() )
+				continue;
+
+			var text = npc.Speech.CurrentSpeech;
+			if ( string.IsNullOrEmpty( text ) )
+				continue;
+
+			if ( npc.WorldPosition.Distance( camera.WorldPosition ) > Range )
+				continue;
+
+			var head = Sandbox.Npcs.Layers.AnimationLayer.GetEyePosition( npc.GameObject ) + Vector3.Up * 10f;
+			var screen = camera.PointToScreenPixels( head, out var behind );
+			if ( behind )
+				continue;
+
+			lines.Add( new Line( text, (int)(screen.x * scale), (int)(screen.y * scale) ) );
+		}
+
+		var next = new HashCode();
+		foreach ( var line in lines )
+			next.Add( line );
+		hash = next.ToHashCode();
+	}
+
+	protected override int BuildHash() => hash;
+}

@@ -7,8 +7,24 @@ namespace Sandbox.Npcs.CombatNpc;
 /// A combat NPC that searches for players, advances on them, fires in bursts, and repositions.
 /// When friendly, can be recruited to follow a player and engages hostile NPCs instead.
 /// </summary>
-public class CombatNpc : Npc
+public class CombatNpc : Npc, Component.IPressable
 {
+	private static readonly string[] PainLines =
+	{
+		"Argh!",
+		"They got me!",
+		"I'm hit!",
+		"Taking fire!",
+		"Ugh!",
+	};
+
+	private static readonly string[] DeathLines =
+	{
+		"Tell them... I fought...",
+		"Not like this...",
+		"I can't...",
+	};
+
 	/// <summary>
 	/// When true, this NPC is friendly to players and will follow them, engaging hostile NPCs.
 	/// When false, this NPC targets players and friendly NPCs.
@@ -163,6 +179,38 @@ public class CombatNpc : Npc
 	private Vector3 _lastSeenPosition;
 	private Vector3? _bodyPosition;
 	private TimeSince _timeSinceKill;
+
+	IPressable.Tooltip? IPressable.GetTooltip( IPressable.Event e )
+	{
+		if ( !Friendly )
+			return null;
+
+		return Leader.IsValid()
+			? new IPressable.Tooltip( "Stop following", "person_off", null )
+			: new IPressable.Tooltip( "Follow me", "follow_the_signs", null );
+	}
+
+	bool IPressable.CanPress( IPressable.Event e ) => Friendly;
+
+	bool IPressable.Press( IPressable.Event e )
+	{
+		ToggleFollow( e.Source.GameObject );
+		return true;
+	}
+
+	[Rpc.Host]
+	private void ToggleFollow( GameObject presserObject )
+	{
+		if ( !Friendly || !presserObject.IsValid() )
+			return;
+
+		var player = presserObject.Root.GetComponent<PlayerController>();
+		if ( !player.IsValid() )
+			return;
+
+		Leader = Leader == player.GameObject ? null : player.GameObject;
+		EndCurrentSchedule();
+	}
 
 	protected override void OnValidate()
 	{
@@ -457,12 +505,18 @@ public class CombatNpc : Npc
 			RememberHostile( damage.Attacker.WorldPosition, SensesLayer.GetVelocity( damage.Attacker ) );
 		}
 
+		if ( Health >= 1f && Speech.CanSpeak && Game.Random.Float() < 0.5f )
+			Speech.TrySay( Game.Random.FromArray( PainLines ), 1.5f, tags: ["reaction", "pain"], priority: 2000 );
+
 		// React immediately.
 		EndCurrentSchedule();
 	}
 
 	protected override void Die( in DamageInfo damage )
 	{
+		if ( Speech.CanSpeak )
+			Speech.TrySay( Game.Random.FromArray( DeathLines ), 2f, tags: ["reaction", "death"], priority: 3000 );
+
 		DropWeapon();
 
 		base.Die( damage );
