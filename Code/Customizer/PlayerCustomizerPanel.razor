@@ -10,7 +10,7 @@
 				<IconPanel class="package" Text="open_in_new" @onclick=@OpenPackagePage />
 				<label>Player Customizer</label>
 			</div>
-			<IconPanel class="close" Text="close" @onclick=@Apply />
+			<IconPanel class="close" Text="close" @onclick=@Close />
 		</div>
 
 		<div class="content">
@@ -701,6 +701,13 @@
 		// stays open: what was just applied is what Cancel goes back to
 		_worn = Copy( Draft );
 		_wornColors = OutfitColors.Copy( DraftColors );
+	}
+
+	// Closes without applying: what was not applied is dropped, like Escape.
+	void Close()
+	{
+		if ( Customizer.IsValid() )
+			Customizer.IsOpen = false;
 	}
 
 	void Cancel()
