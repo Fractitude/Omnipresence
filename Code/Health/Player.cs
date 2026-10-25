@@ -100,6 +100,12 @@ public sealed partial class Player : Component, Component.IDamageable, IKillSour
 	}
 
 	/// <summary>
+	/// The held weapon wants the HUD out of the way (the hand camera does): <see cref="HudSystem"/> fades it out while
+	/// this is true and no menu is open.
+	/// </summary>
+	public bool WantsHideHud => GetComponent<WeaponInventory>()?.ActiveWeapon is { WantsHideHud: true };
+
+	/// <summary>
 	/// Find a player by the id of their connection.
 	/// </summary>
 	public static Player For( Guid playerId ) =>

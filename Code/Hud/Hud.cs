@@ -68,6 +68,20 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 	public HudSystem( Scene scene ) : base( scene )
 	{
 		Listen( Stage.StartUpdate, 0, EnsureHud, "HudSystem.EnsureHud" );
+		Listen( Stage.StartUpdate, 1, UpdateVisibility, "HudSystem.UpdateVisibility" );
+	}
+
+	/// <summary>
+	/// A weapon that wants the HUD hidden (the hand camera) clears the whole screen panel, unless a menu is open: a menu
+	/// still has to be seen to be used.
+	/// </summary>
+	void UpdateVisibility()
+	{
+		if ( !hud.IsValid() || hud.Components.Get<ScreenPanel>() is not { } panel )
+			return;
+
+		var hidden = Player.FindLocalPlayer() is { WantsHideHud: true } && !GameMenus.IsAnyOpen;
+		panel.Opacity = hidden ? 0f : 1f;
 	}
 
 	void EnsureHud()
