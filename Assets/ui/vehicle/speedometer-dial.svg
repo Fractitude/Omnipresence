@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="302.4" height="302.4" viewBox="0 0 302.4 302.4">
+  <path d="M63.35 239.05 A124.23 124.23 0 1 1 239.05 63.35 A124.23 124.23 0 0 1 239.05 239.05"
+        fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="3.24"
+        pathLength="180" stroke-dasharray=".58 .42" />
+  <path d="M269.35 189.59 A124.23 124.23 0 0 1 239.05 239.05"
+        fill="none" stroke="#ff5353" stroke-width="3.24"
+        pathLength="18" stroke-dasharray=".58 .42" />
+</svg>

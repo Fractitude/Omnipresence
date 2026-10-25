@@ -14,7 +14,7 @@
 
 		<div class="speedometer @( rpmFraction >= .9f ? "at-redline" : "" )">
 			<div class="dial">
-			<svg class="speedometer-dial" src="drift_district/ui/speedometer-dial.svg" />
+			<svg class="speedometer-dial" src="ui/vehicle/speedometer-dial.svg" />
 			@for ( var start = 135f; start < 135 + rpmFraction * 270; start += SliceDegrees )
 			{
 				<div class="rpm-active-sector" style="@SectorStyle( start, Math.Min( 135 + rpmFraction * 270, start + SliceDegrees ) )"></div>
