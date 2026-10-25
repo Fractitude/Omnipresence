@@ -24,6 +24,7 @@ Read the stats log ([stats.md](stats.md)). Host only. Code: `Code/Stats/StatsCom
 
 | Command | What it does |
 | --- | --- |
+| `players` | List everyone connected now, one per line: Steam id, then name. Copy the id to kick or ban them. |
 | `stats_show` | List every saved player: id, name, last seen and playtime, most recent first. |
 | `stats_show <name or steamId>` | Log one player's totals: playtime, joins, kills (by weapon), deaths, kicks, bans, transactions, purchases and last balances. A name is matched exactly, or as part of one when only one saved player fits, ignoring case, accents, spaces and punctuation: `stats_show "Yodeling Cat"`, or `stats_show tomas` for Tomáš. |
 

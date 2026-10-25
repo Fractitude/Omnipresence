@@ -98,6 +98,25 @@ public static class StatsCommands
 	}
 
 	/// <summary>
+	/// Lists everyone connected right now, one per line: the Steam id, then the name. Copy the id to kick or ban them.
+	/// </summary>
+	[ConCmd( "players" )]
+	public static void Players()
+	{
+		if ( !Networking.IsHost )
+		{
+			Log.Info( "Players are listed by the host" );
+			return;
+		}
+
+		var connected = Connection.All.ToList();
+		Log.Info( $"{connected.Count} players connected:" );
+
+		foreach ( var c in connected )
+			Log.Info( $"  {c.SteamId}  {c.DisplayName}" );
+	}
+
+	/// <summary>
 	/// One line per saved player: the id to pass to <c>stats_show</c>, the name and the playtime.
 	/// </summary>
 	static void ListSaved()
