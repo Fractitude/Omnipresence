@@ -40,12 +40,6 @@ public sealed class WelcomeData
 		"The host's word is final.",
 	};
 
-	/// <summary>Over the changes a returning player has not seen.</summary>
-	public string NewHeading { get; set; } = "What's new since you last played";
-
-	/// <summary>Over the latest release, for a new player and a player who has seen every release.</summary>
-	public string LatestHeading { get; set; } = "Latest changes";
-
 	public string PlayButton { get; set; } = "Play";
 
 	/// <summary>The releases, newest first.</summary>
@@ -171,8 +165,6 @@ public static class WelcomeContent
 		d.WelcomeBackHeading = Text( d.WelcomeBackHeading );
 		d.Intro = Text( d.Intro, keepLines: true );
 		d.RulesHeading = Text( d.RulesHeading );
-		d.NewHeading = Text( d.NewHeading );
-		d.LatestHeading = Text( d.LatestHeading );
 		d.PlayButton = Text( d.PlayButton );
 		d.Rules = Lines( d.Rules );
 		d.Changelog = (d.Changelog ?? new()).Where( x => x is not null ).Take( MaxItems ).ToList();

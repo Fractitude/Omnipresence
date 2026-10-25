@@ -46,12 +46,6 @@
 
 					<div class="section">
 						<div class="menu-heading">Changelog</div>
-						<div class="caption">Heading over what a returning player has not seen</div>
-						<TextEntry class="input" Multiline=@( true ) Value=@d.NewHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.NewHeading = t; } )/>
-						<div class="caption">Heading over the latest release</div>
-						<TextEntry class="input" Multiline=@( true ) Value=@d.LatestHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.LatestHeading = t; } )/>
 
 						@for ( var i = 0; i < d.Changelog.Count; i++ )
 						{

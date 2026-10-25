@@ -33,7 +33,7 @@
 					</div>
 
 					<div class="section">
-						<div class="menu-heading">@( shownNews ? text.NewHeading : text.LatestHeading )</div>
+						<div class="menu-heading">@( shownNews ? NewHeading : LatestHeading )</div>
 						@foreach ( var entry in shown )
 						{
 							<div class="release">
@@ -64,6 +64,10 @@
 
 @code
 {
+	// The changelog's headings are the game's, not the host's: they are not in the editor.
+	const string NewHeading = "What's new since you last played";
+	const string LatestHeading = "Latest changes";
+
 	/// <summary>
 	/// Whether the screen is open on this computer.
 	/// </summary>
