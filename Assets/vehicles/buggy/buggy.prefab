@@ -333,8 +333,7 @@
         "SitHeight": 0.115207314,
         "SitPose": "ChairForward",
         "TooltipDescription": "",
-        "TooltipIcon": "directions_car",
-        "TooltipTitle": "Drive",
+        "TooltipTitle": "Drive Buggy",
         "YawRange": "-120,120"
       },
       {
