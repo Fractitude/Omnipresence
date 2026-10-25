@@ -20,7 +20,9 @@
     "__guid": "0fc797cd-2071-48c6-985b-f519c3f97d37",
     "__enabled": true,
     "Flags": 0,
-    "Kind": "haze_vial"
+    "Authoring": {
+     "Kind": "haze_vial"
+    }
    },
    {
     "__type": "Sandbox.BoxCollider",
