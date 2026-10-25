@@ -551,29 +551,26 @@ public class CombatNpc : Npc, Component.IPressable
 	{
 		var visible = Senses.GetBestTarget();
 
-		if ( _gun.IsValid() )
+		if ( IsOutOfAmmo )
 		{
-			if ( IsOutOfAmmo )
+			// Ammo or a loose weapon close by is worth fetching - unless the enemy is nearer than it is
+			var pickup = FindPickup();
+			if ( pickup.IsValid() && !(visible.IsValid() && WorldPosition.Distance( visible.WorldPosition ) < WorldPosition.Distance( pickup.WorldPosition )) )
 			{
-				// Ammo or a loose weapon close by is worth fetching - unless the enemy is nearer than it is
-				var pickup = FindPickup();
-				if ( pickup.IsValid() && !(visible.IsValid() && WorldPosition.Distance( visible.WorldPosition ) < WorldPosition.Distance( pickup.WorldPosition )) )
-				{
-					var fetch = GetSchedule<CombatPickupSchedule>();
-					fetch.Pickup = pickup;
-					fetch.Speed = Pace( EngageSpeed );
-					return fetch;
-				}
+				var fetch = GetSchedule<CombatPickupSchedule>();
+				fetch.Pickup = pickup;
+				fetch.Speed = Pace( EngageSpeed );
+				return fetch;
+			}
 
-				// Nothing to be had: hit them with the melee weapon instead
-				if ( !UsingMelee && Melee.IsValid() )
-					UseMelee();
-			}
-			else if ( UsingMelee )
-			{
-				// Found some ammo
-				UseGun();
-			}
+			// Nothing to be had: hit them with the melee weapon instead
+			if ( !UsingMelee && Melee.IsValid() )
+				UseMelee();
+		}
+		else if ( UsingMelee )
+		{
+			// Found some ammo
+			UseGun();
 		}
 
 		if ( visible.IsValid() && Weapon.IsValid() )
@@ -700,9 +697,10 @@ public class CombatNpc : Npc, Component.IPressable
 	/// be picked up. If nobody takes it within <see cref="DroppedWeaponLifetime"/> it's cleaned up.
 	/// </summary>
 	/// <summary>
-	/// Out of ammo on the gun, with no spare magazines to reload from.
+	/// Without a gun, or out of ammo on it with no spare magazines to reload from. An NPC that spawned without a gun is
+	/// just one that has not found one yet.
 	/// </summary>
-	private bool IsOutOfAmmo => _gun.IsValid() && ReloadWeapon.IsEmpty( _gun ) && SpareMagazines <= 0;
+	private bool IsOutOfAmmo => !_gun.IsValid() || (ReloadWeapon.IsEmpty( _gun ) && SpareMagazines <= 0);
 
 	/// <summary>
 	/// The nearest ammo box for the gun in hand, or loose weapon it can use, within <see cref="PickupRange"/>.
@@ -725,10 +723,14 @@ public class CombatNpc : Npc, Component.IPressable
 			bestDistance = distance;
 		}
 
-		foreach ( var ammo in Scene.GetAll<AmmoPickup>() )
+		// Ammo is only any use for a gun it already has
+		if ( _gun.IsValid() )
 		{
-			if ( ammo.AmmoType is not null && ammo.AmmoType == _gun.PrimaryAmmoType )
-				Consider( ammo.GameObject );
+			foreach ( var ammo in Scene.GetAll<AmmoPickup>() )
+			{
+				if ( ammo.AmmoType is not null && ammo.AmmoType == _gun.PrimaryAmmoType )
+					Consider( ammo.GameObject );
+			}
 		}
 
 		foreach ( var weapon in Scene.GetAll<BaseSandboxWeapon>() )
@@ -775,13 +777,15 @@ public class CombatNpc : Npc, Component.IPressable
 	/// </summary>
 	public bool Collect( GameObject pickup )
 	{
-		if ( IsProxy || !pickup.IsValid() || !_gun.IsValid() )
+		if ( IsProxy || !pickup.IsValid() )
 			return false;
 
-		if ( pickup.WorldPosition.Distance( WorldPosition ) > 120f )
+		// As close as a player has to be to use it
+		var reach = pickup.Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )?.Range ?? 80f;
+		if ( pickup.WorldPosition.Distance( WorldPosition ) > MathF.Max( reach, 60f ) )
 			return false;
 
-		if ( pickup.GetComponent<AmmoPickup>() is { } ammo )
+		if ( _gun.IsValid() && pickup.GetComponent<AmmoPickup>() is { } ammo )
 		{
 			var rounds = ammo.TakeByNpc( _gun );
 			if ( rounds <= 0 )
