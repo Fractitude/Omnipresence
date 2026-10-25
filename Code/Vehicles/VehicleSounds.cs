@@ -163,7 +163,7 @@ public sealed class VehicleSounds : Component
 	/// How loud everything this vehicle plays is, on top of each sound's own volume: engine, tyres, crashes and
 	/// backfires. Set to sit near the Hokuto Boxer sent, whose engine is far quieter than the recordings are.
 	/// </summary>
-	[Property, Group( "Mix" ), Range( 0, 1 )] public float Volume { get; set; } = 0.3f;
+	[Property, Group( "Mix" ), Range( 0, 1 )] public float Volume { get; set; } = 0.2f;
 
 	public VehicleSoundState State => _state;
 
