@@ -162,3 +162,4 @@ Code: `Code/Welcome/WelcomeScreen.razor`.
 | Command | What it does |
 |---|---|
 | `welcome` | Open the welcome screen (about the game, rules, what changed since you last played). |
+| `welcome_edit` | Open the welcome screen editor. Host only. |

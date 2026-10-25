@@ -1,0 +1,110 @@
+@import "../Hud/_hud.scss";
+
+// The window, its list and its buttons are MenuWindow's. This is the editor's own content.
+
+.editor
+{
+	flex-direction: column;
+	gap: 16px;
+}
+
+.section
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+}
+
+.label
+{
+	flex-shrink: 0;
+	font-size: 13px;
+	opacity: 0.7;
+
+	&.fixed
+	{
+		align-self: center;
+	}
+}
+
+.input
+{
+	flex-grow: 1;
+	flex-shrink: 0;
+	min-height: 32px;
+	padding: 4px 8px;
+	font-size: 14px;
+	background-color: rgba(0, 0, 0, 0.35);
+	border-radius: 4px;
+
+	&.tall
+	{
+		min-height: 90px;
+	}
+
+	&.number
+	{
+		flex-grow: 0;
+		width: 70px;
+	}
+}
+
+.line-row
+{
+	flex-shrink: 0;
+	align-items: center;
+	gap: 8px;
+}
+
+.entry
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+	margin-top: 8px;
+	padding: 10px;
+	background-color: rgba(255, 255, 255, 0.05);
+	border-radius: 6px;
+}
+
+.version-row
+{
+	flex-shrink: 0;
+	align-items: center;
+	gap: 10px;
+
+	.version
+	{
+		font-size: 20px;
+		font-weight: 700;
+		min-width: 36px;
+		justify-content: center;
+	}
+
+	.note
+	{
+		flex-grow: 1;
+		flex-basis: 0;
+		font-size: 12px;
+		opacity: 0.7;
+	}
+}
+
+.add
+{
+	align-self: flex-start;
+	flex-shrink: 0;
+}
+
+.footer
+{
+	flex-shrink: 0;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+
+	.actions
+	{
+		gap: 8px;
+	}
+}

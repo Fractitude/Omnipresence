@@ -1,0 +1,242 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="menu-root @( IsOpen ? "open" : "" )">
+	@if ( IsOpen && !rebuilding && draft is { } d )
+	{
+		<MenuWindow Title="Edit the welcome screen" Width=@( 760 ) OnClose=@Close Notice=@notice
+		            Hint="Save sends the text to every player. Escape discards your changes.">
+			<ChildContent>
+				<div class="menu-list editor">
+					<div class="section">
+						<div class="menu-heading">Version</div>
+						<div class="version-row">
+							<div class="menu-button small" @onclick=@( () => ChangeVersion( -1 ) )>-</div>
+							<div class="version">@d.Version</div>
+							<div class="menu-button small" @onclick=@( () => ChangeVersion( 1 ) )>+</div>
+							<div class="note">
+								Raise it when this text changed and returning players should read it again. They are
+								shown the screen on joining only if they have not seen this version.
+							</div>
+						</div>
+					</div>
+
+					<div class="section">
+						<div class="menu-heading">Text</div>
+						<div class="label">Window title</div>
+						<TextEntry class="input" Value=@d.Title MaxLength=@( 120 ) OnTextEdited=@( t => d.Title = t )/>
+						<div class="label">Heading for a new player</div>
+						<TextEntry class="input" Value=@d.WelcomeHeading MaxLength=@( 120 )
+						           OnTextEdited=@( t => d.WelcomeHeading = t )/>
+						<div class="label">Heading for a returning player</div>
+						<TextEntry class="input" Value=@d.WelcomeBackHeading MaxLength=@( 120 )
+						           OnTextEdited=@( t => d.WelcomeBackHeading = t )/>
+						<div class="label">About the game</div>
+						<TextEntry class="input tall" Multiline=@( true ) Value=@d.Intro MaxLength=@( 2000 )
+						           OnTextEdited=@( t => d.Intro = t )/>
+						<div class="label">Play button</div>
+						<TextEntry class="input" Value=@d.PlayButton MaxLength=@( 40 )
+						           OnTextEdited=@( t => d.PlayButton = t )/>
+					</div>
+
+					<div class="section">
+						<div class="menu-heading">Rules</div>
+						<div class="label">Heading</div>
+						<TextEntry class="input" Value=@d.RulesHeading MaxLength=@( 120 )
+						           OnTextEdited=@( t => d.RulesHeading = t )/>
+						@for ( var i = 0; i < d.Rules.Count; i++ )
+						{
+							var index = i;
+							<div class="line-row">
+								<TextEntry class="input" Value=@d.Rules[index] MaxLength=@( 500 )
+								           OnTextEdited=@( t => d.Rules[index] = t )/>
+								<div class="menu-button small" @onclick=@( () => Remove( d.Rules, index ) )>Remove</div>
+							</div>
+						}
+						<div class="menu-button add" @onclick=@( () => d.Rules.Add( "" ) )>Add a rule</div>
+					</div>
+
+					<div class="section">
+						<div class="menu-heading">Changelog</div>
+						<div class="label">Heading over what a returning player has not seen</div>
+						<TextEntry class="input" Value=@d.NewHeading MaxLength=@( 120 )
+						           OnTextEdited=@( t => d.NewHeading = t )/>
+						<div class="label">Heading over the latest release</div>
+						<TextEntry class="input" Value=@d.LatestHeading MaxLength=@( 120 )
+						           OnTextEdited=@( t => d.LatestHeading = t )/>
+						<div class="label">Text for a player who is up to date</div>
+						<TextEntry class="input" Value=@d.UpToDateText MaxLength=@( 300 )
+						           OnTextEdited=@( t => d.UpToDateText = t )/>
+
+						@for ( var i = 0; i < d.Changelog.Count; i++ )
+						{
+							var entry = d.Changelog[i];
+							var at = i;
+							<div class="entry">
+								<div class="line-row">
+									<div class="label fixed">Version</div>
+									<TextEntry class="input number" Value=@entry.Version.ToString() MaxLength=@( 6 )
+									           OnTextEdited=@( t => entry.Version = ParseVersion( t, entry.Version ) )/>
+									<TextEntry class="input" Value=@entry.Title MaxLength=@( 120 ) Placeholder="Title"
+									           OnTextEdited=@( t => entry.Title = t )/>
+									<div class="menu-button small" @onclick=@( () => Remove( d.Changelog, at ) )>Remove</div>
+								</div>
+								@for ( var c = 0; c < entry.Changes.Count; c++ )
+								{
+									var change = c;
+									<div class="line-row">
+										<TextEntry class="input" Value=@entry.Changes[change] MaxLength=@( 500 )
+										           OnTextEdited=@( t => entry.Changes[change] = t )/>
+										<div class="menu-button small"
+										     @onclick=@( () => Remove( entry.Changes, change ) )>Remove</div>
+									</div>
+								}
+								<div class="menu-button add" @onclick=@( () => entry.Changes.Add( "" ) )>Add a change</div>
+							</div>
+						}
+						<div class="menu-button add" @onclick=@AddEntry>Add a release</div>
+					</div>
+				</div>
+				<div class="footer">
+					<div class="menu-button" @onclick=@Reset>Reset to default</div>
+					<div class="actions">
+						<div class="menu-button" @onclick=@Close>Cancel</div>
+						<div class="menu-button save" @onclick=@Save>Save</div>
+					</div>
+				</div>
+			</ChildContent>
+		</MenuWindow>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// Whether the editor is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's events and this component's updates are not always on the same instance.
+	// The copy being edited: nothing changes for the players until Save.
+	static WelcomeData draft;
+	static string notice;
+
+	// A removed line makes the panels below it hold the wrong text, so the list is drawn again from scratch.
+	static bool rebuilding;
+
+	/// <summary>
+	/// Whether this computer can edit the text: only the host can.
+	/// </summary>
+	public static bool CanEdit => Networking.IsHost;
+
+	/// <summary>
+	/// Open the editor with the current text. Does nothing for a client, or with another menu open.
+	/// </summary>
+	public static void Open()
+	{
+		if ( IsOpen || !CanEdit || !WelcomeContent.IsReady || GameMenus.IsAnyOpen
+		     || NaviInputCapture.Current is not null )
+			return;
+
+		draft = WelcomeContent.Data.Copy();
+		notice = null;
+		rebuilding = false;
+		IsOpen = true;
+		GameMenus.SetOpen( "welcomeeditor", true );
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		draft = null;
+		GameMenus.SetOpen( "welcomeeditor", false );
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Open the welcome screen editor (host only).
+	/// </summary>
+	[ConCmd( "welcome_edit" )]
+	public static void OpenCommand()
+	{
+		if ( !CanEdit )
+		{
+			Log.Info( "Only the host can edit the welcome screen." );
+			return;
+		}
+
+		Open();
+	}
+
+	static void Save()
+	{
+		if ( draft is null )
+			return;
+
+		if ( WelcomeContent.Save( draft ) )
+			Close();
+		else
+			notice = "Could not save. See the console.";
+	}
+
+	static void Reset()
+	{
+		// The version stays: it must not go back and hide the change from players who saw a higher one.
+		var version = draft?.Version ?? 1;
+		draft = new() { Version = version };
+		rebuilding = true;
+	}
+
+	static void ChangeVersion( int by ) => draft.Version = System.Math.Max( draft.Version + by, 1 );
+
+	static void AddEntry() =>
+		draft.Changelog.Insert( 0, new() { Version = draft.Version, Title = "", Changes = new() { "" } } );
+
+	static void Remove<T>( List<T> list, int index )
+	{
+		if ( index < 0 || index >= list.Count )
+			return;
+
+		list.RemoveAt( index );
+		rebuilding = true;
+	}
+
+	static int ParseVersion( string text, int fallback ) =>
+		int.TryParse( text, out var value ) && value > 0 ? value : fallback;
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+			return;
+
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || !Players.LocalController.IsValid()
+		     || !CanEdit )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		// One frame with nothing drawn, so every row is made again from the list.
+		if ( rebuilding && wasRebuilding )
+			rebuilding = false;
+
+		wasRebuilding = rebuilding;
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+	}
+
+	bool wasRebuilding;
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() => System.HashCode.Combine(
+		IsOpen, rebuilding, notice, draft?.Version, draft?.Rules.Count, draft?.Changelog.Count,
+		draft?.Changelog.Sum( x => x.Changes.Count ) );
+}

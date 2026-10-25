@@ -99,6 +99,7 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<ContextMenu>();
 		hud.Attach<OrgInviteMenu>();
 		hud.Attach<WelcomeScreen>();
+		hud.Attach<WelcomeScreenEditor>();
 
 		// The hotbar draws above the menus, and the dragged icon above both.
 		hud.Attach<AbilityMenu>();

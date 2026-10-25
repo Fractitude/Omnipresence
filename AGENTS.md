@@ -163,7 +163,7 @@ Found building the Character menu (`Code/Character/`). Each one froze the editor
 
 ## Game version and the Welcome screen
 
-`GameVersion.Current` (`Code/Welcome/GameVersion.cs`) is the version of the Welcome screen's contents, a whole number. **Only the host raises it, by hand, when they change the Welcome screen** (rules, intro, changelog). **Do not raise it, or add a changelog entry, when you finish a task unless the user asks.** The screen (`WelcomeScreen`, also on the `welcome` command) opens by itself on joining only for a player who has not seen `Current` yet (a new player, or one who last saw an older version), and lists the changelog entries newer than the version they saw. Its rules and intro text are in `WelcomeScreen.razor`. See `docs/ui.md`.
+Every piece of text on the Welcome screen (intro, rules, changelog, headings, version) is data, `WelcomeData` in `Code/Welcome/WelcomeContent.cs`, kept by the host in `welcome.json` and sent to every client (`WelcomeSystem`). **Only the host edits it, in `WelcomeScreenEditor` (the Edit button on the screen, or `welcome_edit`), and only the host raises its `Version`, by hand.** **Do not edit the text, raise the version or add a changelog entry when you finish a task unless the user asks**; the defaults in `WelcomeData` are only for a world with no `welcome.json`. The screen (`WelcomeScreen`, also on the `welcome` command) opens by itself on joining only for a player who has not seen the current version (a new player, or one who last saw an older one). See `docs/ui.md`.
 
 ## Code style
 

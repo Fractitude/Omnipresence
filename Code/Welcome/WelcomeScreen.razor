@@ -6,37 +6,33 @@
 <root class="menu-root @( IsOpen ? "open" : "" )">
 	@if ( IsOpen )
 	{
-		var news = GameVersion.Since( seenAtOpen ).ToList();
+		var text = WelcomeContent.Data;
+		var news = text.Since( seenAtOpen ).ToList();
 		var returning = seenAtOpen > 0;
 		// A player who is up to date, or new, still sees the latest release.
-		var shown = news.Count > 0 && returning ? news : GameVersion.Changelog.Take( 1 ).ToList();
+		var shown = news.Count > 0 && returning ? news : text.Changelog.Take( 1 ).ToList();
 
-		<MenuWindow Title="Omnipresence in the Wired" Width=@( 640 ) OnClose=@Close>
+		<MenuWindow Title=@text.Title Width=@( 640 ) OnClose=@Close>
 			<ChildContent>
 				<div class="menu-list welcome">
 					<div class="section">
-						<div class="menu-heading">@( returning ? "Welcome back" : "Welcome" )</div>
-						<div class="text">
-							A game inspired by Serial Experiments Lain. You live in the real world and in the Wired, the
-							network under it. Earn, trade and hide your work, and reach the Wired from a computer.
-						</div>
+						<div class="menu-heading">@( returning ? text.WelcomeBackHeading : text.WelcomeHeading )</div>
+						<div class="text">@text.Intro</div>
 					</div>
 
 					<div class="section">
-						<div class="menu-heading">Rules</div>
-						@foreach ( var rule in Rules )
+						<div class="menu-heading">@text.RulesHeading</div>
+						@foreach ( var rule in text.Rules )
 						{
 							<div class="rule">@rule</div>
 						}
 					</div>
 
 					<div class="section">
-						<div class="menu-heading">
-							@( returning && news.Count > 0 ? $"What's new since version {seenAtOpen}" : "Latest changes" )
-						</div>
+						<div class="menu-heading">@( returning && news.Count > 0 ? text.NewHeading : text.LatestHeading )</div>
 						@if ( returning && news.Count == 0 )
 						{
-							<div class="text dim">You are up to date. This is the last release.</div>
+							<div class="text dim">@text.UpToDateText</div>
 						}
 						@foreach ( var entry in shown )
 						{
@@ -51,7 +47,15 @@
 					</div>
 				</div>
 				<div class="footer">
-					<div class="menu-button" @onclick=@Close>Play</div>
+					@if ( Networking.IsHost )
+					{
+						<div class="menu-button" @onclick=@Edit>Edit</div>
+					}
+					else
+					{
+						<div></div>
+					}
+					<div class="menu-button" @onclick=@Close>@text.PlayButton</div>
 				</div>
 			</ChildContent>
 		</MenuWindow>
@@ -60,17 +64,6 @@
 
 @code
 {
-	/// <summary>
-	/// The rules of the server, in the order they are shown.
-	/// </summary>
-	static readonly string[] Rules =
-	{
-		"Be kind to other players. No harassment, hate or threats.",
-		"No cheating, exploits or griefing. If you find a bug, report it instead of using it.",
-		"Do not hurt people who are still starting out.",
-		"The host's word is final.",
-	};
-
 	/// <summary>
 	/// Whether the screen is open on this computer.
 	/// </summary>
@@ -149,9 +142,18 @@
 
 		IsOpen = false;
 		GameMenus.SetOpen( "welcome", false );
-		SaveSeen( GameVersion.Current );
+		SaveSeen( WelcomeContent.Data.Version );
 		MenuControls.Free( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// The host's Edit button: put the screen away and open the editor.
+	/// </summary>
+	static void Edit()
+	{
+		Close();
+		WelcomeScreenEditor.Open();
 	}
 
 	/// <summary>
@@ -166,11 +168,12 @@
 		{
 			// Once per session, as soon as the player is standing in the world, and only if they have not seen this
 			// version of the screen: a new player has seen none.
-			if ( !shownOnJoin && CanShow() )
+			// Wait for the host's text: until it arrives the screen would show the default.
+			if ( !shownOnJoin && WelcomeContent.IsReady && CanShow() )
 			{
 				shownOnJoin = true;
 
-				if ( LoadSeen() < GameVersion.Current )
+				if ( LoadSeen() < WelcomeContent.Data.Version )
 					Open();
 			}
 
@@ -190,5 +193,5 @@
 
 	protected override void OnDisabled() => Close();
 
-	protected override int BuildHash() => System.HashCode.Combine( IsOpen, seenAtOpen );
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, seenAtOpen, WelcomeContent.Revision );
 }
