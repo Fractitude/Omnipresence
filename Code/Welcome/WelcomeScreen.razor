@@ -10,7 +10,8 @@
 		var news = text.Since( seenAtOpen ).ToList();
 		var returning = seenAtOpen > 0;
 		// A player who is up to date, or new, still sees the latest release.
-		var shown = news.Count > 0 && returning ? news : text.Changelog.Take( 1 ).ToList();
+		var shownNews = news.Count > 0 && returning;
+		var shown = shownNews ? news : text.Changelog.Take( 1 ).ToList();
 
 		<MenuWindow Title=@text.Title Width=@( 640 ) OnClose=@Close ShowClose=@( false )>
 			<ChildContent>
@@ -32,11 +33,7 @@
 					</div>
 
 					<div class="section">
-						<div class="menu-heading">@( returning && news.Count > 0 ? text.NewHeading : text.LatestHeading )</div>
-						@if ( returning && news.Count == 0 )
-						{
-							<div class="text dim">@text.UpToDateText</div>
-						}
+						<div class="menu-heading">@( shownNews ? text.NewHeading : text.LatestHeading )</div>
 						@foreach ( var entry in shown )
 						{
 							<div class="release">

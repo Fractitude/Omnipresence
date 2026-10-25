@@ -43,10 +43,9 @@ public sealed class WelcomeData
 	/// <summary>Over the changes a returning player has not seen.</summary>
 	public string NewHeading { get; set; } = "What's new since you last played";
 
-	/// <summary>Over the latest release, for a new player and a player who is up to date.</summary>
+	/// <summary>Over the latest release, for a new player and a player who has seen every release.</summary>
 	public string LatestHeading { get; set; } = "Latest changes";
 
-	public string UpToDateText { get; set; } = "You are up to date. This is the last release.";
 	public string PlayButton { get; set; } = "Play";
 
 	/// <summary>The releases, newest first.</summary>
@@ -174,7 +173,6 @@ public static class WelcomeContent
 		d.RulesHeading = Text( d.RulesHeading );
 		d.NewHeading = Text( d.NewHeading );
 		d.LatestHeading = Text( d.LatestHeading );
-		d.UpToDateText = Text( d.UpToDateText );
 		d.PlayButton = Text( d.PlayButton );
 		d.Rules = Lines( d.Rules );
 		d.Changelog = (d.Changelog ?? new()).Where( x => x is not null ).Take( MaxItems ).ToList();
