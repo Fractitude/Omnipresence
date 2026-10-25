@@ -1,0 +1,119 @@
+{
+  "RootObject": {
+    "__guid": "616fda6a-012b-444e-947e-031b99743083",
+    "__version": 2,
+    "Flags": 0,
+    "Name": "combat_npc",
+    "Position": "0,0,0",
+    "Rotation": "0,0,0,1",
+    "Scale": "1,1,1",
+    "Tags": "npc",
+    "Enabled": true,
+    "NetworkMode": 2,
+    "NetworkFlags": 0,
+    "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
+    "OwnerTransfer": 1,
+    "Components": [
+      {
+        "__type": "Sandbox.NavMeshAgent",
+        "__guid": "ae8f2859-da64-4ca5-8396-43f62ba1fb7b",
+        "__enabled": true,
+        "Flags": 0,
+        "Acceleration": 250,
+        "AllowDefaultArea": true,
+        "Height": 64,
+        "MaxSpeed": 120,
+        "Radius": 16,
+        "Separation": 0.25,
+        "UpdatePosition": true,
+        "UpdateRotation": false
+      },
+      {
+        "__type": "Sandbox.BoxCollider",
+        "__guid": "38c974a2-b655-484b-a6e5-2fd5ca2f531f",
+        "__enabled": true,
+        "Flags": 0,
+        "Center": "0,0,37.5",
+        "IsTrigger": false,
+        "Scale": "25,25,75",
+        "Static": false
+      },
+      {
+        "__type": "Sandbox.Npcs.CombatNpc.CombatNpc",
+        "__guid": "f0a0bc75-cf95-4f56-bbaf-756027446658",
+        "__enabled": true,
+        "Flags": 0,
+        "DisplayName": "Gunman",
+        "Health": 100,
+        "Friendly": false,
+        "Renderer": {
+          "_type": "component",
+          "component_id": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
+          "go": "406225df-2b0c-4bf3-9bfd-8c4474140497",
+          "component_type": "SkinnedModelRenderer"
+        },
+        "WeaponChoices": [
+          {
+            "_type": "gameobject",
+            "prefab": "weapons/glock/glock.prefab"
+          }
+        ]
+      }
+    ],
+    "Children": [
+      {
+        "__guid": "406225df-2b0c-4bf3-9bfd-8c4474140497",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "citizen",
+        "Position": "0,0,0",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 1,
+        "Components": [
+          {
+            "__type": "Sandbox.SkinnedModelRenderer",
+            "__guid": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
+            "__enabled": true,
+            "Flags": 0,
+            "CreateBoneObjects": true,
+            "Model": "models/citizen/citizen.vmdl",
+            "UseAnimGraph": true,
+            "Tint": "1,1,1,1"
+          },
+          {
+            "__type": "Sandbox.ModelHitboxes",
+            "__guid": "3c1c16ec-4cde-4282-81a1-f72023bcc34c",
+            "__enabled": true,
+            "Flags": 0,
+            "Renderer": {
+              "_type": "component",
+              "component_id": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
+              "go": "406225df-2b0c-4bf3-9bfd-8c4474140497",
+              "component_type": "SkinnedModelRenderer"
+            },
+            "Target": {
+              "_type": "gameobject",
+              "go": "616fda6a-012b-444e-947e-031b99743083"
+            }
+          }
+        ],
+        "Children": []
+      }
+    ]
+  },
+  "ResourceVersion": 2,
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "DontBreakAsTemplate": false,
+  "__references": [],
+  "__version": 2
+}

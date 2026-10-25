@@ -28,6 +28,21 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	public virtual bool IsTargetedAim => false;
 
 	/// <summary>
+	/// What an NPC holding this weapon is shooting at. While set, shots go from the muzzle to the
+	/// target's chest instead of along the barrel, which follows the animation and drifts high.
+	/// </summary>
+	public GameObject NpcAimTarget { get; set; }
+
+	/// <summary>
+	/// Roughly chest height - most of the way from the feet up to the eyes, so it follows crouching.
+	/// </summary>
+	private static Vector3 GetChestPosition( GameObject target )
+	{
+		var eyes = Sandbox.Npcs.Layers.AnimationLayer.GetEyePosition( target );
+		return Vector3.Lerp( target.WorldPosition, eyes, 0.7f );
+	}
+
+	/// <summary>
 	/// Controlled from a seat with targeted aim fires where the camera looks, otherwise the engine's muzzle-based
 	/// unheld aim applies.
 	/// </summary>
@@ -38,6 +53,12 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 			var seated = ControlContext.Player;
 			if ( seated.IsValid() && IsTargetedAim && Scene.Camera.IsValid() )
 				return new Ray( Scene.Camera.WorldPosition, Scene.Camera.WorldRotation.Forward );
+
+			if ( NpcAimTarget.IsValid() )
+			{
+				var muzzle = GetMuzzleTransform().Position;
+				return new Ray( muzzle, (GetChestPosition( NpcAimTarget ) - muzzle).Normal );
+			}
 
 			return base.UnheldAimRay;
 		}
@@ -55,6 +76,9 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 
 			var seatedPlayer = ControlContext.Player;
 			if ( seatedPlayer.IsValid() ) return seatedPlayer.GameObject;
+
+			var killSource = GetComponentInParent<IKillSource>( true );
+			if ( killSource is Component c ) return c.GameObject;
 
 			return base.Attacker;
 		}

@@ -106,6 +106,14 @@ A camera watches a place and gives a live picture to the Security System app on 
 |---|---|
 | `spawn_security_camera` | Put a security camera where you stand, at eye height, looking where you look. It appears in the Security System app of a computer within its signal range. |
 
+## NPCs
+
+Ported from Facepunch's sandbox game. See [npcs.md](npcs.md). Code: `Code/Npcs/`.
+
+| Command | What it does |
+|---|---|
+| `spawn_combat_npc` | Spawn a hostile gunman with a Glock about 600 units ahead. It attacks players on sight. Needs the scene's navmesh enabled. |
+
 ## World clock
 
 The game's own time. A new world starts at 12:00 on Day 1, which is a Monday, and the host saves it to `world.json`. Same rules as above: editor only, and the host moves the clock for everyone (the host in the editor moves it itself, so it works while your player is away). Clients follow on the next sync. Moving the clock back delays shipments; moving it forward makes them arrive.

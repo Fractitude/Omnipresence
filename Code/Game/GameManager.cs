@@ -284,4 +284,15 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 			? $"{victimName} killed themself (tags: {dmg.Tags})"
 			: $"{source.DisplayName} killed {victimName} (tags: {dmg.Tags})" );
 	}
+
+	/// <summary>
+	/// Called on the host when an NPC is killed: tells the attacker's kill source.
+	/// </summary>
+	internal void OnNpcDeath( Sandbox.Npcs.Npc npc, DamageInfo dmg )
+	{
+		var source = dmg.Attacker?.GetComponentInParent<IKillSource>( true );
+		source?.OnKill( npc.GameObject );
+
+		Log.Info( $"{source?.DisplayName ?? "Something"} killed {npc.DisplayName} (tags: {dmg.Tags})" );
+	}
 }
