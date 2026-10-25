@@ -3,15 +3,16 @@
 @namespace Sandbox
 
 <root class="menu-root @( IsOpen ? "open" : "" )">
-	@if ( IsOpen && !rebuilding && draft is { } d )
+	@if ( IsOpen && draft is { } d )
 	{
 		<MenuWindow Title="Edit the welcome screen" Width=@( 760 ) OnClose=@Close ShowClose=@( false ) Notice=@notice>
 			<ChildContent>
-				<div @ref=List class="menu-list editor">
+				<div class="menu-list editor">
 					<div class="section">
 						<div class="menu-heading">Text</div>
 						<div class="caption">Window title</div>
-						<TextEntry class="input" Multiline=@( true ) Value=@d.Title MaxLength=@( 120 ) OnTextEdited=@( ( string t ) => { d.Title = t; } )/>
+						<TextEntry class="input" Multiline=@( true ) Value=@d.Title MaxLength=@( 120 )
+						           OnTextEdited=@( ( string t ) => { d.Title = t; } )/>
 						<div class="caption">About the server</div>
 						<TextEntry class="input tall" Multiline=@( true ) Value=@d.Intro MaxLength=@( 2000 )
 						           OnTextEdited=@( ( string t ) => { d.Intro = t; } )/>
@@ -25,16 +26,16 @@
 						<div class="caption">Heading</div>
 						<TextEntry class="input" Multiline=@( true ) Value=@d.RulesHeading MaxLength=@( 120 )
 						           OnTextEdited=@( ( string t ) => { d.RulesHeading = t; } )/>
-						@for ( var i = 0; i < d.Rules.Count; i++ )
+						@foreach ( var rule in rules )
 						{
-							var index = i;
-							<div class="line-row">
-								<TextEntry class="input" Multiline=@( true ) Value=@d.Rules[index] MaxLength=@( 500 )
-								           OnTextEdited=@( ( string t ) => { d.Rules[index] = t; } )/>
-								<div class="menu-button small" @onclick=@( () => Remove( d.Rules, index ) )>Remove</div>
+							var line = rule;
+							<div @key=@line.Key class="line-row">
+								<TextEntry class="input" Multiline=@( true ) Value=@line.Text MaxLength=@( 500 )
+								           OnTextEdited=@( ( string t ) => { line.Text = t; } )/>
+								<div class="menu-button small" @onclick=@( () => Remove( rules, line ) )>Remove</div>
 							</div>
 						}
-						<div class="menu-button add" @onclick=@( () => d.Rules.Add( "" ) )>Add a rule</div>
+						<div class="menu-button add" @onclick=@( () => rules.Add( new() ) )>Add a rule</div>
 					</div>
 
 					<div class="section">
@@ -43,28 +44,28 @@
 							<div class="menu-button" @onclick=@AddEntry>Add a release</div>
 						</div>
 
-						@for ( var i = 0; i < d.Changelog.Count; i++ )
+						@foreach ( var release in releases )
 						{
-							var entry = d.Changelog[i];
-							var at = i;
-							<div class="entry">
+							var entry = release;
+							<div @key=@entry.Key class="entry">
 								<div class="line-row">
 									<div class="caption fixed">@( $"Version {entry.Version}" )</div>
-									<TextEntry class="input" Multiline=@( true ) Value=@entry.Title MaxLength=@( 120 ) Placeholder="Title"
+									<TextEntry class="input" Multiline=@( true ) Value=@entry.Title MaxLength=@( 120 )
+									           Placeholder="Title"
 									           OnTextEdited=@( ( string t ) => { entry.Title = t; } )/>
-									<div class="menu-button small" @onclick=@( () => Remove( d.Changelog, at ) )>Remove</div>
+									<div class="menu-button small" @onclick=@( () => Remove( releases, entry ) )>Remove</div>
 								</div>
-								@for ( var c = 0; c < entry.Changes.Count; c++ )
+								@foreach ( var change in entry.Changes )
 								{
-									var change = c;
-									<div class="line-row">
-										<TextEntry class="input" Multiline=@( true ) Value=@entry.Changes[change] MaxLength=@( 500 )
-										           OnTextEdited=@( ( string t ) => { entry.Changes[change] = t; } )/>
+									var line = change;
+									<div @key=@line.Key class="line-row">
+										<TextEntry class="input" Multiline=@( true ) Value=@line.Text MaxLength=@( 500 )
+										           OnTextEdited=@( ( string t ) => { line.Text = t; } )/>
 										<div class="menu-button small"
-										     @onclick=@( () => Remove( entry.Changes, change ) )>Remove</div>
+										     @onclick=@( () => Remove( entry.Changes, line ) )>Remove</div>
 									</div>
 								}
-								<div class="menu-button add" @onclick=@( () => entry.Changes.Add( "" ) )>Add a change</div>
+								<div class="menu-button add" @onclick=@( () => entry.Changes.Add( new() ) )>Add a change</div>
 							</div>
 						}
 					</div>
@@ -88,17 +89,37 @@
 	/// </summary>
 	public static bool IsOpen { get; private set; }
 
-	// Static: the panel's events and this component's updates are not always on the same instance.
-	// The copy being edited: nothing changes for the players until Save.
-	static WelcomeData draft;
-	static string notice;
+	/// <summary>
+	/// One line of text in a list. Each has a key of its own, so removing one leaves the panels of the others as they
+	/// are: nothing is drawn again, and the list keeps its scroll.
+	/// </summary>
+	sealed class Line
+	{
+		public string Key { get; } = $"line{++nextKey}";
+		public string Text { get; set; } = "";
+	}
 
-	// A removed line makes the panels below it hold the wrong text, so the list is drawn again from scratch. The list
-	// is scrolled back to where it was once it is there again.
-	static bool rebuilding;
-	static Vector2 scrolled;
-	static int restoreFrames;
-	static Panel List { get; set; }
+	/// <summary>
+	/// A release being edited.
+	/// </summary>
+	sealed class Release
+	{
+		public string Key { get; } = $"release{++nextKey}";
+		public int Version { get; set; }
+		public string Title { get; set; } = "";
+		public List<Line> Changes { get; set; } = new();
+	}
+
+	// Static: the panel's events and this component's updates are not always on the same instance.
+	// The copy being edited: nothing changes for the players until Save. Its lists are kept apart, as rows.
+	static WelcomeData draft;
+	static List<Line> rules = new();
+	static List<Release> releases = new();
+	static string notice;
+	static int nextKey;
+
+	// Goes up when the text is started again (Open, Reset), which the counts alone would not show.
+	static int generation;
 
 	/// <summary>
 	/// Whether this computer can edit the text: only the host can.
@@ -114,10 +135,8 @@
 		     || NaviInputCapture.Current is not null )
 			return;
 
-		draft = WelcomeContent.Data.Copy();
+		Begin( WelcomeContent.Data.Copy() );
 		notice = null;
-		restoreFrames = 0;
-		rebuilding = false;
 		IsOpen = true;
 		GameMenus.SetOpen( "welcomeeditor", true );
 	}
@@ -149,44 +168,73 @@
 		Open();
 	}
 
+	/// <summary>
+	/// Start editing some text: its lists become rows.
+	/// </summary>
+	static void Begin( WelcomeData data )
+	{
+		generation++;
+		draft = data;
+		rules = data.Rules.Select( x => new Line { Text = x } ).ToList();
+
+		releases = data.Changelog
+			.Select( x => new Release
+			{
+				Version = x.Version,
+				Title = x.Title,
+				Changes = x.Changes.Select( y => new Line { Text = y } ).ToList(),
+			} )
+			.ToList();
+	}
+
+	/// <summary>
+	/// The edited text as data again.
+	/// </summary>
+	static WelcomeData Collect()
+	{
+		draft.Rules = rules.Select( x => x.Text ).ToList();
+
+		draft.Changelog = releases
+			.Select( x => new ChangelogEntry
+			{
+				Version = x.Version,
+				Title = x.Title,
+				Changes = x.Changes.Select( y => y.Text ).ToList(),
+			} )
+			.ToList();
+
+		return draft;
+	}
+
 	static void Save()
 	{
 		if ( draft is null )
 			return;
 
-		// Every save is a new version: players who saw the last one are shown the screen again.
-		draft.Version = WelcomeContent.Data.Version + 1;
+		var data = Collect();
 
-		if ( WelcomeContent.Save( draft ) )
+		// Every save is a new version: players who saw the last one are shown the screen again.
+		data.Version = WelcomeContent.Data.Version + 1;
+
+		if ( WelcomeContent.Save( data ) )
 			Close();
 		else
 			notice = "Could not save. See the console.";
 	}
 
-	static void ResetText()
+	static void ResetText() => Begin( new() );
+
+	/// <summary>
+	/// Add a release at the top. Its number is the highest there is plus one, so a number freed by removing the newest
+	/// releases is used again, and one freed from the middle is not.
+	/// </summary>
+	static void AddEntry()
 	{
-		draft = new();
-		Rebuild();
+		var next = releases.Count == 0 ? 1 : releases.Max( x => x.Version ) + 1;
+		releases.Insert( 0, new() { Version = next, Changes = new() { new() } } );
 	}
 
-	static void AddEntry() =>
-		draft.Changelog.Insert(
-			0, new() { Version = draft.NextRelease(), Title = "", Changes = new() { "" } } );
-
-	static void Remove<T>( List<T> list, int index )
-	{
-		if ( index < 0 || index >= list.Count )
-			return;
-
-		list.RemoveAt( index );
-		Rebuild();
-	}
-
-	static void Rebuild()
-	{
-		scrolled = List is { IsValid: true } ? List.ScrollOffset : default;
-		rebuilding = true;
-	}
+	static void Remove<T>( List<T> list, T item ) => list.Remove( item );
 
 	protected override void OnUpdate()
 	{
@@ -201,29 +249,12 @@
 			return;
 		}
 
-		// One frame with nothing drawn, so every row is made again from the list.
-		if ( rebuilding && wasRebuilding )
-		{
-			rebuilding = false;
-			restoreFrames = 3;
-		}
-		else if ( restoreFrames > 0 && List is { IsValid: true } )
-		{
-			List.ScrollOffset = scrolled;
-			restoreFrames--;
-		}
-
-		wasRebuilding = rebuilding;
-
 		Mouse.Visibility = MouseVisibility.Visible;
 		MenuControls.Free( false );
 	}
 
-	bool wasRebuilding;
-
 	protected override void OnDisabled() => Close();
 
 	protected override int BuildHash() => System.HashCode.Combine(
-		IsOpen, rebuilding, notice, draft?.Rules.Count, draft?.Changelog.Count,
-		draft?.Changelog.Sum( x => x.Changes.Count ) );
+		IsOpen, generation, notice, rules.Count, releases.Count, releases.Sum( x => x.Changes.Count ) );
 }
