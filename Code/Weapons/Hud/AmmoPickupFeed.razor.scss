@@ -1,0 +1,46 @@
+AmmoPickupFeed
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	font-family: Poppins;
+	color: #f2eee2;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: flex-end;
+	padding-right: 32px;
+	padding-bottom: 150px;
+	gap: 6px;
+}
+
+.pickup
+{
+	align-items: center;
+	gap: 10px;
+	padding: 8px 14px;
+	border-radius: 6px;
+	background-color: rgba(27, 26, 46, 0.75);
+	font-size: 16px;
+	font-weight: 600;
+	animation: ammo-pickup-in 0.25s ease-out 1;
+
+	.amount
+	{
+		color: #e8c872;
+		font-weight: 700;
+	}
+
+	.icon
+	{
+		width: 22px;
+		height: 22px;
+		background-tint: #e8c872;
+	}
+}
+
+@keyframes ammo-pickup-in
+{
+	0% { opacity: 0; transform: translateX( 40px ); }
+	100% { opacity: 1; transform: translateX( 0px ); }
+}

@@ -10,7 +10,7 @@ namespace Sandbox;
 /// This is separate from <see cref="PlayerInventory"/>, the grid of carried items.
 /// </para>
 /// </summary>
-public sealed class WeaponInventory : BaseInventoryComponent
+public sealed partial class WeaponInventory : BaseInventoryComponent
 {
 	/// <summary>
 	/// The weapon the player holds, or null.

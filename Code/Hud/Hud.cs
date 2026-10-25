@@ -105,6 +105,7 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<HudCursor>();
 		hud.Attach<HealthHud>();
 		hud.Attach<AmmoHud>();
+		hud.Attach<AmmoPickupFeed>();
 		hud.Attach<WeaponSwitcher>();
 		hud.Attach<NpcSubtitles>();
 
