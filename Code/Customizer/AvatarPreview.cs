@@ -208,6 +208,16 @@ public sealed class AvatarPreview : Panel
 		UpdateCamera();
 	}
 
+	/// <summary>
+	/// The player's body height (the Player Controller's Body Height) against the one the camera numbers were made for.
+	/// </summary>
+	const float DefaultBodyHeight = 72;
+
+	static float HeightScale =>
+		Player.FindLocalPlayer()?.Controller is { IsValid: true } controller && controller.BodyHeight > 0
+			? controller.BodyHeight / DefaultBodyHeight
+			: 1;
+
 	void UpdateCamera()
 	{
 		if ( !_camera.IsValid() ) return;
@@ -220,6 +230,8 @@ public sealed class AvatarPreview : Panel
 		// thumbnails are small, so they frame the body a little tighter
 		var bodyView = IsStatic ? BodyView with { x = BodyView.x * 0.85f } : BodyView;
 		var view = Vector2.Lerp( bodyView, focusView, Easing.QuadraticInOut( _zoom ) );
+		// the heights above are for a body of the default height: scale them to the player's
+		view *= HeightScale;
 		_camera.WorldPosition = new Vector3( view.x, 0, view.y );
 
 		// the camera's fov is horizontal, so work it out from the vertical one to frame the same at any panel shape
