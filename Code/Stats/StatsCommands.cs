@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+
 namespace Sandbox;
 
 /// <summary>
@@ -7,8 +10,8 @@ public static class StatsCommands
 {
 	/// <summary>
 	/// With no player, lists every saved player. With a Steam id or a name, logs that player's totals:
-	/// <c>stats_show "Yodeling Cat"</c>. A name matches exactly (any case) first, then part of a name, when only one
-	/// saved player fits.
+	/// <c>stats_show "Yodeling Cat"</c>. A name matches exactly first, then part of a name, when only one saved player
+	/// fits. Case, accents and punctuation don't count: <c>stats_show tomas</c> finds Tomáš.
 	/// </summary>
 	[ConCmd( "stats_show" )]
 	public static void Show( string player = "" )
@@ -55,10 +58,11 @@ public static class StatsCommands
 		}
 
 		var players = StatsLog.SavedPlayers();
-		var matches = players.Where( x => string.Equals( x.Name, player, StringComparison.OrdinalIgnoreCase ) ).ToList();
+		var key = Plain( player );
+		var matches = key.Length == 0 ? new List<PlayerStatsSummary>() : players.Where( x => Plain( x.Name ) == key ).ToList();
 
-		if ( matches.Count == 0 )
-			matches = players.Where( x => x.Name?.Contains( player, StringComparison.OrdinalIgnoreCase ) == true ).ToList();
+		if ( matches.Count == 0 && key.Length > 0 )
+			matches = players.Where( x => Plain( x.Name ).Contains( key ) ).ToList();
 
 		if ( matches.Count == 1 )
 			return matches[0];
@@ -75,6 +79,22 @@ public static class StatsCommands
 			Log.Info( $"  {m.SteamId}  {m.Name}" );
 
 		return null;
+	}
+
+	/// <summary>
+	/// A name as plain lowercase letters and digits: accents are taken off their letters, and spaces and punctuation are
+	/// dropped. So "Tomáš" and "tomas" both become "tomas", and "Yodeling Cat" and "yodelingcat" match.
+	/// </summary>
+	static string Plain( string text )
+	{
+		if ( string.IsNullOrEmpty( text ) )
+			return "";
+
+		var letters = text.Normalize( NormalizationForm.FormD )
+			.Where( c => CharUnicodeInfo.GetUnicodeCategory( c ) != UnicodeCategory.NonSpacingMark && char.IsLetterOrDigit( c ) )
+			.Select( c => char.ToLowerInvariant( c ) );
+
+		return new string( letters.ToArray() );
 	}
 
 	/// <summary>
