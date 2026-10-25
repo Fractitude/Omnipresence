@@ -2,10 +2,11 @@
 
 // The window, its list and its buttons are MenuWindow's. This is the screen's own content.
 
-.welcome
+// Both classes: MenuWindow's own .menu-list { gap: 12px } comes later and would win over .welcome alone.
+.menu-list.welcome
 {
 	flex-direction: column;
-	gap: 14px;
+	gap: 20px;
 }
 
 .section
