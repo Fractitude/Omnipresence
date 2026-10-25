@@ -22,8 +22,11 @@ public sealed class HealthPickup : Component, IInteractionHandler
 		if ( !Game.IsPlaying )
 			return;
 
-		_ = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
+		// The model's collider is small next to the ammo boxes' 32 unit one, and the range counts from the collider's surface.
+		// The extra reach makes the pickup usable from as far away as the ammo ones.
+		var interactable = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
 			?? GameObject.Components.Create<Interactable>();
+		interactable.Range = 80f;
 
 		InteractionSetup.EnsureOption( this, "take", "Take", "healing", "" );
 	}
