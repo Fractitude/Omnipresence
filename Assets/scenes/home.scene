@@ -155,8 +155,8 @@
               "ZIndex": 100
             },
             {
-              "__type": "Sandbox.ProgressionHud",
-              "__guid": "6b3142b0-fd0f-45ca-b4b3-61d82698f012",
+              "__type": "Sandbox.Crosshair",
+              "__guid": "8d8198df-2242-4db0-81f0-95736b8eae3a",
               "__enabled": true,
               "Flags": 0,
               "OnComponentDestroy": null,
@@ -167,11 +167,10 @@
               "OnComponentUpdate": null
             },
             {
-              "__type": "Sandbox.Crosshair",
-              "__guid": "71dacec3-87fb-47aa-85d6-29c61b83fc61",
+              "__type": "Sandbox.ProgressionHud",
+              "__guid": "6b3142b0-fd0f-45ca-b4b3-61d82698f012",
               "__enabled": true,
               "Flags": 0,
-              "HideCursor": true,
               "OnComponentDestroy": null,
               "OnComponentDisabled": null,
               "OnComponentEnabled": null,
@@ -231,7 +230,7 @@
               "OrthographicHeight": 1204,
               "PostProcessAnchor": null,
               "Priority": 1,
-              "RenderExcludeTags": "",
+              "RenderExcludeTags": "viewer",
               "RenderTags": "",
               "RenderTexture": null,
               "TargetEye": "None",
@@ -253,6 +252,69 @@
               "OnComponentUpdate": null,
               "RightMouseAction": "Attack2",
               "VRHandSource": "Left"
+            },
+            {
+              "__type": "Sandbox.AmbientOcclusion",
+              "__guid": "c96d865b-c95e-4b7a-9560-e984c920e018",
+              "__enabled": true,
+              "Flags": 0,
+              "__version": 1,
+              "FalloffRange": 1,
+              "Intensity": 1,
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null,
+              "Radius": 128,
+              "ThinCompensation": 5
+            },
+            {
+              "__type": "Sandbox.ScreenSpaceReflections",
+              "__guid": "0141113d-848b-4af9-842c-da936c86b4ea",
+              "__enabled": true,
+              "Flags": 0,
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null
+            },
+            {
+              "__type": "Sandbox.Bloom",
+              "__guid": "8a1eb495-4335-4d7c-bd0d-aa6c083e1c44",
+              "__enabled": true,
+              "Flags": 0,
+              "__version": 1,
+              "Mode": "Screen",
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null,
+              "Strength": 0.5,
+              "Threshold": 1.85,
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "Sandbox.Vignette",
+              "__guid": "9b69d176-020d-4718-b346-2804820f8272",
+              "__enabled": true,
+              "Flags": 0,
+              "Center": "0.5,0.5",
+              "Color": "0,0,0,1",
+              "Intensity": 0.4,
+              "OnComponentDestroy": null,
+              "OnComponentDisabled": null,
+              "OnComponentEnabled": null,
+              "OnComponentFixedUpdate": null,
+              "OnComponentStart": null,
+              "OnComponentUpdate": null,
+              "Roundness": 0.4183267,
+              "Smoothness": 0.7687296
             }
           ],
           "Children": []
@@ -750,7 +812,7 @@
               "IdValue": "a3198331-ef40-49de-b574-2ae4816ba94c"
             },
             "Property": "Position",
-            "Value": "-112.5,-50,25.0000019"
+            "Value": "-112.5,-50,0.135812759"
           }
         ],
         "MovedObjects": []
@@ -763,7 +825,6 @@
         "0ccf777b-0c5c-4c8c-a319-37ef2d782aa4": "0dd0cce6-bae7-42db-82a8-769153196413",
         "4a976fec-51ac-4fb2-bf62-20b9ba3326a1": "24d40215-d97b-409e-a53d-ad9e86d29b4b",
         "a75e8eb6-f41f-4ad4-aae3-b0ad2e0e1067": "95fb994d-8a45-4146-b8a8-840233fa02db",
-        "7f645ce6-fcd8-4500-b267-db6aa83e38b6": "46ebb8fc-58d0-4d9c-8d80-d2df2357378d",
         "38e727c8-db32-4f23-940a-261c10115583": "0d957b2b-1bc5-404b-b2b1-d368c7fe9527",
         "6e0f52f3-15dd-4aa8-9568-db00977b6749": "2c0c56b6-505c-450c-bcb5-2043abe4186b",
         "4aafcc57-cd31-4add-a0ae-e547970b85f5": "4c857b68-aaa7-44fb-b114-be1546c8f398",
@@ -806,6 +867,16 @@
         "6feba249-e19d-4df8-b6f2-1db8b1fada7d": "8847e2b1-b5db-49ac-b406-19c7aaee7468",
         "49b7a1cc-3a41-419f-8728-97e43b259901": "4f6ccb0e-9897-4607-b7dc-8c061a821d31",
         "36d280eb-67d6-4260-9a11-9c8ae4f386ad": "33625ec9-9280-4af5-b0b7-62a52792d3a0",
+        "dbbc9b62-d002-45a7-9344-ffb3eb8a62a5": "15b510c4-59b6-88b6-a31e-8d40819d4ded",
+        "f9b5acce-e865-4398-8b51-12a7e291544f": "3cf32221-499f-8a90-9500-2e12b7890faa",
+        "d0d72ff1-a04d-4bc4-8452-459192d24697": "acb33048-10d9-8598-aae9-6099729c0a97",
+        "780e3191-82e2-4e66-9bce-0acc6497a846": "b7d5ee44-725d-4e00-995a-3f1d24377135",
+        "618febe9-8047-4853-8dde-f2642c76a211": "7a691baa-5909-413f-9d54-aea3e696c353",
+        "a9d11ac6-d984-4670-a316-2672922cfe6e": "b6dc504e-8fe4-4f9b-9871-aa14a0b785c4",
+        "3a95563e-fac0-404f-aec8-fb684a20a51a": "0d1195ae-fc4c-4ed8-85a4-dd13ab2903e9",
+        "422bb386-6881-492a-afe4-047d01dc6ea3": "5a608fff-fe67-400d-ac15-b92d41ff8191",
+        "e1a357db-e74f-4482-adbd-64fbe0c0fde6": "e1f18610-7ba5-447b-a45b-e98ce1c16a8c",
+        "4b5836cc-b5e8-45d7-8064-f05169e4f338": "c854d405-887f-4bf6-b308-82d40e8dc530",
         "c16a22b6-9be5-431d-9711-09a2ef4cb415": "a7110764-e602-400d-a5f0-5e93b8338a24",
         "f0f93a36-9737-4e8a-9f48-2614a1b929c0": "a85964ed-f152-4c8e-a436-005c477ab445",
         "8e47d445-7026-4a27-9cce-400cbeb76d6a": "71da30b7-7e58-4965-b060-67327e404066",
@@ -813,18 +884,8 @@
         "ea183504-ff75-4b65-8b69-5dbca5f9e726": "246df6b9-6fca-47c1-9e6e-e7794919fd49",
         "0c6da27e-0698-48dd-afab-a03f83b65d39": "c181ebff-7e7d-4b04-b780-e3879278c307",
         "a5ab76da-bb33-4dfd-a1b0-e881498f81ad": "646bd263-e38d-4968-b30b-82cc2ca4715a",
-        "dbbc9b62-d002-45a7-9344-ffb3eb8a62a5": "15b510c4-59b6-88b6-a31e-8d40819d4ded",
-        "780e3191-82e2-4e66-9bce-0acc6497a846": "b7d5ee44-725d-4e00-995a-3f1d24377135",
         "f5b1e9b1-20b7-44eb-a237-203b8d294a7a": "04c05255-4ef7-4c73-ba0d-4f1f1e97246f",
-        "04f97b0f-19cb-4578-8bea-d18562a0b4a6": "f68b869b-8109-4037-99bb-9ace1121a173",
-        "3a95563e-fac0-404f-aec8-fb684a20a51a": "0d1195ae-fc4c-4ed8-85a4-dd13ab2903e9",
-        "f9b5acce-e865-4398-8b51-12a7e291544f": "3cf32221-499f-8a90-9500-2e12b7890faa",
-        "d0d72ff1-a04d-4bc4-8452-459192d24697": "acb33048-10d9-8598-aae9-6099729c0a97",
-        "422bb386-6881-492a-afe4-047d01dc6ea3": "5a608fff-fe67-400d-ac15-b92d41ff8191",
-        "618febe9-8047-4853-8dde-f2642c76a211": "7a691baa-5909-413f-9d54-aea3e696c353",
-        "a9d11ac6-d984-4670-a316-2672922cfe6e": "b6dc504e-8fe4-4f9b-9871-aa14a0b785c4",
-        "e1a357db-e74f-4482-adbd-64fbe0c0fde6": "e1f18610-7ba5-447b-a45b-e98ce1c16a8c",
-        "4b5836cc-b5e8-45d7-8064-f05169e4f338": "c854d405-887f-4bf6-b308-82d40e8dc530"
+        "04f97b0f-19cb-4578-8bea-d18562a0b4a6": "f68b869b-8109-4037-99bb-9ace1121a173"
       }
     },
     {
@@ -879,7 +940,7 @@
       "__version": 2,
       "Flags": 0,
       "Name": "skull",
-      "Position": "-116.161911,-36.1497879,25.0769482",
+      "Position": "-116.161911,-38.3799973,51.8372002",
       "Rotation": "0.130526304,0,0,0.991444886",
       "Scale": "1,1,1",
       "Tags": "",
@@ -903,7 +964,7 @@
           "CoverageRange": 0.07,
           "Decals": [
             {
-              "Id": "df12c046-d311-4e38-a94d-0b29235a42de",
+              "Id": "1b9ef779-3f96-4668-b8ce-59c044040529",
               "Path": "skull.decal"
             }
           ],
@@ -982,7 +1043,7 @@
       "__version": 2,
       "Flags": 0,
       "Name": "Driveway",
-      "Position": "-310.242554,-94.8302765,-0.907705307",
+      "Position": "-335.778503,92.6214066,-0.907653928",
       "Rotation": "0,0,0,1",
       "Scale": "4.00288248,2.39632297,0.0776891112",
       "Tags": "",
@@ -1278,7 +1339,7 @@
               "IdValue": "0a06c34c-bbb9-40eb-8362-2618d2e930e8"
             },
             "Property": "Position",
-            "Value": "-301.811951,-94.8758392,2.88762283"
+            "Value": "-327.3479,92.5758438,2.88767433"
           },
           {
             "Target": {
@@ -1661,7 +1722,7 @@
               "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
             },
             "Property": "Position",
-            "Value": "-95.5592346,156.761978,120"
+            "Value": "-97.7386398,146.506668,95.1358109"
           },
           {
             "Target": {
@@ -1669,7 +1730,15 @@
               "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
             },
             "Property": "Rotation",
-            "Value": "0.141823903,0.222919315,-0.517709851,0.813738286"
+            "Value": "0.114328474,0.195861414,-0.490985602,0.841130435"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "FieldOfView",
+            "Value": 75
           },
           {
             "Target": {
@@ -1678,6 +1747,14 @@
             },
             "Property": "Label",
             "Value": "Inside"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "SignalRange",
+            "Value": 500
           }
         ],
         "MovedObjects": []
@@ -1727,7 +1804,7 @@
               "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
             },
             "Property": "Position",
-            "Value": "-135.365601,-160.96846,120"
+            "Value": "-129.542038,-154.438965,95.1358109"
           },
           {
             "Target": {
@@ -1735,7 +1812,15 @@
               "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
             },
             "Property": "Rotation",
-            "Value": "0.236285791,-0.124843135,-0.85201633,-0.450168341"
+            "Value": "-0.140236616,0.0759207308,0.868145406,0.469992965"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "FieldOfView",
+            "Value": 75
           },
           {
             "Target": {
@@ -1744,6 +1829,14 @@
             },
             "Property": "Label",
             "Value": "Outside"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "cf2e3047-6914-4da4-9a5c-37b675792c80"
+            },
+            "Property": "SignalRange",
+            "Value": 500
           }
         ],
         "MovedObjects": []
@@ -1957,10 +2050,10 @@
     "WantsSystemScene": true,
     "Metadata": {},
     "NavMesh": {
-      "Enabled": false,
+      "Enabled": true,
       "IncludeStaticBodies": true,
       "IncludeKeyframedBodies": true,
-      "EditorAutoUpdate": false,
+      "EditorAutoUpdate": true,
       "AgentHeight": 64,
       "AgentRadius": 16,
       "AgentStepSize": 18,

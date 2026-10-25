@@ -88,6 +88,7 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		// The fade is above everything; it starts clear, so a new scene never begins black.
 		hud.Attach<ScreenFade>();
 
+		hud.Attach<HudCursor>();
 		hud.Attach<HealthHud>();
 		hud.Attach<AmmoHud>();
 		hud.Attach<NpcSubtitles>();

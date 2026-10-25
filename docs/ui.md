@@ -21,6 +21,7 @@ menus, in **one shared window**. A new piece should not copy the size rules or m
 - A hot reload does not run `HudSystem` again for a scene that already has its HUD: add a piece, then press Play again.
   Removing a `GameObjectSystem` class makes the open editor log an error until it restarts.
 - Leave the scene alone: the pieces are never put in the `.scene`.
+- **The cursor is `HudCursor`'s** (`Code/Hud/HudCursor.cs`): hidden and locked every frame unless `GameMenus.IsAnyOpen` or a Navi app has the input, and re-locked when the window regains focus. The HUD's own panels take the mouse, so `MouseVisibility.Auto` would show the cursor over them. A menu sets `Visible` while open and `Hidden` on close, as before.
 
 ## A menu window
 

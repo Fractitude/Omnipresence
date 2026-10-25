@@ -162,7 +162,6 @@
           "__guid": "71dacec3-87fb-47aa-85d6-29c61b83fc61",
           "__enabled": true,
           "Flags": 0,
-          "HideCursor": true,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
@@ -321,105 +320,6 @@
       "Children": []
     },
     {
-      "__guid": "694266ad-9e62-41cc-9d6e-822b42ae751d",
-      "__version": 2,
-      "Flags": 0,
-      "Name": "Information",
-      "Position": "0,0,0",
-      "Rotation": "0,0,0,1",
-      "Scale": "1,1,1",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 2,
-      "NetworkFlags": 0,
-      "NetworkOrphaned": 0,
-      "NetworkTransmit": true,
-      "OwnerTransfer": 1,
-      "Components": [],
-      "Children": [
-        {
-          "__guid": "eadcb36e-938b-4776-8e38-cf326d97b4e4",
-          "__version": 2,
-          "Flags": 0,
-          "Name": "Title",
-          "Position": "192,7.91873317E-05,133.351929",
-          "Rotation": "0,0,0,1",
-          "Scale": "1,1,1",
-          "Tags": "",
-          "Enabled": true,
-          "NetworkMode": 2,
-          "NetworkFlags": 0,
-          "NetworkOrphaned": 0,
-          "NetworkTransmit": true,
-          "OwnerTransfer": 1,
-          "Components": [
-            {
-              "__type": "Sandbox.TextRenderer",
-              "__guid": "dae18bd6-5d32-4a81-9a5e-82857fb5dffd",
-              "__enabled": true,
-              "Flags": 0,
-              "__version": 2,
-              "Billboard": "None",
-              "BlendMode": "Normal",
-              "FogStrength": 1,
-              "HorizontalAlignment": "Center",
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "RenderOptions": {
-                "GameLayer": true,
-                "OverlayLayer": false,
-                "BloomLayer": false,
-                "AfterUILayer": false
-              },
-              "Scale": 0.3,
-              "TextScope": {
-                "Text": "Omnipresence\nLain-inspired world\n",
-                "TextColor": "1,1,1,1",
-                "FontName": "Poppins",
-                "FontSize": 64,
-                "FontWeight": 800,
-                "FontItalic": false,
-                "FontVariantNumeric": "Normal",
-                "LineHeight": 0.7307693,
-                "LetterSpacing": 0,
-                "WordSpacing": 0,
-                "FilterMode": "Bilinear",
-                "FontSmooth": "Auto",
-                "Outline": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,1,1"
-                },
-                "Shadow": {
-                  "Enabled": true,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
-                },
-                "OutlineUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,1,0,1"
-                },
-                "ShadowUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
-                }
-              },
-              "VerticalAlignment": "Center"
-            }
-          ],
-          "Children": []
-        }
-      ]
-    },
-    {
       "__guid": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc",
       "__version": 2,
       "Flags": 0,
@@ -480,7 +380,7 @@
               "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
             },
             "Property": "Position",
-            "Value": "50,0,58"
+            "Value": "194.070374,0,58"
           },
           {
             "Target": {
