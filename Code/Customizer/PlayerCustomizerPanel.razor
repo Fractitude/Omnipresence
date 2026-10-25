@@ -25,7 +25,7 @@
 
 			<div class="side">
 				<div class="tabs">
-					@foreach ( var tab in Enum.GetValues<Tab>() )
+					@foreach ( var tab in Enum.GetValues<Tab>().Where( x => x != Tab.Settings ) )
 					{
 						<div class="tab @(CurrentTab == tab ? "active" : "")" @onclick=@(() => CurrentTab = tab)>
 							<IconPanel class="icon" Text="@GetTabIcon( tab )" />
@@ -175,12 +175,6 @@
 								}
 							</div>
 							break;
-
-						case Tab.Settings:
-							<div class="section-header">Outfit</div>
-							<UIButton Text="Restore the last outfit on start" Icon=@(PlayerCustomizer.RestoreLastOutfit ? "check_box" : "check_box_outline_blank") Active=@PlayerCustomizer.RestoreLastOutfit @onclick=@ToggleRestoreLastOutfit />
-							<label class="note">Puts the outfit applied last back on when the game starts. The menu opens with @PlayerCustomizer.OpenKeyName.</label>
-							break;
 					}
 				</div>
 
@@ -190,7 +184,6 @@
 					<UIButton class="apply" Text="Apply" Icon="check" @onclick=@Apply />
 					<div class="spacer"></div>
 					<UIButton Text="Undress" Icon="accessibility_new" @onclick=@Undress />
-					<UIButton Icon="switch_camera" Tooltip="@(IsThirdPerson ? "Switch to first person" : "Switch to third person")" @onclick=@ToggleView />
 				</div>
 			</div>
 		</div>
@@ -509,16 +502,6 @@
 
 	PlayerController LocalController => Player.FindLocalPlayer()?.Controller;
 
-	bool IsThirdPerson => LocalController?.ThirdPerson ?? false;
-
-	// the same as the "view" input
-	void ToggleView()
-	{
-		var controller = LocalController;
-		if ( controller.IsValid() )
-			controller.ThirdPerson = !controller.ThirdPerson;
-	}
-
 	IEnumerable<CatalogItem> FilteredSkins()
 	{
 		if ( string.IsNullOrWhiteSpace( Search ) )
@@ -704,7 +687,9 @@
 		else
 			Customizer.ApplyOutfit( Draft, DraftColors );
 
-		Customizer.IsOpen = false;
+		// stays open: what was just applied is what Cancel goes back to
+		_worn = Copy( Draft );
+		_wornColors = OutfitColors.Copy( DraftColors );
 	}
 
 	void Cancel()
@@ -810,14 +795,8 @@
 		SetDraft( outfit, false );
 	}
 
-	void ToggleRestoreLastOutfit()
-	{
-		PlayerCustomizer.RestoreLastOutfit = !PlayerCustomizer.RestoreLastOutfit;
-		_revision++;
-	}
-
 	protected override int BuildHash()
 	{
-		return HashCode.Combine( IsOpen, CurrentTab, Search, Scope, Group, SubCategory, Focus, HashCode.Combine( IsThirdPerson, PlayerCustomizer.IconSize, WorkshopItems.Count, _revision ) );
+		return HashCode.Combine( IsOpen, CurrentTab, Search, Scope, Group, SubCategory, Focus, HashCode.Combine( PlayerCustomizer.IconSize, WorkshopItems.Count, _revision ) );
 	}
 }

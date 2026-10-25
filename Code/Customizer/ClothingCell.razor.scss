@@ -7,7 +7,7 @@ ClothingCell
 	height: 84;
 	flex-shrink: 0;
 	border: 1 solid $ui-section-border;
-	border-radius: 2;
+	border-radius: 6;
 	background-color: $ui-tile-bg;
 	cursor: pointer;
 	transition: border-color 0.1s ease;
@@ -111,7 +111,7 @@ ClothingCell
 		height: 16;
 		justify-content: center;
 		align-items: center;
-		border-radius: 2;
+		border-radius: 6;
 		@include ui-selected;
 		font-size: 12;
 		pointer-events: none;

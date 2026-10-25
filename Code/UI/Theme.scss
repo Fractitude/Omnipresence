@@ -9,9 +9,9 @@ $hud-accent: #4d90fc;
 $color-accent: #0094ff;
 $color-text: #fafaff;
 
-$title-font: "Inter";
-$body-font: "Inter";
-$subtitle-font: "Inter";
+$title-font: "Poppins";
+$body-font: "Poppins";
+$subtitle-font: "Poppins";
 
 $ui-mono: "Inconsolata";
 
@@ -30,7 +30,7 @@ $ui-section-gap: 20px;
 	padding: 8px;
 	border: 1px solid $ui-block-border;
 	background-image: linear-gradient( to bottom, $ui-block-top, $ui-block-bottom );
-	border-radius: 2px;
+	border-radius: 6px;
 }
 
 // lists, settings, tool list, etc..
@@ -39,7 +39,7 @@ $ui-section-gap: 20px;
 	color: $ui-text;
 	border: 1px solid $ui-section-border;
 	background-image: linear-gradient( to bottom, $ui-section-top, $ui-section-bottom );
-	border-radius: 2px;
+	border-radius: 6px;
 }
 
 // scrollbar
@@ -73,7 +73,7 @@ $ui-section-gap: 20px;
 	align-items: center;
 	background-color: $ui-input-bg;
 	border: 1px solid $ui-input-border;
-	border-radius: 2px;
+	border-radius: 6px;
 	font-size: 12px;
 	font-weight: 500;
 	color: $ui-text;
@@ -85,7 +85,7 @@ $ui-section-gap: 20px;
 	color: $ui-text;
 	background-image: linear-gradient( to bottom, $ui-button-top 0%, $ui-button-top 46%, $ui-button-bottom 54%, $ui-button-bottom 100% );
 	border: 1px solid $ui-button-border;
-	border-radius: 2px;
+	border-radius: 6px;
 	cursor: pointer;
 
 	&:hover
@@ -150,7 +150,7 @@ $ui-section-gap: 20px;
 	padding: 5px 15px;
 	background-color: rgba( 46, 46, 46, 0.9 );
 	border: 1px solid rgb( 43, 43, 43 );
-	border-radius: 2px;
+	border-radius: 6px;
 	color: rgb( 221, 221, 221 );
 	opacity: 1;
 	transition: opacity 0.04s ease;
@@ -180,7 +180,7 @@ $ui-section-gap: 20px;
 @mixin ui-selectable
 {
 	cursor: pointer;
-	border-radius: 2px;
+	border-radius: 6px;
 
 	&:hover
 	{
@@ -214,14 +214,12 @@ $ui-section-gap: 20px;
 	flex-direction: row;
 	align-items: center;
 	flex-shrink: 0;
-	height: 23px;
-	padding: 0 10px;
-	background-color: $ui-blue;
-	color: white;
-	font-size: 12px;
-	font-weight: 800;
-	border-radius: 2px 2px 0px 0px;
-	text-transform: uppercase;
+	height: 34px;
+	padding: 0 4px;
+	background-color: transparent;
+	color: $ui-text;
+	font-size: 22px;
+	font-weight: 700;
 	white-space: nowrap;
 }
 
@@ -273,7 +271,7 @@ $ui-section-gap: 20px;
 	height: 24px;
 	padding: 0 10px;
 	flex-shrink: 0;
-	border-radius: 2px 2px 0px 0px;
+	border-radius: 6px 6px 0px 0px;
 	font-size: 13px;
 	font-weight: 600;
 	color: $ui-text-on-gray;
@@ -323,7 +321,7 @@ $ui-section-gap: 20px;
 {
 	@include ui-tab;
 	border: 1px solid $ui-tab-border;
-	border-radius: 2px;
+	border-radius: 6px;
 
 	&.active
 	{
@@ -396,7 +394,7 @@ $ui-section-gap: 20px;
 	position: relative;
 	overflow: hidden;
 	border: 1px solid transparent;
-	border-radius: 2px;
+	border-radius: 6px;
 	background-color: $ui-tile-bg;
 	background-position: center;
 	background-size: cover;

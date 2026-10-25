@@ -6,7 +6,7 @@ PresetCard
 	flex-shrink: 0;
 	width: 150;
 	border: 1 solid $ui-section-border;
-	border-radius: 2;
+	border-radius: 6;
 	background-color: $ui-tile-bg;
 	overflow: hidden;
 	transition: border-color 0.1s ease;
@@ -63,7 +63,7 @@ PresetCard
 			height: 18;
 			justify-content: center;
 			align-items: center;
-			border-radius: 2;
+			border-radius: 6;
 			@include ui-selected;
 			font-size: 13;
 			pointer-events: none;

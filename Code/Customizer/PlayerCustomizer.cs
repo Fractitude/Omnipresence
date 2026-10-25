@@ -19,16 +19,11 @@ public sealed class PlayerCustomizer : Component
 	const string PreviewBackgroundCookie = "player_customizer.preview_background";
 	const string SortOrderCookie = "player_customizer.sort_order";
 	const string VerifiedOnlyCookie = "player_customizer.verified_only";
-	const string RestoreLastOutfitCookie = "player_customizer.restore_last_outfit";
 
 	/// <summary>
-	/// Put the outfit applied last back on when the addon spawns.
+	/// The outfit applied last is always put back on when the game starts; players cannot turn it off.
 	/// </summary>
-	public static bool RestoreLastOutfit
-	{
-		get => Game.Cookies.Get( RestoreLastOutfitCookie, true );
-		set => Game.Cookies.Set( RestoreLastOutfitCookie, value );
-	}
+	public static bool RestoreLastOutfit => true;
 
 	/// <summary>
 	/// How the workshop list is sorted, remembered like the spawn menu's.

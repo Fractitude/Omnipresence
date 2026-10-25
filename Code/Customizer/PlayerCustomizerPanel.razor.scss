@@ -22,6 +22,10 @@ PlayerCustomizerPanel
 	{
 		@include ui-block;
 		flex-direction: column;
+		padding: 18px 20px;
+		gap: 10px;
+		border-radius: 10px;
+		backdrop-filter-blur: 14px;
 		width: 1200;
 		height: 736;
 		max-width: 95vw;
@@ -31,7 +35,6 @@ PlayerCustomizerPanel
 		{
 			@include ui-title-bar;
 			justify-content: space-between;
-			font-size: 16;
 
 			> .title
 			{
@@ -208,7 +211,7 @@ PlayerCustomizerPanel
 
 				&:first-child
 				{
-					border-radius: 2 0 0 2;
+					border-radius: 6 0 0 6;
 				}
 
 				&:last-child
@@ -284,7 +287,7 @@ PlayerCustomizerPanel
 		gap: 4;
 		margin: -4 0 10 0;
 		padding: 6;
-		border-radius: 2;
+		border-radius: 6;
 		background-color: $ui-well;
 
 		> .subcategory
@@ -351,7 +354,7 @@ PlayerCustomizerPanel
 			flex-shrink: 0;
 			gap: 8;
 			padding: 4;
-			border-radius: 2;
+			border-radius: 6;
 
 			&:nth-child(even)
 			{
@@ -371,7 +374,7 @@ PlayerCustomizerPanel
 				height: 50;
 				flex-shrink: 0;
 				border: 1 solid $ui-section-border;
-				border-radius: 2;
+				border-radius: 6;
 				background-color: $ui-tile-bg;
 			}
 
