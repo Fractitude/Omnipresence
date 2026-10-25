@@ -9,7 +9,7 @@ namespace Sandbox;
 /// leaves a ragdoll, hands the owner an observer and removes the player until <see cref="GameManager"/> respawns them.
 /// </summary>
 [Alias( "PlayerHealth" )]
-public sealed class Player : Component, Component.IDamageable, IKillSource
+public sealed partial class Player : Component, Component.IDamageable, IKillSource
 {
 	[RequireComponent] public PlayerController Controller { get; set; }
 
@@ -61,6 +61,8 @@ public sealed class Player : Component, Component.IDamageable, IKillSource
 	{
 		if ( Controller.IsValid() && Controller.Renderer.IsValid() )
 			Controller.Renderer.Set( "b_noclip", IsNoclipping );
+
+		UpdateFlashlight();
 
 		if ( !IsLocalPlayer || Input.Suppressed || Input.MouseCursorVisible )
 			return;

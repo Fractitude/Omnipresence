@@ -16,6 +16,16 @@ public struct PlayerDamageParams
 }
 
 /// <summary>
+/// Fired on the player's own machine when they press the flashlight key, before the flashlight toggles. Set
+/// <see cref="Cancelled"/> to true to keep the key for yourself - a vehicle can use it for its headlights.
+/// </summary>
+public class PlayerFlashlightEvent
+{
+	public Player Player { get; init; }
+	public bool Cancelled { get; set; }
+}
+
+/// <summary>
 /// Pre-damage event. Fired before damage is applied. Listeners can modify <see cref="Damage"/>
 /// or set <see cref="Cancelled"/> to block damage entirely.
 /// </summary>
@@ -63,6 +73,7 @@ public static partial class Local
 		void OnSuicide() { }
 		void OnDamaging( PlayerDamageEvent e ) { }
 		void OnKill( PlayerKillEvent e ) { }
+		void OnFlashlight( PlayerFlashlightEvent e ) { }
 	}
 }
 
@@ -80,5 +91,6 @@ public static partial class Global
 		void OnPlayerDamaging( PlayerDamageEvent e ) { }
 		void OnPlayerRespawning( PlayerRespawnEvent e ) { }
 		void OnPlayerKill( PlayerKillEvent e ) { }
+		void OnPlayerFlashlight( PlayerFlashlightEvent e ) { }
 	}
 }
