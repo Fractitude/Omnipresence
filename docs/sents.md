@@ -30,7 +30,7 @@ fix is to compile it as part of this game:
 1. Spawn the sent once (`spawn_sent org.package`), so the engine has downloaded it.
 2. `sent_import org.package` (editor console, `Editor/SentImporter.cs`) writes its source to
    `Code/Sents/Imported/org.package/`. Files another import already has, unchanged, are skipped, because one author's
-   sents often share a library. **Not tested yet**: `crosschainer.hokuto_boxer` was copied there by hand.
+   sents often share a library. Tested on `crosschainer.takeda_ascend`, which shares all 14 files with Hokuto Boxer: nothing is written twice.
 3. Read the code. It runs in the game with no sandbox, and it is now in the repo, so review it before committing.
 4. Fix what does not compile. Most of a sent's code only uses the engine, and then it just works. Where it uses a type
    of the sandbox game (`Player`, `Ownable`, `GameManager`, a sandbox tool), that type has to exist here under the same

@@ -1,52 +1,52 @@
-@using Sandbox
-@using Sandbox.UI
-@using System
-@using System.Globalization
-@namespace CuratedVehicles
-@inherits PanelComponent
-
-<root>
-	@if ( Vehicle.IsValid() && Vehicle.LocalDriver )
-	{
-		var rpmFraction = Math.Clamp( Vehicle.Rpm / Vehicle.MaxRpm, 0, 1 );
-		<div class="speedometer @(rpmFraction >= .9f ? "at-redline" : "")">
-			<svg class="speedometer-dial" src="drift_district/ui/speedometer-dial.svg" />
-			@for ( int i = 0; i < 3; i++ )
-			{
-				var start = 135 + i * 90;
-				var end = Math.Min( 135 + rpmFraction * 270, start + 90 );
-				@if ( end > start ) { <div class="rpm-active-sector" style="@SectorStyle(start, end)"></div> }
-			}
-			@for ( int i = 0; i <= (int)(Vehicle.MaxRpm / 1000); i++ )
-			{
-				var fraction = i * 1000 / Vehicle.MaxRpm;
-				var angle = 135 + fraction * 270;
-				<div class="rpm-tick @(fraction >= .9f ? "redline" : "")" style="@ArcStyle(angle)"></div>
-				<label class="rpm-number @(fraction >= .9f ? "redline-text" : "")" style="@PointStyle(angle, 84.24)">@i</label>
-			}
-			<div class="speed-reading"><label class="rpm-label">RPM ×1000</label><label class="speed">@Math.Round(Vehicle.Speed)</label><label class="speed-unit">KM/H</label><label class="gear">@(Vehicle.Gear < 0 ? "R" : Vehicle.Gear == 0 ? "N" : Vehicle.Gear.ToString())</label></div>
-			<label class="handling-label">@(Vehicle.Drift ? "DRIFT MODE" : "GRIP MODE")</label>
-			<div class="driving-prompts">
-				<div><label class="key">B</label><label>DRIVING MODE</label></div>
-				<div><label class="key">L</label><label>LIGHTS</label></div>
-				<div><label class="key">@Input.GetButtonOrigin("Use")</label><label>EXIT</label></div>
-			</div>
-		</div>
-	}
-</root>
-
-@code
-{
-	[Property] public CuratedVehicle Vehicle { get; set; }
-	private static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
-	private static string PointStyle( double angle, double radius ) => $"left: {Css(151.2 + Math.Cos(angle * Math.PI / 180) * radius)}px; top: {Css(151.2 + Math.Sin(angle * Math.PI / 180) * radius)}px;";
-	private static string ArcStyle( double angle ) => $"{PointStyle(angle, 104.76)} transform: translate(-50%, -50%) rotate({Css(angle)}deg);";
-	private static string SectorStyle( double startAngle, double endAngle )
-	{
-		var start = startAngle * Math.PI / 180;
-		var end = endAngle * Math.PI / 180;
-		return $"border-shape: polygon(50% 50%, {Css(50 + Math.Cos(start) * 75)}% {Css(50 + Math.Sin(start) * 75)}%, {Css(50 + Math.Cos(end) * 75)}% {Css(50 + Math.Sin(end) * 75)}%);";
-	}
-	protected override int BuildHash() => Vehicle.IsValid()
-		? HashCode.Combine( Math.Round(Vehicle.Speed), Math.Round(Vehicle.Rpm / 25), Vehicle.Gear, Vehicle.Mode, Vehicle.LocalDriver ) : 0;
-}
+@using Sandbox
+@using Sandbox.UI
+@using System
+@using System.Globalization
+@namespace CuratedVehicles
+@inherits PanelComponent
+
+<root>
+	@if ( Vehicle.IsValid() && Vehicle.LocalDriver )
+	{
+		var rpmFraction = Math.Clamp( Vehicle.Rpm / Vehicle.MaxRpm, 0, 1 );
+		<div class="speedometer @(rpmFraction >= .9f ? "at-redline" : "")">
+			<svg class="speedometer-dial" src="drift_district/ui/speedometer-dial.svg" />
+			@for ( int i = 0; i < 3; i++ )
+			{
+				var start = 135 + i * 90;
+				var end = Math.Min( 135 + rpmFraction * 270, start + 90 );
+				@if ( end > start ) { <div class="rpm-active-sector" style="@SectorStyle(start, end)"></div> }
+			}
+			@for ( int i = 0; i <= (int)(Vehicle.MaxRpm / 1000); i++ )
+			{
+				var fraction = i * 1000 / Vehicle.MaxRpm;
+				var angle = 135 + fraction * 270;
+				<div class="rpm-tick @(fraction >= .9f ? "redline" : "")" style="@ArcStyle(angle)"></div>
+				<label class="rpm-number @(fraction >= .9f ? "redline-text" : "")" style="@PointStyle(angle, 84.24)">@i</label>
+			}
+			<div class="speed-reading"><label class="rpm-label">RPM ×1000</label><label class="speed">@Math.Round(Vehicle.Speed)</label><label class="speed-unit">KM/H</label><label class="gear">@(Vehicle.Gear < 0 ? "R" : Vehicle.Gear == 0 ? "N" : Vehicle.Gear.ToString())</label></div>
+			<label class="handling-label">@(Vehicle.Drift ? "DRIFT MODE" : "GRIP MODE")</label>
+			<div class="driving-prompts">
+				<div><label class="key">B</label><label>DRIVING MODE</label></div>
+				<div><label class="key">L</label><label>LIGHTS</label></div>
+				<div><label class="key">@Input.GetButtonOrigin("Use")</label><label>EXIT</label></div>
+			</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	[Property] public CuratedVehicle Vehicle { get; set; }
+	private static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
+	private static string PointStyle( double angle, double radius ) => $"left: {Css(151.2 + Math.Cos(angle * Math.PI / 180) * radius)}px; top: {Css(151.2 + Math.Sin(angle * Math.PI / 180) * radius)}px;";
+	private static string ArcStyle( double angle ) => $"{PointStyle(angle, 104.76)} transform: translate(-50%, -50%) rotate({Css(angle)}deg);";
+	private static string SectorStyle( double startAngle, double endAngle )
+	{
+		var start = startAngle * Math.PI / 180;
+		var end = endAngle * Math.PI / 180;
+		return $"border-shape: polygon(50% 50%, {Css(50 + Math.Cos(start) * 75)}% {Css(50 + Math.Sin(start) * 75)}%, {Css(50 + Math.Cos(end) * 75)}% {Css(50 + Math.Sin(end) * 75)}%);";
+	}
+	protected override int BuildHash() => Vehicle.IsValid()
+		? HashCode.Combine( Math.Round(Vehicle.Speed), Math.Round(Vehicle.Rpm / 25), Vehicle.Gear, Vehicle.Mode, Vehicle.LocalDriver ) : 0;
+}
