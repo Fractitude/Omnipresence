@@ -11,7 +11,7 @@ A sent is a prefab published to the cloud as a package of type `sent` (the asset
   prefab where the player looks (500 units, stood on the floor) and `NetworkSpawn`s it.
 - `SentBrowser` (`sents` command, a HUD piece) searches the cloud (`Package.FindAsync( "sort:popular type:sent <text>" )`)
   and shows tiles with thumbnail, title and author. Clicking one spawns it and closes the window; right-click copies its ident
-  or opens its package page. The sidebar filters by tag (`tag:vehicle`, `weapon`, `npc`, `explosives`), and the list loads the
+  or opens its package page. The sidebar filters by tag (`#vehicle`, `#weapon`, `#npc`, `#explosives`; `tag:` finds nothing), and the list loads the
   next 40 when scrolled near the bottom.
 
 ## Who may spawn

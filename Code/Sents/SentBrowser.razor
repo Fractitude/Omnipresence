@@ -179,7 +179,7 @@
 		var query = $"sort:{sort} type:sent";
 
 		if ( !string.IsNullOrEmpty( tag ) )
-			query += $" tag:{tag}";
+			query += $" #{tag}";
 
 		if ( !string.IsNullOrWhiteSpace( filter ) )
 			query += $" {filter.Trim()}";
