@@ -47,6 +47,11 @@ public sealed class PlayerCustomization : Component
 	/// </summary>
 	const float DressAgainAfter = 0.5f;
 
+	/// <summary>
+	/// How long after a dressing the body's bone objects are held to the renderer's pose (see <see cref="OnPreRender"/>).
+	/// </summary>
+	const float DressBoneSync = 1.5f;
+
 	const string Folder = "customization";
 
 	sealed class SavedOutfit
@@ -67,6 +72,7 @@ public sealed class PlayerCustomization : Component
 	bool everDressed;
 	bool dressedAgain;
 	RealTimeSince sinceDressed;
+	RealTimeUntil syncBonesUntil;
 
 	/// <summary>
 	/// Makes the component on a player's object, on the host, and has the clients get it.
@@ -94,6 +100,28 @@ public sealed class PlayerCustomization : Component
 
 		if ( Loaded )
 			Dress();
+	}
+
+	/// <summary>
+	/// While a body is being dressed its bone objects (the hand a weapon is held by, which follow the animation) can stay at
+	/// the bind pose for a while, and the weapon in the hand was drawn in a T-pose until they caught up. For the time
+	/// after a dressing they are put where the renderer says the bones are, just before drawing.
+	/// </summary>
+	protected override void OnPreRender()
+	{
+		if ( syncBonesUntil <= 0 )
+			return;
+
+		var body = GetComponentInChildren<Dresser>( true )?.BodyTarget;
+
+		if ( !body.IsValid() )
+			return;
+
+		foreach ( var bone in body.GameObject.GetAllObjects( false ).Where( x => x.Flags.HasFlag( GameObjectFlags.Bone ) ) )
+		{
+			if ( body.TryGetBoneTransform( bone.Name, out var pose ) && (bone.WorldPosition - pose.Position).LengthSquared > 0.01f )
+				bone.WorldTransform = bone.WorldTransform.WithPosition( pose.Position ).WithRotation( pose.Rotation );
+		}
 	}
 
 	// The host
@@ -245,9 +273,11 @@ public sealed class PlayerCustomization : Component
 		wornOutfit = outfit;
 		wornColors = colors;
 		wornWorkshop = workshop;
+		// Only the first dressing after the body appears is repeated; later changes are dressed once.
+		dressedAgain = everDressed;
 		everDressed = true;
 		sinceDressed = 0;
-		dressedAgain = false;
+		syncBonesUntil = DressBoneSync;
 
 		if ( GetComponentInChildren<Dresser>( true ) is { IsValid: true } dresser )
 			_ = Put( dresser, outfit, colors, workshop );
