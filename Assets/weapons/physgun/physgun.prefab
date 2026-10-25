@@ -20,6 +20,8 @@
         "__guid": "45dbfc9d-3b70-4986-994e-905d4f1670ba",
         "__enabled": true,
         "Flags": 0,
+        "AllowChangingDistance": true,
+        "AllowThrowing": true,
         "AttackSound": null,
         "AutoReload": true,
         "Ballistics": {
@@ -48,14 +50,13 @@
           "component_type": "LineRenderer"
         },
         "ButtonInSound": {
-          "Id": "8ed6cc04-facb-48f1-8f74-dea34d80dbf0",
+          "Id": "739fc95c-c466-4298-9a3f-601465ac489f",
           "Path": "weapons/physgun/sounds/physgun.button.in.1.sound"
         },
         "ButtonOutSound": {
-          "Id": "c01b704f-2a9a-474b-8100-f785bb5443d7",
+          "Id": "cd8385ec-52b0-4960-94db-75cf9417fcfe",
           "Path": "weapons/physgun/sounds/physgun.button.out.1.sound"
         },
-        "CanAim": true,
         "CanCancelReload": true,
         "ClipMaxSize": 30,
         "DeployTime": 0.2,
@@ -107,9 +108,6 @@
           "_type": "gameobject",
           "prefab": "weapons/physgun/effects/beam-end.prefab"
         },
-        "ExtendInput": {
-          "Action": null
-        },
         "FirstShellReloadTime": 0,
         "FreezeEffectPrefab": {
           "_type": "gameobject",
@@ -120,38 +118,43 @@
           "prefab": "weapons/physgun/effects/grab.prefab"
         },
         "GravityDropSound": {
-          "Id": "9994f4f9-0b01-4afb-ad35-a911006cd27b",
+          "Id": "8bfd160a-e76d-4fd6-b668-b3387c38cbfa",
           "Path": "weapons/physgun/sounds/gravgun.shoot.drop.sound"
         },
         "GravityDrySound": {
-          "Id": "e5adbd21-eba3-4e5c-8c8f-46ec5f7ca42f",
+          "Id": "d4d72e75-1272-4cc1-a3e0-995e68789afa",
           "Path": "weapons/physgun/sounds/gravgun.shoot.dry.sound"
         },
         "GravityHoldSound": {
-          "Id": "a9b4e81b-ee16-45e0-92f9-4595281d5a09",
+          "Id": "0628adca-3fe1-41a6-ac62-cb60abd8704d",
           "Path": "weapons/physgun/sounds/gravgun.hold.sound"
         },
         "GravityLaunchSound": {
-          "Id": "8dd915d9-a147-4121-9339-6d36ecac4353",
+          "Id": "5916486f-a1a6-44da-877f-78a10ced0291",
           "Path": "weapons/physgun/sounds/gravgun.shoot.launch.sound"
         },
         "GravityLookCloseSound": {
-          "Id": "911e2e0d-fef4-434f-9de5-135f582b65ac",
+          "Id": "384932a1-d435-4e63-9d06-86f5c447ca08",
           "Path": "weapons/physgun/sounds/gravgun.look.close.sound"
         },
         "GravityLookDropCooldown": 0.5,
         "GravityLookOpenSound": {
-          "Id": "bbb470b2-01e4-4fd3-be53-c4d1b9700533",
+          "Id": "5f81ab3e-3797-45e8-a55e-bae2c34195cc",
           "Path": "weapons/physgun/sounds/gravgun.look.open.sound"
         },
         "GravityPullSound": {
-          "Id": "577c6b4b-dd28-43ab-9ab4-795411f76cf0",
+          "Id": "00d8826f-c8c9-404d-99f1-4f328b26558f",
           "Path": "weapons/physgun/sounds/gravgun.shoot.pull.sound"
         },
         "Handedness": "Both",
         "HoldBone": "hold_r",
         "HoldType": "Physgun",
         "IncrementalReloading": false,
+        "LaunchForce": 500,
+        "LaunchHeavyMass": 100,
+        "LaunchHeavyStrength": 0.5,
+        "MaxHoldAcceleration": 5000,
+        "MaxMass": 100,
         "Npc": {
           "MinRange": 0,
           "MaxRange": 1400,
@@ -176,21 +179,25 @@
         "PrimaryAmmoType": null,
         "PrimaryAutomatic": true,
         "PrimaryDelay": 0.1,
-        "Range": 8196,
+        "PullForce": 100,
+        "Range": 150,
         "ReleasedSound": {
-          "Id": "fe22f215-8ed0-49b4-8f4c-5596d93586a1",
+          "Id": "f1a67caf-0a73-4464-80d1-4405fe17c065",
           "Path": "weapons/physgun/sounds/physgun.shoot.end.sound"
         },
         "ReloadStartTime": 0,
         "ReloadTime": 2,
-        "RetractInput": {
-          "Action": null
-        },
         "SecondaryAmmoType": null,
         "SecondaryAutomatic": false,
         "SecondaryClipSize": -1,
         "SecondaryDefaultClip": -1,
         "SecondaryDelay": 0.5,
+        "SecondaryInput": {
+          "Action": null
+        },
+        "ShootInput": {
+          "Action": null
+        },
         "SlotOrder": 0,
         "StartingAmmo": 0,
         "SuccessBeamEffect": null,
@@ -242,7 +249,7 @@
         "Friction": null,
         "IsTrigger": false,
         "Model": {
-          "Id": "9b88ece6-5987-4a58-9fc7-7f3be211c5ca",
+          "Id": "1130e2ac-6ee3-4cca-be30-0589cb2ac33e",
           "Path": "models/weapons/sbox_physgun/w_physgun.vmdl"
         },
         "OnComponentDestroy": null,
@@ -389,7 +396,7 @@
                 "compiled": "textures/generated/random/de57f30dc50aa163.vtex"
               },
               "Material": {
-                "Id": "8c9d3bed-bd77-4d4e-921d-093f0664857a",
+                "Id": "0dd1b447-b1b7-416b-ab40-35a282acc8ab",
                 "Path": "weapons/physgun/physgun_beam.vmat"
               },
               "WorldSpace": true,
@@ -476,7 +483,7 @@
             "ReverbEnabled": false,
             "ReverbOverride": false,
             "SoundEvent": {
-              "Id": "891eb113-09c5-4a78-8c82-6959aa706a4f",
+              "Id": "3fc08067-47a2-4b14-8ef5-358ff1d2d1ae",
               "Path": "weapons/physgun/sounds/physgun.active.loop.sound"
             },
             "SoundOverride": false,
@@ -528,7 +535,7 @@
             "ReverbEnabled": false,
             "ReverbOverride": false,
             "SoundEvent": {
-              "Id": "20359398-ea43-4d92-9b7a-2cfe372897da",
+              "Id": "0d4b18d9-1fd3-4c0c-8eea-95e4d2c7d453",
               "Path": "weapons/physgun/sounds/physgun.shoot.start.sound"
             },
             "SoundOverride": false,
@@ -599,7 +606,7 @@
             "ReverbEnabled": false,
             "ReverbOverride": false,
             "SoundEvent": {
-              "Id": "74a1a755-3e42-4bb0-9ee0-cb2471031b36",
+              "Id": "9d119327-2f33-4f19-972a-156f1acbeb99",
               "Path": "weapons/physgun/sounds/physgun.idle.sound"
             },
             "SoundOverride": false,
@@ -645,7 +652,7 @@
             "MaterialOverride": null,
             "Materials": null,
             "Model": {
-              "Id": "9b88ece6-5987-4a58-9fc7-7f3be211c5ca",
+              "Id": "1130e2ac-6ee3-4cca-be30-0589cb2ac33e",
               "Path": "models/weapons/sbox_physgun/w_physgun.vmdl"
             },
             "Morphs": {},
@@ -748,7 +755,7 @@
                 "__guid": "c0c2a398-6d71-418b-b883-12ee49db7ac8",
                 "__version": 2,
                 "__Prefab": {
-                  "Id": "9ae80f7b-f980-48f9-80a7-d10a4a34927a",
+                  "Id": "e2c3442b-3d8e-4f97-918a-a894b74d6b52",
                   "Path": "weapons/physgun/effects/wm-glow.prefab"
                 },
                 "__PrefabInstancePatch": {

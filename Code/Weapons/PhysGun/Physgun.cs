@@ -12,6 +12,17 @@ public partial class Physgun
 
 	[Property, RequireComponent] public HighlightOutline BeamHighlight { get; set; }
 
+	/// <summary>
+	/// Whether primary fire launches an object held in gravity gun mode. When off, it can only be dropped.
+	/// </summary>
+	[Property] public bool AllowThrowing { get; set; } = false;
+
+	/// <summary>
+	/// Whether a held object's distance can be changed (scroll wheel, and W/S while rotating). The distance
+	/// never goes beyond <see cref="Range"/>.
+	/// </summary>
+	[Property] public bool AllowChangingDistance { get; set; } = true;
+
 	[Property, Group( "Sound" )] SoundEvent ReleasedSound { get; set; }
 	[Property, Group( "Sound" )] SoundEvent ButtonInSound { get; set; }
 	[Property, Group( "Sound" )] SoundEvent ButtonOutSound { get; set; }
@@ -231,12 +242,53 @@ public partial class Physgun
 	/// <summary>
 	/// The force applied to pull objects to us.
 	/// </summary>
-	static float PullForce => 1000.0f;
+	[Property, Group( "Gravity" )] public float PullForce { get; set; } = 1000.0f;
 
 	/// <summary>
 	/// The force applied when launching grabbed objects.
 	/// </summary>
-	static float LaunchForce => 2000.0f;
+	[Property, Group( "Gravity" )] public float LaunchForce { get; set; } = 2000.0f;
+
+	/// <summary>
+	/// How strongly an object of <see cref="LaunchHeavyMass"/> or more is launched, as a fraction of
+	/// <see cref="LaunchForce"/>. 1 launches everything at the same speed; 0.5 launches the heaviest at half of
+	/// it. Lighter objects scale in between by mass, so they fly further.
+	/// </summary>
+	[Property, Group( "Gravity" )] public float LaunchHeavyStrength { get; set; } = 1.0f;
+
+	/// <summary>
+	/// The mass at which <see cref="LaunchHeavyStrength"/> is fully applied, in kilograms.
+	/// </summary>
+	[Property, Group( "Gravity" )] public float LaunchHeavyMass { get; set; } = 200.0f;
+
+	float GetLaunchMassScale( Rigidbody body )
+	{
+		if ( !body.IsValid() || LaunchHeavyMass <= 0.0f ) return 1.0f;
+
+		return MathX.Lerp( 1.0f, LaunchHeavyStrength, (body.Mass / LaunchHeavyMass).Clamp( 0.0f, 1.0f ) );
+	}
+
+	/// <summary>
+	/// The heaviest object that can be grabbed or pulled, in kilograms. 0 means no limit. A ragdoll counts as
+	/// the sum of its bodies.
+	/// </summary>
+	[Property] public float MaxMass { get; set; } = 0.0f;
+
+	/// <summary>
+	/// The most acceleration the hold applies to a grabbed object, so the most it can shove other objects with.
+	/// Lower values make a held object push weakly and lag behind your aim when blocked.
+	/// </summary>
+	[Property] public float MaxHoldAcceleration { get; set; } = 700000.0f;
+
+	bool IsTooHeavy( Rigidbody body )
+	{
+		if ( MaxMass <= 0.0f || !body.IsValid() ) return false;
+
+		var ragdoll = GetRagdoll( body );
+		var mass = ragdoll.IsValid() ? ragdoll.Bodies.Sum( x => x.Component.IsValid() ? x.Component.Mass : 0.0f ) : body.Mass;
+
+		return mass > MaxMass;
+	}
 
 	/// <summary>
 	/// The distance at which we'll grab an object when pulling it towards us.
@@ -361,9 +413,9 @@ public partial class Physgun
 
 			if ( _state.Pulling )
 			{
-				if ( Input.Pressed( "attack1" ) )
+				if ( AllowThrowing && Input.Pressed( "attack1" ) )
 				{
-					var force = CurrentAimTransform.Rotation.Forward * LaunchForce;
+					var force = CurrentAimTransform.Rotation.Forward * LaunchForce * GetLaunchMassScale( _state.Body );
 					Launch( _state.Body, force );
 					PlayGravityLaunchSound();
 
@@ -398,11 +450,10 @@ public partial class Physgun
 					return;
 				}
 
-				if ( !Input.MouseWheel.IsNearZeroLength )
+				if ( AllowChangingDistance && !Input.MouseWheel.IsNearZeroLength )
 				{
 					var state = _state;
-					state.GrabDistance += Input.MouseWheel.y * 20.0f;
-					state.GrabDistance = MathF.Max( 0.0f, state.GrabDistance );
+					state.GrabDistance = (state.GrabDistance + Input.MouseWheel.y * 20.0f).Clamp( 0.0f, Range );
 
 					_state = default;
 					_state = state;
@@ -419,10 +470,9 @@ public partial class Physgun
 				var state = _state;
 
 				// Only beam grabs allow W/S to adjust the holding distance.
-				if ( !state.Pulling )
+				if ( AllowChangingDistance && !state.Pulling )
 				{
-					state.GrabDistance += move.x * KeyboardMoveSpeed * Time.Delta;
-					state.GrabDistance = MathF.Max( 0.0f, state.GrabDistance );
+					state.GrabDistance = (state.GrabDistance + move.x * KeyboardMoveSpeed * Time.Delta).Clamp( 0.0f, Range );
 				}
 
 				if ( _isSnapping )
@@ -558,7 +608,6 @@ public partial class Physgun
 
 	Vector3 _massCenterOffset;
 
-	const float MaxLinearAcceleration = 700000.0f;
 
 	/// <summary>
 	/// The object our joint is moving
@@ -656,10 +705,10 @@ public partial class Physgun
 
 			var point1 = new PhysicsPoint( _body );
 			var point2 = new PhysicsPoint( body, body.LocalMassCenter );
-			var maxForce = body.Mass * MaxLinearAcceleration;
+			var maxForce = body.Mass * MaxHoldAcceleration;
 
 			var inertia = body.Inertia;
-			var maxTorque = MaxLinearAcceleration * MathF.Sqrt( body.Mass * MathF.Max( inertia.x, MathF.Max( inertia.y, inertia.z ) ) );
+			var maxTorque = MaxHoldAcceleration *MathF.Sqrt( body.Mass * MathF.Max( inertia.x, MathF.Max( inertia.y, inertia.z ) ) );
 
 			_joint = PhysicsJoint.CreateControl( point1, point2 );
 			_joint.LinearSpring = new PhysicsSpring( 32, 4, maxForce );
@@ -711,7 +760,10 @@ public partial class Physgun
 		get
 		{
 			var ray = AimRay;
-			return new Transform( ray.Position, Rotation.LookAt( ray.Forward ) );
+
+			// In third person the aim ray starts at the camera; hold from the player's eyes, as in first person
+			var position = HasOwner ? Owner.EyeTransform.Position : ray.Position;
+			return new Transform( position, Rotation.LookAt( ray.Forward ) );
 		}
 	}
 
@@ -754,6 +806,7 @@ public partial class Physgun
 		}
 
 		if ( !rb.IsValid() || !rb.PhysicsBody.IsValid() ) return false;
+		if ( IsTooHeavy( rb ) ) return false;
 
 		var physicsBody = rb.PhysicsBody;
 		var go = physicsBody.GameObject;
