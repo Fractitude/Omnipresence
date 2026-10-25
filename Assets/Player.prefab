@@ -183,23 +183,6 @@
         "SwimLevel": 0.7
       },
       {
-        "__type": "Sandbox.MoveModeHover",
-        "__guid": "92e64e48-85ec-4531-a0c0-7743025e8a95",
-        "__enabled": true,
-        "Flags": 0,
-        "DoubleTapTime": 0.3,
-        "FastHoverSpeed": 450,
-        "HoverSpeed": 250,
-        "OnComponentDestroy": null,
-        "OnComponentDisabled": null,
-        "OnComponentEnabled": null,
-        "OnComponentFixedUpdate": null,
-        "OnComponentStart": null,
-        "OnComponentUpdate": null,
-        "Priority": 20,
-        "Responsiveness": 6
-      },
-      {
         "__type": "Sandbox.Movement.MoveModeLadder",
         "__guid": "b12cce1e-3e81-4fb5-89b9-43b3b081a5eb",
         "__enabled": true,
