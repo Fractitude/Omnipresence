@@ -22,7 +22,7 @@ Changed from upstream: `Player` is the engine's `PlayerController`, no `Ownable`
 
 ## The test NPC
 
-`spawn_gunman` spawns `Assets/npcs/gunman.prefab`, a hostile gunman with a Glock (`WeaponChoices`; the weapon is cloned onto the NPC before it is network spawned). It sees 1500 units (`CombatNpc.SightRange`), hates players, and closes in, fires bursts and sometimes strafes. Hurt NPCs turn on whoever hit them; a dead one drops its gun and a ragdoll.
+`spawn_gunman` spawns `Assets/npcs/gunman.prefab`, a hostile gunman (the human male citizen model, in one of six outfits: army, raider, biker, riot, street, drifter, with one of five faces, picked by `NpcOutfits`) with a Glock (`WeaponChoices`; the weapon is cloned onto the NPC before it is network spawned). It sees 1500 units (`CombatNpc.SightRange`), hates players, and closes in, fires bursts and sometimes strafes. Hurt NPCs turn on whoever hit them; a dead one drops its gun and a ragdoll.
 
 - **NPCs walk on the navmesh**, so the scene's NavMesh must be enabled. It is on in `playground.scene` and off in the other scenes.
 - A player counts as hostile only if its root has the tag `player`.

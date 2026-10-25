@@ -3,7 +3,7 @@
     "__guid": "616fda6a-012b-444e-947e-031b99743083",
     "__version": 2,
     "Flags": 0,
-    "Name": "combat_npc",
+    "Name": "gunman",
     "Position": "0,0,0",
     "Rotation": "0,0,0,1",
     "Scale": "1,1,1",
@@ -22,8 +22,17 @@
         "Flags": 0,
         "Acceleration": 250,
         "AllowDefaultArea": true,
+        "AllowedAreas": [],
+        "AutoTraverseLinks": true,
+        "ForbiddenAreas": [],
         "Height": 64,
         "MaxSpeed": 120,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
         "Radius": 16,
         "Separation": 0.25,
         "UpdatePosition": true,
@@ -35,28 +44,239 @@
         "__enabled": true,
         "Flags": 0,
         "Center": "0,0,37.5",
+        "ColliderFlags": 0,
+        "Elasticity": null,
+        "Friction": null,
         "IsTrigger": false,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OnObjectTriggerEnter": null,
+        "OnObjectTriggerExit": null,
+        "OnTriggerEnter": null,
+        "OnTriggerExit": null,
+        "RollingResistance": null,
         "Scale": "25,25,75",
-        "Static": false
+        "Static": false,
+        "Surface": null,
+        "SurfaceVelocity": "0,0,0"
       },
       {
         "__type": "Sandbox.Npcs.CombatNpc.CombatNpc",
         "__guid": "f0a0bc75-cf95-4f56-bbaf-756027446658",
         "__enabled": true,
         "Flags": 0,
+        "AimSpreadScale": 1,
+        "CalloutRange": 1500,
         "DisplayName": "Gunman",
-        "Health": 100,
+        "DroppedWeaponLifetime": 20,
+        "EngageSpeed": 180,
+        "FatalImpactSpeed": 1100,
+        "FollowDistance": 150,
         "Friendly": false,
+        "Health": 100,
+        "MaxSafeImpactSpeed": 350,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "PatrolRadius": 400,
+        "Patrols": true,
+        "PatrolSpeed": 85,
+        "ReactionTimeAlert": "0.5,0.899999976",
+        "ReactionTimeRelaxed": "1,1.60000002",
+        "RelaxDelay": 5,
         "Renderer": {
           "_type": "component",
           "component_id": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
           "go": "406225df-2b0c-4bf3-9bfd-8c4474140497",
           "component_type": "SkinnedModelRenderer"
         },
+        "SearchSpeed": 85,
+        "SearchTimeout": 8,
+        "ShowDebugOverlay": false,
+        "SightRange": 1500,
+        "SpeedVariation": 0.05,
+        "Weapon": null,
         "WeaponChoices": [
           {
             "_type": "gameobject",
             "prefab": "weapons/glock/glock.prefab"
+          }
+        ]
+      },
+      {
+        "__type": "Sandbox.Npcs.Layers.SensesLayer",
+        "__guid": "912eaf85-41e0-4631-bc86-d9e2d3f10ef2",
+        "__enabled": true,
+        "Flags": 0,
+        "FieldOfView": 200,
+        "HearingRange": 300,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "QuietSpeed": 120,
+        "ScanTags": "player,npc",
+        "SightRange": 500
+      },
+      {
+        "__type": "Sandbox.Npcs.Layers.NavigationLayer",
+        "__guid": "961e1a08-aa80-4339-8642-3debc14576d3",
+        "__enabled": true,
+        "Flags": 0,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "RunDistance": 200,
+        "RunSpeed": 190,
+        "StopDistance": 10,
+        "TurnSpeed": 4
+      },
+      {
+        "__type": "Sandbox.Npcs.Layers.AnimationLayer",
+        "__guid": "c144b242-de62-4cb4-bac6-6a0777b8f2ef",
+        "__enabled": true,
+        "Flags": 0,
+        "EnableFootsteps": true,
+        "FootstepVolume": 1,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
+      },
+      {
+        "__type": "Sandbox.Npcs.Layers.SpeechLayer",
+        "__guid": "925231b0-2477-427f-a7d5-ea5a3daf3ca8",
+        "__enabled": true,
+        "Flags": 0,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
+      },
+      {
+        "__type": "Sandbox.Npcs.NpcOutfits",
+        "__guid": "bbfa2e69-2a3a-4d96-8b95-ea2b9e1de3b0",
+        "__enabled": true,
+        "Flags": 0,
+        "Dresser": {
+          "_type": "component",
+          "component_id": "4c0de31d-70c5-4e65-9b9c-a2d01827acd2",
+          "go": "406225df-2b0c-4bf3-9bfd-8c4474140497",
+          "component_type": "Dresser"
+        },
+        "Outfits": [
+          {
+            "Name": "Army",
+            "Clothing": [
+              "models/citizen_clothes/hat/tactical_helmet/tactical_helmet_army.clothing",
+              "models/citizen_clothes/vest/tactical_vest/models/tactical_vest_army.clothing",
+              "models/citizen_clothes/shirt/army_shirt/army_shirt.clothing",
+              "models/citizen_clothes/trousers/cargopants/cargo_pants_army.clothing",
+              "models/citizen_clothes/shoes/boots/army_boots.clothing"
+            ]
+          },
+          {
+            "Name": "Raider",
+            "Clothing": [
+              "models/citizen_clothes/hat/balaclava/balaclava.clothing",
+              "models/citizen_clothes/jacket/brown_leather_jacket/black_leather_jacket.clothing",
+              "models/citizen_clothes/shirt/tshirt/tshirt.clothing",
+              "models/citizen_clothes/trousers/jeans/jeans_black.clothing",
+              "models/citizen_clothes/shoes/boots/black_boots.clothing"
+            ]
+          },
+          {
+            "Name": "Biker",
+            "Clothing": [
+              "models/citizen_clothes/hat/bandana_mask/bandana_mask.clothing",
+              "models/citizen_clothes/jacket/biker_jacket/biker_jacket.clothing",
+              "models/citizen_clothes/shirt/tshirt/tshirt.clothing",
+              "models/citizen_clothes/trousers/loosejeans/loose_jeans.clothing",
+              "models/citizen_clothes/shoes/boots/black_boots.clothing"
+            ]
+          },
+          {
+            "Name": "Riot",
+            "Clothing": [
+              "models/citizen_clothes/hat/tactical_helmet/tactical_helmet.clothing",
+              "models/citizen_clothes/vest/tactical_vest/models/tactical_vest.clothing",
+              "models/citizen_clothes/jacket/hoodie/hoodie_black.clothing",
+              "models/citizen_clothes/trousers/cargopants/brown_cargo_pants.clothing",
+              "models/citizen_clothes/shoes/boots/black_boots.clothing"
+            ]
+          },
+          {
+            "Name": "Street",
+            "Clothing": [
+              "models/citizen_clothes/hat/baseball_cap/baseball_cap_black.clothing",
+              "models/citizen_clothes/jacket/bomber_jacket/bomber_jacket.clothing",
+              "models/citizen_clothes/shirt/polo_shirt/polo_shirt.clothing",
+              "models/citizen_clothes/trousers/jeans/jeans.clothing",
+              "models/citizen_clothes/shoes/sneakers/sneakers.clothing"
+            ]
+          },
+          {
+            "Name": "Drifter",
+            "Clothing": [
+              "models/citizen_clothes/hat/beanie/beanie_green.clothing",
+              "models/citizen_clothes/jacket/winter_coat/winter_coat.clothing",
+              "models/citizen_clothes/shirt/flannel_shirt/flannel_shirt.clothing",
+              "models/citizen_clothes/trousers/trackiebottoms/trackie_bottoms_black.clothing",
+              "models/citizen_clothes/shoes/boots/army_boots.clothing"
+            ]
+          }
+        ],
+        "FacialAppearances": [
+          {
+            "Name": "Buzz",
+            "Head": "models/citizen_clothes/body/human01.clothing",
+            "Hair": "models/citizen_clothes/hair/hair_thinning_short/thinning_short.clothing",
+            "Beard": null,
+            "HairTint": 0.9
+          },
+          {
+            "Name": "Stubble",
+            "Head": "models/citizen_clothes/body/human05.clothing",
+            "Hair": "models/citizen_clothes/hair/hair_thinning_short/thinning_short.clothing",
+            "Beard": "models/citizen_clothes/hair/medium_beard/medium_beard.clothing",
+            "HairTint": 0.8
+          },
+          {
+            "Name": "Goatee",
+            "Head": "models/citizen_clothes/body/human07.clothing",
+            "Hair": "models/citizen_clothes/hair/hair_thinning_short/thinning_short.clothing",
+            "Beard": "models/citizen_clothes/hair/goatee/goatee.clothing",
+            "HairTint": 0.8
+          },
+          {
+            "Name": "Slick",
+            "Head": "models/citizen_clothes/body/human03.clothing",
+            "Hair": "models/citizen_clothes/hair/hair_slicked_back_balding/hair_slicked_back_balding.clothing",
+            "Beard": "models/citizen_clothes/hair/handlebar_moustache/handlebar_moustache.clothing",
+            "HairTint": 0.75
+          },
+          {
+            "Name": "Grey",
+            "Head": "models/citizen_clothes/body/human06.clothing",
+            "Hair": "models/citizen_clothes/hair/hair_balding/hair_baldingbrown.clothing",
+            "Beard": "models/citizen_clothes/hair/moustache/moustache.clothing",
+            "HairTint": 0.0
           }
         ]
       }
@@ -83,16 +303,52 @@
             "__guid": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
             "__enabled": true,
             "Flags": 0,
+            "AnimationGraph": null,
+            "BodyGroups": 3746,
+            "BoneMergeTarget": null,
+            "CreateAttachments": false,
             "CreateBoneObjects": true,
-            "Model": "models/citizen/citizen.vmdl",
-            "UseAnimGraph": true,
-            "Tint": "1,1,1,1"
+            "DeformationMode": "Normal",
+            "LodOverride": null,
+            "MaterialGroup": "skin_light",
+            "MaterialOverride": null,
+            "Materials": null,
+            "Model": "models/citizen_human/citizen_human_male.vmdl",
+            "Morphs": {},
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "Parameters": {},
+            "PlaybackRate": 1,
+            "RenderOptions": {
+              "GameLayer": true,
+              "OverlayLayer": false,
+              "BloomLayer": false,
+              "AfterUILayer": false
+            },
+            "RenderType": "On",
+            "Sequence": {
+              "Name": null,
+              "Looping": true,
+              "Blending": false
+            },
+            "Tint": "1,1,1,1",
+            "UseAnimGraph": true
           },
           {
             "__type": "Sandbox.ModelHitboxes",
             "__guid": "3c1c16ec-4cde-4282-81a1-f72023bcc34c",
             "__enabled": true,
             "Flags": 0,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
             "Renderer": {
               "_type": "component",
               "component_id": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
@@ -103,11 +359,63 @@
               "_type": "gameobject",
               "go": "616fda6a-012b-444e-947e-031b99743083"
             }
+          },
+          {
+            "__type": "Sandbox.Dresser",
+            "__guid": "4c0de31d-70c5-4e65-9b9c-a2d01827acd2",
+            "__enabled": true,
+            "Flags": 0,
+            "ApplyHeightScale": true,
+            "BodyTarget": {
+              "_type": "component",
+              "component_id": "2ab27dae-45a7-43a7-a56d-cac806ddb76a",
+              "go": "406225df-2b0c-4bf3-9bfd-8c4474140497",
+              "component_type": "SkinnedModelRenderer"
+            },
+            "Clothing": [
+              {
+                "Clothing": "models/citizen_clothes/hat/tactical_helmet/tactical_helmet_army.clothing"
+              },
+              {
+                "Clothing": "models/citizen_clothes/vest/tactical_vest/models/tactical_vest_army.clothing"
+              },
+              {
+                "Clothing": "models/citizen_clothes/shirt/army_shirt/army_shirt.clothing"
+              },
+              {
+                "Clothing": "models/citizen_clothes/trousers/cargopants/cargo_pants_army.clothing"
+              },
+              {
+                "Clothing": "models/citizen_clothes/shoes/boots/army_boots.clothing"
+              }
+            ]
           }
         ],
         "Children": []
       }
-    ]
+    ],
+    "__properties": {
+      "NetworkInterpolation": true,
+      "PhysicsMode": "Physics3D",
+      "TimeScale": 1,
+      "WantsSystemScene": true,
+      "Metadata": {},
+      "NavMesh": {
+        "Enabled": false,
+        "IncludeStaticBodies": true,
+        "IncludeKeyframedBodies": true,
+        "EditorAutoUpdate": false,
+        "AgentHeight": 64,
+        "AgentRadius": 16,
+        "AgentStepSize": 18,
+        "AgentMaxSlope": 40,
+        "ExcludedBodies": "",
+        "IncludedBodies": "",
+        "DeferGeneration": false,
+        "CustomBounds": false
+      }
+    },
+    "__variables": []
   },
   "ResourceVersion": 2,
   "ShowInMenu": false,
