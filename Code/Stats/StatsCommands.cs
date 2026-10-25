@@ -117,6 +117,51 @@ public static class StatsCommands
 	}
 
 	/// <summary>
+	/// Bans a Steam id (see <c>players</c> or <c>stats_show</c>) and kicks them if connected: <c>ban 7656119… "cheating"</c>.
+	/// </summary>
+	[ConCmd( "ban" )]
+	public static void Ban( ulong steamId, string reason = "" )
+	{
+		if ( !Networking.IsHost )
+		{
+			Log.Info( "Bans are kept by the host" );
+			return;
+		}
+
+		var name = StatsLog.Find( steamId )?.Name ?? steamId.ToString();
+
+		Log.Info( GameManager.Current?.Ban( steamId, name, reason ) == true
+			? $"Banned {name} ({steamId})"
+			: $"{steamId} is already banned" );
+	}
+
+	/// <summary>
+	/// Lifts the ban on a Steam id: <c>unban 7656119…</c>. With no id, lists everyone banned.
+	/// </summary>
+	[ConCmd( "unban" )]
+	public static void Unban( ulong steamId = 0 )
+	{
+		if ( !Networking.IsHost )
+		{
+			Log.Info( "Bans are kept by the host" );
+			return;
+		}
+
+		if ( steamId == 0 )
+		{
+			var all = BanList.All.ToList();
+			Log.Info( $"{all.Count} banned. Run unban <steamId> to lift one:" );
+
+			foreach ( var b in all )
+				Log.Info( $"  {b.SteamId}  {b.Name}  {b.Date:u}  {b.Reason}" );
+
+			return;
+		}
+
+		Log.Info( BanList.Remove( steamId ) ? $"Unbanned {steamId}" : $"{steamId} is not banned" );
+	}
+
+	/// <summary>
 	/// One line per saved player: the id to pass to <c>stats_show</c>, the name and the playtime.
 	/// </summary>
 	static void ListSaved()

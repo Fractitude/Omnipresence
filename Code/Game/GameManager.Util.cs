@@ -57,6 +57,39 @@ public sealed partial class GameManager
 	}
 
 	/// <summary>
+	/// Bans a Steam id, kicks them if connected, and writes it in the stats log. <paramref name="by"/> is the admin who
+	/// asked, or null for the server itself. False if they are already banned.
+	/// </summary>
+	public bool Ban( ulong steamId, string name, string reason = "", Connection by = null )
+	{
+		Assert.True( Networking.IsHost, "Only the host may ban players." );
+
+		var connection = Connection.All.FirstOrDefault( c => c.SteamId == steamId );
+		name = connection?.DisplayName ?? name;
+
+		if ( !BanList.Add( steamId, name, reason, by?.SteamId ?? 0 ) )
+			return false;
+
+		StatsLog.Banned( steamId, name, reason, by );
+		StatsLog.Flush();
+
+		Notify( string.IsNullOrWhiteSpace( reason ) ? $"{name} was banned" : $"{name} was banned: {reason}" );
+		connection?.Kick( string.IsNullOrWhiteSpace( reason ) ? "Banned" : $"Banned: {reason}" );
+		return true;
+	}
+
+	/// <summary>
+	/// RPC to ban a player. Caller must have admin permission.
+	/// </summary>
+	[Rpc.Host]
+	public static void RpcBanPlayer( Connection target, string reason = "" )
+	{
+		if ( !Rpc.Caller.HasPermission( "admin" ) ) return;
+
+		Current?.Ban( target.SteamId, target.DisplayName, reason, Rpc.Caller );
+	}
+
+	/// <summary>
 	/// RPC to kick a player. Caller must be host or have admin permission.
 	/// </summary>
 	[Rpc.Host]

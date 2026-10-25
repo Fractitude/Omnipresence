@@ -60,4 +60,4 @@ Logging a purchase: `StatsLog.Purchase( connection, kind, id, name, price )` nex
 - The engine's own `kick` console command does not go through `GameManager.Kick`, so it is not logged. Use `GameManager.Kick`.
 - A share waiting for an offline member (the `OrgRegistry` pending list) is logged when it is paid into their record, not
   when it is put on the list.
-- Bans, and buying houses, cars and weapons, do not exist yet: see [../plans/stats.md](../plans/stats.md).
+- Bans go through `GameManager.Ban` (`ban` command, `BanList`, `Code/Game/BanList.cs`), which calls `StatsLog.Banned`. Buying houses, cars and weapons, do not exist yet: see [../plans/stats.md](../plans/stats.md).

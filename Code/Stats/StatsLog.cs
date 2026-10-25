@@ -268,7 +268,7 @@ public static class StatsLog
 	}
 
 	/// <summary>
-	/// A player was banned. There is no ban system yet (see plans/stats.md); the one that comes calls this.
+	/// A player was banned. Called by <c>GameManager.Ban</c>.
 	/// </summary>
 	public static void Banned( ulong steamId, string name, string reason, Connection by = null )
 	{
