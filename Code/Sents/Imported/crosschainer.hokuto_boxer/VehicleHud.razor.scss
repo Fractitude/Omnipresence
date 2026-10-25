@@ -137,9 +137,13 @@ VehicleHud
 
 		.key
 		{
-			min-width: 24px;
-			padding: 2px 6px;
+			min-width: 26px;
+			height: 26px;
+			padding: 0 6px;
 			justify-content: center;
+			align-items: center;
+			text-align: center;
+			line-height: 26px;
 			border: 1px solid rgba( 255, 255, 255, 0.7 );
 			border-radius: 4px;
 			font-weight: 700;
