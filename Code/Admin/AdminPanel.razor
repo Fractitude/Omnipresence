@@ -257,8 +257,7 @@
 			return;
 		}
 
-		if ( Input.EscapePressed || NaviInputCapture.Current is not null || !Players.LocalController.IsValid()
-		     || !CanUse )
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || !CanUse )
 		{
 			Input.EscapePressed = false;
 			Close();
