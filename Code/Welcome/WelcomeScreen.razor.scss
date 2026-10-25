@@ -51,8 +51,10 @@
 
 .footer
 {
+	flex-direction: row;
 	flex-shrink: 0;
-	justify-content: flex-end;
+	gap: 10px;
+	justify-content: space-between;
 	align-items: center;
 	margin-top: 10px;
 }
