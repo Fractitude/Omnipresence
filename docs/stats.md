@@ -33,6 +33,7 @@ crash loses seconds of events. Playtime is added to the totals at the same momen
 | `money` | `Amount` (signed), `Currency` (`cash`, `credits`, `crypto`), `Balance` after, `Mechanic`, `Detail`, and `OtherId`/`OtherName` when another player gave or received it. |
 | `purchase` | `ItemKind`, `ItemId`, `Detail` (name), `Amount` (price). The money has its own `money` line. |
 | `kick`, `ban` | `Reason` when given, `OtherId`/`OtherName` for the admin. |
+| `balance` | `Cash`, `Credits`, `Crypto`: what the save held when the player's record was loaded (every join). |
 
 `Mechanic` is one of `StatMechanic`: `payment_app`, `console_command`, `ground_pickup`, `org_payout`, `exchange`, `shop`,
 `fee`, `refund`, `hacking`.
@@ -48,6 +49,9 @@ wallet.AddCash( reward, StatMechanic.Hacking, $"Intrusion {serverId}" );
 
 A path that changes a `ProgressRecord` without a wallet (the player is offline) calls `StatsLog.Money( steamId, ... )` itself
 (`Exchange.Settle`, `OrgPayouts.CreditRecord`). Never change a balance without one of these, or the log has a hole.
+
+The totals' balances (`Cash`, `Credits`, `Crypto` in `players/{steamId}.json`) start from the `balance` line written when
+the save loads, then follow every money line. Money that was earned before this log existed is only in that baseline.
 
 Logging a purchase: `StatsLog.Purchase( connection, kind, id, name, price )` next to the spend.
 

@@ -225,6 +225,28 @@ public static class StatsLog
 		} );
 	}
 
+	/// <summary>
+	/// The balances in a player's save, written when it is loaded. The money lines only show changes made after the log
+	/// began, so this is the starting point: it covers money that was earned before the log existed. Host only.
+	/// </summary>
+	public static void Balances( Connection connection, ProgressRecord record )
+	{
+		if ( !Active || connection is null || record is null )
+			return;
+
+		var summary = SummaryOf( connection.SteamId, connection.DisplayName );
+		summary.Cash = record.Money;
+		summary.Credits = record.Credits;
+		summary.Crypto = record.Crypto;
+		Dirty( connection.SteamId );
+
+		Write( new()
+		{
+			Kind = StatKind.Balance, SteamId = connection.SteamId, Name = connection.DisplayName,
+			Cash = record.Money, Credits = record.Credits, Crypto = record.Crypto,
+		} );
+	}
+
 	// -- Discipline ---------------------------------------------------------------------------------------------------
 
 	/// <summary>

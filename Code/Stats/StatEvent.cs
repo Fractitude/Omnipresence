@@ -14,6 +14,9 @@ public static class StatKind
 	public const string Purchase = "purchase";
 	public const string Kick = "kick";
 	public const string Ban = "ban";
+
+	/// <summary>The balances a player had when their save was loaded (<see cref="StatsLog.Balances"/>).</summary>
+	public const string Balance = "balance";
 }
 
 /// <summary>
@@ -79,6 +82,13 @@ public sealed class StatEvent
 
 	/// <summary>Money: the balance after the change.</summary>
 	public long? Balance { get; set; }
+
+	/// <summary>Balance: the dollars, credits and crypto in the save when it was loaded.</summary>
+	public long? Cash { get; set; }
+
+	public long? Credits { get; set; }
+
+	public long? Crypto { get; set; }
 
 	/// <summary>Money: one of <see cref="StatMechanic"/>.</summary>
 	public string Mechanic { get; set; }

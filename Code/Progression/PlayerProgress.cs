@@ -174,6 +174,7 @@ public sealed class PlayerProgress : Component
 			record = await PlayerProgression.LoadAsync( steamId );
 			AttachRecord();
 			ShowStats();
+			StatsLog.Balances( Owner, record );
 			Loaded = true;
 			Version++;
 
