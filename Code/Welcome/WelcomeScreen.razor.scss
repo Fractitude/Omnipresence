@@ -1,0 +1,64 @@
+@import "../Hud/_hud.scss";
+
+// The window, its list and its buttons are MenuWindow's. This is the screen's own content.
+
+.welcome
+{
+	flex-direction: column;
+	gap: 14px;
+}
+
+.section
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+}
+
+.text
+{
+	font-size: 15px;
+	line-height: 1.4;
+	opacity: 0.9;
+
+	&.dim
+	{
+		opacity: 0.6;
+	}
+}
+
+.rule, .change
+{
+	font-size: 14px;
+	line-height: 1.4;
+	opacity: 0.9;
+	padding-left: 12px;
+}
+
+.release
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 3px;
+	margin-bottom: 8px;
+}
+
+.release-title
+{
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.footer
+{
+	flex-shrink: 0;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+
+	.version
+	{
+		font-size: 13px;
+		opacity: 0.6;
+	}
+}

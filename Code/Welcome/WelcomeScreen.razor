@@ -1,0 +1,192 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="menu-root @( IsOpen ? "open" : "" )">
+	@if ( IsOpen )
+	{
+		var news = GameVersion.Since( seenAtOpen ).ToList();
+		var returning = seenAtOpen > 0;
+		// A player who is up to date, or new, still sees the latest release.
+		var shown = news.Count > 0 && returning ? news : GameVersion.Changelog.Take( 1 ).ToList();
+
+		<MenuWindow Title="Omnipresence in the Wired" Width=@( 640 ) OnClose=@Close
+		            Hint="Escape closes this. Type welcome in the console to read it again.">
+			<ChildContent>
+				<div class="menu-list welcome">
+					<div class="section">
+						<div class="menu-heading">@( returning ? "Welcome back" : "Welcome" )</div>
+						<div class="text">
+							A game inspired by Serial Experiments Lain. You live in the real world and in the Wired, the
+							network under it. Earn, trade and hide your work, and reach the Wired from a computer.
+						</div>
+					</div>
+
+					<div class="section">
+						<div class="menu-heading">Rules</div>
+						@foreach ( var rule in Rules )
+						{
+							<div class="rule">@rule</div>
+						}
+					</div>
+
+					<div class="section">
+						<div class="menu-heading">
+							@( returning && news.Count > 0 ? $"What's new since version {seenAtOpen}" : "Latest changes" )
+						</div>
+						@if ( returning && news.Count == 0 )
+						{
+							<div class="text dim">You are up to date. This is the last release.</div>
+						}
+						@foreach ( var entry in shown )
+						{
+							<div class="release">
+								<div class="release-title">@( $"Version {entry.Version}: {entry.Title}" )</div>
+								@foreach ( var change in entry.Changes )
+								{
+									<div class="change">@change</div>
+								}
+							</div>
+						}
+					</div>
+				</div>
+				<div class="footer">
+					<div class="version">@( $"Version {GameVersion.Current}" )</div>
+					<div class="menu-button" @onclick=@Close>Play</div>
+				</div>
+			</ChildContent>
+		</MenuWindow>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The rules of the server, in the order they are shown.
+	/// </summary>
+	static readonly string[] Rules =
+	{
+		"Be kind to other players. No harassment, hate or threats.",
+		"No cheating, exploits or griefing. If you find a bug, report it instead of using it.",
+		"Do not hurt people who are still starting out.",
+		"The host's word is final.",
+	};
+
+	/// <summary>
+	/// Whether the screen is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's mouse events and this component's updates are not always on the same instance.
+	// The version the player had seen when the screen opened, so the list does not change when it is saved on close.
+	static int seenAtOpen;
+
+	// Whether the join screen was already shown to this player in this session.
+	static bool shownOnJoin;
+
+	const string SeenFile = "welcome_seen.txt";
+
+	/// <summary>
+	/// The newest version this player closed the screen on, kept in this computer's game data. 0 if none.
+	/// </summary>
+	static int LoadSeen()
+	{
+		try
+		{
+			if ( FileSystem.Data.FileExists( SeenFile )
+			     && int.TryParse( FileSystem.Data.ReadAllText( SeenFile ).Trim(), out var v ) )
+				return v;
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( $"Could not read {SeenFile}: {e.Message}" );
+		}
+
+		return 0;
+	}
+
+	static void SaveSeen( int version )
+	{
+		try
+		{
+			FileSystem.Data.WriteAllText( SeenFile, version.ToString() );
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( $"Could not write {SeenFile}: {e.Message}" );
+		}
+	}
+
+	/// <summary>
+	/// Whether the player can be shown a window now: in the world, alive, not steering a seat, no other menu or Navi
+	/// computer using the keyboard.
+	/// </summary>
+	static bool CanShow()
+	{
+		var controller = Players.LocalController;
+
+		return controller.IsValid() && Players.Local<PlayerHealth>() is { Health: > 0 }
+		       && controller.GetComponentInParent<ISitTarget>( false ) is null
+		       && !GameMenus.IsAnyOpen && NaviInputCapture.Current is null;
+	}
+
+	/// <summary>
+	/// Open the screen. Does nothing with another menu open.
+	/// </summary>
+	public static void Open()
+	{
+		if ( IsOpen || GameMenus.IsAnyOpen || NaviInputCapture.Current is not null )
+			return;
+
+		seenAtOpen = LoadSeen();
+		IsOpen = true;
+		GameMenus.SetOpen( "welcome", true );
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "welcome", false );
+		SaveSeen( GameVersion.Current );
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Open the welcome screen again.
+	/// </summary>
+	[ConCmd( "welcome" )]
+	public static void OpenCommand() => Open();
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+		{
+			// Once per session, as soon as the player is standing in the world.
+			if ( !shownOnJoin && CanShow() )
+			{
+				shownOnJoin = true;
+				Open();
+			}
+
+			return;
+		}
+
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || !Players.LocalController.IsValid() )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, seenAtOpen );
+}

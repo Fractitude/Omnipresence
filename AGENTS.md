@@ -161,6 +161,10 @@ Found building the Character menu (`Code/Character/`). Each one froze the editor
 - **Removing a `GameObjectSystem` class** makes the open editor log an error every frame until it restarts.
 - **The editor's console buffer and `sbox-dev.log` lag behind a hang.** To debug one, write lines to `FileSystem.Data` at once (the game's data folder under the engine's `data/`), and remove them when done. Tests that call private methods through `run_csharp` can freeze the editor: press the real key.
 
+## Game version and the Welcome screen
+
+`GameVersion.Current` (`Code/Welcome/GameVersion.cs`) is the game's version, a whole number. **When you finish a whole task, add 1 to it and put a `ChangelogEntry` for it on top of `GameVersion.Changelog`** (title and short lines for players: what they can do or see now). Commit the bump with the task. The Welcome screen (`WelcomeScreen`, opens when a player joins and on the `welcome` command) compares `Current` with the version the player last saw and lists the newer entries. Its rules and intro text are in `WelcomeScreen.razor`. See `docs/ui.md`.
+
 ## Code style
 
 `docs/code-style.md` is the contract: Rider's **default** code style settings over the repo's `.editorconfig`, which is what formats the files in `Code/`, `Editor/`, `Addons/` and `Libraries/navi/Code/`. Run Reformat Code (Ctrl+Alt+L) on the files you touch before committing.

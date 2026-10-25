@@ -154,3 +154,11 @@ Plugins are part of the OS and run with no sandbox, so only the host may use the
 | `navi_plugin_install <packageIdent>` | Download and install a plugin, like `fractitude.nplug_themes`. |
 | `navi_plugin_remove <packageIdent>` | Take a plugin off the list. It stops loading next time. |
 | `navi_plugins` | Log the saved and the running plugins. |
+
+## Welcome
+
+Code: `Code/Welcome/WelcomeScreen.razor`.
+
+| Command | What it does |
+|---|---|
+| `welcome` | Open the welcome screen (about the game, rules, what changed since you last played). |
