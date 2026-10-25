@@ -57,6 +57,14 @@ A car has cargo only if its prefab has one, placed by hand. On a new car:
 
 The car must have a Rigidbody (the bed finds its vehicle as the nearest rigidbody above it). A car without the component has no "Manage cargo", is never listed in "Load into ...", and spills nothing. The buggy's bed is at local (-62, 0, 36), 52 x 70 x 44, 6 x 4 slots, 3 big objects.
 
+## Frozen by the Physgun
+
+Freezing an object with the Physgun (`PhysFreeze.Set`, see [world-items.md](world-items.md)) writes `Frozen` and its place to
+its entry in `placed_objects.json`; a restart makes it again frozen where it stood (`PhysFreeze.Apply` on restore), and
+unfreezing writes `Frozen: false`. An object loaded into a vehicle and unloaded comes out **unfrozen**: `PlacedObjectRegistry.Create`
+clears the flag, because it is put on the floor again. A frozen object still aboard when the game ends comes back frozen at its
+last resting place.
+
 ## Ownership
 
 `BuyerId` and the record's `Owner` are the buyer's Steam id, kept for the ownership design

@@ -26,6 +26,11 @@ public sealed class PlacedObjectRecord
 	public Vector3 Position { get; set; }
 
 	public Angles Angles { get; set; }
+
+	/// <summary>
+	/// Frozen with the Physgun (its body does not move until it is unfrozen). Additive: a file without it loads as false.
+	/// </summary>
+	public bool Frozen { get; set; }
 }
 
 /// <summary>

@@ -126,6 +126,33 @@ public static class WorldItemRegistry
 	}
 
 	/// <summary>
+	/// Write down that the Physgun froze or unfroze an item, and where it stands now. Nothing is written when the state
+	/// is what the file already says. Host only.
+	/// </summary>
+	public static void SetFrozen( string id, bool frozen, Vector3 position, Angles angles )
+	{
+		if ( Find( id ) is not { } record )
+			return;
+
+		if ( WorldItemRules.IsPlace( position ) )
+		{
+			record.Position = position;
+			record.Angles = angles;
+		}
+
+		if ( record.Frozen == frozen && !WorldItemRules.IsPlace( position ) )
+			return;
+
+		record.Frozen = frozen;
+		Changed();
+	}
+
+	/// <summary>
+	/// Whether the file says this item is frozen.
+	/// </summary>
+	public static bool IsFrozen( string id ) => Find( id )?.Frozen ?? false;
+
+	/// <summary>
 	/// Write down that an item changed (a partial pickup left fewer). Host only.
 	/// </summary>
 	public static void SetItem( GameObject go, ItemData item )
@@ -195,7 +222,7 @@ public static class WorldItemRegistry
 		foreach ( var record in Loaded.Items.Where( x => x.Scene == key && !live.Contains( x.Id ) ).ToList() )
 		{
 			var go = WorldItem.Spawn( record.Item.Clone(), record.Position, record.Angles.ToRotation(), Vector3.Zero,
-				record.Id );
+				record.Id, record.Frozen );
 
 			if ( go.IsValid() )
 				made++;

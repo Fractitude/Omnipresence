@@ -114,4 +114,12 @@ host reads or writes it; clients just see the networked objects.
   command `world_items_clear` calls it (editor, host). There is no season wipe in the game yet: when one is added (the
   place that resets `CrimeRecord` and `mailboxes.json`), call `WorldItemRegistry.Wipe` there too.
 - **Hot reload.** The registry's state is in non-readonly statics, so a hot reload keeps it.
+- **Frozen with the Physgun.** The Physgun freezes an object by setting `Rigidbody.MotionEnabled = false` on the host (and
+  unfreezes by setting it back, also when it picks the object up). Both go through `PhysFreeze.Set`
+  (`Code/Weapons/PhysGun/PhysFreeze.cs`; the only change to the ported `Physgun.cs`), which also writes `Frozen` and where
+  the item stands now to the entry (`WorldItemRegistry.SetFrozen`, same debounce as a moved item). `Frozen` is additive:
+  a file without it loads as false. A restore passes it to `WorldItem.Spawn( ..., frozen )`, which calls
+  `PhysFreeze.Apply`: the same assignment the Physgun makes, so the item comes back not falling and not pushable and the
+  Physgun can unfreeze it. `WorldItemKeeper` treats a body with motion off as still, so a frozen item is never reported as
+  moving. Cash piles and parcels are world items and are covered.
 - Parcels persist like anything else: a packed order stays `Packed` until someone picks the parcel up and posts it.

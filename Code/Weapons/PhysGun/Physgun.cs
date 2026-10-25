@@ -825,7 +825,7 @@ public partial class Physgun
 
 		if ( Networking.IsHost )
 		{
-			body.MotionEnabled = false;
+			PhysFreeze.Set( body, true );
 		}
 	}
 
@@ -835,7 +835,7 @@ public partial class Physgun
 		if ( !body.IsValid() ) return;
 		if ( body.IsProxy ) return;
 
-		body.MotionEnabled = true;
+		PhysFreeze.Set( body, false );
 	}
 
 	[Rpc.Broadcast]

@@ -155,7 +155,8 @@ public sealed class PlacedObject : Component, IInteractionHandler
 
 		body ??= Components.Get<Rigidbody>( FindMode.EverythingInSelfAndDescendants );
 
-		var speed = body.IsValid() ? body.Velocity.Length : 0f;
+		// A body the Physgun froze does not move, whatever velocity it had when it was frozen.
+		var speed = body.IsValid() && body.MotionEnabled ? body.Velocity.Length : 0f;
 
 		if ( speed > StillSpeed )
 		{

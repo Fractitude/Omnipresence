@@ -158,6 +158,9 @@ public static class PlacedObjectRegistry
 		record.Position = position;
 		record.Angles = rotation.Angles();
 
+		// Made new, or put down again from a vehicle's cargo: it stands on the floor, unfrozen.
+		record.Frozen = false;
+
 		Changed();
 		return go;
 	}
@@ -167,7 +170,8 @@ public static class PlacedObjectRegistry
 	/// for the Physgun (the prefabs' colliders are static, as a scene-placed object should be), the id, and the host as
 	/// the keeper of it if the player who last held it leaves.
 	/// </summary>
-	static GameObject Make( Placeable item, string id, ulong owner, Vector3 position, Rotation rotation, Scene scene )
+	static GameObject Make(
+		Placeable item, string id, ulong owner, Vector3 position, Rotation rotation, Scene scene, bool frozen = false )
 	{
 		GameObject go;
 
@@ -203,6 +207,7 @@ public static class PlacedObjectRegistry
 		go.NetworkMode = NetworkMode.Object;
 		go.NetworkSpawn();
 		go.Network.SetOrphanedMode( NetworkOrphaned.Host );
+		PhysFreeze.Apply( go, frozen );
 		return go;
 	}
 
@@ -216,6 +221,30 @@ public static class PlacedObjectRegistry
 
 		record.Position = position;
 		record.Angles = angles;
+		Changed();
+	}
+
+	/// <summary>
+	/// Write down that the Physgun froze or unfroze an object, and where it stands now. Nothing is written when nothing
+	/// changed. Host only.
+	/// </summary>
+	public static void SetFrozen( string id, bool frozen, Vector3 position, Angles angles )
+	{
+		if ( Find( id ) is not { } record )
+			return;
+
+		var moved = WorldItemRules.IsPlace( position );
+
+		if ( record.Frozen == frozen && !moved )
+			return;
+
+		if ( moved )
+		{
+			record.Position = position;
+			record.Angles = angles;
+		}
+
+		record.Frozen = frozen;
 		Changed();
 	}
 
@@ -274,7 +303,7 @@ public static class PlacedObjectRegistry
 		foreach ( var record in Loaded.Objects.Where( x => x.Scene == key && !live.Contains( x.Id ) ).ToList() )
 		{
 			var go = Make( PlaceableCatalog.Find( record.Placeable ), record.Id, record.Owner, record.Position,
-				record.Angles.ToRotation(), scene );
+				record.Angles.ToRotation(), scene, record.Frozen );
 
 			if ( go.IsValid() )
 				made++;

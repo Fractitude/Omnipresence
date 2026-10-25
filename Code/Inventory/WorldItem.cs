@@ -94,10 +94,11 @@ public sealed class WorldItem : Component, IInteractionHandler
 	/// Make a world item for <paramref name="item"/> (a copy is kept) at a place and network-spawn it. A kind uses its
 	/// own prefab; an ordinary item that came from a prefab with a <see cref="PickupItem"/> drops as that prefab; the rest
 	/// use the shared prefab. Returns null when nothing could be made. The object is tracked by the
-	/// <see cref="WorldItemRegistry"/> so it is saved; a restored item passes the id it was saved under. Host only.
+	/// <see cref="WorldItemRegistry"/> so it is saved; a restored item passes the id it was saved under, and whether the Physgun had frozen it
+	/// (<see cref="PhysFreeze.Apply"/>). Host only.
 	/// </summary>
 	public static GameObject Spawn( ItemData item, Vector3 position, Rotation rotation, Vector3 velocity,
-		string restoreId = null )
+		string restoreId = null, bool frozen = false )
 	{
 		if ( item is null || item.Count < 1 || Networking.IsActive && !Networking.IsHost )
 			return null;
@@ -109,6 +110,7 @@ public sealed class WorldItem : Component, IInteractionHandler
 		{
 			Launch( own, velocity );
 			WorldItemRegistry.Track( own, item, item.PrefabPath, restoreId );
+			PhysFreeze.Apply( own, frozen );
 			return own;
 		}
 
@@ -128,6 +130,7 @@ public sealed class WorldItem : Component, IInteractionHandler
 		go.NetworkSpawn();
 		Launch( go, velocity );
 		WorldItemRegistry.Track( go, item, prefab, restoreId );
+		PhysFreeze.Apply( go, frozen );
 		return go;
 	}
 
