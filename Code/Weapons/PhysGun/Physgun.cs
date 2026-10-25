@@ -816,6 +816,10 @@ public partial class Physgun
 		var go = physicsBody.GameObject;
 		if ( !go.IsValid() || go.IsDestroyed ) return false;
 
+		// Players and NPCs are never picked up
+		if ( go.Root.Components.Get<Player>( FindMode.EverythingInSelfAndDescendants ).IsValid() ) return false;
+		if ( go.Root.Components.Get<Npc>( FindMode.EverythingInSelfAndDescendants ).IsValid() ) return false;
+
 		// Ask the object if it allows being grabbed (Ownable and others can reject via IPhysgunEvent)
 		var grabEvent = new IPhysgunEvent.GrabEvent { Grabber = Network.Owner };
 		go.Root.RunEvent<IPhysgunEvent>( x => x.OnPhysgunGrab( grabEvent ) );
