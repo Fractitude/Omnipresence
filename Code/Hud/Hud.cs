@@ -102,9 +102,9 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<WelcomeScreen>();
 		hud.Attach<WelcomeScreenEditor>();
 
-		// The hotbar draws above the menus, and the dragged icon above both.
-		hud.Attach<AbilityMenu>();
-		hud.Attach<AbilityHotbar>();
-		hud.Attach<AbilityDragGhost>();
+		// The abilities are switched off for now. The hotbar draws above the menus, and the dragged icon above both.
+		// hud.Attach<AbilityMenu>();
+		// hud.Attach<AbilityHotbar>();
+		// hud.Attach<AbilityDragGhost>();
 	}
 }
