@@ -42,20 +42,21 @@
         "__type": "Sandbox.Npcs.Scientist.ScientistNpc",
         "__guid": "9e7014a2-de94-4f9f-852e-871f9fd821ef",
         "__enabled": true,
-        "WalkSpeed": 85,
         "Flags": 0,
         "DisplayName": "Darren",
+        "FatalImpactSpeed": 1100,
         "FearDecayRate": 0.15,
         "FearGracePeriod": 3,
         "FollowVoice": {
-          "Id": "ebaa86e8-306c-419b-b28f-01edd0b3428d",
+          "Id": "3cf77179-0960-4db2-b9ce-5999940c54cd",
           "Path": "sounds/npc/darren/follow.sound"
         },
         "Health": 20,
         "IdleVoice": {
-          "Id": "939a3e63-e6af-4783-ab72-0f79c3eb535d",
+          "Id": "51a3a588-1999-4c04-955b-3edec57d4aa1",
           "Path": "sounds/npc/darren/idle.sound"
         },
+        "MaxSafeImpactSpeed": 350,
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
@@ -69,18 +70,19 @@
           "component_type": "SkinnedModelRenderer"
         },
         "ScaredVoice": {
-          "Id": "dae9d96f-1d51-4bb7-aedd-38964e2371ef",
+          "Id": "c093fb9d-d70d-46f3-992e-fb7e6fba2f70",
           "Path": "sounds/npc/darren/scared.sound"
         },
         "ShowDebugOverlay": false,
         "StayVoice": {
-          "Id": "92132c9f-5b5f-4c4d-a84f-113e0d5980c9",
+          "Id": "5a671c9b-1459-4421-8fa7-e6d7b6986038",
           "Path": "sounds/npc/darren/stay.sound"
         },
         "StuckVoice": {
-          "Id": "9324cbfd-731a-4fb5-a325-30bb9def7bff",
+          "Id": "4f6c0939-36dd-4291-b1f4-3dedbd9e5f1a",
           "Path": "sounds/npc/darren/stuck.sound"
-        }
+        },
+        "WalkSpeed": 85
       },
       {
         "__type": "Sandbox.Npcs.Layers.SensesLayer",
@@ -95,6 +97,7 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
+        "QuietSpeed": 120,
         "ScanTags": "player,npc",
         "SightRange": 500
       },
@@ -109,12 +112,6 @@
           "go": "20ebc983-bcde-4769-9dda-e8b4ae45a063",
           "component_type": "Dresser"
         },
-        "OnComponentDestroy": null,
-        "OnComponentDisabled": null,
-        "OnComponentEnabled": null,
-        "OnComponentFixedUpdate": null,
-        "OnComponentStart": null,
-        "OnComponentUpdate": null,
         "FacialAppearances": [
           {
             "Name": "Professor",
@@ -210,6 +207,12 @@
             "HairTint": 0.75
           }
         ],
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
         "Outfits": [
           {
             "Name": "Blue Shirt",
@@ -409,7 +412,7 @@
           "Roll": true
         },
         "MassCenterOverride": "0,0,0",
-        "MassOverride": 0,
+        "MassOverride": 75,
         "MinImpactDamageSpeed": 500,
         "MotionEnabled": false,
         "OnComponentDestroy": null,
@@ -2594,7 +2597,7 @@
             ]
           },
           {
-            "__guid": "ee2001e4-4b00-4d5e-b9ae-6c62dd319e86",
+            "__guid": "a72ab1eb-fb6e-4443-bc76-ebd9481622c4",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - blue_shirt",
@@ -2611,7 +2614,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "f3f70cf0-7f0d-46a0-a697-34ecefc8843a",
+                "__guid": "a3128756-a010-4144-aff5-3bebf1f30d95",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
@@ -2661,7 +2664,7 @@
             "Children": []
           },
           {
-            "__guid": "183e38c7-e644-4411-bd0c-ba026d3b7cda",
+            "__guid": "edd13526-9372-4cf5-9ee6-3752a75e0e9b",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - labcoat",
@@ -2678,7 +2681,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "4497624d-a3e9-4d55-9e50-5f63fdb9bdcd",
+                "__guid": "b793b20e-a8cc-499d-80c1-7824fa14f4f6",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
@@ -2728,7 +2731,7 @@
             "Children": []
           },
           {
-            "__guid": "0bf95f9a-0c95-4073-bb56-f54d12049073",
+            "__guid": "c2c3effe-7322-47b3-8dcf-1051258ed9b9",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - hair_baldingbrown",
@@ -2745,7 +2748,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "4c34646b-aedc-463f-ae13-9214905f09e9",
+                "__guid": "714077c4-4c1f-4b06-9540-d86e88c90b81",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
@@ -2795,7 +2798,7 @@
             "Children": []
           },
           {
-            "__guid": "9e283040-8c90-4945-b2a6-3e4ebd72b483",
+            "__guid": "496be838-b923-453d-ade0-97977776e79b",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - loose_trousers",
@@ -2812,7 +2815,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "f962c67d-0be7-4499-83f4-937ae9686c56",
+                "__guid": "db832b26-25ed-4c70-b4c3-f04073427ce5",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
@@ -2862,7 +2865,7 @@
             "Children": []
           },
           {
-            "__guid": "9fed108e-5b9a-4a42-b955-7cb6c9cc4d22",
+            "__guid": "69d8e07b-c3e3-4812-ade2-5e055a773ea4",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - black_boots",
@@ -2879,7 +2882,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "007a1bfe-2d11-4a86-8d8e-8e9c530f8021",
+                "__guid": "5816690d-6286-4e41-825b-b5b6c6eab782",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
@@ -2929,7 +2932,7 @@
             "Children": []
           },
           {
-            "__guid": "e0abbff6-0674-42a9-8b82-a7c4bd51f9a6",
+            "__guid": "b48d42c9-3880-4515-8c75-8b3a32f199da",
             "__version": 2,
             "Flags": 0,
             "Name": "Clothing - moustache",
@@ -2946,7 +2949,7 @@
             "Components": [
               {
                 "__type": "Sandbox.SkinnedModelRenderer",
-                "__guid": "7991d4c8-590b-4468-bbd7-02b00e94a2db",
+                "__guid": "3cb72f7f-eace-4c6d-ba3c-9ac5c9d844ae",
                 "__enabled": true,
                 "Flags": 0,
                 "AnimationGraph": null,
@@ -3047,7 +3050,7 @@
         "__version": 2,
         "Flags": 0,
         "Name": "Thumbnail Camera",
-        "Position": "78.9342,28.7297,61",
+        "Position": "78.9341965,28.7297001,61",
         "Rotation": "0,0,0.984807789,-0.173648193",
         "Scale": "1,1,1",
         "Tags": "",
@@ -3064,13 +3067,17 @@
             "__enabled": true,
             "Flags": 0,
             "FieldOfView": 15,
+            "FitToBounds": false,
+            "Focus": "0,0",
             "GizmoDistance": 84,
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
             "OnComponentFixedUpdate": null,
             "OnComponentStart": null,
-            "OnComponentUpdate": null
+            "OnComponentUpdate": null,
+            "Padding": 0.1,
+            "Zoom": 1
           }
         ],
         "Children": []

@@ -279,6 +279,36 @@
             "HairTint": 0.0
           }
         ]
+      },
+      {
+        "__type": "Sandbox.Rigidbody",
+        "__guid": "09d7b22d-df2b-459d-8bce-25c05dd2bfa4",
+        "__enabled": true,
+        "Flags": 0,
+        "AngularDamping": 2,
+        "EnableImpactDamage": false,
+        "EnhancedCcd": false,
+        "Gravity": true,
+        "GravityScale": 1,
+        "ImpactDamage": 0,
+        "InertiaScale": 1,
+        "LinearDamping": 0.5,
+        "Locking": {
+          "X": false,
+          "Y": false,
+          "Z": false,
+          "Pitch": true,
+          "Yaw": false,
+          "Roll": true
+        },
+        "MassCenterOverride": "0,0,0",
+        "MassOverride": 75,
+        "MinImpactDamageSpeed": 500,
+        "MotionEnabled": false,
+        "OverrideMassCenter": false,
+        "RigidbodyFlags": 0,
+        "SleepThreshold": 2,
+        "StartAsleep": false
       }
     ],
     "Children": [
