@@ -7,7 +7,7 @@
 	@if ( IsOpen )
 	{
 		var text = WelcomeContent.Data;
-		var news = text.Since( seenAtOpen ).ToList();
+		var news = text.Since( releaseSeenAtOpen ).ToList();
 		var returning = seenAtOpen > 0;
 		// A player who is up to date, or new, still sees the latest release.
 		var shownNews = news.Count > 0 && returning;
@@ -76,6 +76,7 @@
 	// Static: the panel's mouse events and this component's updates are not always on the same instance.
 	// The version the player had seen when the screen opened, so the list does not change when it is saved on close.
 	static int seenAtOpen;
+	static int releaseSeenAtOpen;
 
 	// Whether the join screen was already shown to this player in this session.
 	static bool shownOnJoin;
@@ -83,29 +84,35 @@
 	const string SeenFile = "welcome_seen.txt";
 
 	/// <summary>
-	/// The newest version this player closed the screen on, kept in this computer's game data. 0 if none.
+	/// What this player last saw, kept in this computer's game data: the screen's version, and the newest changelog
+	/// release it listed. 0 for both if none (an older file holds only the version, which was both).
 	/// </summary>
-	static int LoadSeen()
+	static (int Version, int Release) LoadSeen()
 	{
 		try
 		{
-			if ( FileSystem.Data.FileExists( SeenFile )
-			     && int.TryParse( FileSystem.Data.ReadAllText( SeenFile ).Trim(), out var v ) )
-				return v;
+			if ( FileSystem.Data.FileExists( SeenFile ) )
+			{
+				var parts = FileSystem.Data.ReadAllText( SeenFile )
+					.Split( ' ', System.StringSplitOptions.RemoveEmptyEntries );
+
+				if ( parts.Length > 0 && int.TryParse( parts[0], out var version ) )
+					return (version, parts.Length > 1 && int.TryParse( parts[1], out var release ) ? release : version);
+			}
 		}
 		catch ( System.Exception e )
 		{
 			Log.Warning( $"Could not read {SeenFile}: {e.Message}" );
 		}
 
-		return 0;
+		return (0, 0);
 	}
 
-	static void SaveSeen( int version )
+	static void SaveSeen( int version, int release )
 	{
 		try
 		{
-			FileSystem.Data.WriteAllText( SeenFile, version.ToString() );
+			FileSystem.Data.WriteAllText( SeenFile, $"{version} {release}" );
 		}
 		catch ( System.Exception e )
 		{
@@ -134,7 +141,7 @@
 		if ( IsOpen || GameMenus.IsAnyOpen || NaviInputCapture.Current is not null )
 			return;
 
-		seenAtOpen = LoadSeen();
+		(seenAtOpen, releaseSeenAtOpen) = LoadSeen();
 		IsOpen = true;
 		GameMenus.SetOpen( "welcome", true );
 	}
@@ -146,7 +153,7 @@
 
 		IsOpen = false;
 		GameMenus.SetOpen( "welcome", false );
-		SaveSeen( WelcomeContent.Data.Version );
+		SaveSeen( WelcomeContent.Data.Version, WelcomeContent.Data.LatestRelease() );
 		MenuControls.Free( true );
 		Mouse.Visibility = MouseVisibility.Hidden;
 	}
@@ -177,7 +184,7 @@
 			{
 				shownOnJoin = true;
 
-				if ( LoadSeen() < WelcomeContent.Data.Version )
+				if ( LoadSeen().Version < WelcomeContent.Data.Version )
 					Open();
 			}
 
@@ -197,5 +204,5 @@
 
 	protected override void OnDisabled() => Close();
 
-	protected override int BuildHash() => System.HashCode.Combine( IsOpen, seenAtOpen, WelcomeContent.Revision );
+	protected override int BuildHash() => System.HashCode.Combine( IsOpen, seenAtOpen, releaseSeenAtOpen, WelcomeContent.Revision );
 }

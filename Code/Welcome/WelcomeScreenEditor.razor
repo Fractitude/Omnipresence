@@ -53,9 +53,7 @@
 							var at = i;
 							<div class="entry">
 								<div class="line-row">
-									<div class="caption fixed">Version</div>
-									<TextEntry class="input number" Value=@entry.Version.ToString() MaxLength=@( 6 )
-									           OnTextEdited=@( ( string t ) => { entry.Version = ParseVersion( t, entry.Version ); } )/>
+									<div class="caption fixed">@( $"Version {entry.Version}" )</div>
 									<TextEntry class="input" Multiline=@( true ) Value=@entry.Title MaxLength=@( 120 ) Placeholder="Title"
 									           OnTextEdited=@( ( string t ) => { entry.Title = t; } )/>
 									<div class="menu-button small" @onclick=@( () => Remove( d.Changelog, at ) )>Remove</div>
@@ -178,7 +176,7 @@
 
 	static void AddEntry() =>
 		draft.Changelog.Insert(
-			0, new() { Version = WelcomeContent.Data.Version + 1, Title = "", Changes = new() { "" } } );
+			0, new() { Version = draft.NextRelease(), Title = "", Changes = new() { "" } } );
 
 	static void Remove<T>( List<T> list, int index )
 	{
@@ -194,9 +192,6 @@
 		scrolled = List is { IsValid: true } ? List.ScrollOffset : default;
 		rebuilding = true;
 	}
-
-	static int ParseVersion( string text, int fallback ) =>
-		int.TryParse( text, out var value ) && value > 0 ? value : fallback;
 
 	protected override void OnUpdate()
 	{

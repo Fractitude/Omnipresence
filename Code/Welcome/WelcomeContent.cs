@@ -57,6 +57,15 @@ public sealed class WelcomeData
 		},
 	};
 
+	/// <summary>The highest release number in the changelog, 0 with none.</summary>
+	public int LatestRelease() => Changelog.Count == 0 ? 0 : Changelog.Max( x => x.Version );
+
+	/// <summary>
+	/// The number a release added now gets: one more than the highest there is. A number freed by removing a release
+	/// in the middle is not reused; one freed by removing the newest ones is.
+	/// </summary>
+	public int NextRelease() => LatestRelease() + 1;
+
 	/// <summary>The entries newer than a version, in the order they are listed.</summary>
 	public IEnumerable<ChangelogEntry> Since( int version ) => Changelog.Where( x => x.Version > version );
 

@@ -42,14 +42,7 @@
 	&.tall
 	{
 		min-height: 90px;
-	}
-
-	&.number
-	{
-		flex-grow: 0;
-		flex-shrink: 0;
-		width: 70px;
-	}
+	}
 }
 
 // A button never gives up its width, whatever is beside it.
