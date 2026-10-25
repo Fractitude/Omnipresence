@@ -25,7 +25,8 @@ Read the stats log ([stats.md](stats.md)). Host only. Code: `Code/Stats/StatsCom
 | Command | What it does |
 | --- | --- |
 | `players` | List everyone connected now, one per line: Steam id, then name. Copy the id to kick or ban them. |
-| `ban <steamId> [reason]` | Host only. Ban a Steam id and kick them if connected. Saved in `bans.json` (data folder); `BanSystem` refuses their connection from then on. Logged as a `ban` stat. |
+| `ban <steamId> [duration] [reason]` | Host only. Ban a Steam id and kick them if connected. Duration is `30m`, `12h`, `7d`, `2w` or `perm` (default). Saved in `bans.json` (data folder); `BanSystem` refuses their connection from then on, with the reason shown to them, and a timed ban lifts itself. Logged as a `ban` stat. |
+| `admin` | Admins (and the host) only. Open the admin window (also F10): connected players with Kick and Ban (reason, length) and the list of bans with Unban. |
 | `unban <steamId>` | Host only. Lift a ban. With no id, lists everyone banned. |
 | `stats_show` | List every saved player: id, name, last seen and playtime, most recent first. |
 | `stats_show <name or steamId>` | Log one player's totals: playtime, joins, kills (by weapon), deaths, kicks, bans, transactions, purchases and last balances. A name is matched exactly, or as part of one when only one saved player fits, ignoring case, accents, spaces and punctuation: `stats_show "Yodeling Cat"`, or `stats_show tomas` for Tomáš. |

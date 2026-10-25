@@ -60,33 +60,85 @@ public sealed partial class GameManager
 	/// Bans a Steam id, kicks them if connected, and writes it in the stats log. <paramref name="by"/> is the admin who
 	/// asked, or null for the server itself. False if they are already banned.
 	/// </summary>
-	public bool Ban( ulong steamId, string name, string reason = "", Connection by = null )
+	public bool Ban( ulong steamId, string name, string reason = "", Connection by = null, TimeSpan? duration = null )
 	{
 		Assert.True( Networking.IsHost, "Only the host may ban players." );
 
 		var connection = Connection.All.FirstOrDefault( c => c.SteamId == steamId );
 		name = connection?.DisplayName ?? name;
 
-		if ( !BanList.Add( steamId, name, reason, by?.SteamId ?? 0 ) )
+		if ( !BanList.Add( steamId, name, reason, by?.SteamId ?? 0, duration ) )
 			return false;
 
 		StatsLog.Banned( steamId, name, reason, by );
 		StatsLog.Flush();
 
-		Notify( string.IsNullOrWhiteSpace( reason ) ? $"{name} was banned" : $"{name} was banned: {reason}" );
-		connection?.Kick( string.IsNullOrWhiteSpace( reason ) ? "Banned" : $"Banned: {reason}" );
+		var length = duration is { } d ? $" for {BanDuration.Describe( d )}" : "";
+		Notify( string.IsNullOrWhiteSpace( reason ) ? $"{name} was banned{length}" : $"{name} was banned{length}: {reason}" );
+		connection?.Kick( BanList.Find( steamId )?.Message() ?? "Banned" );
 		return true;
 	}
 
 	/// <summary>
-	/// RPC to ban a player. Caller must have admin permission.
+	/// Whether a player may use the admin tools: the host, or anyone with the engine's <c>admin</c> permission.
+	/// </summary>
+	public static bool IsAdmin( Connection connection ) =>
+		connection is not null && (connection.IsHost || connection.HasPermission( "admin" ));
+
+	/// <summary>
+	/// RPC to ban a player. Caller must be an admin. <paramref name="seconds"/> is how long, 0 for ever. The host and the
+	/// caller cannot be banned.
 	/// </summary>
 	[Rpc.Host]
-	public static void RpcBanPlayer( Connection target, string reason = "" )
+	public static void RpcBanPlayer( Connection target, string reason = "", long seconds = 0 )
 	{
-		if ( !Rpc.Caller.HasPermission( "admin" ) ) return;
+		if ( !IsAdmin( Rpc.Caller ) || target is null || target.IsHost || target == Rpc.Caller ) return;
 
-		Current?.Ban( target.SteamId, target.DisplayName, reason, Rpc.Caller );
+		TimeSpan? duration = seconds > 0 ? TimeSpan.FromSeconds( Math.Min( seconds, 3650L * 24 * 3600 ) ) : null;
+		Current?.Ban( target.SteamId, target.DisplayName, Clean( reason ), Rpc.Caller, duration );
+		SendBans( Rpc.Caller );
+	}
+
+	/// <summary>
+	/// RPC to lift a ban. Caller must be an admin.
+	/// </summary>
+	[Rpc.Host]
+	public static void RpcUnban( ulong steamId )
+	{
+		if ( !IsAdmin( Rpc.Caller ) ) return;
+
+		if ( BanList.Remove( steamId ) )
+			Current?.Notify( Rpc.Caller, $"Unbanned {steamId}" );
+
+		SendBans( Rpc.Caller );
+	}
+
+	/// <summary>
+	/// RPC asking for the list of bans, which comes back to the caller alone. Caller must be an admin.
+	/// </summary>
+	[Rpc.Host]
+	public static void RpcRequestBans()
+	{
+		if ( IsAdmin( Rpc.Caller ) )
+			SendBans( Rpc.Caller );
+	}
+
+	static void SendBans( Connection to )
+	{
+		var json = Json.Serialize( BanList.All.ToList() );
+
+		using ( Rpc.FilterInclude( to ) )
+			ReceiveBansRpc( json );
+	}
+
+	[Rpc.Broadcast( NetFlags.HostOnly )]
+	static void ReceiveBansRpc( string json ) => AdminPanel.ReceiveBans( json );
+
+	/// <summary>A reason as one short line of text.</summary>
+	static string Clean( string text )
+	{
+		text = (text ?? "").Replace( '\r', ' ' ).Replace( '\n', ' ' ).Trim();
+		return text.Length > 200 ? text[..200] : text;
 	}
 
 	/// <summary>
@@ -95,9 +147,9 @@ public sealed partial class GameManager
 	[Rpc.Host]
 	public static void RpcKickPlayer( Connection target, string reason = "Kicked" )
 	{
-		if ( !Rpc.Caller.HasPermission( "admin" ) ) return;
+		if ( !IsAdmin( Rpc.Caller ) || target is null || target.IsHost || target == Rpc.Caller ) return;
 
-		Current?.Kick( target, reason, Rpc.Caller );
+		Current?.Kick( target, string.IsNullOrWhiteSpace( reason ) ? "Kicked" : Clean( reason ), Rpc.Caller );
 	}
 
 	/// <summary>

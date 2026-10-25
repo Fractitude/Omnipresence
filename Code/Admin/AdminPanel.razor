@@ -1,0 +1,286 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+<root class="menu-root @( IsOpen ? "open" : "" )">
+	@if ( IsOpen )
+	{
+		<MenuWindow Title="Admin" Width=@( 720 ) OnClose=@Close Notice=@notice
+		            Hint="Kicks and bans are logged. F10 or the admin command opens this window.">
+			<ChildContent>
+				<div class="tabs">
+					<div class="menu-button @( tab == Tab.Players ? "active" : "" )"
+					     @onclick=@( () => SetTab( Tab.Players ) )>Players</div>
+					<div class="menu-button @( tab == Tab.Bans ? "active" : "" )"
+					     @onclick=@( () => SetTab( Tab.Bans ) )>@( $"Bans ({bans.Count})" )</div>
+				</div>
+
+				@if ( tab == Tab.Players )
+				{
+					<div class="menu-list">
+						@foreach ( var c in Connection.All.OrderBy( x => x.DisplayName ) )
+						{
+							var player = c;
+							var protectedPlayer = player.IsHost || player == Connection.Local;
+							<div @key=@( player.SteamId.ToString() )
+							     class="menu-row roomy selectable @( selected == player.SteamId ? "selected" : "" )"
+							     @onclick=@( () => Select( player.SteamId ) )>
+								<div class="who">
+									<div class="name">@player.DisplayName</div>
+									<div class="caption">@( $"{player.SteamId}{( player.IsHost ? "  host" : "" )}{( player == Connection.Local ? "  you" : "" )}" )</div>
+								</div>
+								@if ( protectedPlayer )
+								{
+									<div class="caption">Cannot be kicked or banned</div>
+								}
+							</div>
+						}
+					</div>
+
+					@if ( SelectedPlayer is { } target )
+					{
+						<div class="form">
+							<div class="menu-heading">@( $"Reason for {target.DisplayName}" )</div>
+							<TextEntry @key=@generation class="input" Multiline=@( true ) Value=@reason MaxLength=@( 200 )
+							           Placeholder="Shown to the player and kept in the log"
+							           OnTextEdited=@( ( string t ) => { reason = t; } )/>
+
+							<div class="caption">Ban length</div>
+							<div class="durations">
+								@for ( var i = 0; i < Durations.Length; i++ )
+								{
+									var index = i;
+									<div class="menu-button @( durationIndex == index ? "active" : "" )"
+									     @onclick=@( () => { durationIndex = index; } )>@Durations[i].Label</div>
+								}
+							</div>
+
+							<div class="actions">
+								<div class="menu-button" @onclick=@Kick>Kick</div>
+								<div class="menu-button danger" @onclick=@Ban>@( $"Ban {Durations[durationIndex].Label}" )</div>
+							</div>
+						</div>
+					}
+					else
+					{
+						<div class="menu-empty">Pick a player to kick or ban.</div>
+					}
+				}
+				else
+				{
+					<div class="menu-list">
+						@if ( bans.Count == 0 )
+						{
+							<div class="menu-empty">Nobody is banned.</div>
+						}
+						@foreach ( var b in bans )
+						{
+							var ban = b;
+							<div @key=@( ban.SteamId.ToString() ) class="menu-row roomy">
+								<div class="who">
+									<div class="name">@( string.IsNullOrEmpty( ban.Name ) ? ban.SteamId.ToString() : ban.Name )</div>
+									<div class="caption">@( $"{ban.SteamId}  {Left( ban )}" )</div>
+									@if ( !string.IsNullOrWhiteSpace( ban.Reason ) )
+									{
+										<div class="caption">@ban.Reason</div>
+									}
+								</div>
+								<div class="menu-button" @onclick=@( () => Unban( ban.SteamId ) )>Unban</div>
+							</div>
+						}
+					</div>
+				}
+			</ChildContent>
+		</MenuWindow>
+	}
+</root>
+
+@code
+{
+	enum Tab
+	{
+		Players,
+		Bans,
+	}
+
+	/// <summary>The lengths a ban can have in the window. Seconds, 0 for ever.</summary>
+	static readonly (string Label, long Seconds)[] Durations =
+	{
+		("1 hour", 3600), ("1 day", 86400), ("1 week", 7 * 86400), ("30 days", 30 * 86400), ("for ever", 0),
+	};
+
+	/// <summary>
+	/// Whether the window is open on this computer.
+	/// </summary>
+	public static bool IsOpen { get; private set; }
+
+	// Static: the panel's events and this component's updates are not always on the same instance.
+	static Tab tab;
+	static ulong selected;
+	static string reason = "";
+	static string notice;
+	static int durationIndex = 1;
+
+	// Goes up when the reason is cleared, which makes the text field a new one (it keeps its text otherwise).
+	static int generation;
+
+	static List<BanEntry> bans = new();
+
+	// Redraw now and then so the time left on a ban counts down.
+	static int minuteStamp;
+
+	Connection SelectedPlayer => Connection.All.FirstOrDefault( x => x.SteamId == selected && !x.IsHost && x != Connection.Local );
+
+	/// <summary>
+	/// Whether the player at this computer may use the window. The host checks again on every request.
+	/// </summary>
+	public static bool CanUse => GameManager.IsAdmin( Connection.Local );
+
+	/// <summary>
+	/// Opens the window. Does nothing for a player who is not an admin, or with another menu open.
+	/// </summary>
+	public static void Open()
+	{
+		if ( IsOpen || !CanUse || GameMenus.IsAnyOpen || NaviInputCapture.Current is not null )
+			return;
+
+		tab = Tab.Players;
+		selected = 0;
+		notice = null;
+		ClearReason();
+		IsOpen = true;
+		GameMenus.SetOpen( "admin", true );
+		GameManager.RpcRequestBans();
+	}
+
+	static void Close()
+	{
+		if ( !IsOpen )
+			return;
+
+		IsOpen = false;
+		GameMenus.SetOpen( "admin", false );
+		MenuControls.Free( true );
+		Mouse.Visibility = MouseVisibility.Hidden;
+	}
+
+	/// <summary>
+	/// Open the admin window (admins only).
+	/// </summary>
+	[ConCmd( "admin" )]
+	public static void OpenCommand()
+	{
+		if ( !CanUse )
+		{
+			Log.Info( "Only admins can use the admin window." );
+			return;
+		}
+
+		Open();
+	}
+
+	/// <summary>
+	/// The host sent the list of bans.
+	/// </summary>
+	public static void ReceiveBans( string json )
+	{
+		try
+		{
+			bans = Json.Deserialize<List<BanEntry>>( json ) ?? new();
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( $"Could not read the list of bans: {e.Message}" );
+		}
+	}
+
+	static void ClearReason()
+	{
+		reason = "";
+		generation++;
+	}
+
+	static void SetTab( Tab to )
+	{
+		tab = to;
+		notice = null;
+
+		if ( to == Tab.Bans )
+			GameManager.RpcRequestBans();
+	}
+
+	static void Select( ulong steamId )
+	{
+		selected = steamId;
+		notice = null;
+		ClearReason();
+	}
+
+	static void Kick()
+	{
+		if ( Connection.All.FirstOrDefault( x => x.SteamId == selected ) is not { } target )
+			return;
+
+		GameManager.RpcKickPlayer( target, reason );
+		notice = $"Kicked {target.DisplayName}.";
+		selected = 0;
+		ClearReason();
+	}
+
+	static void Ban()
+	{
+		if ( Connection.All.FirstOrDefault( x => x.SteamId == selected ) is not { } target )
+			return;
+
+		GameManager.RpcBanPlayer( target, reason, Durations[durationIndex].Seconds );
+		notice = $"Banned {target.DisplayName} {Durations[durationIndex].Label}.";
+		selected = 0;
+		ClearReason();
+	}
+
+	static void Unban( ulong steamId )
+	{
+		GameManager.RpcUnban( steamId );
+		notice = $"Unbanned {steamId}.";
+	}
+
+	static string Left( BanEntry ban ) =>
+		ban.ExpiresAt is not { } end ? "permanent" : $"{BanDuration.Describe( end - System.DateTime.UtcNow )} left";
+
+	protected override void OnUpdate()
+	{
+		if ( !IsOpen )
+		{
+			if ( Input.Keyboard.Pressed( "F10" ) )
+				Open();
+
+			return;
+		}
+
+		if ( Input.EscapePressed || NaviInputCapture.Current is not null || !Players.LocalController.IsValid()
+		     || !CanUse )
+		{
+			Input.EscapePressed = false;
+			Close();
+			return;
+		}
+
+		Mouse.Visibility = MouseVisibility.Visible;
+		MenuControls.Free( false );
+		minuteStamp = (int)( Time.Now / 30 );
+	}
+
+	protected override void OnDisabled() => Close();
+
+	protected override int BuildHash()
+	{
+		var players = new System.HashCode();
+
+		foreach ( var c in Connection.All )
+			players.Add( c.SteamId );
+
+		return System.HashCode.Combine(
+			IsOpen, tab, selected, notice, durationIndex, generation, players.ToHashCode(),
+			System.HashCode.Combine( bans.Count, minuteStamp, bans.Sum( x => (long)x.SteamId ) ) );
+	}
+}

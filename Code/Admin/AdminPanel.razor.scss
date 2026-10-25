@@ -1,0 +1,81 @@
+@import "../Hud/_hud.scss";
+
+// The window, its list, rows and buttons are MenuWindow's. This is the admin window's own content.
+
+.tabs
+{
+	flex-direction: row;
+	flex-shrink: 0;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.menu-button
+{
+	flex-shrink: 0;
+	white-space: nowrap;
+
+	&.active
+	{
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+
+	&.danger
+	{
+		background-color: rgba(200, 50, 50, 0.6);
+	}
+}
+
+.who
+{
+	flex-direction: column;
+	flex-grow: 1;
+	min-width: 0;
+	gap: 2px;
+}
+
+.name
+{
+	font-size: 15px;
+}
+
+.caption
+{
+	flex-shrink: 0;
+	font-size: 13px;
+	opacity: 0.7;
+}
+
+.form
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 6px;
+	margin-top: 10px;
+}
+
+.input
+{
+	flex-grow: 1;
+	min-width: 0;
+	min-height: 32px;
+	padding: 4px 8px;
+	font-size: 14px;
+	background-color: rgba(0, 0, 0, 0.35);
+	border-radius: 4px;
+}
+
+.durations
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.actions
+{
+	flex-direction: row;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 6px;
+}

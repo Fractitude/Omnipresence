@@ -117,10 +117,12 @@ public static class StatsCommands
 	}
 
 	/// <summary>
-	/// Bans a Steam id (see <c>players</c> or <c>stats_show</c>) and kicks them if connected: <c>ban 7656119… "cheating"</c>.
+	/// Bans a Steam id (see <c>players</c> or <c>stats_show</c>) and kicks them if connected:
+	/// <c>ban 7656119… 7d "cheating"</c>. The duration is a number and a unit (<c>30m</c>, <c>12h</c>, <c>7d</c>,
+	/// <c>2w</c>), or <c>perm</c> (the default) for one that never ends.
 	/// </summary>
 	[ConCmd( "ban" )]
-	public static void Ban( ulong steamId, string reason = "" )
+	public static void Ban( ulong steamId, string duration = "perm", string reason = "" )
 	{
 		if ( !Networking.IsHost )
 		{
@@ -128,9 +130,15 @@ public static class StatsCommands
 			return;
 		}
 
+		if ( !BanDuration.TryParse( duration, out var length ) )
+		{
+			Log.Info( $"\"{duration}\" is not a duration. Use 30m, 12h, 7d, 2w or perm." );
+			return;
+		}
+
 		var name = StatsLog.Find( steamId )?.Name ?? steamId.ToString();
 
-		Log.Info( GameManager.Current?.Ban( steamId, name, reason ) == true
+		Log.Info( GameManager.Current?.Ban( steamId, name, reason, null, length ) == true
 			? $"Banned {name} ({steamId})"
 			: $"{steamId} is already banned" );
 	}
@@ -153,7 +161,7 @@ public static class StatsCommands
 			Log.Info( $"{all.Count} banned. Run unban <steamId> to lift one:" );
 
 			foreach ( var b in all )
-				Log.Info( $"  {b.SteamId}  {b.Name}  {b.Date:u}  {b.Reason}" );
+				Log.Info( $"  {b.SteamId}  {b.Name}  {b.Date:u}  {(b.ExpiresAt is { } end ? $"until {end:u}" : "permanent")}  {b.Reason}" );
 
 			return;
 		}

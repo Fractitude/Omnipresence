@@ -121,6 +121,7 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<PlayerCustomizerPanel>();
 		hud.Attach<WelcomeScreen>();
 		hud.Attach<WelcomeScreenEditor>();
+		hud.Attach<AdminPanel>();
 
 		// The abilities are switched off for now. The hotbar draws above the menus, and the dragged icon above both.
 		// hud.Attach<AbilityMenu>();
