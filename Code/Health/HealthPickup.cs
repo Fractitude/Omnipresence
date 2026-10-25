@@ -1,15 +1,10 @@
 namespace Sandbox;
 
 /// <summary>
-/// A pickup that gives the player some health. The host checks it when a player touches it.
+/// A pickup that gives the player some health. The player looks at it and presses Use; walking into it does nothing.
 /// </summary>
-public sealed class HealthPickup : Component, Component.ITriggerListener, Component.ICollisionListener
+public sealed class HealthPickup : Component, IInteractionHandler
 {
-	/// <summary>
-	/// The pickup's collider, it is required
-	/// </summary>
-	[RequireComponent] public Collider Collider { get; set; }
-
 	/// <summary>
 	/// The sound to play when picking up this item
 	/// </summary>
@@ -22,12 +17,29 @@ public sealed class HealthPickup : Component, Component.ITriggerListener, Compon
 
 	bool CanPickup( Player player ) => player.Health < player.MaxHealth || HealthGive <= 0;
 
-	void TryPickup( GameObject other )
+	protected override void OnStart()
 	{
-		if ( !Networking.IsHost ) return;
-		if ( GameObject.IsDestroyed ) return;
+		if ( !Game.IsPlaying )
+			return;
 
-		var player = other.Root.GetComponent<Player>();
+		_ = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
+			?? GameObject.Components.Create<Interactable>();
+
+		InteractionSetup.EnsureOption( this, "take", "Take", "healing", "" );
+	}
+
+	InteractionInfo? IInteractionHandler.Describe( InteractionEvent e ) =>
+		new( HealthGive > 0 ? $"Take +{HealthGive:0} health" : "Take", "healing" );
+
+	bool IInteractionHandler.CanInteract( InteractionEvent e ) =>
+		e.Interactor.IsValid() && e.Interactor.GetComponent<Player>() is { } player && CanPickup( player );
+
+	void IInteractionHandler.OnInteract( InteractionEvent e )
+	{
+		if ( !Networking.IsHost || GameObject.IsDestroyed )
+			return;
+
+		var player = e.Interactor.IsValid() ? e.Interactor.GetComponent<Player>() : null;
 		if ( !player.IsValid() || !CanPickup( player ) )
 			return;
 
@@ -36,10 +48,6 @@ public sealed class HealthPickup : Component, Component.ITriggerListener, Compon
 		PlayPickupEffects( player );
 		DestroyGameObject();
 	}
-
-	void ITriggerListener.OnTriggerEnter( GameObject other ) => TryPickup( other );
-
-	void ICollisionListener.OnCollisionStart( Collision collision ) => TryPickup( collision.Other.GameObject );
 
 	[Rpc.Broadcast]
 	void PlayPickupEffects( Player player )
