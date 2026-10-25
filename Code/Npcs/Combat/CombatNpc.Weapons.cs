@@ -338,15 +338,24 @@ public partial class CombatNpc
 			bestDistance = distance;
 		}
 
-		// Ammo is only any use for a gun it already has, and only wanted when it has run out
+		// Ammo is only any use for a gun it already has, and only wanted when it has run out. With several kinds
+		// about, the kind for its strongest gun wins, however far that box is, as long as it is in range.
 		if ( needAmmo )
 		{
-			var types = _guns.Where( x => x.IsValid() && x.PrimaryAmmoType is not null ).Select( x => x.PrimaryAmmoType ).ToHashSet();
+			var boxes = Scene.GetAll<AmmoPickup>()
+				.Where( x => x.AmmoType is not null && WorldPosition.Distance( x.WorldPosition ) < PickupRange )
+				.ToList();
 
-			foreach ( var ammo in Scene.GetAll<AmmoPickup>() )
+			foreach ( var gun in _guns.Where( x => x.IsValid() && x.PrimaryAmmoType is not null ).OrderByDescending( Rating ) )
 			{
-				if ( ammo.AmmoType is not null && types.Contains( ammo.AmmoType ) )
-					Consider( ammo.GameObject );
+				var forGun = boxes.Where( x => x.AmmoType == gun.PrimaryAmmoType ).ToList();
+				if ( forGun.Count == 0 )
+					continue;
+
+				foreach ( var box in forGun )
+					Consider( box.GameObject );
+
+				break;
 			}
 		}
 
