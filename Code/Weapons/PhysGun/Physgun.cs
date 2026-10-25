@@ -786,6 +786,13 @@ public partial class Physgun
 		return true;
 	}
 
+	static bool IsLiving( GameObject go )
+	{
+		// by tag too, so NPCs from imported sents that are not our Npc class are covered
+		return go.Tags.HasAny( "npc", "player" ) || go.Root.Tags.HasAny( "npc", "player" )
+			|| go.Parent.IsValid() && go.Parent.Tags.HasAny( "npc", "player" );
+	}
+
 	bool FindGrabbedBody( out GrabState state, Transform aim, bool isPulling )
 	{
 		state = default;
@@ -817,8 +824,9 @@ public partial class Physgun
 		if ( !go.IsValid() || go.IsDestroyed ) return false;
 
 		// Players and NPCs are never picked up
+		if ( IsLiving( go ) ) return false;
 		if ( go.Root.Components.Get<Player>( FindMode.EverythingInSelfAndDescendants ).IsValid() ) return false;
-		if ( go.Root.Components.Get<Npc>( FindMode.EverythingInSelfAndDescendants ).IsValid() ) return false;
+		if ( go.Root.Components.Get<Sandbox.Npcs.Npc>( FindMode.EverythingInSelfAndDescendants ).IsValid() ) return false;
 
 		// Ask the object if it allows being grabbed (Ownable and others can reject via IPhysgunEvent)
 		var grabEvent = new IPhysgunEvent.GrabEvent { Grabber = Network.Owner };
