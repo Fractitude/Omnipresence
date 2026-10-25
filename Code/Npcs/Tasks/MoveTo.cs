@@ -75,6 +75,12 @@ public class MoveTo : TaskBase
 	{
 		if ( TargetObject.IsValid() )
 		{
+			// A player or NPC: its bounds take in everything attached to it (a held weapon, effects) and are far bigger
+			// than the body, so the closest point on them is often where we already stand and the move ends at once.
+			// Go to the body.
+			if ( Npc.GetFactionOf( TargetObject ) is not null )
+				return TargetObject.WorldPosition;
+
 			// Navigate to the closest point on the object's bounds, not its origin.
 			// This prevents the NPC from trying to walk inside large props.
 			var bounds = TargetObject.GetBounds();
