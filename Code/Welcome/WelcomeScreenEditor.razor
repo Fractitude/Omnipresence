@@ -25,32 +25,32 @@
 					<div class="section">
 						<div class="menu-heading">Text</div>
 						<div class="label">Window title</div>
-						<TextEntry class="input" Value=@d.Title MaxLength=@( 120 ) OnTextEdited=@( ( string t ) => { d.Title = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.Title MaxLength=@( 120 ) OnTextEdited=@( ( string t ) => { d.Title = t; } )/></div>
 						<div class="label">Heading for a new player</div>
-						<TextEntry class="input" Value=@d.WelcomeHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.WelcomeHeading = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.WelcomeHeading MaxLength=@( 120 )
+						           OnTextEdited=@( ( string t ) => { d.WelcomeHeading = t; } )/></div>
 						<div class="label">Heading for a returning player</div>
-						<TextEntry class="input" Value=@d.WelcomeBackHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.WelcomeBackHeading = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.WelcomeBackHeading MaxLength=@( 120 )
+						           OnTextEdited=@( ( string t ) => { d.WelcomeBackHeading = t; } )/></div>
 						<div class="label">About the game</div>
-						<TextEntry class="input tall" Multiline=@( true ) Value=@d.Intro MaxLength=@( 2000 )
-						           OnTextEdited=@( ( string t ) => { d.Intro = t; } )/>
+						<div class="field tall"><TextEntry class="input" Multiline=@( true ) Value=@d.Intro MaxLength=@( 2000 )
+						           OnTextEdited=@( ( string t ) => { d.Intro = t; } )/></div>
 						<div class="label">Play button</div>
-						<TextEntry class="input" Value=@d.PlayButton MaxLength=@( 40 )
-						           OnTextEdited=@( ( string t ) => { d.PlayButton = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.PlayButton MaxLength=@( 40 )
+						           OnTextEdited=@( ( string t ) => { d.PlayButton = t; } )/></div>
 					</div>
 
 					<div class="section">
 						<div class="menu-heading">Rules</div>
 						<div class="label">Heading</div>
-						<TextEntry class="input" Value=@d.RulesHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.RulesHeading = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.RulesHeading MaxLength=@( 120 )
+						           OnTextEdited=@( ( string t ) => { d.RulesHeading = t; } )/></div>
 						@for ( var i = 0; i < d.Rules.Count; i++ )
 						{
 							var index = i;
 							<div class="line-row">
-								<TextEntry class="input" Value=@d.Rules[index] MaxLength=@( 500 )
-								           OnTextEdited=@( ( string t ) => { d.Rules[index] = t; } )/>
+								<div class="field"><TextEntry class="input" Value=@d.Rules[index] MaxLength=@( 500 )
+								           OnTextEdited=@( ( string t ) => { d.Rules[index] = t; } )/></div>
 								<div class="menu-button small" @onclick=@( () => Remove( d.Rules, index ) )>Remove</div>
 							</div>
 						}
@@ -60,14 +60,14 @@
 					<div class="section">
 						<div class="menu-heading">Changelog</div>
 						<div class="label">Heading over what a returning player has not seen</div>
-						<TextEntry class="input" Value=@d.NewHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.NewHeading = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.NewHeading MaxLength=@( 120 )
+						           OnTextEdited=@( ( string t ) => { d.NewHeading = t; } )/></div>
 						<div class="label">Heading over the latest release</div>
-						<TextEntry class="input" Value=@d.LatestHeading MaxLength=@( 120 )
-						           OnTextEdited=@( ( string t ) => { d.LatestHeading = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.LatestHeading MaxLength=@( 120 )
+						           OnTextEdited=@( ( string t ) => { d.LatestHeading = t; } )/></div>
 						<div class="label">Text for a player who is up to date</div>
-						<TextEntry class="input" Value=@d.UpToDateText MaxLength=@( 300 )
-						           OnTextEdited=@( ( string t ) => { d.UpToDateText = t; } )/>
+						<div class="field"><TextEntry class="input" Value=@d.UpToDateText MaxLength=@( 300 )
+						           OnTextEdited=@( ( string t ) => { d.UpToDateText = t; } )/></div>
 
 						@for ( var i = 0; i < d.Changelog.Count; i++ )
 						{
@@ -76,18 +76,18 @@
 							<div class="entry">
 								<div class="line-row">
 									<div class="label fixed">Version</div>
-									<TextEntry class="input number" Value=@entry.Version.ToString() MaxLength=@( 6 )
-									           OnTextEdited=@( ( string t ) => { entry.Version = ParseVersion( t, entry.Version ); } )/>
-									<TextEntry class="input" Value=@entry.Title MaxLength=@( 120 ) Placeholder="Title"
-									           OnTextEdited=@( ( string t ) => { entry.Title = t; } )/>
+									<div class="field number"><TextEntry class="input" Value=@entry.Version.ToString() MaxLength=@( 6 )
+									           OnTextEdited=@( ( string t ) => { entry.Version = ParseVersion( t, entry.Version ); } )/></div>
+									<div class="field"><TextEntry class="input" Value=@entry.Title MaxLength=@( 120 ) Placeholder="Title"
+									           OnTextEdited=@( ( string t ) => { entry.Title = t; } )/></div>
 									<div class="menu-button small" @onclick=@( () => Remove( d.Changelog, at ) )>Remove</div>
 								</div>
 								@for ( var c = 0; c < entry.Changes.Count; c++ )
 								{
 									var change = c;
 									<div class="line-row">
-										<TextEntry class="input" Value=@entry.Changes[change] MaxLength=@( 500 )
-										           OnTextEdited=@( ( string t ) => { entry.Changes[change] = t; } )/>
+										<div class="field"><TextEntry class="input" Value=@entry.Changes[change] MaxLength=@( 500 )
+										           OnTextEdited=@( ( string t ) => { entry.Changes[change] = t; } )/></div>
 										<div class="menu-button small"
 										     @onclick=@( () => Remove( entry.Changes, change ) )>Remove</div>
 									</div>
