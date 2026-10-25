@@ -100,7 +100,7 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 89px;
+			top: 96px;
 			justify-content: center;
 			text-align: center;
 			font-size: 13px;
@@ -114,13 +114,13 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 98px;
+			top: 108px;
 			justify-content: center;
 			text-align: center;
-			font-size: 74px;
+			font-size: 62px;
 			font-weight: 800;
 			font-style: italic;
-			line-height: 74px;
+			line-height: 62px;
 		}
 
 		.speed-unit
@@ -128,10 +128,10 @@ VehicleHud
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 184px;
+			top: 176px;
 			justify-content: center;
 			text-align: center;
-			font-size: 15px;
+			font-size: 13px;
 			font-weight: 500;
 			letter-spacing: 2px;
 			opacity: 0.9;
