@@ -143,7 +143,10 @@ VehicleHud
 			justify-content: center;
 			align-items: center;
 			text-align: center;
-			line-height: 26px;
+			// No line-height: the label centres its text with the flex alignment above, and a line height taller than the
+			// text pushes it to the top of its line box.
+			line-height: 1;
+			padding-top: 1px;
 			border: 1px solid rgba( 255, 255, 255, 0.7 );
 			border-radius: 4px;
 			font-weight: 700;
