@@ -20,7 +20,7 @@ Files in `Code/Sents/`, each with one job:
   package page. The sidebar filters by tag (`#vehicle`, `#weapon`, `#npc`, `#explosives`; `tag:` finds nothing), and the
   next page loads when the list is scrolled near the bottom.
 - `SentLocal.cs`: the integrated sents (below): where their prefab is, and mounting their assets.
-- `Ported/`: types a sent needs and its author never published (`ClaymoreMine`).
+- `Ported/`: types a sent needs and its author never published (`ClaymoreMine`, `Mineexplosion`).
 - `Imported/<ident>/`: the code of imported sents (below).
 
 ## Integrating a sent (making it ours)
@@ -119,3 +119,4 @@ system) needs that part ported first. Props and models with no code, and code th
 ### Known not working
 
 - `sftatlas.claymoremine`: the package has no code, only two ActionGraphs (on the prop's damage event and the trigger's enter event) that call `ClaymoreMine.ActivateMine`, a type its author never published. With the type missing, every touch logged `ActionGraph... Unable to resolve type binding` against whatever component was updating (the player's `WeaponInventory`, a drone's `FpvDroneNpc`). `Code/Sents/Ported/ClaymoreMine.cs` is a stand-in written from the prefab: it spawns the prefab's explosion and removes the mine. Any other sent whose graphs log this error is missing a type the same way: look for `"_type"` in its graphs (`Cloud.Load<ScriptedEntity>`, `Prefab.RootObject`).
+- `tankmine`: the same case. One ActionGraph ("On Prop Take Damage") calls `Mineexplosion.ActivateMine`, a type its author never published, and shooting the mine logged the error against `WeaponInventory`. `Code/Sents/Ported/Mineexplosion.cs` is the stand-in; it also goes off when something tagged `player` (its `TargetTags`) lands on it, which the prefab's properties suggest but no graph shows.
