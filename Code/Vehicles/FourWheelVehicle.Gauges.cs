@@ -37,7 +37,7 @@ public sealed partial class FourWheelVehicle : IVehicleGauges
 
 	IEnumerable<(string Key, string Label)> IVehicleGauges.GaugePrompts =>
 	[
-		(Input.GetButtonOrigin( "Jump" ), "HANDBRAKE"),
+		(Input.GetButtonOrigin( "Run" ), "TURBO"),
 		(Input.GetButtonOrigin( "Flashlight" ), "LIGHTS"),
 		(Input.GetButtonOrigin( "Use" ), "EXIT"),
 	];
