@@ -30,7 +30,7 @@
           "OnComponentUpdate": null,
           "PlayerPrefab": {
             "_type": "gameobject",
-            "prefab": "player controller.prefab"
+            "prefab": "player.prefab"
           },
           "SpawnPoints": [
             {
