@@ -27,7 +27,32 @@
 	}
 }
 
-.rule, .change
+.rule
+{
+	flex-direction: row;
+	flex-shrink: 0;
+	gap: 8px;
+	padding-left: 12px;
+
+	.bullet
+	{
+		flex-shrink: 0;
+		font-size: 14px;
+		opacity: 0.9;
+	}
+
+	.rule-text
+	{
+		flex-grow: 1;
+		flex-basis: 0;
+		min-width: 0;
+		font-size: 14px;
+		line-height: 1.4;
+		opacity: 0.9;
+	}
+}
+
+.change
 {
 	font-size: 14px;
 	line-height: 1.4;

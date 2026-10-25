@@ -24,7 +24,10 @@
 						<div class="menu-heading">@text.RulesHeading</div>
 						@foreach ( var rule in text.Rules )
 						{
-							<div class="rule">@rule</div>
+							<div class="rule">
+								<div class="bullet">•</div>
+								<div class="rule-text">@rule</div>
+							</div>
 						}
 					</div>
 
