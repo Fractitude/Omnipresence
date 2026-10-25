@@ -5,7 +5,7 @@ namespace Sandbox;
 /// </summary>
 public sealed class PlayerDamageIndicators : Component, Local.IPlayerEvents
 {
-	[RequireComponent] PlayerHealth Player { get; set; }
+	[RequireComponent] Player Player { get; set; }
 
 	float RadialDistanceFromCenter => 128f;
 	float RadialIndicatorLifetime => 2f;

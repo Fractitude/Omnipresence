@@ -2,7 +2,7 @@ namespace Sandbox;
 
 /// <summary>
 /// The one place that finds a player's components: the local player's, or the player of a connection. Every part of the
-/// player (<see cref="PlayerController"/>, <see cref="PlayerHealth"/>, <see cref="PlayerProgress"/>,
+/// player (<see cref="PlayerController"/>, <see cref="Player"/>, <see cref="PlayerProgress"/>,
 /// <see cref="PlayerInventory"/>, …) is on the player prefab, so any of them can be asked for.
 /// </summary>
 public static class Players

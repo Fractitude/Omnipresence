@@ -47,7 +47,7 @@ public sealed partial class CombineNpc : Component.IPressable
 	{
 		if ( !Calm ) return true;
 		if ( target is null ) return false;
-		if ( !target.GetComponent<PlayerController>().IsValid() ) return true;
+		if ( !target.GetComponent<Player>().IsValid() ) return true;
 		return _criminals.Contains( target ) || _chasePlayerUntil > 0f && !_chasePlayerUntil;
 	}
 
@@ -59,8 +59,8 @@ public sealed partial class CombineNpc : Component.IPressable
 		NearPlayer = null;
 		if ( !Calm ) return;
 
-		var player = Scene.GetAllComponents<PlayerController>()
-			.Where( p => p.IsValid() && (p.GetComponent<PlayerHealth>()?.Health ?? 0f) > 0f && !_criminals.Contains( p.GameObject ) )
+		var player = Scene.GetAllComponents<Player>()
+			.Where( p => p.IsValid() && p.Health > 0f && !_criminals.Contains( p.GameObject ) )
 			.OrderBy( p => p.WorldPosition.Distance( WorldPosition ) )
 			.FirstOrDefault();
 
@@ -84,7 +84,7 @@ public sealed partial class CombineNpc : Component.IPressable
 
 		// Standing on his head: always beaten. Pressed up against him, in sight: shoved -
 		// but not a fourth time in a row, unless he's a cop who hasn't moved off his spot
-		if ( player.GroundObject?.Root == GameObject )
+		if ( player.Controller?.GroundObject?.Root == GameObject )
 		{
 			_playerHits = 0;
 			_playerTooClose = true;
@@ -207,7 +207,7 @@ public sealed partial class CombineNpc : Component.IPressable
 	public void StunnedTarget( GameObject target )
 	{
 		_sinceHitPlayer = 0;
-		if ( target.IsValid() && target.GetComponent<PlayerController>().IsValid() ) _playerHits++;
+		if ( target.IsValid() && target.GetComponent<Player>().IsValid() ) _playerHits++;
 	}
 
 	/// <summary>A calm cop hurt by a player: a thrown thing is "pick up that can"; a bullet makes him a criminal for good.</summary>
@@ -222,7 +222,7 @@ public sealed partial class CombineNpc : Component.IPressable
 	public void HitByThrownThing()
 	{
 		if ( !Calm ) return;
-		var thrower = Scene.GetAllComponents<PlayerController>()
+		var thrower = Scene.GetAllComponents<Player>()
 			.Where( p => p.IsValid() && p.WorldPosition.Distance( WorldPosition ) < 1500f && CanSeePlayer( p.GameObject ) )
 			.OrderBy( p => p.WorldPosition.Distance( WorldPosition ) )
 			.FirstOrDefault();

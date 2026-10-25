@@ -20,14 +20,14 @@ public sealed class HealthPickup : Component, Component.ITriggerListener, Compon
 	/// </summary>
 	[Property, Group( "Health" )] float HealthGive { get; set; } = 0;
 
-	bool CanPickup( PlayerHealth player ) => player.Health < player.MaxHealth || HealthGive <= 0;
+	bool CanPickup( Player player ) => player.Health < player.MaxHealth || HealthGive <= 0;
 
 	void TryPickup( GameObject other )
 	{
 		if ( !Networking.IsHost ) return;
 		if ( GameObject.IsDestroyed ) return;
 
-		var player = other.Root.GetComponent<PlayerHealth>();
+		var player = other.Root.GetComponent<Player>();
 		if ( !player.IsValid() || !CanPickup( player ) )
 			return;
 
@@ -42,7 +42,7 @@ public sealed class HealthPickup : Component, Component.ITriggerListener, Compon
 	void ICollisionListener.OnCollisionStart( Collision collision ) => TryPickup( collision.Other.GameObject );
 
 	[Rpc.Broadcast]
-	void PlayPickupEffects( PlayerHealth player )
+	void PlayPickupEffects( Player player )
 	{
 		if ( Application.IsDedicatedServer ) return;
 

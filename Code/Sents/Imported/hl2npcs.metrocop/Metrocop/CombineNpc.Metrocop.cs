@@ -383,7 +383,7 @@ public sealed partial class CombineNpc
 		if ( Calm )
 		{
 			var thrown = info.Tags.Contains( DamageTags.Impact ) || info.Tags.Contains( DamageTags.Crush );
-			var player = root is not null && root.GetComponent<PlayerController>().IsValid() ? root : null;
+			var player = root is not null && root.GetComponent<Player>().IsValid() ? root : null;
 			if ( player is not null && !PlayerIsCriminal( player ) )
 			{
 				if ( thrown ) CalmHurtByPlayer( player );
@@ -875,7 +875,7 @@ public sealed partial class CombineNpc
 		if ( Vector3.Dot( flatNow.Normal, forward ) < front && Vector3.Dot( flatAhead.Normal, forward ) < front ) return false;
 
 		// A player who'll be within 48 in a third of a second gets it
-		if ( enemy.GetComponent<PlayerController>().IsValid() && (enemy.WorldPosition + velocity * 0.35f - WorldPosition).WithZ( 0 ).Length <= 48f )
+		if ( enemy.GetComponent<Player>().IsValid() && (enemy.WorldPosition + velocity * 0.35f - WorldPosition).WithZ( 0 ).Length <= 48f )
 			return true;
 
 		// HL2's 48 between centres, plus a little: s&box bodies can't get as close as HL2's. No further

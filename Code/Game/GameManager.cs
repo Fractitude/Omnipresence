@@ -54,14 +54,14 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	/// cancel the spawn. Pass <paramref name="force"/> to skip that event. Returns the new player, or null if the
 	/// connection already has one or a listener cancelled.
 	/// </summary>
-	public PlayerHealth SpawnPlayer( Connection connection, bool force = false )
+	public Player SpawnPlayer( Connection connection, bool force = false )
 	{
 		Assert.True( Networking.IsHost, $"Client tried to SpawnPlayer: {connection?.DisplayName}" );
 
 		var playerData = GetOrCreatePlayerData( connection );
 
 		// does this connection already have a player?
-		if ( PlayerHealth.FindForConnection( connection ).IsValid() )
+		if ( Player.FindForConnection( connection ).IsValid() )
 			return null;
 
 		var helper = Scene.GetAllComponents<NetworkHelper>().FirstOrDefault();
@@ -95,7 +95,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 			Name = connection?.DisplayName, StartEnabled = false, Transform = startLocation
 		} );
 
-		var player = playerGo.Components.Get<PlayerHealth>( true );
+		var player = playerGo.Components.Get<Player>( true );
 		playerGo.NetworkSpawn( connection );
 
 		Local.IPlayerEvents.PostToGameObject( player.GameObject, x => x.OnSpawned() );
@@ -109,11 +109,11 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	/// player object and any observer without a death, then spawns a fresh one without consulting
 	/// <see cref="Global.IPlayerEvents.OnPlayerRespawning"/>.
 	/// </summary>
-	public PlayerHealth Respawn( Connection connection )
+	public Player Respawn( Connection connection )
 	{
 		Assert.True( Networking.IsHost, "Only the host can respawn players" );
 
-		PlayerHealth.FindForConnection( connection )?.GameObject.Destroy();
+		Player.FindForConnection( connection )?.GameObject.Destroy();
 		DestroyObservers( connection );
 
 		return SpawnPlayer( connection, force: true );
@@ -245,7 +245,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 	/// <summary>
 	/// Called on the host when a player is killed: credits the attacker and counts the death.
 	/// </summary>
-	internal void OnDeath( PlayerHealth player, DamageInfo dmg )
+	internal void OnDeath( Player player, DamageInfo dmg )
 	{
 		Assert.True( Networking.IsHost );
 		Assert.True( player.IsValid(), "Player invalid" );
@@ -256,7 +256,7 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 		playerData.Deaths++;
 
 		var weapon = dmg.Weapon.IsValid() ? dmg.Weapon.Name : null;
-		var killerConnection = source is PlayerHealth { } shooter && shooter != player ? shooter.Network.Owner : null;
+		var killerConnection = source is Player { } shooter && shooter != player ? shooter.Network.Owner : null;
 		StatsLog.Death( player.Network.Owner, killerConnection, source?.DisplayName, weapon, dmg.Tags?.ToString() );
 
 		if ( source is null )
@@ -265,13 +265,13 @@ public sealed partial class GameManager : GameObjectSystem<GameManager>, Compone
 			return;
 		}
 
-		var isSuicide = source is PlayerHealth p && p == player;
+		var isSuicide = source is Player p && p == player;
 
 		if ( !isSuicide )
 			source.OnKill( player.GameObject );
 
 		// Fire kill event on the killer if they're a player
-		if ( !isSuicide && source is PlayerHealth killer )
+		if ( !isSuicide && source is Player killer )
 		{
 			var killEvent = new PlayerKillEvent { Player = killer, Victim = player.GameObject, DamageInfo = dmg };
 			Local.IPlayerEvents.PostToGameObject( killer.GameObject, x => x.OnKill( killEvent ) );

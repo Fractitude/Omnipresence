@@ -37,14 +37,14 @@
 	/// <summary>
 	/// The living local player. Nothing is drawn while a Navi app or a menu has the screen.
 	/// </summary>
-	PlayerHealth Player
+	Player Player
 	{
 		get
 		{
 			if ( NaviInputCapture.Current is not null || AbilityMenu.IsOpen || CharacterMenu.IsOpen )
 				return null;
 
-			var player = PlayerHealth.FindLocalPlayer();
+			var player = Player.FindLocalPlayer();
 			return player.IsValid() ? player : null;
 		}
 	}
@@ -55,7 +55,7 @@
 
 	protected override void OnUpdate()
 	{
-		var player = PlayerHealth.FindLocalPlayer();
+		var player = Player.FindLocalPlayer();
 		if ( !player.IsValid() )
 		{
 			lastHealth = -1;

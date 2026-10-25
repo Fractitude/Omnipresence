@@ -42,7 +42,7 @@ public sealed partial class CombineNpc
 
 		PlayAt( BatonHitSound, hit.WorldPosition + Vector3.Up * 40f );
 
-		var player = hit.GetComponent<PlayerController>();
+		var player = hit.GetComponent<Player>();
 		var criminal = player is null || PlayerIsCriminal( hit );
 		if ( criminal ) Hurt( hit, player is not null ? BatonDamageNpc * SuitScale : BatonDamageNpc, start );
 
@@ -50,7 +50,7 @@ public sealed partial class CombineNpc
 		{
 			StunnedTarget( hit );
 			var away = (hit.WorldPosition - WorldPosition).WithZ( 0 ).Normal;
-			if ( player.GroundObject?.Root == GameObject ) away = dir.WithZ( 0 ).Normal;
+			if ( player.Controller?.GroundObject?.Root == GameObject ) away = dir.WithZ( 0 ).Normal;
 			Push( player, away * 500f );
 			ScreenFlash( player, new Color( 0.5f, 0f, 0f, 0.5f ) );
 			ForceDrop( player );
@@ -65,7 +65,7 @@ public sealed partial class CombineNpc
 		var hit = MeleeTrace( start - ahead * 24f, start + ahead * 16f, new BBox( new Vector3( -16 ), new Vector3( 16 ) ) );
 		if ( hit is null ) return;
 
-		var player = hit.GetComponent<PlayerController>();
+		var player = hit.GetComponent<Player>();
 		if ( player is not null )
 		{
 			if ( PlayerIsCriminal( hit ) ) Hurt( hit, ShoveDamage * SuitScale, start );
@@ -93,7 +93,7 @@ public sealed partial class CombineNpc
 		{
 			if ( !tr.GameObject.IsValid() ) continue;
 			var root = tr.GameObject.Root;
-			if ( root.GetComponent<PlayerController>().IsValid() ) return root;
+			if ( root.GetComponent<Player>().IsValid() ) return root;
 			if ( root.GetComponent<Npc>().IsValid() )
 			{
 				if ( GetDisposition( root ) == Disposition.Hostile ) return root;
@@ -123,15 +123,15 @@ public sealed partial class CombineNpc
 			damageable.OnDamage( damage );
 	}
 
-	private static void Push( PlayerController player, Vector3 velocity )
+	private static void Push( Player player, Vector3 velocity )
 	{
 		// Not airborne: "if not on ground, then don't make them fly"
-		if ( !player.IsOnGround ) velocity = velocity.WithZ( 0 );
+		if ( player.Controller is { } controller && !controller.IsOnGround ) velocity = velocity.WithZ( 0 );
 		if ( player.GameObject.Root.GetComponent<Rigidbody>() is { } body ) body.Velocity += velocity;
 	}
 
 	/// <summary>Make the player let go of whatever his physgun holds (ForceDropOfCarriedPhysObjects).</summary>
-	private static void ForceDrop( PlayerController player )
+	private static void ForceDrop( Player player )
 	{
 		// The physgun's grab is the holder's to change: this reaches the host's own player, not a joined one's
 		foreach ( var gun in player.GameObject.Root.GetComponentsInChildren<Physgun>( true ) )
@@ -140,7 +140,7 @@ public sealed partial class CombineNpc
 		}
 	}
 
-	private void ScreenFlash( PlayerController player, Color color )
+	private void ScreenFlash( Player player, Color color )
 	{
 		var owner = player.Network.Owner;
 		if ( owner is null )

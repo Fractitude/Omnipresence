@@ -224,7 +224,7 @@ public sealed partial class CombineNpc
 
 			if ( bunched >= 2 ) return true;
 			if ( Squad is not null && Squad.Strength < 1f ) return Game.Random.Float() < 0.5f;
-			return target.IsValid() && target.GetComponent<PlayerController>().IsValid() && Game.Random.Float() < 0.2f;
+			return target.IsValid() && target.GetComponent<Player>().IsValid() && Game.Random.Float() < 0.2f;
 		}
 
 		// Hiding behind something close by: bounce it in there
@@ -301,7 +301,7 @@ public sealed partial class CombineNpc
 		LastLineOfFireHit = $"{tr.GameObject.Name} / root {root.Name} / target root {(target.IsValid() ? target.Root.Name : "-")}";
 		if ( target.IsValid() && root == target.Root ) return LineOfFire.Clear;
 
-		if ( root.GetComponent<Npc>().IsValid() || root.GetComponent<PlayerController>().IsValid() )
+		if ( root.GetComponent<Npc>().IsValid() || root.GetComponent<Player>().IsValid() )
 		{
 			if ( GetDisposition( root ) == Disposition.Hostile ) return LineOfFire.Clear;
 			// Our own manhacks dart about the target all the time: fire past them, not hold for them
@@ -557,7 +557,7 @@ public sealed partial class CombineNpc
 			if ( GetDisposition( npc.GameObject ) != Disposition.Hostile ) return false;
 		}
 
-		foreach ( var player in Scene.GetAllComponents<PlayerController>() )
+		foreach ( var player in Scene.GetAllComponents<Player>() )
 		{
 			if ( player.WorldPosition.Distance( position ) > safe ) continue;
 			if ( GetDisposition( player.GameObject ) != Disposition.Hostile ) return false;

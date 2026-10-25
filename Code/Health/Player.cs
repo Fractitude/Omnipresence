@@ -1,11 +1,13 @@
 namespace Sandbox;
 
 /// <summary>
-/// The player's health, armour and death, ported from Facepunch's sandbox <c>Player</c>. The host owns it: damage comes
+/// The player, ported from Facepunch's sandbox <c>Player</c> and named like it so code written for that game (the sents
+/// in <c>Code/Sents/Imported</c>) finds the same members: health, armour, death, the controller and the eyes. The host owns it: damage comes
 /// in through <see cref="OnDamage"/> on the host, which drains armour then health, tells everyone, and on death
 /// leaves a ragdoll, hands the owner an observer and removes the player until <see cref="GameManager"/> respawns them.
 /// </summary>
-public sealed class PlayerHealth : Component, Component.IDamageable, IKillSource
+[Alias( "PlayerHealth" )]
+public sealed class Player : Component, Component.IDamageable, IKillSource
 {
 	[RequireComponent] public PlayerController Controller { get; set; }
 
@@ -26,19 +28,44 @@ public sealed class PlayerHealth : Component, Component.IDamageable, IKillSource
 		Help = "Seconds of invulnerability after spawning. 0 disables spawn protection." )]
 	public static float SpawnProtection { get; set; } = 5.0f;
 
-	static PlayerHealth localPlayer;
+	static Player localPlayer;
 
 	/// <summary>
 	/// The player this client controls, if it is alive.
 	/// </summary>
-	public static PlayerHealth FindLocalPlayer() => localPlayer;
+	public static Player FindLocalPlayer() => localPlayer;
 
 	/// <summary>
 	/// Find a player for this connection
 	/// </summary>
-	public static PlayerHealth FindForConnection( Connection c ) => Players.For<PlayerHealth>( c );
+	public static Player FindForConnection( Connection c ) => Players.For<Player>( c );
 
 	public bool IsLocalPlayer => !IsProxy;
+
+	/// <summary>
+	/// The model's object under the player, the one the skinned renderer is on.
+	/// </summary>
+	public GameObject Body => Controller.IsValid() && Controller.Renderer.IsValid() ? Controller.Renderer.GameObject : null;
+
+	public Transform EyeTransform
+	{
+		get
+		{
+			if ( Controller.IsValid() )
+				return Controller.EyeTransform;
+
+			Log.Warning( $"Invalid Controller for {GameObject}" );
+			return default;
+		}
+	}
+
+	/// <summary>
+	/// Find a player by the id of their connection.
+	/// </summary>
+	public static Player For( Guid playerId ) =>
+		Game.ActiveScene.GetAllComponents<Player>().FirstOrDefault( x => x.Network.Owner?.Id == playerId );
+
+	public static T FindLocalWeapon<T>() where T : BaseSandboxWeapon => FindLocalPlayer()?.GetComponentInChildren<T>( true );
 
 	/// <summary>
 	/// This player's kills, deaths and god mode, which outlive the body.

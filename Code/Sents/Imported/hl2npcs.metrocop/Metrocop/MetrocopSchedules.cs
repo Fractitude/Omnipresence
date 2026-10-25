@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Sandbox;
 using Sandbox.Npcs;
-using TaskStatus = Sandbox.Npcs.TaskStatus;
 using Sandbox.Npcs.Tasks;
 
 namespace Hl2Metrocop;

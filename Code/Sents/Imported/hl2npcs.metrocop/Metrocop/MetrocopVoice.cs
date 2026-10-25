@@ -121,7 +121,7 @@ public static partial class MetrocopVoice
 		if ( leader != cop && leader is not null && leader.CopEnemy == enemy ) return;
 
 		var group = "METROPOLICE_MONST";
-		if ( enemy.GetComponent<PlayerController>().IsValid() )
+		if ( enemy.GetComponent<Player>().IsValid() )
 			group = InVehicle( enemy ) ? "METROPOLICE_MONST_PLAYER_VEHICLE" : "METROPOLICE_MONST_PLAYER";
 		else if ( enemy.GetComponent<Npc>() is { } npc )
 		{
@@ -144,7 +144,7 @@ public static partial class MetrocopVoice
 	{
 		if ( !victim.IsValid() ) return;
 		var group = "METROPOLICE_KILL_MONST";
-		if ( victim.GetComponent<PlayerController>().IsValid() ) group = "METROPOLICE_KILL_PLAYER";
+		if ( victim.GetComponent<Player>().IsValid() ) group = "METROPOLICE_KILL_PLAYER";
 		else if ( victim.GetComponent<Npc>() is { } npc )
 		{
 			group = npc.Faction switch
@@ -204,7 +204,7 @@ public static partial class MetrocopVoice
 	{
 		if ( !cop.PlayerIsCriminal( null ) || !enemy.IsValid() || cop.ArrestEnemy ) return;
 
-		if ( enemy.GetComponent<PlayerController>() is { } player && (player.GetComponent<PlayerHealth>()?.Health ?? 0f) <= 20f && cop.Squad is { } squad && !squad.CopPlayerHurtSaid )
+		if ( enemy.GetComponent<Player>() is { } player && player.Health <= 20f && cop.Squad is { } squad && !squad.CopPlayerHurtSaid )
 		{
 			if ( Speak( cop, "METROPOLICE_PLAYERHIT", High ) ) squad.CopPlayerHurtSaid = true;
 		}

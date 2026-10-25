@@ -21,7 +21,7 @@ public struct PlayerDamageParams
 /// </summary>
 public class PlayerDamageEvent
 {
-	public PlayerHealth Player { get; init; }
+	public Player Player { get; init; }
 	public DamageInfo DamageInfo { get; init; }
 	public float Damage { get; set; }
 	public bool Cancelled { get; set; }
@@ -45,7 +45,7 @@ public class PlayerRespawnEvent
 /// </summary>
 public class PlayerKillEvent
 {
-	public PlayerHealth Player { get; init; }
+	public Player Player { get; init; }
 	public GameObject Victim { get; init; }
 	public DamageInfo DamageInfo { get; init; }
 }
@@ -73,10 +73,10 @@ public static partial class Global
 {
 	public interface IPlayerEvents : ISceneEvent<IPlayerEvents>
 	{
-		void OnPlayerSpawned( PlayerHealth player ) { }
-		void OnPlayerDied( PlayerHealth player, PlayerDiedParams args ) { }
-		void OnPlayerDamage( PlayerHealth player, PlayerDamageParams args ) { }
-		void OnPlayerSuicide( PlayerHealth player ) { }
+		void OnPlayerSpawned( Player player ) { }
+		void OnPlayerDied( Player player, PlayerDiedParams args ) { }
+		void OnPlayerDamage( Player player, PlayerDamageParams args ) { }
+		void OnPlayerSuicide( Player player ) { }
 		void OnPlayerDamaging( PlayerDamageEvent e ) { }
 		void OnPlayerRespawning( PlayerRespawnEvent e ) { }
 		void OnPlayerKill( PlayerKillEvent e ) { }

@@ -90,7 +90,13 @@ public static class Sents
 		// The engine keeps a prefab's scene once loaded. If it was loaded before this game had the code of its
 		// components (a sent imported while the editor was open), the clone has them as missing: build it from the
 		// prefab's data instead, which looks the types up again.
-		if ( go.Components.GetAll( FindMode.EverythingInSelfAndDescendants ).Any( x => x is MissingComponent ) )
+		// A component whose type is in a package that failed to compile (a second sent of an author who shares code,
+		// whose own build broke) is not even missing: it is left out of the clone. Fewer components than the prefab's
+		// data lists means the same thing, so build it from the data as well.
+		var components = go.Components.GetAll( FindMode.EverythingInSelfAndDescendants ).ToList();
+		var listed = Regex.Matches( entity.Prefab.RootObject.ToJsonString(), "\"__type\"" ).Count;
+
+		if ( components.Any( x => x is MissingComponent ) || components.Count < listed )
 		{
 			go.Destroy();
 			go = new GameObject( false, entity.Title ?? ident );

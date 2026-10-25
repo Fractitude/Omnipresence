@@ -51,11 +51,10 @@ system) needs that part ported first. Props and models with no code, and code th
   without our `Interactable`. `CuratedVehicle` implements `IVehicleGauges` (added by hand after the import) and so shows the game's own speedometer
   (`Code/Vehicles/Hud/VehicleHud.razor`, shared with the buggy). The package's own HUD was not kept; running `sent_import` again would bring it back as a duplicate `VehicleHud`, so delete that copy. The dial picture and the
   sounds are assets of the package and come with it.
-- `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at
-  and explodes on its target. It used sandbox's `Player`; those uses were changed by hand to the engine's `PlayerController` (eyes) and our
-  `PlayerHealth`, so a new import of it needs the same edits.
-- `gmk.aura`: a weapon (`AuraWeapon` on the engine's weapon base; click toggles the aura, which heals the holder and throws things away). Its sandbox `Player` uses became `PlayerController` and `PlayerHealth`, and `OnPrimaryDown` (an upstream hook not ported) became an empty `PrimaryAttack`.
-- `hl2npcs.metrocop` (and probably `combine_soldier`, `combine_elite`, `manhack`, same author and code): a Half-Life 2 Metro Police NPC (`CombineNpc`, 18 files). Edits made by hand after the import: sandbox's `Player` became `PlayerController`, its health became `PlayerHealth`, `TaskStatus` is aliased to `Sandbox.Npcs.TaskStatus` (it clashes with `System.Threading.Tasks`), and the kill feed call was removed. A metrocop spawned before the import stays broken (`AnimationLayer` NullReference, its `Npc` is a missing component): delete it and spawn a new one.
+- `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at and explodes on its target. It needed no edits once our player was named `Player` like upstream's.
+- `gmk.aura`: a weapon (`AuraWeapon` on the engine's weapon base; click toggles the aura, which heals the holder and throws things away). Two edits: `Owner` is the engine's `PlayerController` here (upstream's is `Player`), so the heal looks the `Player` up, and upstream's `OnPrimaryDown` hook is not ported, so it overrides `PrimaryAttack` instead.
+- `hl2npcs.metrocop` (and probably `combine_soldier`, `combine_elite`, `manhack`, same author and code): a Half-Life 2 Metro Police NPC (`CombineNpc`, 18 files). No edits: the `TaskStatus` clash is a global alias in `Assembly.cs`, and `Feed` / `IKillIcon` (the kill feed) exist as empty types in `Code/Game/Feed.cs`. A metrocop spawned before the import stays broken (`AnimationLayer` NullReference, its `Npc` is a missing component): delete it and spawn a new one.
+- A sent whose package failed to compile (the friendly drone, which shares code with the enemy) loses its code components from the clone without leaving a missing one; `Sents.SpawnAsync` notices the clone has fewer components than the prefab lists and builds it from the prefab's data.
 
 ### Known not working
 

@@ -69,7 +69,7 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 		UsesAmmo = false;
 	}
 
-	public override void PrimaryAttack() { }
+	public override void PrimaryAttack() { } // upstream's OnPrimaryDown hook is not ported
 
 	protected override void OnControl()
 	{
@@ -121,8 +121,9 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 	private void Pulse()
 	{
 		// It looks after the one holding it
-		if ( Owner.GetComponent<PlayerHealth>() is { Health: > 0f } health )
-			health.Health = MathF.Min( health.Health + CurrentHeal * PulseInterval, health.MaxHealth );
+		// Owner is the engine's PlayerController here (upstream's is the Player component)
+		if ( Owner.GetComponent<Player>() is { Health: > 0f } owner )
+			owner.Health = MathF.Min( owner.Health + CurrentHeal * PulseInterval, owner.MaxHealth );
 
 		if ( _shape is null ) return;
 		var me = Owner.GameObject;
@@ -138,7 +139,7 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 			if ( root == me ) continue;
 
 			// Only what the liquid actually reaches - nothing behind a wall
-			var character = root.GetComponent<PlayerController>().IsValid() || root.GetComponent<NavMeshAgent>().IsValid();
+			var character = root.GetComponent<Player>().IsValid() || root.GetComponent<NavMeshAgent>().IsValid();
 			var point = character ? root.WorldPosition + Vector3.Up * 36f : go.WorldPosition;
 			if ( !_shape.Contains( point ) && !_shape.Contains( go.WorldPosition ) ) continue;
 
@@ -151,7 +152,7 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 			if ( hurt.Add( root ) && root.Components.Get<Component.IDamageable>( FindMode.EverythingInSelfAndDescendants ) is { } damageable )
 			{
 				// A kill is someone alive before this hit and dead (or gone) after it
-				var victim = (Component)root.GetComponent<PlayerController>() ?? root.GetComponent<Sandbox.Npcs.Npc>();
+				var victim = (Component)root.GetComponent<Player>() ?? root.GetComponent<Sandbox.Npcs.Npc>();
 				var aliveBefore = victim.IsValid() && HealthOf( victim ) > 0f;
 
 				damageable.OnDamage( new DamageInfo( CurrentDamage * PulseInterval, me, GameObject )
@@ -163,7 +164,7 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 				if ( aliveBefore && (!victim.IsValid() || HealthOf( victim ) <= 0f) ) Kills++;
 			}
 
-			if ( root.GetComponent<PlayerController>() is { } player )
+			if ( root.GetComponent<Player>() is { } player )
 			{
 				if ( pushed.Add( player.GetComponent<Rigidbody>() ) )
 					PushPlayer( player, dir.Normal * speed );
@@ -186,7 +187,7 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 
 	private static float HealthOf( Component character ) => character switch
 	{
-		PlayerController player => player.GetComponent<PlayerHealth>()?.Health ?? 0f,
+		Player player => player.Health,
 		Sandbox.Npcs.Npc npc => npc.Health,
 		_ => 0f,
 	};
@@ -200,10 +201,10 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 
 	/// <summary>A player's body moves on their own machine, so the push is sent to them.</summary>
 	[Rpc.Broadcast( NetFlags.HostOnly )]
-	private void PushPlayer( PlayerController player, Vector3 velocity )
+	private void PushPlayer( Player player, Vector3 velocity )
 	{
 		if ( !player.IsValid() || player.IsProxy ) return;
-		player.PreventGrounding( 0.2f );
+		if ( player.Controller.IsValid() ) player.Controller.PreventGrounding( 0.2f );
 		if ( player.GetComponent<Rigidbody>() is { } body )
 			Throw( body, velocity.Normal, velocity.Length );
 	}

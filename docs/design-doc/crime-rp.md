@@ -570,7 +570,7 @@ The big idea: **the computer is the crime tool, and the same case file connects 
 ### What this needs
 
 - A host-authoritative **status effects** system on the player: a list of effects with strength and end time, synced to the player. It hooks:
-  - Damage taken (`PlayerHealth.OnDamage`) for Numb.
+  - Damage taken (`Player.OnDamage`) for Numb.
   - Movement speed (`PlayerController`) for Rush and Slow.
   - Hacking puzzles (attempts and removed words) for Focus.
   - A **fatigue (sleep) need**: a new system. Sleep is not in the game today. Without it, the "less sleep" effects wait.

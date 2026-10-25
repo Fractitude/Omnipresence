@@ -391,7 +391,7 @@ public sealed partial class CombineSquad
 
 	private static float ThreatOf( GameObject target )
 	{
-		if ( target.GetComponent<PlayerController>().IsValid() ) return 1.5f;
+		if ( target.GetComponent<Player>().IsValid() ) return 1.5f;
 		return 1f;
 	}
 
@@ -683,7 +683,7 @@ public sealed partial class CombineSquad
 
 		if ( killer.IsValid() )
 		{
-			killer = killer.GetComponentInParent<PlayerController>()?.GameObject
+			killer = killer.GetComponentInParent<Player>()?.GameObject
 				?? killer.GetComponentInParent<Npc>()?.GameObject
 				?? killer;
 		}

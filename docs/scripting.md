@@ -74,8 +74,8 @@ Not reachable: `System.*` (so no `System.IO`), `Game`, `Log`, `MathX`, `TypeLibr
 
 | Test | Result |
 | --- | --- |
-| Find the local player: `Players.LocalObject`, `PlayerHealth.FindLocalPlayer()` | works |
-| Set `PlayerHealth.Health` (100 to 42) and `Armour` | **works** |
+| Find the local player: `Players.LocalObject`, `Player.FindLocalPlayer()` | works |
+| Set `Player.Health` (100 to 42) and `Armour` | **works** |
 | Teleport: set `Players.LocalObject.WorldPosition` | **works** |
 | `WeaponCommands.Give( "name" )` (static helper, tried with a bad name) | **callable** |
 | Reach `PlayerInventory` and `WeaponInventory` | found; `PlayerInventory.Add` was refused |
@@ -88,7 +88,7 @@ Not reachable: `System.*` (so no `System.IO`), `Game`, `Log`, `MathX`, `TypeLibr
 | `new NaviComputer()`, `NaviMessages.Identify`, `NaviHardware.Find` | callable |
 | Set a private-set property (`IpAddress`), internal set (`SecureEntryActive`) | refused |
 | Call a private method (`UpdateBackPlane`), read an internal property (`CurrentDrag`) | refused |
-| `PlayerHealth.Kill`, `GameManager.Current`, `NaviHardwareResource.All`, `NaviComputer.Active` | refused (not public, or not found) |
+| `Player.Kill`, `GameManager.Current`, `NaviHardwareResource.All`, `NaviComputer.Active` | refused (not public, or not found) |
 
 Calls into `NaviComputer` that check `IsAuthority` or `Authorize` (host and seat checks) still apply, because those run
 inside the method. In the editor the player is the host, so those checks pass.
@@ -169,7 +169,7 @@ Before a script engine goes into Navi or the game:
   (`NaviSystemCalls`) would be skipped: the script calls `NaviComputer` itself.
 - Candidates to guard in `NaviComputer`: `Lock`, `Unlock`, `InstallHardware`, `RemoveHardware`, `CaptureSave`,
   `RestoreSave`, `Files`, `Launch`, `Install`, and the `NaviMessages`, `NaviNpc` and `NaviPluginManager` statics. Game
-  types: `PlayerHealth` setters, `WeaponCommands.Give`, `PlayerInventory`, `GameManager`.
+  types: `Player` setters, `WeaponCommands.Give`, `PlayerInventory`, `GameManager`.
 - Run scripts only on the host (Navi does: `RunScript` is host only) or on the seated player's client, never from a remote request, and keep the instruction
   limit low.
 
@@ -215,7 +215,7 @@ call answers "Running scripts is disabled." Not tested: the real permission prom
 client in multiplayer.
 
 **The guard is a list, not a wall.** A script can still reach what is not on it: `NaviComputer.Files`, `NaviMessages`,
-`NaviNpcs`, `NaviPluginManager`, other `NaviComputer` setters and the game's own types (`PlayerHealth`, the player's
+`NaviNpcs`, `NaviPluginManager`, other `NaviComputer` setters and the game's own types (`Player`, the player's
 position, `WeaponCommands.Give`). Any new public method that changes state or leaks a secret must check
 `NaviScriptGuard.Active`, or it is open to scripts. Turn the flag on only where you trust scripts as much as game code.
 

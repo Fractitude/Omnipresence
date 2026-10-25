@@ -41,7 +41,7 @@ public static class CashDrops
 		if ( Players.For<PlayerWallet>( who ) is not { } wallet || wallet.SteamId == 0 )
 			return CrimeResult.Fail( "Your wallet isn't ready." );
 
-		if ( Players.For<PlayerHealth>( who ) is { Health: < 1 } )
+		if ( Players.For<Player>( who ) is { Health: < 1 } )
 			return CrimeResult.Fail( "You can't drop cash now." );
 
 		if ( PlayerData.For( who ) is { InWired: true } )

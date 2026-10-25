@@ -382,7 +382,7 @@ public sealed partial class CombineNpc : Npc, IKillSource
 	{
 		if ( !go.IsValid() ) return true;
 		if ( go.GetComponent<Npc>() is { } npc ) return npc.Health < 1f;
-		if ( go.GetComponent<PlayerController>() is { } player ) return (player.GetComponent<PlayerHealth>()?.Health ?? 0f) < 1f;
+		if ( go.GetComponent<Player>() is { } player ) return player.Health < 1f;
 		return false;
 	}
 
@@ -654,13 +654,13 @@ public sealed partial class CombineNpc : Npc, IKillSource
 
 		if ( attacker.IsValid() )
 		{
-			attacker = attacker.GetComponentInParent<PlayerController>()?.GameObject
+			attacker = attacker.GetComponentInParent<Player>()?.GameObject
 				?? attacker.GetComponentInParent<Npc>()?.GameObject
 				?? attacker;
 
 			// Squadmates hitting each other is an accident, not a betrayal
 			var friendlyFire = attacker.GetComponent<Npc>() is { } other && CombineSquad.Allied( this, other );
-			var isAgent = attacker.GetComponent<Npc>().IsValid() || attacker.GetComponent<PlayerController>().IsValid();
+			var isAgent = attacker.GetComponent<Npc>().IsValid() || attacker.GetComponent<Player>().IsValid();
 
 			if ( friendlyFire && attacker != GameObject )
 			{
@@ -753,7 +753,15 @@ public sealed partial class CombineNpc : Npc, IKillSource
 		var source = damage.Attacker.IsValid() ? damage.Attacker.GetComponent<IKillSource>() : null;
 		source?.OnKill( GameObject );
 
-		// the sandbox game's kill feed and kill icons are not in this game
+		var icon = damage.Weapon.IsValid() ? damage.Weapon.GetComponentInChildren<IKillIcon>() : null;
+		var attackerName = source?.DisplayName;
+		var attackerSteamId = source?.SteamId ?? 0L;
+		var attackerTags = source?.Tags ?? "";
+		var damageTags = damage.Tags.ToString();
+		var victimName = DisplayName;
+		var weaponIcon = icon?.DisplayIcon;
+
+		Scene.RunEvent<Feed>( x => x.NotifyKill( victimName, attackerName, attackerSteamId, damageTags, attackerTags, "npc", weaponIcon ) );
 	}
 
 	void IKillSource.OnKill( GameObject victim )

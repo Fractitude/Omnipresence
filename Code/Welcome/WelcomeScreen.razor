@@ -141,7 +141,7 @@
 	{
 		var controller = Players.LocalController;
 
-		return controller.IsValid() && Players.Local<PlayerHealth>() is { Health: > 0 }
+		return controller.IsValid() && Players.Local<Player>() is { Health: > 0 }
 		       && controller.GetComponentInParent<ISitTarget>( false ) is null
 		       && !GameMenus.IsAnyOpen && NaviInputCapture.Current is null;
 	}

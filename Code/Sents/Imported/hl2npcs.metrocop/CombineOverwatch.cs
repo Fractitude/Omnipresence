@@ -134,7 +134,7 @@ public sealed class CombineOverwatch : GameObjectSystem<CombineOverwatch>
 
 	private void Gunfire( BaseCombatWeapon weapon )
 	{
-		var shooter = weapon.GetComponentInParent<PlayerController>()?.GameObject
+		var shooter = weapon.GetComponentInParent<Player>()?.GameObject
 			?? weapon.GetComponentInParent<Npc>()?.GameObject;
 		if ( !shooter.IsValid() ) return;
 		if ( CombineSquad.Debug ) Log.Info( $"[overwatch] gunfire from {shooter.Name}" );

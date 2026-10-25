@@ -69,12 +69,12 @@ public static class WiredTravel
 
 	static bool CanCross( Connection connection ) =>
 		connection is not null && PlayerData.For( connection ).IsValid()
-		&& PlayerHealth.FindForConnection( connection ).IsValid();
+		&& Player.FindForConnection( connection ).IsValid();
 
 	static void Move( GameManager manager, Connection connection )
 	{
 		var data = PlayerData.For( connection );
-		var player = PlayerHealth.FindForConnection( connection );
+		var player = Player.FindForConnection( connection );
 
 		if ( !data.InWired )
 		{

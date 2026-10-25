@@ -8,7 +8,7 @@ public static class HealthCommands
 	[ConCmd( "kill" )]
 	public static void Kill( Connection source )
 	{
-		PlayerHealth.FindForConnection( source )?.KillSelf();
+		Player.FindForConnection( source )?.KillSelf();
 	}
 
 	[ConCmd( "god", ConVarFlags.Server | ConVarFlags.Cheat, Help = "Toggle invulnerability" )]

@@ -415,7 +415,7 @@ public sealed partial class CombineNpc
 	private GameObject MeleeTarget()
 	{
 		var candidates = Scene.GetAllComponents<Npc>().Where( n => n != this && n.Health >= 1f ).Select( n => n.GameObject )
-			.Concat( Scene.GetAllComponents<PlayerController>().Where( p => (p.GetComponent<PlayerHealth>()?.Health ?? 0f) >= 1f ).Select( p => p.GameObject ) );
+			.Concat( Scene.GetAllComponents<Player>().Where( p => p.Health >= 1f ).Select( p => p.GameObject ) );
 
 		return candidates
 			.Where( go => (go.WorldPosition - WorldPosition).WithZ( 0 ).Length < MeleeRange

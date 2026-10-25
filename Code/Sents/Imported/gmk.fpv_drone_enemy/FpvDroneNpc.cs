@@ -302,7 +302,7 @@ public sealed class FpvDroneNpc : Npc, Component.ICollisionListener
 			bestAim = aim;
 		}
 
-		foreach ( var player in Scene.GetAllComponents<PlayerController>() )
+		foreach ( var player in Scene.GetAllComponents<Player>() )
 			Consider( player.GameObject );
 
 		var npcs = Scene.GetSystem<NpcSystem>();
@@ -564,7 +564,7 @@ public sealed class FpvDroneNpc : Npc, Component.ICollisionListener
 
 	private static Vector3 LookDirection( GameObject go )
 	{
-		if ( go.GetComponent<PlayerController>() is { } player ) return player.EyeAngles.ToRotation().Forward.WithZ( 0f ).Normal;
+		if ( go.GetComponent<Player>() is { } player ) return player.EyeTransform.Rotation.Forward.WithZ( 0f ).Normal;
 		return go.WorldRotation.Forward.WithZ( 0f ).Normal;
 	}
 
@@ -862,7 +862,7 @@ public sealed class FpvDroneNpc : Npc, Component.ICollisionListener
 
 	private static bool IsAlive( GameObject go )
 	{
-		if ( go.GetComponent<PlayerController>() is not null ) return go.GetComponent<PlayerHealth>() is not { } health || health.Health > 0f;
+		if ( go.GetComponent<Player>() is { } player ) return player.Health > 0f;
 		if ( go.GetComponent<Npc>() is { } npc ) return npc.Health >= 1f;
 		return true;
 	}
@@ -870,8 +870,8 @@ public sealed class FpvDroneNpc : Npc, Component.ICollisionListener
 	/// <summary>Куда целиться: у игрока — в грудь, у дрона — в центр, у остальных — в середину габаритов.</summary>
 	private static Vector3 AimPoint( GameObject go )
 	{
-		if ( go.GetComponent<PlayerController>() is { } player )
-			return Vector3.Lerp( player.WorldPosition, player.EyePosition, 0.6f );
+		if ( go.GetComponent<Player>() is { } player )
+			return Vector3.Lerp( player.WorldPosition, player.EyeTransform.Position, 0.6f );
 		if ( go.GetComponent<FpvDroneNpc>() is not null )
 			return go.WorldPosition;
 		return go.GetBounds().Center;
@@ -906,7 +906,7 @@ public sealed class FpvDroneNpc : Npc, Component.ICollisionListener
 		// приоритетом и летим к нему. Другие дроны на него не обижаются — только этот.
 		var attacker = damage.Attacker;
 		if ( _exploded || !attacker.IsValid() ) return;
-		attacker = attacker.GetComponentInParent<PlayerController>()?.GameObject ?? attacker.GetComponentInParent<Npc>()?.GameObject ?? attacker;
+		attacker = attacker.GetComponentInParent<Player>()?.GameObject ?? attacker.GetComponentInParent<Npc>()?.GameObject ?? attacker;
 		if ( attacker == GameObject ) return;
 		SetDisposition( attacker, Disposition.Hostile, priority: 10 );
 

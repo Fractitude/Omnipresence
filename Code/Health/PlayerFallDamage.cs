@@ -5,7 +5,7 @@ namespace Sandbox;
 /// </summary>
 public sealed class PlayerFallDamage : Component, PlayerController.IEvents
 {
-	[RequireComponent] public PlayerHealth Player { get; set; }
+	[RequireComponent] public Player Player { get; set; }
 
 	/// <summary>
 	/// Fatal fall speed, you will die if you fall at or above this speed

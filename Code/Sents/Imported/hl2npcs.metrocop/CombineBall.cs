@@ -187,7 +187,7 @@ public sealed class CombineBall : Component
 		}
 
 		var root = tr.GameObject.Root;
-		var alive = root.GetComponent<Npc>().IsValid() || root.GetComponent<PlayerController>().IsValid();
+		var alive = root.GetComponent<Npc>().IsValid() || root.GetComponent<Player>().IsValid();
 
 		if ( alive )
 		{
@@ -219,7 +219,7 @@ public sealed class CombineBall : Component
 
 		// Remember who it was before the hit: a killed NPC removes itself straight away
 		var npc = victim.GetComponent<Sandbox.Npcs.Npc>();
-		var player = victim.GetComponent<PlayerController>();
+		var player = victim.GetComponent<Player>();
 		var where = victim.WorldPosition;
 
 		foreach ( var damageable in victim.Components.GetAll<Component.IDamageable>() )
@@ -229,7 +229,7 @@ public sealed class CombineBall : Component
 
 		// Killed: the body dissolves, as in HL2
 		var dead = npc is not null ? !npc.IsValid() || npc.Health < 1f
-			: player is not null && (!player.IsValid() || (player.GetComponent<PlayerHealth>()?.Health ?? 0f) < 1f);
+			: player is not null && (!player.IsValid() || player.Health < 1f);
 		if ( dead ) CombineDissolve.At( where );
 	}
 
@@ -274,9 +274,9 @@ public sealed class CombineBall : Component
 		{
 			if ( npc.IsValid() && npc.Health >= 1f ) yield return npc.GameObject;
 		}
-		foreach ( var player in scene.GetAllComponents<PlayerController>() )
+		foreach ( var player in scene.GetAllComponents<Player>() )
 		{
-			if ( player.IsValid() && (player.GetComponent<PlayerHealth>()?.Health ?? 0f) >= 1f ) yield return player.GameObject;
+			if ( player.IsValid() && player.Health >= 1f ) yield return player.GameObject;
 		}
 	}
 
