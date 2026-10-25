@@ -132,18 +132,23 @@ public static class BanList
 		return true;
 	}
 
-	/// <summary>Drops the bans whose time has run out.</summary>
-	static void Purge()
+	/// <summary>
+	/// Lifts the bans whose time has run out, saves, and returns them. <see cref="BanSystem"/> calls it every second and
+	/// once at start-up, which lifts at once a ban that ran out while the server was off; every read of the list calls
+	/// it too, so a ban never outlasts its time.
+	/// </summary>
+	public static List<BanEntry> Purge()
 	{
-		var over = Bans.Values.Where( b => b.IsExpired() ).Select( b => b.SteamId ).ToList();
+		var over = Bans.Values.Where( b => b.IsExpired() ).ToList();
 
 		if ( over.Count == 0 )
-			return;
+			return over;
 
-		foreach ( var id in over )
-			Bans.Remove( id );
+		foreach ( var ban in over )
+			Bans.Remove( ban.SteamId );
 
 		Save();
+		return over;
 	}
 
 	static Dictionary<ulong, BanEntry> Load()
@@ -188,8 +193,28 @@ public static class BanList
 /// </summary>
 public sealed class BanSystem : GameObjectSystem<BanSystem>, Component.INetworkListener
 {
+	/// <summary>Seconds between checks for a ban that has run out.</summary>
+	const float CheckInterval = 1f;
+
+	TimeUntil nextCheck;
+
 	public BanSystem( Scene scene ) : base( scene )
 	{
+		Listen( Stage.FinishUpdate, 0, Tick, "BanSystem.Tick" );
+	}
+
+	void Tick()
+	{
+		if ( !Networking.IsHost || !nextCheck )
+			return;
+
+		nextCheck = CheckInterval;
+
+		foreach ( var ban in BanList.Purge() )
+		{
+			Log.Info( $"Ban on {ban.Name} ({ban.SteamId}) has run out" );
+			GameManager.Current?.Notify( $"The ban on {ban.Name} has run out" );
+		}
 	}
 
 	bool Component.INetworkListener.AcceptConnection( Connection channel, ref string reason )
