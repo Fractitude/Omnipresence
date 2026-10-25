@@ -29,7 +29,7 @@ public partial class Npc
 	/// </summary>
 	private void MoveBody()
 	{
-		if ( !_navAgent.IsValid() || !_navAgent.Enabled || isPickedUp || !IsOnGround )
+		if ( !_navAgent.IsValid() || !_navAgent.Enabled || isPickedUp )
 			return;
 
 		var from = WorldPosition;

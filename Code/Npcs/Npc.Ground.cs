@@ -89,5 +89,8 @@ public partial class Npc : IPhysgunEvent
 	{
 		if ( _rigidbody.IsValid() ) _rigidbody.MotionEnabled = !IsOnGround;
 		if ( _navAgent.IsValid() ) _navAgent.Enabled = IsOnGround;
+
+		// The agent has not moved the body while it was off its feet: start from where it landed
+		if ( IsOnGround && _navAgent.IsValid() ) _navAgent.SetAgentPosition( WorldPosition );
 	}
 }

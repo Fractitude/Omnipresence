@@ -301,8 +301,10 @@ public class CombatNpc : Npc, Component.IPressable
 	/// </summary>
 	private void ApplyHeld()
 	{
-		var held = UsingMelee ? Melee : _gun;
-		var other = UsingMelee ? _gun : Melee;
+		// With no gun the melee weapon is all there is
+		var melee = UsingMelee || !_gun.IsValid();
+		var held = melee ? Melee : _gun;
+		var other = melee ? _gun : Melee;
 
 		if ( !held.IsValid() || !Renderer.IsValid() )
 			return;
@@ -367,7 +369,16 @@ public class CombatNpc : Npc, Component.IPressable
 		if ( !IsProxy && Melee.IsValid() )
 			Melee.IsDropped = false;
 
-		if ( Weapon.IsValid() && Renderer.IsValid() )
+		// Armed with only a melee weapon: it is in hand from the start
+		if ( !_gun.IsValid() && Melee.IsValid() )
+		{
+			if ( !IsProxy )
+				UsingMelee = true;
+
+			ApplyHeld();
+		}
+
+		if ( _gun.IsValid() && Renderer.IsValid() )
 		{
 			Weapon.CreateWorldModel( Renderer );
 
