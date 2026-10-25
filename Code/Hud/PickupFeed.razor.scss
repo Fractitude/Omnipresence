@@ -25,6 +25,11 @@ PickupFeed
 	font-weight: 600;
 	animation: pickup-in 0.25s ease-out 1;
 
+	&.leaving
+	{
+		animation: pickup-out 0.25s ease-in 1 forwards;
+	}
+
 	.amount
 	{
 		color: #e8c872;
@@ -37,6 +42,12 @@ PickupFeed
 		background-repeat: no-repeat;
 		background-tint: #e8c872;
 	}
+}
+
+@keyframes pickup-out
+{
+	0% { opacity: 1; transform: translateX( 0px ); }
+	100% { opacity: 0; transform: translateX( 40px ); }
 }
 
 @keyframes pickup-in

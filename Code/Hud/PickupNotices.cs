@@ -30,6 +30,11 @@ public static class PickupNotices
 	const string ItemKind = "item";
 
 	const float Seconds = 4f;
+
+	/// <summary>
+	/// How long a notice stays after it expires, so the feed can play its exit animation.
+	/// </summary>
+	public const float ExitSeconds = 0.25f;
 	const int MaxLines = 6;
 
 	static List<PickupNotice> notices = new();
@@ -38,6 +43,11 @@ public static class PickupNotices
 	/// The local player's notices that have not expired, oldest first.
 	/// </summary>
 	public static IEnumerable<PickupNotice> Active => notices.Where( x => x.ExpiresAt > RealTime.Now );
+
+	/// <summary>
+	/// Active notices plus those that expired less than <see cref="ExitSeconds"/> ago, still on screen leaving.
+	/// </summary>
+	public static IEnumerable<PickupNotice> Visible => notices.Where( x => x.ExpiresAt + ExitSeconds > RealTime.Now );
 
 	/// <summary>
 	/// Reserve ammo went into a weapon's owner. Host only.
@@ -84,7 +94,7 @@ public static class PickupNotices
 			return;
 
 		var now = RealTime.Now;
-		notices.RemoveAll( x => x.ExpiresAt <= now );
+		notices.RemoveAll( x => x.ExpiresAt + ExitSeconds <= now );
 
 		var key = $"{kind}:{id}";
 		var existing = notices.FirstOrDefault( x => x.Key == key );

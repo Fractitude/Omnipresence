@@ -5,7 +5,7 @@
 <root>
 	@foreach ( var notice in Notices )
 	{
-		<div @key=@notice class="pickup">
+		<div @key=@notice class="pickup @( IsLeaving( notice ) ? "leaving" : "" )">
 			@if ( notice.Amount > 1 || notice.Icon is null )
 			{
 				<label class="amount">+@notice.Amount</label>
@@ -32,7 +32,7 @@
 			if ( NaviInputCapture.Current is not null || AbilityMenu.IsOpen || CharacterMenu.IsOpen )
 				return [];
 
-			return PickupNotices.Active;
+			return PickupNotices.Visible;
 		}
 	}
 
@@ -49,6 +49,8 @@
 		return $"width: {icon.Width * fit:0}px; height: {icon.Height * fit:0}px;";
 	}
 
+	static bool IsLeaving( PickupNotice notice ) => notice.ExpiresAt <= RealTime.Now;
+
 	protected override int BuildHash()
 	{
 		var hash = new HashCode();
@@ -57,6 +59,7 @@
 		{
 			hash.Add( notice );
 			hash.Add( notice.Amount );
+			hash.Add( IsLeaving( notice ) );
 		}
 
 		return hash.ToHashCode();
