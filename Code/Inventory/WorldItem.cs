@@ -26,32 +26,59 @@ public sealed class WorldItem : Component, IInteractionHandler
 	// -- Placing by hand ------------------------------------------------------------------------------------------------
 
 	/// <summary>
-	/// What this item is, for one placed by hand in the editor: the id of a kind in the <see cref="ItemCatalog"/>
-	/// (<c>cash</c>, <c>static_tab</c>, <c>static_raw</c>, <c>static_culture</c>, <c>haze_seed</c>, <c>haze_raw</c>,
-	/// <c>haze_vial</c>). The prefabs in Assets/items have theirs set. Ignored for an item the game drops.
+	/// What the author set for an item placed by hand (<see cref="ItemAuthoring"/>): its kind and the few knobs that kind
+	/// has. Edited only by the custom inspector (<c>Editor/WorldItemInspector.cs</c>), which shows just the fields that make
+	/// sense for the chosen kind; hidden from the default inspector so a failed custom editor never shows a wall of knobs.
+	/// Ignored for an item the game drops.
 	/// </summary>
-	[Property, Group( "Item (placed by hand)" ), Title( "Kind" )]
-	public string Kind { get; set; } = "";
+	[Property, Hide]
+	public ItemAuthoring Authoring { get; set; } = new();
 
-	/// <summary>How many are in the stack, up to the kind's stack size. Not used for cash.</summary>
-	[Property, Group( "Item (placed by hand)" ), Range( 1, 256 )]
-	public int Count { get; set; } = 1;
+	// The loose fields of a component made before the knobs moved into Authoring. They still load, and
+	// MigrateLegacy carries any value over and puts them back to their defaults. Never set them in new code.
+	[Property, Hide] public string Kind { get; set; } = "";
+	[Property, Hide] public int Count { get; set; } = ItemAuthoring.DefaultCount;
+	[Property, Hide] public int Quality { get; set; } = ItemAuthoring.DefaultQuality;
+	[Property, Hide] public long Amount { get; set; } = ItemAuthoring.DefaultAmount;
+	[Property, Hide] public string NameOverride { get; set; } = "";
+	[Property, Hide] public string DescriptionOverride { get; set; } = "";
 
-	/// <summary>How good the batch is, 0 to 100. Not used for cash.</summary>
-	[Property, Group( "Item (placed by hand)" ), Range( 0, 100 )]
-	public int Quality { get; set; } = 50;
+	/// <summary>
+	/// Carry the values of the old loose fields into <see cref="Authoring"/> (when it has not been set) and reset the old
+	/// fields. Does nothing for a component that has none. Safe to call any number of times.
+	/// </summary>
+	public void MigrateLegacy()
+	{
+		Authoring ??= new();
 
-	/// <summary>For cash: the dollars it holds, 1 up to the wallet's cap.</summary>
-	[Property, Group( "Item (placed by hand)" )]
-	public long Amount { get; set; } = 100;
+		var legacy = !string.IsNullOrEmpty( Kind ) || Count != ItemAuthoring.DefaultCount
+		             || Quality != ItemAuthoring.DefaultQuality || Amount != ItemAuthoring.DefaultAmount
+		             || !string.IsNullOrEmpty( NameOverride ) || !string.IsNullOrEmpty( DescriptionOverride );
 
-	/// <summary>Replaces the kind's name, if set.</summary>
-	[Property, Group( "Item (placed by hand)" ), Title( "Name override" )]
-	public string NameOverride { get; set; } = "";
+		if ( !legacy )
+			return;
 
-	/// <summary>Replaces the kind's description, if set.</summary>
-	[Property, Group( "Item (placed by hand)" ), Title( "Description override" )]
-	public string DescriptionOverride { get; set; } = "";
+		// Field by field: an old value fills a field that Authoring left at its default. (A prefab instance placed before this
+		// stores only what it overrode, such as the amount, while the prefab itself now carries the kind.)
+		var now = Authoring;
+
+		Authoring = ItemAuthoringRules.Normalise( new ItemAuthoring
+		{
+			Kind = string.IsNullOrEmpty( now.Kind ) ? Kind : now.Kind,
+			Count = now.Count == ItemAuthoring.DefaultCount ? Count : now.Count,
+			Quality = now.Quality == ItemAuthoring.DefaultQuality ? Quality : now.Quality,
+			Amount = now.Amount == ItemAuthoring.DefaultAmount ? Amount : now.Amount,
+			Name = string.IsNullOrEmpty( now.Name ) ? NameOverride : now.Name,
+			Description = string.IsNullOrEmpty( now.Description ) ? DescriptionOverride : now.Description,
+		} );
+
+		Kind = "";
+		Count = ItemAuthoring.DefaultCount;
+		Quality = ItemAuthoring.DefaultQuality;
+		Amount = ItemAuthoring.DefaultAmount;
+		NameOverride = "";
+		DescriptionOverride = "";
+	}
 
 	/// <summary>
 	/// The id this item has in its scene while it is still as the map placed it (untouched, or only part picked up), else
@@ -261,7 +288,9 @@ public sealed class WorldItem : Component, IInteractionHandler
 
 		if ( item is null )
 		{
-			var made = HandPlacedRules.Build( Kind, Count, Quality, Amount, NameOverride, DescriptionOverride );
+			MigrateLegacy();
+			var a = Authoring;
+			var made = HandPlacedRules.Build( a.Kind, a.Count, a.Quality, a.Amount, a.Name, a.Description );
 
 			if ( made.Item is null )
 			{
@@ -342,7 +371,9 @@ public sealed class WorldItem : Component, IInteractionHandler
 		if ( !string.IsNullOrEmpty( ItemJson ) )
 			return;
 
-		var text = HandPlacedRules.Label( Kind, Count, Quality, Amount, out var valid );
+		MigrateLegacy();
+		var a = Authoring;
+		var text = HandPlacedRules.Label( a.Kind, a.Count, a.Quality, a.Amount, out var valid, a.Name, a.Description );
 		Gizmo.Draw.Color = valid ? new Color( 0.4f, 1f, 0.55f, 1f ) : new Color( 1f, 0.3f, 0.3f, 1f );
 		Gizmo.Draw.Text( text, new Transform( Vector3.Up * 14f ) );
 	}

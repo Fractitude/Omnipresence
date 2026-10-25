@@ -53,53 +53,71 @@ public static class HandPlacedRules
 	public readonly record struct Authored( ItemData Item, string Error, string Warning );
 
 	/// <summary>
-	/// Turn the inspector's fields into an item. A known kind keeps its count within the kind's stack size and its quality
-	/// within 0 to 100 (a cut is a warning, not an error). Cash holds <paramref name="amount"/> dollars, at least one and at
-	/// most the wallet's cap. A name or description may override the kind's own. An empty, unknown or game-made kind (the
-	/// parcel) gives an error and no item.
+	/// Turn the author's values into an item, using only the fields the kind declares (<see cref="ItemAuthoringRules.FieldsOf"/>):
+	/// the others are ignored. A count is cut to the kind's stack size and a quality to 0 to 100 (a cut is a warning, not an
+	/// error); an amount to 1 up to the wallet's cap. A custom item (no kind) needs a name. An unknown kind, or one the game
+	/// makes itself (the parcel), gives an error and no item.
 	/// </summary>
 	public static Authored Build(
 		string kind, int count, int quality, long amount, string name = "", string description = "" )
 	{
 		kind = (kind ?? "").Trim();
 
-		if ( kind.Length == 0 )
-			return new( null, "no Kind is set", "" );
-
-		if ( ItemCatalog.Find( kind ) is not { } def )
-			return new( null, $"unknown kind '{kind}'", "" );
-
-		if ( kind == ItemCatalog.Parcel )
-			return new( null, "a parcel is made by the game, not placed", "" );
-
-		ItemData item;
+		var fields = ItemAuthoringRules.FieldsOf( kind );
 		var warning = "";
+		ItemData item;
 
-		if ( kind == ItemCatalog.Cash )
+		if ( kind.Length == 0 )
 		{
-			var wanted = amount;
-			item = ItemCatalog.MakeCash( System.Math.Max( amount, 1 ) );
+			if ( string.IsNullOrWhiteSpace( name ) )
+				return new( null, "a custom item needs a name", "" );
 
-			if ( wanted < 1 )
-				warning = "Amount below one dollar, made it $1";
-			else if ( item.Amount < wanted )
-				warning = $"Amount above the wallet's cap, cut to {CashRules.Format( item.Amount )}";
+			item = new ItemData { Name = Cut( name.Trim(), 100 ), Count = 1 };
+		}
+		else if ( ItemCatalog.Find( kind ) is not { } def )
+		{
+			return new( null, $"unknown kind '{kind}'", "" );
+		}
+		else if ( !def.PlaceableByHand )
+		{
+			return new( null, $"{def.Name} is made by the game, not placed", "" );
 		}
 		else
 		{
 			var cap = System.Math.Max( def.MaxStack, 1 );
-			item = ItemCatalog.Make( kind, System.Math.Max( count, 1 ), quality, "" );
+			var wanted = fields.HasFlag( ItemField.Count ) ? count : 1;
 
-			if ( count > cap )
-				warning = $"Count {count} is above the stack size {cap}, cut to {cap}";
-			else if ( count < 1 )
-				warning = "Count below one, made it 1";
+			item = kind == ItemCatalog.Cash
+				? ItemCatalog.MakeCash( System.Math.Max( amount, 1 ) )
+				: ItemCatalog.Make( kind, System.Math.Max( wanted, 1 ),
+					fields.HasFlag( ItemField.Quality ) ? quality : 0, "" );
+
+			if ( kind != ItemCatalog.Cash && fields.HasFlag( ItemField.Amount ) )
+				item.Amount = System.Math.Clamp( amount, ItemAuthoringRules.MinAmount, ItemAuthoringRules.MaxAmount );
+
+			if ( fields.HasFlag( ItemField.Amount ) )
+			{
+				if ( amount < 1 )
+					warning = "Amount below one dollar, made it $1";
+				else if ( item.Amount < amount )
+					warning = $"Amount above the wallet's cap, cut to {CashRules.Format( item.Amount )}";
+			}
+			else if ( fields.HasFlag( ItemField.Count ) )
+			{
+				if ( count > cap )
+					warning = $"Count {count} is above the stack size {cap}, cut to {cap}";
+				else if ( count < 1 )
+					warning = "Count below one, made it 1";
+			}
+
+			if ( fields.HasFlag( ItemField.Quality ) && (quality < 0 || quality > 100) && warning == "" )
+				warning = $"Quality {quality} is outside 0 to 100, cut to {item.Quality}";
 		}
 
-		if ( !string.IsNullOrWhiteSpace( name ) )
+		if ( fields.HasFlag( ItemField.Name ) && !string.IsNullOrWhiteSpace( name ) )
 			item.Name = Cut( name.Trim(), 100 );
 
-		if ( !string.IsNullOrWhiteSpace( description ) )
+		if ( fields.HasFlag( ItemField.Description ) && !string.IsNullOrWhiteSpace( description ) )
 			item.Description = Cut( description.Trim(), 1000 );
 
 		return new( item, "", warning );
@@ -108,15 +126,19 @@ public static class HandPlacedRules
 	/// <summary>
 	/// The short text the scene view shows over the item: "Static tabs x12 q61", "$1,250", or what is wrong.
 	/// </summary>
-	public static string Label( string kind, int count, int quality, long amount, out bool valid )
+	public static string Label(
+		string kind, int count, int quality, long amount, out bool valid, string name = "", string description = "" )
 	{
-		var made = Build( kind, count, quality, amount );
+		var made = Build( kind, count, quality, amount, name, description );
 		valid = made.Item is not null;
 
 		if ( !valid )
 			return $"Item: {made.Error}";
 
 		var item = made.Item;
+
+		if ( string.IsNullOrEmpty( item.Kind ) )
+			return item.Name;
 
 		if ( item.Kind == ItemCatalog.Cash )
 			return CashRules.Format( item.Amount );

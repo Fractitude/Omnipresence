@@ -17,6 +17,10 @@ namespace Sandbox;
 /// the drugs' items. The player's own Shift-combine still averages.</param>
 /// <param name="WorldPrefab">The prefab (relative to Assets, like "items/static_tab.prefab") that shows a dropped item of
 /// this kind in the world. Empty, or a prefab that does not exist, uses <see cref="ItemCatalog.WorldFallbackPrefab"/>.</param>
+/// <param name="Fields">The knobs the editor's item inspector shows for an item of this kind placed by hand
+/// (<see cref="ItemField"/>). Null derives them: a count if it stacks, a quality if quality matters. Declare it for a kind
+/// with other knobs (cash has only an amount).</param>
+/// <param name="PlaceableByHand">False for a kind the game makes itself and nobody may place in the editor (the parcel).</param>
 public sealed record ItemDef(
 	string Id,
 	string Name,
@@ -28,7 +32,9 @@ public sealed record ItemDef(
 	string Category = "",
 	int MaxStack = 1,
 	bool QualityMatters = false,
-	string WorldPrefab = "" );
+	string WorldPrefab = "",
+	ItemField? Fields = null,
+	bool PlaceableByHand = true );
 
 /// <summary>
 /// The crime items: batches with a kind, a count and a quality (see <see cref="ItemData"/>). The three items of each
@@ -70,9 +76,9 @@ public static class ItemCatalog
 	[
 		.. ProductCatalog.Items,
 		new( Parcel, "Parcel", "Packed for an order. Send it from your mailbox.", 0,
-			Icon: "redeem", Color: "#c9a27a" ),
+			Icon: "redeem", Color: "#c9a27a", PlaceableByHand: false ),
 		new( Cash, "Cash", "Dollars. Pick them up to put them in your wallet.", 0,
-			Icon: "payments", Color: "#5fbf6f", WorldPrefab: "items/cash.prefab" ),
+			Icon: "payments", Color: "#5fbf6f", WorldPrefab: "items/cash.prefab", Fields: ItemField.Amount ),
 	];
 
 	public static IReadOnlyList<ItemDef> Items => items;
