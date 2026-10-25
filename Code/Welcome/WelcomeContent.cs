@@ -170,7 +170,7 @@ public static class WelcomeContent
 		d.Title = Text( d.Title );
 		d.WelcomeHeading = Text( d.WelcomeHeading );
 		d.WelcomeBackHeading = Text( d.WelcomeBackHeading );
-		d.Intro = Text( d.Intro );
+		d.Intro = Text( d.Intro, keepLines: true );
 		d.RulesHeading = Text( d.RulesHeading );
 		d.NewHeading = Text( d.NewHeading );
 		d.LatestHeading = Text( d.LatestHeading );
@@ -189,14 +189,19 @@ public static class WelcomeContent
 		return d;
 	}
 
-	static string Text( string text )
+	static string Text( string text, bool keepLines = false )
 	{
 		text = (text ?? "").Trim();
+
+		// The editor's fields wrap, and Enter there starts a new line: a one-line text takes it as a space.
+		if ( !keepLines )
+			text = text.Replace( "\r\n", " " ).Replace( '\n', ' ' ).Replace( '\r', ' ' );
+
 		return text.Length > MaxText ? text[..MaxText] : text;
 	}
 
 	static List<string> Lines( List<string> lines ) =>
-		(lines ?? new()).Select( Text ).Where( x => x.Length > 0 ).Take( MaxItems ).ToList();
+		(lines ?? new()).Select( x => Text( x ) ).Where( x => x.Length > 0 ).Take( MaxItems ).ToList();
 }
 
 /// <summary>
