@@ -104,12 +104,10 @@
         "SpeedVariation": 0.05,
         "Weapon": null,
         "SpareMagazines": 2,
-        "MeleeChoices": [
-          {
-            "_type": "gameobject",
-            "prefab": "weapons/crowbar/crowbar.prefab"
-          }
-        ],
+        "MeleePrefab": {
+          "Id": "22c23f40-9940-4d6e-b10f-355268326f8a",
+          "Path": "weapons/crowbar/crowbar.prefab"
+        },
         "WeaponChoices": [
           {
             "_type": "gameobject",

@@ -8,7 +8,7 @@ namespace Sandbox.Npcs.CombatNpc;
 /// A combat NPC that searches for players, advances on them, fires in bursts, and repositions.
 /// When friendly, can be recruited to follow a player and engages hostile NPCs instead.
 /// </summary>
-public class CombatNpc : Npc, Component.IPressable
+public partial class CombatNpc : Npc, Component.IPressable
 {
 	private static readonly string[] PainLines =
 	{
@@ -41,12 +41,13 @@ public class CombatNpc : Npc, Component.IPressable
 	public BaseSandboxWeapon Weapon { get; set; }
 
 	/// <summary>
-	/// Melee weapon prefabs, one of which this NPC carries as well (picked at random when it spawns). It switches to
-	/// it when its gun is empty and it has no spare magazines left. Empty means no melee weapon. Declared before <see cref="WeaponChoices"/>:
-	/// arming runs when that one is loaded, so this one has to be loaded first.
+	/// The melee weapon this NPC carries as well: one, and only one. It takes it out when it has nothing left to shoot
+	/// with. Empty means no melee weapon. A prefab file rather than an object (a reference to a prefab's object does
+	/// not survive the NPC being cloned), and declared before <see cref="WeaponChoices"/>: arming runs when that one
+	/// is loaded, so this one has to be loaded first.
 	/// </summary>
 	[Property]
-	public List<GameObject> MeleeChoices { get; set; } = [];
+	public PrefabFile MeleePrefab { get; set; }
 
 	/// <summary>
 	/// Weapon prefabs to arm this NPC with - one is picked at random when it spawns, replacing
@@ -54,37 +55,6 @@ public class CombatNpc : Npc, Component.IPressable
 	/// </summary>
 	[Property]
 	public List<GameObject> WeaponChoices { get; set; } = [];
-
-	/// <summary>
-	/// The carried melee weapon, cloned from <see cref="MeleeChoices"/> when the NPC spawns.
-	/// </summary>
-	[Property]
-	public BaseSandboxWeapon Melee { get; set; }
-
-	/// <summary>
-	/// Full magazines carried besides the one in the gun. Each reload uses one; with none left and the gun empty the
-	/// NPC switches to its melee weapon.
-	/// </summary>
-	[Property, Group( "Balance" )]
-	public int SpareMagazines { get; set; } = 2;
-
-	/// <summary>
-	/// How far this NPC looks for ammo and loose weapons once it is out of ammo.
-	/// </summary>
-	[Property, Group( "Balance" )]
-	public float PickupRange { get; set; } = 900f;
-
-	/// <summary>
-	/// True while the melee weapon is in hand instead of the gun. Set by the host, followed on every peer.
-	/// </summary>
-	[Sync( SyncFlags.FromHost ), Change( nameof(OnUsingMeleeChanged) )]
-	public bool UsingMelee { get; private set; }
-
-	// The gun the NPC was armed with. Weapon is whichever of the gun and the melee weapon is in hand.
-	private BaseSandboxWeapon _gun;
-
-	// Pickups it could not reach or use, and when to look at them again
-	private readonly Dictionary<GameObject, TimeUntil> _ignoredPickups = new();
 
 	/// <summary>
 	/// Skill multiplier on the weapon's NPC spread - 1 is a average shot, lower is more accurate.
@@ -267,87 +237,6 @@ public class CombatNpc : Npc, Component.IPressable
 	}
 
 	/// <summary>
-	/// Clone one of <see cref="MeleeChoices"/> onto the NPC, holstered.
-	/// </summary>
-	private void ArmWithMelee()
-	{
-		if ( MeleeChoices is not { Count: > 0 } )
-			return;
-
-		var prefab = MeleeChoices[Game.Random.Int( 0, MeleeChoices.Count - 1 )];
-		if ( !prefab.IsValid() )
-			return;
-
-		var go = prefab.Clone( new CloneConfig { Parent = GameObject, Transform = global::Transform.Zero, StartEnabled = true } );
-		var weapon = go?.GetComponent<BaseSandboxWeapon>( true );
-		if ( !weapon.IsValid() )
-		{
-			go?.Destroy();
-			Log.Warning( $"{DisplayName}: '{prefab.Name}' isn't a weapon prefab, no melee weapon." );
-			return;
-		}
-
-		Melee?.GameObject.DestroyImmediate();
-		Melee = weapon;
-	}
-
-	/// <summary>
-	/// Put the melee weapon in hand. Host only; the gun is not used again.
-	/// </summary>
-	private void UseMelee()
-	{
-		if ( IsProxy || UsingMelee || !Melee.IsValid() )
-			return;
-
-		UsingMelee = true;
-		ApplyHeld();
-	}
-
-	/// <summary>
-	/// Back to the gun, after finding ammo for it. Host only.
-	/// </summary>
-	private void UseGun()
-	{
-		if ( IsProxy || !UsingMelee || !_gun.IsValid() )
-			return;
-
-		UsingMelee = false;
-		ApplyHeld();
-	}
-
-	private void OnUsingMeleeChanged( bool oldValue, bool newValue ) => ApplyHeld();
-
-	/// <summary>
-	/// Make the world model, hold type and <see cref="Weapon"/> match <see cref="UsingMelee"/>, on this peer.
-	/// </summary>
-	private void ApplyHeld( bool rethink = true )
-	{
-		// With no gun the melee weapon is all there is
-		var melee = UsingMelee || !_gun.IsValid();
-		var held = melee ? Melee : _gun;
-		var other = melee ? _gun : Melee;
-
-		if ( !held.IsValid() || !Renderer.IsValid() )
-			return;
-
-		if ( other.IsValid() && other.WorldModel.IsValid() )
-			other.WorldModel.Destroy();
-
-		if ( !held.WorldModel.IsValid() )
-			held.CreateWorldModel( Renderer );
-
-		Weapon = held;
-
-		if ( !IsProxy )
-		{
-			Animation.SetHoldType( held.HoldType );
-
-			if ( rethink )
-				EndCurrentSchedule();
-		}
-	}
-
-	/// <summary>
 	/// Swap the prefab's weapon for a random one from <see cref="WeaponChoices"/>.
 	/// </summary>
 	private void ArmWithRandomWeapon()
@@ -382,40 +271,7 @@ public class CombatNpc : Npc, Component.IPressable
 		_post = WorldPosition;
 		_postForward = WorldRotation.Forward;
 
-		_gun = Weapon;
-
-		// Found on a client by what the spawn snapshot brought
-		if ( !Melee.IsValid() )
-			Melee = Components.GetAll<BaseSandboxWeapon>( FindMode.EverythingInChildren ).FirstOrDefault( x => x is MeleeWeapon );
-
-		// Holstered: no pickup model or physics until it is dropped
-		if ( !IsProxy && Melee.IsValid() )
-			Melee.IsDropped = false;
-
-		// Armed with only a melee weapon: it is in hand from the start
-		if ( !_gun.IsValid() && Melee.IsValid() )
-		{
-			if ( !IsProxy )
-				UsingMelee = true;
-
-			ApplyHeld();
-		}
-
-		if ( _gun.IsValid() && Renderer.IsValid() )
-		{
-			Weapon.CreateWorldModel( Renderer );
-
-			// The weapon says how forgiving it is in NPC hands; we say how good we are with it.
-			Weapon.SpreadScale = Weapon.Npc.SpreadScale * AimSpreadScale;
-
-			// A gun nobody was given through an inventory has no magazine and never runs dry. Load it, so the
-			// NPC has to reload like anyone else (see ReloadWeapon).
-			if ( !IsProxy && Weapon.UsesPrimaryClip )
-				Weapon.Clip1 = Weapon.PrimaryClipSize;
-
-			if ( !IsProxy )
-				Animation.SetHoldType( Weapon.HoldType );
-		}
+		StartWeapons();
 	}
 
 	// Friendly soldiers fight alongside the player; the rest are enemies.
@@ -551,27 +407,8 @@ public class CombatNpc : Npc, Component.IPressable
 	{
 		var visible = Senses.GetBestTarget();
 
-		if ( IsOutOfAmmo )
-		{
-			// Ammo or a loose weapon close by is worth fetching - unless the enemy is nearer than it is
-			var pickup = FindPickup();
-			if ( pickup.IsValid() && !(visible.IsValid() && WorldPosition.Distance( visible.WorldPosition ) < WorldPosition.Distance( pickup.WorldPosition )) )
-			{
-				var fetch = GetSchedule<CombatPickupSchedule>();
-				fetch.Pickup = pickup;
-				fetch.Speed = Pace( EngageSpeed );
-				return fetch;
-			}
-
-			// Nothing to be had: hit them with the melee weapon instead
-			if ( !UsingMelee && Melee.IsValid() )
-				UseMelee();
-		}
-		else if ( UsingMelee )
-		{
-			// Found some ammo
-			UseGun();
-		}
+		if ( ChooseWeapons( visible ) is { } fetch )
+			return fetch;
 
 		if ( visible.IsValid() && Weapon.IsValid() )
 		{
@@ -687,175 +524,9 @@ public class CombatNpc : Npc, Component.IPressable
 		if ( Speech.CanSpeak )
 			Speech.TrySay( Game.Random.FromArray( DeathLines ), 2f, tags: ["reaction", "death"], priority: 3000 );
 
-		DropWeapon();
+		DropWeapons();
 
 		base.Die( damage );
-	}
-
-	/// <summary>
-	/// Drop the held weapon into the world where the hand was, so it survives the NPC's death and can
-	/// be picked up. If nobody takes it within <see cref="DroppedWeaponLifetime"/> it's cleaned up.
-	/// </summary>
-	/// <summary>
-	/// Without a gun, or out of ammo on it with no spare magazines to reload from. An NPC that spawned without a gun is
-	/// just one that has not found one yet.
-	/// </summary>
-	private bool IsOutOfAmmo => !_gun.IsValid() || (ReloadWeapon.IsEmpty( _gun ) && SpareMagazines <= 0);
-
-	/// <summary>
-	/// The nearest ammo box for the gun in hand, or loose weapon it can use, within <see cref="PickupRange"/>.
-	/// </summary>
-	private GameObject FindPickup()
-	{
-		GameObject best = null;
-		var bestDistance = PickupRange;
-
-		void Consider( GameObject candidate )
-		{
-			if ( _ignoredPickups.TryGetValue( candidate, out var until ) && !until )
-				return;
-
-			var distance = WorldPosition.Distance( candidate.WorldPosition );
-			if ( distance >= bestDistance )
-				return;
-
-			best = candidate;
-			bestDistance = distance;
-		}
-
-		// Ammo is only any use for a gun it already has
-		if ( _gun.IsValid() )
-		{
-			foreach ( var ammo in Scene.GetAll<AmmoPickup>() )
-			{
-				if ( ammo.AmmoType is not null && ammo.AmmoType == _gun.PrimaryAmmoType )
-					Consider( ammo.GameObject );
-			}
-		}
-
-		foreach ( var weapon in Scene.GetAll<BaseSandboxWeapon>() )
-		{
-			if ( CanTake( weapon ) )
-				Consider( weapon.GameObject );
-		}
-
-		return best;
-	}
-
-	/// <summary>
-	/// A loose gun, with rounds in it, that this NPC can use.
-	/// </summary>
-	private bool CanTake( BaseSandboxWeapon weapon )
-	{
-		return weapon.IsValid() && weapon != _gun && weapon != Melee
-			&& weapon is not MeleeWeapon
-			&& weapon.IsDropped && !weapon.HasOwner
-			&& weapon.UsableByNpcs && weapon.Npc.CanBePickedUp
-			&& weapon.UsesPrimaryClip && weapon.Clip1 != 0
-			&& !weapon.ShootInput.IsEnabled && !weapon.SecondaryInput.IsEnabled
-			&& !weapon.GetComponentInParent<Npc>().IsValid();
-	}
-
-	/// <summary>
-	/// Leave this pickup alone for a while - it could not be reached or taken.
-	/// </summary>
-	public void IgnorePickup( GameObject pickup )
-	{
-		if ( !pickup.IsValid() )
-			return;
-
-		// Forget the ones that are gone, so this does not grow
-		foreach ( var gone in _ignoredPickups.Keys.Where( x => !x.IsValid() ).ToList() )
-			_ignoredPickups.Remove( gone );
-
-		_ignoredPickups[pickup] = 20f;
-	}
-
-	/// <summary>
-	/// Take an ammo box (counted as spare magazines for the gun) or a loose weapon (which becomes the gun, the old one
-	/// is dropped). Host only. False if it could not be taken.
-	/// </summary>
-	public bool Collect( GameObject pickup )
-	{
-		if ( IsProxy || !pickup.IsValid() )
-			return false;
-
-		// As close as a player has to be to use it
-		var reach = pickup.Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )?.Range ?? 80f;
-		if ( pickup.WorldPosition.Distance( WorldPosition ) > MathF.Max( reach, 60f ) )
-			return false;
-
-		if ( _gun.IsValid() && pickup.GetComponent<AmmoPickup>() is { } ammo )
-		{
-			var rounds = ammo.TakeByNpc( _gun );
-			if ( rounds <= 0 )
-				return false;
-
-			SpareMagazines += Math.Max( 1, MathX.CeilToInt( rounds / (float)Math.Max( _gun.PrimaryClipSize, 1 ) ) );
-			return true;
-		}
-
-		if ( pickup.GetComponent<BaseSandboxWeapon>() is { } weapon && CanTake( weapon ) )
-		{
-			var previous = _gun;
-
-			// Never fired, or from a magazine counter that was never set: a full one. One spare magazine with it.
-			if ( weapon.Clip1 < 0 )
-				weapon.Clip1 = weapon.PrimaryClipSize;
-
-			SpareMagazines = Math.Max( SpareMagazines, 1 );
-
-			weapon.GameObject.SetParent( GameObject, false );
-			weapon.LocalTransform = global::Transform.Zero;
-
-			UsingMelee = false;
-			AdoptWeapon( weapon, previous );
-
-			// The empty one goes on the floor, where the NPC will not want it back
-			DropWeapon( previous );
-			return true;
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Make this the NPC's gun on every peer: the world model, hold type and aim.
-	/// </summary>
-	[Rpc.Broadcast]
-	private void AdoptWeapon( BaseSandboxWeapon weapon, BaseSandboxWeapon previous )
-	{
-		if ( !weapon.IsValid() )
-			return;
-
-		if ( previous.IsValid() && previous.WorldModel.IsValid() )
-			previous.WorldModel.Destroy();
-
-		_gun = weapon;
-		weapon.SpreadScale = weapon.Npc.SpreadScale * AimSpreadScale;
-
-		ApplyHeld( rethink: false );
-	}
-
-	private void DropWeapon()
-	{
-		DropWeapon( _gun );
-		DropWeapon( Melee );
-	}
-
-	private void DropWeapon( BaseSandboxWeapon weapon )
-	{
-		if ( !weapon.IsValid() )
-			return;
-
-		var position = weapon.WorldModel.IsValid()
-			? weapon.WorldModel.WorldPosition
-			: WorldPosition + Vector3.Up * 32f;
-
-		weapon.DropIntoWorld( position, Vector3.Up * 50f );
-
-		// The timer lives on the weapon - this NPC is about to be destroyed
-		weapon.Invoke( DroppedWeaponLifetime, () => RemoveIfUnclaimed( weapon ) );
 	}
 
 	/// <summary>

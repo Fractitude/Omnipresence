@@ -55,6 +55,21 @@ public sealed class HealthPickup : Component, IInteractionHandler
 		DestroyGameObject();
 	}
 
+	/// <summary>
+	/// An NPC takes the kit and heals, up to <paramref name="maxHealth"/>. Host only. False if it was not taken.
+	/// </summary>
+	public bool TakeByNpc( Sandbox.Npcs.Npc npc, float maxHealth )
+	{
+		if ( !Networking.IsHost || GameObject.IsDestroyed || !npc.IsValid() || HealthGive <= 0 || npc.Health >= maxHealth )
+			return false;
+
+		npc.Health = (npc.Health + HealthGive).Clamp( 0, maxHealth );
+
+		PlayPickupEffects( null );
+		DestroyGameObject();
+		return true;
+	}
+
 	[Rpc.Broadcast]
 	void PlayPickupEffects( Player player )
 	{

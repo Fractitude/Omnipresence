@@ -12,6 +12,7 @@ public class ReloadWeapon : TaskBase
 
 	private TimeUntil _done;
 	private bool _reloading;
+	private bool _failed;
 
 	public ReloadWeapon( BaseSandboxWeapon weapon )
 	{
@@ -31,13 +32,12 @@ public class ReloadWeapon : TaskBase
 		if ( !IsEmpty( Weapon ) )
 			return;
 
-		// Each reload uses a spare magazine; none left means the schedule picks something else (the melee weapon)
-		if ( Npc is CombatNpc.CombatNpc soldier )
+		// Each reload uses a spare magazine; none left means the schedule picks something else (another gun, the melee weapon)
+		if ( Npc is CombatNpc.CombatNpc soldier && !soldier.TakeSpareMagazine( Weapon ) )
 		{
-			if ( soldier.SpareMagazines <= 0 )
-				return;
-
-			soldier.SpareMagazines--;
+			// Nothing to reload with: end the schedule now, the NPC picks another gun or the melee weapon
+			_failed = true;
+			return;
 		}
 
 		_reloading = true;
@@ -47,6 +47,9 @@ public class ReloadWeapon : TaskBase
 
 	protected override TaskStatus OnUpdate()
 	{
+		if ( _failed )
+			return TaskStatus.Failed;
+
 		if ( !_reloading )
 			return TaskStatus.Success;
 
