@@ -69,6 +69,12 @@ public class CombatNpc : Npc, Component.IPressable
 	public int SpareMagazines { get; set; } = 2;
 
 	/// <summary>
+	/// How far this NPC looks for ammo and loose weapons once it is out of ammo.
+	/// </summary>
+	[Property, Group( "Balance" )]
+	public float PickupRange { get; set; } = 900f;
+
+	/// <summary>
 	/// True while the melee weapon is in hand instead of the gun. Set by the host, followed on every peer.
 	/// </summary>
 	[Sync( SyncFlags.FromHost ), Change( nameof(OnUsingMeleeChanged) )]
@@ -76,6 +82,9 @@ public class CombatNpc : Npc, Component.IPressable
 
 	// The gun the NPC was armed with. Weapon is whichever of the gun and the melee weapon is in hand.
 	private BaseSandboxWeapon _gun;
+
+	// Pickups it could not reach or use, and when to look at them again
+	private readonly Dictionary<GameObject, TimeUntil> _ignoredPickups = new();
 
 	/// <summary>
 	/// Skill multiplier on the weapon's NPC spread - 1 is a average shot, lower is more accurate.
@@ -294,12 +303,24 @@ public class CombatNpc : Npc, Component.IPressable
 		ApplyHeld();
 	}
 
+	/// <summary>
+	/// Back to the gun, after finding ammo for it. Host only.
+	/// </summary>
+	private void UseGun()
+	{
+		if ( IsProxy || !UsingMelee || !_gun.IsValid() )
+			return;
+
+		UsingMelee = false;
+		ApplyHeld();
+	}
+
 	private void OnUsingMeleeChanged( bool oldValue, bool newValue ) => ApplyHeld();
 
 	/// <summary>
 	/// Make the world model, hold type and <see cref="Weapon"/> match <see cref="UsingMelee"/>, on this peer.
 	/// </summary>
-	private void ApplyHeld()
+	private void ApplyHeld( bool rethink = true )
 	{
 		// With no gun the melee weapon is all there is
 		var melee = UsingMelee || !_gun.IsValid();
@@ -320,7 +341,9 @@ public class CombatNpc : Npc, Component.IPressable
 		if ( !IsProxy )
 		{
 			Animation.SetHoldType( held.HoldType );
-			EndCurrentSchedule();
+
+			if ( rethink )
+				EndCurrentSchedule();
 		}
 	}
 
@@ -526,11 +549,32 @@ public class CombatNpc : Npc, Component.IPressable
 
 	public override ScheduleBase GetSchedule()
 	{
-		// Dry, nothing left to reload with: hit them with the melee weapon instead
-		if ( !UsingMelee && Melee.IsValid() && SpareMagazines <= 0 && ReloadWeapon.IsEmpty( Weapon ) )
-			UseMelee();
-
 		var visible = Senses.GetBestTarget();
+
+		if ( _gun.IsValid() )
+		{
+			if ( IsOutOfAmmo )
+			{
+				// Ammo or a loose weapon close by is worth fetching - unless the enemy is nearer than it is
+				var pickup = FindPickup();
+				if ( pickup.IsValid() && !(visible.IsValid() && WorldPosition.Distance( visible.WorldPosition ) < WorldPosition.Distance( pickup.WorldPosition )) )
+				{
+					var fetch = GetSchedule<CombatPickupSchedule>();
+					fetch.Pickup = pickup;
+					fetch.Speed = Pace( EngageSpeed );
+					return fetch;
+				}
+
+				// Nothing to be had: hit them with the melee weapon instead
+				if ( !UsingMelee && Melee.IsValid() )
+					UseMelee();
+			}
+			else if ( UsingMelee )
+			{
+				// Found some ammo
+				UseGun();
+			}
+		}
 
 		if ( visible.IsValid() && Weapon.IsValid() )
 		{
@@ -655,6 +699,140 @@ public class CombatNpc : Npc, Component.IPressable
 	/// Drop the held weapon into the world where the hand was, so it survives the NPC's death and can
 	/// be picked up. If nobody takes it within <see cref="DroppedWeaponLifetime"/> it's cleaned up.
 	/// </summary>
+	/// <summary>
+	/// Out of ammo on the gun, with no spare magazines to reload from.
+	/// </summary>
+	private bool IsOutOfAmmo => _gun.IsValid() && ReloadWeapon.IsEmpty( _gun ) && SpareMagazines <= 0;
+
+	/// <summary>
+	/// The nearest ammo box for the gun in hand, or loose weapon it can use, within <see cref="PickupRange"/>.
+	/// </summary>
+	private GameObject FindPickup()
+	{
+		GameObject best = null;
+		var bestDistance = PickupRange;
+
+		void Consider( GameObject candidate )
+		{
+			if ( _ignoredPickups.TryGetValue( candidate, out var until ) && !until )
+				return;
+
+			var distance = WorldPosition.Distance( candidate.WorldPosition );
+			if ( distance >= bestDistance )
+				return;
+
+			best = candidate;
+			bestDistance = distance;
+		}
+
+		foreach ( var ammo in Scene.GetAll<AmmoPickup>() )
+		{
+			if ( ammo.AmmoType is not null && ammo.AmmoType == _gun.PrimaryAmmoType )
+				Consider( ammo.GameObject );
+		}
+
+		foreach ( var weapon in Scene.GetAll<BaseSandboxWeapon>() )
+		{
+			if ( CanTake( weapon ) )
+				Consider( weapon.GameObject );
+		}
+
+		return best;
+	}
+
+	/// <summary>
+	/// A loose gun, with rounds in it, that this NPC can use.
+	/// </summary>
+	private bool CanTake( BaseSandboxWeapon weapon )
+	{
+		return weapon.IsValid() && weapon != _gun && weapon != Melee
+			&& weapon is not MeleeWeapon
+			&& weapon.IsDropped && !weapon.HasOwner
+			&& weapon.UsableByNpcs && weapon.Npc.CanBePickedUp
+			&& weapon.UsesPrimaryClip && weapon.Clip1 != 0
+			&& !weapon.ShootInput.IsEnabled && !weapon.SecondaryInput.IsEnabled
+			&& !weapon.GetComponentInParent<Npc>().IsValid();
+	}
+
+	/// <summary>
+	/// Leave this pickup alone for a while - it could not be reached or taken.
+	/// </summary>
+	public void IgnorePickup( GameObject pickup )
+	{
+		if ( !pickup.IsValid() )
+			return;
+
+		// Forget the ones that are gone, so this does not grow
+		foreach ( var gone in _ignoredPickups.Keys.Where( x => !x.IsValid() ).ToList() )
+			_ignoredPickups.Remove( gone );
+
+		_ignoredPickups[pickup] = 20f;
+	}
+
+	/// <summary>
+	/// Take an ammo box (counted as spare magazines for the gun) or a loose weapon (which becomes the gun, the old one
+	/// is dropped). Host only. False if it could not be taken.
+	/// </summary>
+	public bool Collect( GameObject pickup )
+	{
+		if ( IsProxy || !pickup.IsValid() || !_gun.IsValid() )
+			return false;
+
+		if ( pickup.WorldPosition.Distance( WorldPosition ) > 120f )
+			return false;
+
+		if ( pickup.GetComponent<AmmoPickup>() is { } ammo )
+		{
+			var rounds = ammo.TakeByNpc( _gun );
+			if ( rounds <= 0 )
+				return false;
+
+			SpareMagazines += Math.Max( 1, MathX.CeilToInt( rounds / (float)Math.Max( _gun.PrimaryClipSize, 1 ) ) );
+			return true;
+		}
+
+		if ( pickup.GetComponent<BaseSandboxWeapon>() is { } weapon && CanTake( weapon ) )
+		{
+			var previous = _gun;
+
+			// Never fired, or from a magazine counter that was never set: a full one. One spare magazine with it.
+			if ( weapon.Clip1 < 0 )
+				weapon.Clip1 = weapon.PrimaryClipSize;
+
+			SpareMagazines = Math.Max( SpareMagazines, 1 );
+
+			weapon.GameObject.SetParent( GameObject, false );
+			weapon.LocalTransform = global::Transform.Zero;
+
+			UsingMelee = false;
+			AdoptWeapon( weapon, previous );
+
+			// The empty one goes on the floor, where the NPC will not want it back
+			DropWeapon( previous );
+			return true;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Make this the NPC's gun on every peer: the world model, hold type and aim.
+	/// </summary>
+	[Rpc.Broadcast]
+	private void AdoptWeapon( BaseSandboxWeapon weapon, BaseSandboxWeapon previous )
+	{
+		if ( !weapon.IsValid() )
+			return;
+
+		if ( previous.IsValid() && previous.WorldModel.IsValid() )
+			previous.WorldModel.Destroy();
+
+		_gun = weapon;
+		weapon.SpreadScale = weapon.Npc.SpreadScale * AimSpreadScale;
+
+		ApplyHeld( rethink: false );
+	}
+
 	private void DropWeapon()
 	{
 		DropWeapon( _gun );

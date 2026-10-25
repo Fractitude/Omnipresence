@@ -65,6 +65,21 @@ public sealed class AmmoPickup : Component, IInteractionHandler
 		GameObject.Destroy();
 	}
 
+	/// <summary>
+	/// An NPC takes the box. It only wants ammo for the gun it holds, and has no inventory to put it in, so this gives
+	/// back how many rounds there were and the NPC counts them itself. Host only. Zero if it was not taken.
+	/// </summary>
+	public int TakeByNpc( BaseCombatWeapon gun )
+	{
+		if ( !Networking.IsHost || GameObject.IsDestroyed || AmmoType is null || !gun.IsValid() || gun.PrimaryAmmoType != AmmoType )
+			return 0;
+
+		PlayPickupEffects( null );
+		GameObject.Destroy();
+
+		return Math.Max( AmmoAmount, 1 );
+	}
+
 	[Rpc.Broadcast]
 	void PlayPickupEffects( GameObject player )
 	{
