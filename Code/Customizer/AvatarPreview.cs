@@ -56,7 +56,7 @@ public sealed class AvatarPreview : Panel
 
 	static float GetFocusHeight( PreviewFocus focus ) => focus switch
 	{
-		PreviewFocus.Head => 63,
+		PreviewFocus.Head => 68,
 		PreviewFocus.Chest => 50,
 		PreviewFocus.Pelvis => 38,
 		PreviewFocus.Legs => 22,
