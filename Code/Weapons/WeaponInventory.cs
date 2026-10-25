@@ -193,35 +193,7 @@ public sealed class WeaponInventory : BaseInventoryComponent
 		if ( Input.Pressed( "Drop" ) && ActiveWeapon.IsValid() )
 			DropActiveWeapon();
 
-		for ( var i = 0; i < 10; i++ )
-		{
-			if ( Input.Pressed( $"Slot{i}" ) )
-				SelectSlot( i == 0 ? 9 : i - 1 );
-		}
-
-		if ( Input.Pressed( "SlotNext" ) ) CycleSlot( 1 );
-		if ( Input.Pressed( "SlotPrev" ) ) CycleSlot( -1 );
-	}
-
-	void SelectSlot( int slot )
-	{
-		var weapon = GetSlot( slot ) as BaseSandboxWeapon;
-		if ( weapon.IsValid() )
-			Switch( weapon, allowHolster: true );
-	}
-
-	void CycleSlot( int direction )
-	{
-		var current = ActiveWeapon.IsValid() ? ActiveWeapon.Slot : -1;
-
-		for ( var step = 1; step <= MaxSlots; step++ )
-		{
-			var slot = ((current + direction * step) % MaxSlots + MaxSlots) % MaxSlots;
-			if ( GetSlot( slot ) is not BaseSandboxWeapon weapon ) continue;
-
-			Switch( weapon );
-			return;
-		}
+		// The slot keys, the next and previous keys and the wheel are read by WeaponSwitcher, the menu that picks a weapon.
 	}
 
 	/// <summary>

@@ -1,0 +1,110 @@
+WeaponSwitcher
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	font-family: Poppins;
+	color: #f2eee2;
+}
+
+.buckets
+{
+	position: absolute;
+	top: 38px;
+	left: 0;
+	right: 0;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 7px;
+}
+
+.bucket
+{
+	flex-direction: column;
+	gap: 7px;
+	width: 60px;
+
+	.tile
+	{
+		position: relative;
+		width: 100%;
+		height: 60px;
+		border-radius: 6px;
+		background-color: rgba(27, 26, 46, 0.75);
+		align-items: center;
+		justify-content: center;
+
+		&.child
+		{
+			height: 6px;
+		}
+
+		&.highlighted
+		{
+			background-color: rgba(74, 74, 74, 0.85);
+			color: white;
+		}
+	}
+
+	&.empty .tile
+	{
+		opacity: 0.5;
+	}
+
+	.index
+	{
+		position: absolute;
+		left: 6px;
+		top: 4px;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.content
+	{
+		display: none;
+	}
+
+	&.expanded
+	{
+		width: 230px;
+
+		.tile
+		{
+			height: 120px;
+			color: rgba(242, 238, 226, 0.51);
+
+			&.highlighted
+			{
+				color: white;
+			}
+		}
+
+		.content
+		{
+			display: flex;
+			width: 100%;
+			height: 100%;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-between;
+			padding: 6px 0 10px 0;
+		}
+
+		.icon
+		{
+			width: 80%;
+			height: 80px;
+			object-fit: contain;
+		}
+
+		.name
+		{
+			font-size: 16px;
+			font-weight: 700;
+			letter-spacing: 1px;
+			text-transform: uppercase;
+		}
+	}
+}

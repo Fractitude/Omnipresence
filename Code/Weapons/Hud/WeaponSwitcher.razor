@@ -1,0 +1,190 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+@if ( IsSelecting && inventory.IsValid() )
+{
+	<root>
+		<div class="buckets">
+			@for ( var bucket = 0; bucket < inventory.MaxSlots; bucket++ )
+			{
+				var items = BucketItems( bucket );
+				var expanded = selected.IsValid() && selected.Slot == bucket;
+
+				<div class="bucket @( expanded ? "expanded" : "" ) @( items.Count == 0 ? "empty" : "" )">
+					@for ( var i = 0; i < items.Count; i++ )
+					{
+						var weapon = items[i];
+						var highlighted = weapon == selected;
+
+						<div class="tile @( highlighted ? "highlighted" : "" ) @( i > 0 ? "child" : "" )">
+							@if ( i == 0 )
+							{
+								<label class="index">@( bucket + 1 )</label>
+							}
+							@if ( expanded )
+							{
+								<div class="content">
+									@if ( weapon.DisplayIcon is { } icon )
+									{
+										<image class="icon" Texture=@icon />
+									}
+									<label class="name">@weapon.DisplayName</label>
+								</div>
+							}
+						</div>
+					}
+					@if ( items.Count == 0 )
+					{
+						<div class="tile">
+							<label class="index">@( bucket + 1 )</label>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</root>
+}
+
+@code
+{
+	[Property, Group( "Sound" )] public SoundEvent SwitchSound { get; set; }
+
+	/// <summary>
+	/// Seconds after the last selection change before the menu closes on its own, keeping the current weapon.
+	/// </summary>
+	[Property] public float SelectionTimeout { get; set; } = 1.5f;
+
+	WeaponInventory inventory;
+	BaseSandboxWeapon selected;
+	RealTimeSince sinceSelectionChanged;
+
+	bool IsSelecting => selected.IsValid();
+
+	List<BaseSandboxWeapon> BucketItems( int bucket ) => inventory.Weapons.Where( x => x.Slot == bucket ).ToList();
+
+	protected override int BuildHash()
+	{
+		if ( !IsSelecting || !inventory.IsValid() )
+			return 0;
+
+		return HashCode.Combine( selected.GameObject.Id, inventory.Weapons.Count(), inventory.ActiveWeapon );
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( !inventory.IsValid() || inventory.IsProxy )
+			inventory = Scene.GetAllComponents<WeaponInventory>().FirstOrDefault( x => !x.IsProxy );
+
+		if ( !inventory.IsValid() )
+			return;
+
+		// the highlighted weapon was dropped or removed
+		if ( IsSelecting && selected.Inventory != inventory )
+			selected = null;
+
+		// Nothing is picked while a Navi app, a menu or a seat has the player's keys.
+		if ( NaviInputCapture.Current is not null || AbilityMenu.IsOpen || CharacterMenu.IsOpen || inventory.IsSeatHolstered
+		     || Scene.GetAllComponents<NaviComputer>().Any( x => x.IsSeated ) )
+		{
+			selected = null;
+			return;
+		}
+
+		HandleInput();
+	}
+
+	protected override void OnDisabled()
+	{
+		selected = null;
+	}
+
+	void HandleInput()
+	{
+		if ( Input.Pressed( "SlotNext" ) ) Step( 1 );
+		if ( Input.Pressed( "SlotPrev" ) ) Step( -1 );
+
+		for ( var i = 0; i < 10; i++ )
+		{
+			if ( Input.Pressed( $"Slot{i}" ) )
+				SelectBucket( i == 0 ? 9 : i - 1 );
+		}
+
+		// A weapon that uses the wheel (the physgun's distance) clears it first, so only a free wheel reaches the menu.
+		if ( Input.MouseWheel.y != 0 )
+			Step( -(int)Input.MouseWheel.y );
+
+		if ( !IsSelecting )
+			return;
+
+		// don't let the click fire the weapon at this moment
+		if ( Input.Pressed( "attack1" ) )
+		{
+			Input.ReleaseAction( "attack1" );
+			Confirm();
+		}
+		else if ( Input.Pressed( "attack2" ) )
+		{
+			Input.ReleaseAction( "attack2" );
+			selected = null;
+		}
+		else if ( sinceSelectionChanged > SelectionTimeout )
+		{
+			selected = null;
+		}
+	}
+
+	/// <summary>
+	/// Pressing a bucket's key opens it on its first weapon (or the one after the held weapon), pressing it again steps
+	/// through the bucket.
+	/// </summary>
+	void SelectBucket( int bucket )
+	{
+		var items = BucketItems( bucket );
+		if ( items.Count == 0 )
+			return;
+
+		var from = IsSelecting && selected.Slot == bucket ? selected : inventory.ActiveWeapon;
+		var index = items.IndexOf( from );
+
+		SetSelected( items[(index + 1) % items.Count] );
+	}
+
+	/// <summary>
+	/// The wheel steps through every weapon across all buckets.
+	/// </summary>
+	void Step( int delta )
+	{
+		if ( delta == 0 )
+			return;
+
+		var items = inventory.Weapons.ToList();
+		if ( items.Count == 0 )
+			return;
+
+		var index = items.IndexOf( IsSelecting ? selected : inventory.ActiveWeapon );
+		if ( index < 0 ) index = delta > 0 ? -1 : 0;
+
+		index = ((index + delta) % items.Count + items.Count) % items.Count;
+		SetSelected( items[index] );
+	}
+
+	void SetSelected( BaseSandboxWeapon weapon )
+	{
+		selected = weapon;
+		sinceSelectionChanged = 0;
+		StateHasChanged();
+
+		if ( SwitchSound is not null )
+			Sound.Play( SwitchSound );
+	}
+
+	void Confirm()
+	{
+		var weapon = selected;
+		selected = null;
+
+		if ( weapon.IsValid() && weapon != inventory.ActiveWeapon )
+			inventory.Switch( weapon, allowHolster: true );
+	}
+}
