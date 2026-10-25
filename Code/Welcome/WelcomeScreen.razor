@@ -44,7 +44,10 @@
 								<div class="release-title">@( $"Version {entry.Version}: {entry.Title}" )</div>
 								@foreach ( var change in entry.Changes )
 								{
-									<div class="change">@change</div>
+									<div class="rule">
+										<i class="bullet">fiber_manual_record</i>
+										<div class="rule-text">@change</div>
+									</div>
 								}
 							</div>
 						}
