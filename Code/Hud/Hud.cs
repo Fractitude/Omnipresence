@@ -117,6 +117,8 @@ public sealed class HudSystem : GameObjectSystem<HudSystem>
 		hud.Attach<ContextMenu>();
 		hud.Attach<OrgInviteMenu>();
 		hud.Attach<SentBrowser>();
+		hud.Attach<PlayerCustomizer>();
+		hud.Attach<PlayerCustomizerPanel>();
 		hud.Attach<WelcomeScreen>();
 		hud.Attach<WelcomeScreenEditor>();
 

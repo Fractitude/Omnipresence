@@ -1,0 +1,823 @@
+@using Sandbox.UI
+@namespace Sandbox
+@inherits PanelComponent
+@attribute [Title( "Player Customizer Panel" ), Icon( "checkroom" )]
+
+<root class="@(IsOpen ? "open" : "")">
+	<div class="window">
+		<div class="title-bar">
+			<div class="title">
+				<IconPanel class="package" Text="open_in_new" @onclick=@OpenPackagePage />
+				<label>Player Customizer</label>
+			</div>
+			<IconPanel class="close" Text="close" @onclick=@Apply />
+		</div>
+
+		<div class="content">
+			<div class="preview" style="background-color: @PlayerCustomizer.PreviewBackground.Rgba">
+				<AvatarPreview @ref="Preview" />
+				<div class="view-controls">
+					<UIDropdown class="focus" Items=@FocusItems Value=@Focus ValueChanged=@SetFocus Tooltip="Where scrolling zooms in to" />
+					<UIButton Text="Reset" Icon="center_focus_strong" @onclick=@(() => Preview?.ResetView()) />
+					<UIButton @ref="BackgroundButton" Icon="format_color_fill" Tooltip="Background color" @onclick=@OpenBackgroundPicker />
+				</div>
+			</div>
+
+			<div class="side">
+				<div class="tabs">
+					@foreach ( var tab in Enum.GetValues<Tab>() )
+					{
+						<div class="tab @(CurrentTab == tab ? "active" : "")" @onclick=@(() => CurrentTab = tab)>
+							<IconPanel class="icon" Text="@GetTabIcon( tab )" />
+							<label>@tab</label>
+						</div>
+					}
+				</div>
+
+				<div class="page @(CurrentTab == Tab.Clothing && Scope == ClothingScope.Workshop ? "workshop" : "")">
+					@switch ( CurrentTab )
+					{
+						case Tab.Clothing:
+							<div class="toolbar">
+								<div class="scopes">
+									@foreach ( var scope in Enum.GetValues<ClothingScope>() )
+									{
+										<div class="scope @(Scope == scope ? "active" : "")" tooltip="@GetScopeTooltip( scope )" @onclick=@(() => SelectScope( scope ))>@GetScopeLabel( scope )</div>
+									}
+								</div>
+								<TextEntry class="search" Placeholder="Search..." Value:bind=@Search />
+								<UIButton class="clear-search" Icon="backspace" @onclick=@ClearSearch />
+								<UIButton class="icon-size" Icon=@PlayerCustomizer.IconSize.Icon() Tooltip="Icon size" @onclick=@OpenIconSizeMenu />
+								@if ( Scope == ClothingScope.Workshop )
+								{
+									<UIButton class="verified" Icon="verified" Active=@PlayerCustomizer.VerifiedOnly Tooltip="Show verified items only" @onclick=@ToggleVerified />
+									<UIDropdown class="sort" Items=@SortItems Value=@PlayerCustomizer.SortOrder ValueChanged=@OnSortChanged Tooltip="Sort order" />
+								}
+							</div>
+							@if ( Scope == ClothingScope.Workshop )
+							{
+								@if ( WorkshopItems.Count == 0 )
+								{
+									<label class="empty">@GetEmptyText()</label>
+								}
+								<VirtualGrid class="workshop-grid" Items=@WorkshopItems ItemSize=@GetCellSize() OnLastCell=@LoadMoreWorkshop>
+									<Item Context="item">
+										@if ( item is CatalogItem cell )
+										{
+											<ClothingCell Item=@cell IsSelected=@(() => cell.IsWornIn( Draft )) @onclick=@(() => Toggle( cell )) @onrightclick=@(() => OpenItemMenu( cell )) />
+										}
+									</Item>
+								</VirtualGrid>
+								break;
+							}
+							<div class="groups">
+								@foreach ( var group in Enum.GetValues<ClothingGroup>() )
+								{
+									<div class="group @(Group == group ? "active" : "")" tooltip="@(Group == group ? "Click again to show every category" : "")" @onclick=@(() => SelectGroup( Group == group ? null : group ))>
+										<IconPanel class="icon" Text="@group.GetIcon()" />
+										<label>@group</label>
+									</div>
+								}
+							</div>
+							@if ( SubCategories.Count > 1 )
+							{
+								<div class="subcategories">
+									<div class="subcategory @(SubCategory is null ? "active" : "")" @onclick=@(() => SubCategory = null)>All</div>
+									@foreach ( var category in SubCategories )
+									{
+										<div class="subcategory @(SubCategory == category ? "active" : "")" @onclick=@(() => SubCategory = category)>@category.GetTitle()</div>
+									}
+								</div>
+							}
+							@{
+								var filtered = FilteredClothing().ToList();
+							}
+							@if ( filtered.Count == 0 )
+							{
+								<label class="empty">@GetEmptyText()</label>
+							}
+							<div class="grid @PlayerCustomizer.IconSize.CssClass()">
+								@foreach ( var item in filtered )
+								{
+									<ClothingCell Item=@item Selected=@item.IsWornIn( Draft ) @onclick=@(() => Toggle( item )) @onrightclick=@(() => OpenItemMenu( item )) />
+								}
+							</div>
+							break;
+
+						case Tab.Model:
+							<div class="toolbar">
+								<TextEntry class="search" Placeholder="Search..." Value:bind=@Search />
+								<UIButton class="clear-search" Icon="backspace" @onclick=@ClearSearch />
+								<UIButton class="icon-size" Icon=@PlayerCustomizer.IconSize.Icon() Tooltip="Icon size" @onclick=@OpenIconSizeMenu />
+							</div>
+							@{
+								var skins = FilteredSkins().ToList();
+							}
+							@if ( skins.Count == 0 )
+							{
+								<label class="empty">@GetEmptyText()</label>
+							}
+							@foreach ( var group in skins.GroupBy( x => x.Clothing.GetSkinGender() ).OrderBy( x => GenderOrder( x.Key ) ) )
+							{
+								<div class="section-header">@group.Key</div>
+								<div class="grid @PlayerCustomizer.IconSize.CssClass()">
+									@foreach ( var item in group )
+									{
+										<ClothingCell Item=@item Selected=@item.IsWornIn( Draft ) @onclick=@(() => Toggle( item )) />
+									}
+								</div>
+							}
+							break;
+
+						case Tab.Colors:
+							<div class="color-list">
+								@foreach ( var row in GetColorRows() )
+								{
+									<div class="color-row">
+										@if ( row.Clothing is null )
+										{
+											<div class="color-take-off"></div>
+										}
+										else
+										{
+											<UIButton class="color-take-off" Icon="close" @onclick=@(() => TakeOff( row.Clothing )) />
+										}
+										<div class="color-icon" style="background-image: url( @row.Icon )"></div>
+										<label class="color-title">@row.Title</label>
+										<UIColor class="color-picker" Property=@GetColorProperty( row.Key ) />
+										<UIButton Icon="format_color_reset" Tooltip="Original color" Disabled=@(!DraftColors.ContainsKey( row.Key )) @onclick=@(() => ResetColor( row.Key )) />
+									</div>
+									@if ( row.SeparatorAfter )
+									{
+										<div class="color-separator"></div>
+									}
+								}
+							</div>
+							break;
+
+						case Tab.Presets:
+							<div class="preset-toolbar">
+								<UIButton Text="Save Current Outfit" Icon="add" Tooltip="Save the outfit and colors picked right now" @onclick=@SaveNewPreset />
+								<label class="note">Presets are kept on this computer, between sessions.</label>
+							</div>
+							@if ( Presets.Count == 0 )
+							{
+								<label class="empty">No presets yet. Dress up, then save the outfit here to put it back on with one click.</label>
+							}
+							<div class="preset-grid">
+								@foreach ( var preset in Presets )
+								{
+									<PresetCard Preset=@preset Active=@(preset == _loadedPreset)
+												OnLoad=@(() => LoadPreset( preset ))
+												OnOverwrite=@(() => OverwritePreset( preset ))
+												OnRename=@(() => RenamePreset( preset ))
+												OnDelete=@(() => DeletePreset( preset )) />
+								}
+							</div>
+							break;
+
+						case Tab.Settings:
+							<div class="section-header">Outfit</div>
+							<UIButton Text="Restore the last outfit on start" Icon=@(PlayerCustomizer.RestoreLastOutfit ? "check_box" : "check_box_outline_blank") Active=@PlayerCustomizer.RestoreLastOutfit @onclick=@ToggleRestoreLastOutfit />
+							<label class="note">Puts the outfit applied last back on when the game starts. The menu opens with @PlayerCustomizer.OpenKeyName.</label>
+							break;
+					}
+				</div>
+
+				<div class="footer">
+					<UIButton Text="Default Avatar" Icon="person" Tooltip="The clothing picked in the avatar menu" @onclick=@DefaultAvatar />
+					<UIButton Text="Cancel" Icon="undo" Tooltip="Back to what you're wearing" @onclick=@Cancel />
+					<UIButton class="apply" Text="Apply" Icon="check" @onclick=@Apply />
+					<div class="spacer"></div>
+					<UIButton Text="Undress" Icon="accessibility_new" @onclick=@Undress />
+					<UIButton Icon="switch_camera" Tooltip="@(IsThirdPerson ? "Switch to first person" : "Switch to third person")" @onclick=@ToggleView />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-layer" @ref="ModalLayer"></div>
+</root>
+
+@code
+{
+	enum Tab
+	{
+		Clothing,
+		Presets,
+		Model,
+		Colors,
+		Settings
+	}
+
+	static string GetTabIcon( Tab tab ) => tab switch
+	{
+		Tab.Clothing => "👕",
+		Tab.Presets => "⭐",
+		Tab.Model => "🧍",
+		Tab.Colors => "🏳️‍🌈",
+		_ => "⚙️"
+	};
+
+	PlayerCustomizer Customizer { get; set; }
+
+	bool IsOpen => Customizer.IsValid() && Customizer.IsOpen;
+
+	Tab CurrentTab { get; set; }
+
+	string Search { get; set; }
+
+	ClothingScope Scope { get; set; }
+
+	// null shows every category
+	ClothingGroup? Group { get; set; }
+
+	Clothing.ClothingCategory? SubCategory { get; set; }
+
+	List<Clothing.ClothingCategory> SubCategories { get; set; } = [];
+
+	static readonly List<UIDropdown.Item> FocusItems = UIDropdown.ForEnum<PreviewFocus>();
+
+	PreviewFocus Focus { get; set; } = PreviewFocus.Head;
+
+	AvatarPreview Preview { get; set; }
+
+	ClothingContainer Draft { get; set; } = new();
+
+	Dictionary<string, Color> DraftColors { get; set; } = [];
+
+	// what the player wears right now, Cancel goes back to it
+	ClothingContainer _worn = new();
+	Dictionary<string, Color> _wornColors = [];
+
+	readonly Dictionary<string, SerializedProperty> _colorProperties = [];
+
+	// the draft is the avatar from the menu, so Apply puts the avatar back instead of a copy of it
+	bool _draftIsDefault;
+
+	List<CatalogItem> Clothes { get; set; } = [];
+
+	List<CatalogItem> Skins { get; set; } = [];
+
+	int _revision;
+	bool _wasOpen;
+
+	protected override void OnStart()
+	{
+		Customizer = GetComponentInParent<PlayerCustomizer>();
+	}
+
+	protected override void OnTreeFirstBuilt()
+	{
+		base.OnTreeFirstBuilt();
+
+		// menu lists and tooltips live on the root panel, so they only get sandbox's look from sheets loaded there
+		var root = Panel.FindRootPanel();
+		root?.StyleSheet.Load( "/UI/Tooltip.scss" );
+		root?.StyleSheet.Load( "/UI/ContextMenu.scss" );
+	}
+
+	// built on every open, so downloaded packages and new inventory items show up
+	void BuildCatalog()
+	{
+		var all = ClothingCatalog.Build();
+
+		Skins = all.Where( x => x.Clothing.HasHumanSkin ).ToList();
+		Clothes = all.Where( x => !x.Clothing.HasHumanSkin && x.Clothing.Category != Clothing.ClothingCategory.Skin ).ToList();
+
+		SelectGroup( Group );
+	}
+
+	protected override void OnUpdate()
+	{
+		if ( IsOpen && !_wasOpen )
+			ResetDraft();
+
+		_wasOpen = IsOpen;
+
+		UpdateWorkshopSearch();
+	}
+
+	void ResetDraft()
+	{
+		Presets = OutfitPresets.Load();
+		_loadedPreset = null;
+		BuildCatalog();
+		_worn = Customizer.GetCurrentOutfit();
+		_wornColors = Customizer.GetCurrentColors();
+		DraftColors = OutfitColors.Copy( _wornColors );
+		SetDraft( Copy( _worn ), false );
+	}
+
+	void SetDraft( ClothingContainer outfit, bool isDefault )
+	{
+		_loadedPreset = null;
+		Draft = outfit;
+		_draftIsDefault = isDefault;
+		Preview?.SetOutfit( Draft, DraftColors );
+		_revision++;
+	}
+
+	static ClothingContainer Copy( ClothingContainer outfit ) => ClothingContainer.CreateFromJson( outfit.Serialize() );
+
+	static int GenderOrder( string gender ) => gender switch
+	{
+		"Male" => 0,
+		"Female" => 1,
+		_ => 2
+	};
+
+	void SelectGroup( ClothingGroup? group )
+	{
+		Group = group;
+		SubCategory = null;
+		SubCategories = group is null
+			? []
+			: Clothes.Where( x => !x.IsLocked && x.Clothing.GetGroup() == group ).Select( x => x.Clothing.Category ).Distinct().OrderBy( x => x.GetTitle() ).ToList();
+	}
+
+	string GetScopeTooltip( ClothingScope scope ) => scope switch
+	{
+		ClothingScope.Wearing => "Currently Wearing",
+		ClothingScope.Workshop => "Community Clothing",
+		_ => ""
+	};
+
+	Vector2 GetCellSize()
+	{
+		float size = PlayerCustomizer.IconSize switch
+		{
+			SpawnMenuIconSize.Small => 64,
+			SpawnMenuIconSize.Large => 120,
+			_ => 84
+		};
+
+		return new Vector2( size, size );
+	}
+
+	List<CatalogItem> WorkshopItems { get; set; } = [];
+
+	Package.FindResult _workshopResult;
+	int _workshopFetched;
+	int _workshopQueryId;
+	bool _workshopLoading;
+	string _workshopSearch = "";
+	string _typedSearch = "";
+	RealTimeSince _searchTyped;
+
+	/// <summary>
+	/// A page of clothing packages, the grid asks for the next one when its last cell shows up.
+	/// </summary>
+	async Task FetchWorkshop( bool reset )
+	{
+		if ( reset )
+		{
+			WorkshopItems = [];
+			_workshopResult = null;
+			_workshopFetched = 0;
+			_workshopQueryId++;
+		}
+		else if ( _workshopLoading || _workshopResult is null || _workshopFetched >= _workshopResult.TotalCount )
+		{
+			return;
+		}
+
+		var queryId = _workshopQueryId;
+		_workshopSearch = Search ?? "";
+		_workshopLoading = true;
+		_revision++;
+
+		try
+		{
+			var query = $"type:clothing sort:{PlayerCustomizer.SortOrder.ToIdentifier()} {_workshopSearch.Trim()}".Trim();
+			var added = 0;
+
+			// verified items are a few per page, keep going until there's something to show or a few pages ran out
+			for ( int page = 0; page < 8 && added == 0; page++ )
+			{
+				var result = await Package.FindAsync( query, 60, _workshopFetched );
+
+				// a newer search replaced this one
+				if ( queryId != _workshopQueryId || result is null ) return;
+
+				_workshopResult = result;
+				_workshopFetched += result.Packages.Count();
+
+				var packages = result.Packages.AsEnumerable();
+				if ( PlayerCustomizer.VerifiedOnly )
+					packages = packages.Where( x => WorkshopClothing.IsSold( x.FullIdent ) );
+
+				var items = packages.Select( WorkshopClothing.FromPackage ).ToList();
+				WorkshopItems.AddRange( items );
+				added += items.Count;
+
+				if ( _workshopFetched >= result.TotalCount ) break;
+			}
+		}
+		finally
+		{
+			if ( queryId == _workshopQueryId )
+				_workshopLoading = false;
+
+			_revision++;
+		}
+	}
+
+	// the catalog is built when the panel opens, so a package downloaded since then joins it here
+	void AddToCatalog( CatalogItem item )
+	{
+		if ( item.Clothing.HasHumanSkin )
+		{
+			if ( !Skins.Any( x => x.Clothing == item.Clothing ) )
+				Skins = Skins.Append( item ).OrderBy( x => x.Title ).ToList();
+
+			return;
+		}
+
+		if ( !Clothes.Any( x => x.Clothing == item.Clothing ) )
+			Clothes = Clothes.Append( item ).OrderBy( x => x.Title ).ToList();
+	}
+
+	void LoadMoreWorkshop() => _ = FetchWorkshop( false );
+
+	static readonly List<UIDropdown.Item> SortItems = UIDropdown.ForEnum<PackageSortMode>();
+
+	void OnSortChanged( object value )
+	{
+		if ( value is not PackageSortMode mode || mode == PlayerCustomizer.SortOrder ) return;
+
+		PlayerCustomizer.SortOrder = mode;
+		_ = FetchWorkshop( true );
+	}
+
+	void ToggleVerified()
+	{
+		PlayerCustomizer.VerifiedOnly = !PlayerCustomizer.VerifiedOnly;
+		_ = FetchWorkshop( true );
+	}
+
+	void OpenItemMenu( CatalogItem item )
+	{
+		if ( string.IsNullOrEmpty( item.PackageIdent ) ) return;
+
+		var menu = new Sandbox.UI.Menu();
+		menu.AddOption( "Workshop page", "open_in_new", () => Game.Overlay.ShowPackageModal( item.PackageIdent ) );
+		menu.Open( Panel, Popup.PositionMode.UnderMouse );
+	}
+
+	// searching the workshop goes to the server, so wait until typing stops
+	void UpdateWorkshopSearch()
+	{
+		if ( !IsOpen || Scope != ClothingScope.Workshop ) return;
+
+		var search = Search ?? "";
+		if ( search != _typedSearch )
+		{
+			_typedSearch = search;
+			_searchTyped = 0;
+		}
+
+		if ( search != _workshopSearch && _searchTyped > 0.4f )
+			_ = FetchWorkshop( true );
+	}
+
+	string GetScopeLabel( ClothingScope scope ) => scope switch
+	{
+		ClothingScope.Wearing => $"Wearing ({Clothes.Count( x => x.IsWornIn( Draft ) )})",
+		ClothingScope.Purchased => $"Purchased ({Clothes.Count( x => x.IsPurchased )})",
+		ClothingScope.Workshop => "Workshop",
+		_ => "All"
+	};
+
+	string GetEmptyText()
+	{
+		var what = Scope switch
+		{
+			ClothingScope.Wearing => "Nothing worn",
+			ClothingScope.Workshop => _workshopLoading ? "Loading..." : "Nothing found on the workshop",
+			ClothingScope.Purchased => "Nothing purchased",
+			_ => "Nothing found"
+		};
+
+		if ( Group is not null )
+			what += $" in {Group}";
+
+		if ( !string.IsNullOrWhiteSpace( Search ) )
+			what += $" for \"{Search.Trim()}\"";
+
+		return what;
+	}
+
+	PlayerController LocalController => Player.FindLocalPlayer()?.Controller;
+
+	bool IsThirdPerson => LocalController?.ThirdPerson ?? false;
+
+	// the same as the "view" input
+	void ToggleView()
+	{
+		var controller = LocalController;
+		if ( controller.IsValid() )
+			controller.ThirdPerson = !controller.ThirdPerson;
+	}
+
+	IEnumerable<CatalogItem> FilteredSkins()
+	{
+		if ( string.IsNullOrWhiteSpace( Search ) )
+			return Skins;
+
+		return Skins.Where( x => x.Title.Contains( Search.Trim(), StringComparison.OrdinalIgnoreCase ) );
+	}
+
+	void OpenIconSizeMenu()
+	{
+		SpawnMenuIconSizeExtensions.OpenMenu( Panel, size =>
+		{
+			PlayerCustomizer.IconSize = size;
+			_revision++;
+		} );
+	}
+
+	void OpenPackagePage()
+	{
+		Game.Overlay.ShowPackageModal( PlayerCustomizer.PackageIdent );
+	}
+
+	record ColorRow( string Key, string Title, string Icon, bool SeparatorAfter = false, Clothing Clothing = null );
+
+	// the body and underwear first, then everything worn that has a renderer to tint
+	IEnumerable<ColorRow> GetColorRows()
+	{
+		var skin = Draft.Clothing.Select( x => x.Clothing ).FirstOrDefault( x => x?.HasHumanSkin == true );
+		yield return new ColorRow( OutfitColors.BodyKey, "Body", GetIcon( skin ) );
+		yield return new ColorRow( OutfitColors.UnderwearKey, "Underwear", GetIcon( ResourceLibrary.Get<Clothing>( OutfitColors.DefaultUnderwearPath ) ), true );
+
+		foreach ( var entry in Draft.Clothing )
+		{
+			var clothing = entry.Clothing;
+			if ( string.IsNullOrEmpty( clothing?.ResourcePath ) || clothing.HasHumanSkin ) continue;
+
+			yield return new ColorRow( OutfitColors.GetKey( clothing ), clothing.Title, GetIcon( clothing ), Clothing: clothing );
+		}
+	}
+
+	string GetIcon( Clothing clothing )
+	{
+		if ( clothing is null ) return "";
+
+		var item = Clothes.Concat( Skins ).FirstOrDefault( x => x.Clothing == clothing );
+		return item?.Icon ?? clothing.Icon.Path ?? "";
+	}
+
+	Panel BackgroundButton { get; set; }
+
+	SerializedProperty _backgroundProperty;
+
+	void OpenBackgroundPicker()
+	{
+		_backgroundProperty ??= new ColorSlot( () => PlayerCustomizer.PreviewBackground, color =>
+		{
+			PlayerCustomizer.PreviewBackground = color;
+			_revision++;
+		}, opaque: false ).GetProperty();
+
+		_ = new UIColorPopup( BackgroundButton, _backgroundProperty );
+	}
+
+	SerializedProperty GetColorProperty( string key )
+	{
+		if ( _colorProperties.TryGetValue( key, out var property ) )
+			return property;
+
+		var slot = new ColorSlot( () => DraftColors.GetValueOrDefault( key, Color.White ), color => SetColor( key, color ) );
+		property = slot.GetProperty();
+		_colorProperties[key] = property;
+		return property;
+	}
+
+	void SetColor( string key, Color color )
+	{
+		DraftColors[key] = color;
+		_draftIsDefault = false;
+		Preview?.SetColors( DraftColors );
+		_revision++;
+	}
+
+	void ResetColor( string key )
+	{
+		DraftColors.Remove( key );
+
+		// dress again, so the item gets the Dresser's own tint back
+		SetDraft( Draft, _draftIsDefault );
+	}
+
+	void SelectScope( ClothingScope scope )
+	{
+		Scope = scope;
+		SelectGroup( null );
+		ClearSearch();
+
+		if ( scope == ClothingScope.Workshop && (WorkshopItems.Count == 0 || _workshopSearch != "") )
+			_ = FetchWorkshop( true );
+	}
+
+	void ClearSearch()
+	{
+		Search = "";
+		InputFocus.Clear();
+	}
+
+	void SetFocus( object value )
+	{
+		Focus = (PreviewFocus)value;
+		if ( Preview is not null )
+			Preview.ZoomFocus = Focus;
+	}
+
+	IEnumerable<CatalogItem> FilteredClothing()
+	{
+		var items = Clothes.AsEnumerable();
+
+		// clothing that is not owned only shows up while worn, the workshop is where to browse it
+		if ( Scope == ClothingScope.Wearing )
+			items = items.Where( x => x.IsWornIn( Draft ) );
+		else if ( Scope == ClothingScope.Purchased )
+			items = items.Where( x => x.IsPurchased );
+		else
+			items = items.Where( x => !x.IsLocked );
+
+		if ( Group is not null )
+			items = items.Where( x => x.Clothing.GetGroup() == Group );
+
+		if ( SubCategory is not null )
+			items = items.Where( x => x.Clothing.Category == SubCategory );
+
+		if ( !string.IsNullOrWhiteSpace( Search ) )
+			items = items.Where( x => x.Title.Contains( Search.Trim(), StringComparison.OrdinalIgnoreCase ) );
+
+		return items;
+	}
+
+	void TakeOff( Clothing clothing )
+	{
+		Draft.Clothing.RemoveAll( x => x.Clothing == clothing );
+		SetDraft( Draft, false );
+	}
+
+	async void Toggle( CatalogItem item )
+	{
+		if ( item.IsLoading ) return;
+
+		if ( item.IsWornIn( Draft ) )
+		{
+			// the body has to be some model, picking another one replaces it
+			if ( item.Clothing.HasHumanSkin ) return;
+
+			item.RemoveFrom( Draft );
+			SetDraft( Draft, false );
+			return;
+		}
+
+		if ( !item.IsLoaded )
+		{
+			_revision++;
+			var loaded = await item.Load();
+			_revision++;
+
+			if ( !loaded )
+			{
+				Log.Warning( $"Couldn't download {item.Title} ({item.PackageIdent})" );
+				return;
+			}
+
+			AddToCatalog( item );
+		}
+
+		item.AddTo( Draft );
+		SetDraft( Draft, false );
+	}
+
+	void Apply()
+	{
+		if ( !Customizer.IsValid() ) return;
+
+		if ( _draftIsDefault )
+			Customizer.ApplyDefaultAvatar();
+		else
+			Customizer.ApplyOutfit( Draft, DraftColors );
+
+		Customizer.IsOpen = false;
+	}
+
+	void Cancel()
+	{
+		DraftColors = OutfitColors.Copy( _wornColors );
+		SetDraft( Copy( _worn ), false );
+	}
+
+	List<OutfitPreset> Presets { get; set; } = [];
+
+	Panel ModalLayer { get; set; }
+
+	// UIModal goes over the spawn menu when it thinks that's open, ours has to sit over this panel
+	void ShowModal( UIModal modal )
+	{
+		if ( modal is null ) return;
+
+		if ( ModalLayer.IsValid() && modal.Parent != ModalLayer )
+			modal.Parent = ModalLayer;
+	}
+
+	// the preset loaded into the draft, until the draft changes
+	OutfitPreset _loadedPreset;
+
+	void SaveNewPreset()
+	{
+		ShowModal( UIModal.Prompt( Panel, "Save Preset", $"Preset {Presets.Count + 1}", name =>
+		{
+			var preset = OutfitPresets.Capture( name, Draft, DraftColors );
+			Presets.Add( preset );
+			OutfitPresets.Save( Presets );
+
+			_loadedPreset = preset;
+			_revision++;
+		}, "Preset name", "Save", "save" ) );
+	}
+
+	async void LoadPreset( OutfitPreset preset )
+	{
+		var (outfit, colors) = await OutfitPresets.Resolve( preset );
+
+		DraftColors = colors;
+		SetDraft( outfit, false );
+		_loadedPreset = preset;
+	}
+
+	void OverwritePreset( OutfitPreset preset )
+	{
+		ShowModal( UIModal.Confirm( Panel, "Overwrite Preset", $"Replace <b>{UIModal.Escape( preset.Name )}</b> with the outfit picked right now?", () =>
+		{
+			ReplacePreset( preset, OutfitPresets.Capture( preset.Name, Draft, DraftColors ) );
+		}, "Overwrite" ) );
+	}
+
+	void RenamePreset( OutfitPreset preset )
+	{
+		ShowModal( UIModal.Prompt( Panel, "Rename Preset", preset.Name, name =>
+		{
+			ReplacePreset( preset, new OutfitPreset { Name = name, Outfit = preset.Outfit, Colors = preset.Colors, Workshop = preset.Workshop } );
+		}, "Preset name", "Rename", "edit" ) );
+	}
+
+	void DeletePreset( OutfitPreset preset )
+	{
+		ShowModal( UIModal.Confirm( Panel, "Delete Preset", $"Delete <b>{UIModal.Escape( preset.Name )}</b>? This can't be undone.", () =>
+		{
+			Presets.Remove( preset );
+			OutfitPresets.Save( Presets );
+
+			if ( _loadedPreset == preset )
+				_loadedPreset = null;
+
+			_revision++;
+		}, "Delete" ) );
+	}
+
+	// a new object, so its card notices and renders it again
+	void ReplacePreset( OutfitPreset old, OutfitPreset replacement )
+	{
+		var index = Presets.IndexOf( old );
+		if ( index < 0 ) return;
+
+		Presets[index] = replacement;
+		OutfitPresets.Save( Presets );
+
+		if ( _loadedPreset == old )
+			_loadedPreset = replacement;
+
+		_revision++;
+	}
+
+	void DefaultAvatar()
+	{
+		DraftColors = [];
+		SetDraft( ClothingContainer.CreateFromLocalUser(), true );
+	}
+
+	void Undress()
+	{
+		// keep the skin, it's the avatar's body rather than clothing
+		var outfit = Copy( Draft );
+		outfit.Clothing.RemoveAll( x => x.Clothing is null || !x.Clothing.HasHumanSkin );
+		SetDraft( outfit, false );
+	}
+
+	void ToggleRestoreLastOutfit()
+	{
+		PlayerCustomizer.RestoreLastOutfit = !PlayerCustomizer.RestoreLastOutfit;
+		_revision++;
+	}
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( IsOpen, CurrentTab, Search, Scope, Group, SubCategory, Focus, HashCode.Combine( IsThirdPerson, PlayerCustomizer.IconSize, WorkshopItems.Count, _revision ) );
+	}
+}

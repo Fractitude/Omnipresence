@@ -1,0 +1,61 @@
+@using Sandbox.UI
+@namespace Sandbox
+@inherits Panel
+
+<root class="@CellClasses" tooltip="@(Item?.Title ?? "")">
+	@if ( string.IsNullOrWhiteSpace( Item?.Icon ) )
+	{
+		<label class="title">@Item?.Title</label>
+	}
+	else
+	{
+		<div class="icon" style="background-image: url( @Item.Icon )"></div>
+	}
+
+	@if ( Item?.IsLoading == true )
+	{
+		<IconPanel class="loading" Text="hourglass_empty" />
+	}
+	else if ( Item is { IsLoaded: false } )
+	{
+		<IconPanel class="cloud" Text="cloud_download" tooltip="From the workshop, downloads when picked" />
+	}
+	else if ( Item?.IsWorkshop == true )
+	{
+		<IconPanel class="workshop" Text="cloud" tooltip="From the workshop" />
+	}
+
+	@if ( Item?.IsLocked == true )
+	{
+		<IconPanel class="lock" Text="lock" tooltip="Not owned, sandbox lets you wear it anyway" />
+	}
+
+	@if ( ShowSelected )
+	{
+		<IconPanel class="check" Text="check" />
+	}
+</root>
+
+@code
+{
+	[Parameter]
+	public CatalogItem Item { get; set; }
+
+	[Parameter]
+	public bool Selected { get; set; }
+
+	/// <summary>
+	/// Asked every tick instead of <see cref="Selected"/>, for cells a VirtualGrid builds once and never updates.
+	/// </summary>
+	[Parameter]
+	public Func<bool> IsSelected { get; set; }
+
+	bool ShowSelected => IsSelected?.Invoke() ?? Selected;
+
+	string CellClasses => (ShowSelected ? "active " : "") + (Item?.IsLoading == true ? "loading " : "") + (Item?.IsLocked == true ? "locked" : "");
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( Item, Item?.IsLoading, Item?.IsLoaded, ShowSelected );
+	}
+}

@@ -1,0 +1,462 @@
+@import "/UI/Theme.scss";
+
+PlayerCustomizerPanel
+{
+	display: none;
+	pointer-events: all;
+	position: absolute;
+	top: -50;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	justify-content: center;
+	align-items: center;
+	font-family: $body-font;
+
+	&.open
+	{
+		display: flex;
+	}
+
+	> .window
+	{
+		@include ui-block;
+		flex-direction: column;
+		width: 1200;
+		height: 736;
+		max-width: 95vw;
+		max-height: 90vh;
+
+		> .title-bar
+		{
+			@include ui-title-bar;
+			justify-content: space-between;
+			font-size: 16;
+
+			> .title
+			{
+				flex-direction: row;
+				align-items: center;
+				gap: 6;
+
+				> .package
+				{
+					cursor: pointer;
+					font-size: 16;
+					text-transform: none;
+					opacity: 0.8;
+
+					&:hover
+					{
+						opacity: 1;
+						sound-in: ui.hover;
+					}
+
+					&:active
+					{
+						sound-in: ui.select;
+					}
+				}
+			}
+
+			> .close
+			{
+				cursor: pointer;
+				font-size: 20;
+				text-transform: none;
+				opacity: 0.8;
+
+				&:hover
+				{
+					opacity: 1;
+					sound-in: ui.hover;
+				}
+
+				&:active
+				{
+					sound-in: ui.select;
+				}
+			}
+		}
+
+		> .content
+		{
+			flex-direction: row;
+			flex-grow: 1;
+			min-height: 0;
+			gap: 8;
+			margin-top: 8;
+		}
+	}
+
+	.preview
+	{
+		@include ui-section;
+
+		background-image: none;
+		border-width: 0;
+		position: relative;
+
+		// the extra width of the window goes to the side with the clothing
+		width: 431;
+		flex-shrink: 0;
+		overflow: hidden;
+
+		> AvatarPreview
+		{
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			cursor: grab;
+
+			> .scene
+			{
+				width: 100%;
+				height: 100%;
+			}
+		}
+
+		> .view-controls
+		{
+			position: absolute;
+			bottom: 8;
+			left: 0;
+			right: 0;
+			flex-direction: row;
+			justify-content: center;
+			gap: 6;
+
+			> .focus
+			{
+				width: 100;
+				flex-grow: 0;
+			}
+		}
+	}
+
+	.side
+	{
+		flex-direction: column;
+		flex-grow: 1;
+		min-width: 0;
+
+		> .tabs
+		{
+			flex-direction: row;
+			flex-shrink: 0;
+
+			> .tab
+			{
+				@include ui-tab;
+
+				> .icon
+				{
+					font-size: 13;
+				}
+			}
+		}
+
+		> .page.workshop
+		{
+			overflow: hidden;
+		}
+
+		> .page
+		{
+			@include ui-section;
+			@include ui-scroll;
+			flex-direction: column;
+			flex-grow: 1;
+			min-height: 0;
+			padding: 10;
+			overflow-y: scroll;
+		}
+
+		> .footer
+		{
+			flex-direction: row;
+			align-items: center;
+			flex-shrink: 0;
+			gap: 6;
+			margin-top: 8;
+		}
+	}
+
+	.toolbar
+	{
+		gap: 6;
+		flex-direction: row;
+		flex-shrink: 0;
+		margin-bottom: 8;
+
+		> .scopes
+		{
+			flex-direction: row;
+			flex-shrink: 0;
+
+			> .scope
+			{
+				@include ui-button-face;
+				height: 24;
+				padding: 0 10;
+				align-items: center;
+				border-radius: 0;
+				font-size: 12;
+				font-weight: 600;
+
+				&:first-child
+				{
+					border-radius: 2 0 0 2;
+				}
+
+				&:last-child
+				{
+					border-radius: 0 2 2 0;
+				}
+
+				&:not(:first-child)
+				{
+					margin-left: -1;
+				}
+
+				&.active
+				{
+					@include ui-selected;
+					background-image: none;
+					border-color: $ui-blue;
+				}
+			}
+		}
+
+		> .search
+		{
+			@include ui-text-entry;
+			flex-grow: 1;
+		}
+
+		> .clear-search, > .icon-size, > .verified
+		{
+			flex-shrink: 0;
+		}
+
+		> .sort
+		{
+			width: 110;
+			flex-grow: 0;
+			flex-shrink: 0;
+		}
+	}
+
+	.groups
+	{
+		flex-direction: row;
+		flex-wrap: wrap;
+		flex-shrink: 0;
+		gap: 4;
+		margin-bottom: 10;
+
+		> .group
+		{
+			@include ui-selectable;
+			flex-direction: row;
+			align-items: center;
+			gap: 4;
+			padding: 3 8;
+			border: 1 solid $ui-control-border;
+			font-size: 12;
+			font-weight: 600;
+			color: $ui-text;
+
+			> .icon
+			{
+				font-size: 12;
+			}
+		}
+	}
+
+	.subcategories
+	{
+		flex-direction: row;
+		flex-wrap: wrap;
+		flex-shrink: 0;
+		gap: 4;
+		margin: -4 0 10 0;
+		padding: 6;
+		border-radius: 2;
+		background-color: $ui-well;
+
+		> .subcategory
+		{
+			@include ui-selectable;
+			padding: 2 8;
+			font-size: 11;
+			font-weight: 600;
+			color: $ui-text;
+		}
+	}
+
+	.empty
+	{
+		@include ui-subtitle;
+		margin: 6 0 10 0;
+	}
+
+	.grid
+	{
+		flex-direction: row;
+		flex-wrap: wrap;
+		flex-shrink: 0;
+		gap: 6;
+		margin-bottom: 10;
+
+		&.size-small > ClothingCell
+		{
+			width: 64;
+			height: 64;
+		}
+
+		&.size-large > ClothingCell
+		{
+			width: 120;
+			height: 120;
+		}
+	}
+
+	.workshop-grid
+	{
+		flex-grow: 1;
+		min-height: 0;
+		width: 100%;
+		gap: 6;
+
+		ClothingCell
+		{
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	.color-list
+	{
+		flex-direction: column;
+		flex-shrink: 0;
+		gap: 4;
+
+		> .color-row
+		{
+			flex-direction: row;
+			align-items: center;
+			flex-shrink: 0;
+			gap: 8;
+			padding: 4;
+			border-radius: 2;
+
+			&:nth-child(even)
+			{
+				background-color: $ui-row-alt;
+			}
+
+			> .color-take-off
+			{
+				width: 24;
+				flex-shrink: 0;
+			}
+
+			> .color-icon
+			{
+				@include ui-tile-thumb;
+				width: 50;
+				height: 50;
+				flex-shrink: 0;
+				border: 1 solid $ui-section-border;
+				border-radius: 2;
+				background-color: $ui-tile-bg;
+			}
+
+			> .color-title
+			{
+				@include ui-label;
+				width: 220;
+				flex-shrink: 0;
+			}
+
+			> .color-picker
+			{
+				flex-grow: 0;
+				flex-shrink: 0;
+			}
+		}
+	}
+
+	.color-separator
+	{
+		height: 1;
+		flex-shrink: 0;
+		margin: 6 0;
+		background-color: $ui-separator;
+	}
+
+	// prompts and confirmations from UIModal, centered over the window
+	> .modal-layer
+	{
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		justify-content: center;
+		align-items: center;
+		pointer-events: none;
+		z-index: 100;
+	}
+
+	.preset-toolbar
+	{
+		flex-direction: row;
+		align-items: center;
+		flex-shrink: 0;
+		gap: 10;
+		margin-bottom: 10;
+
+		> .note
+		{
+			margin-top: 0;
+		}
+	}
+
+	.preset-grid
+	{
+		flex-direction: row;
+		flex-wrap: wrap;
+		flex-shrink: 0;
+		gap: 8;
+	}
+
+	.section-header
+	{
+		@include ui-section-header;
+
+		&.addon
+		{
+			margin-top: $ui-section-gap;
+		}
+	}
+
+	.delete
+	{
+		align-self: flex-start;
+	}
+
+	.spacer
+	{
+		flex-grow: 1;
+	}
+
+	.note
+	{
+		@include ui-subtitle;
+		margin-top: 6;
+	}
+}

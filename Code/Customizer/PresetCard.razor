@@ -1,0 +1,72 @@
+@using Sandbox.UI
+@namespace Sandbox
+@inherits Panel
+
+<root class="@(Active ? "active" : "")">
+	<div class="render" @onclick=@(() => OnLoad?.Invoke())>
+		<AvatarPreview @ref="Preview" />
+		@if ( Active )
+		{
+			<IconPanel class="check" Text="check" />
+		}
+	</div>
+
+	<div class="footer">
+		<label class="name" tooltip="@(Preset?.Name ?? "")" @onclick=@(() => OnLoad?.Invoke())>@Preset?.Name</label>
+		<div class="actions">
+			<UIButton Icon="save" Tooltip="Overwrite with the current outfit" @onclick=@(() => OnOverwrite?.Invoke())></UIButton>
+			<UIButton Icon="edit" Tooltip="Rename" @onclick=@(() => OnRename?.Invoke())></UIButton>
+			<UIButton Icon="delete" Tooltip="Delete" @onclick=@(() => OnDelete?.Invoke())></UIButton>
+		</div>
+	</div>
+</root>
+
+@code
+{
+	[Parameter]
+	public OutfitPreset Preset { get; set; }
+
+	[Parameter]
+	public bool Active { get; set; }
+
+	[Parameter]
+	public Action OnLoad { get; set; }
+
+	[Parameter]
+	public Action OnOverwrite { get; set; }
+
+	[Parameter]
+	public Action OnRename { get; set; }
+
+	[Parameter]
+	public Action OnDelete { get; set; }
+
+	AvatarPreview Preview { get; set; }
+
+	OutfitPreset _shown;
+
+	protected override void OnAfterTreeRender( bool firstTime )
+	{
+		base.OnAfterTreeRender( firstTime );
+
+		// cards get reused by position, so a different preset can land in this one
+		if ( Preview is null || Preset is null || _shown == Preset ) return;
+
+		_shown = Preset;
+		Preview.IsStatic = true;
+		_ = Show( Preset );
+	}
+
+	async Task Show( OutfitPreset preset )
+	{
+		var (outfit, colors) = await OutfitPresets.Resolve( preset );
+
+		if ( _shown == preset )
+			Preview?.SetOutfit( outfit, colors );
+	}
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( Preset, Preset?.Name, Active );
+	}
+}

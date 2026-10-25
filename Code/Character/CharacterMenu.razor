@@ -76,7 +76,7 @@
 	/// Whether the scene only draws a preview for this menu (the character or an item icon). Game systems must not put a
 	/// HUD in it.
 	/// </summary>
-	public static bool IsPreview( Scene scene ) => scene == PreviewScene || ItemIcons.IsIconScene( scene );
+	public static bool IsPreview( Scene scene ) => scene == PreviewScene || ItemIcons.IsIconScene( scene ) || AvatarPreview.IsPreviewScene( scene );
 
 	Scene scene;
 	GameObject pivot;

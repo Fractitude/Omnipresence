@@ -1,0 +1,101 @@
+@import "/UI/Theme.scss";
+
+PresetCard
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	width: 150;
+	border: 1 solid $ui-section-border;
+	border-radius: 2;
+	background-color: $ui-tile-bg;
+	overflow: hidden;
+	transition: border-color 0.1s ease;
+
+	&:hover
+	{
+		border-color: $ui-tile-outline;
+	}
+
+	&.active
+	{
+		border: 2 solid $ui-blue;
+	}
+
+	> .render
+	{
+		position: relative;
+		height: 200;
+		flex-shrink: 0;
+		cursor: pointer;
+
+		&:hover
+		{
+			sound-in: ui.hover;
+		}
+
+		&:active
+		{
+			sound-in: ui.select;
+		}
+
+		> AvatarPreview
+		{
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			pointer-events: none;
+
+			> .scene
+			{
+				width: 100%;
+				height: 100%;
+			}
+		}
+
+		> .check
+		{
+			position: absolute;
+			top: 4;
+			right: 4;
+			width: 18;
+			height: 18;
+			justify-content: center;
+			align-items: center;
+			border-radius: 2;
+			@include ui-selected;
+			font-size: 13;
+			pointer-events: none;
+		}
+	}
+
+	> .footer
+	{
+		flex-direction: column;
+		flex-shrink: 0;
+		gap: 4;
+		padding: 6;
+		border-top: 1 solid $ui-section-border;
+		background-image: linear-gradient( to bottom, $ui-section-top, $ui-section-bottom );
+
+		> .name
+		{
+			@include ui-label;
+			font-weight: 600;
+			color: $ui-text-strong;
+			cursor: pointer;
+		}
+
+		> .actions
+		{
+			flex-direction: row;
+			gap: 4;
+
+			> UIButton
+			{
+				flex-grow: 1;
+			}
+		}
+	}
+}
