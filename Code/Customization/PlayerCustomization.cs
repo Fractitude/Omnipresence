@@ -42,11 +42,6 @@ public sealed class PlayerCustomization : Component
 	public bool HasOutfit => !string.IsNullOrEmpty( OutfitJson );
 
 	/// <summary>
-	/// How soon after one change the same player may send another, in seconds.
-	/// </summary>
-	const float SubmitInterval = 0.25f;
-
-	/// <summary>
 	/// How long after a body is first dressed it is dressed once more: the body's own <see cref="Dresser"/> may not have
 	/// started yet, and puts the avatar on over the outfit if it starts late.
 	/// </summary>
@@ -64,7 +59,6 @@ public sealed class PlayerCustomization : Component
 	// The host's.
 	bool started;
 	ulong steamId;
-	RealTimeSince sinceSubmit;
 
 	// Every machine's: what this body wears now.
 	string wornOutfit;
@@ -178,11 +172,6 @@ public sealed class PlayerCustomization : Component
 	{
 		if ( Rpc.Caller != (Network.Owner ?? Connection.Local) || !Loaded )
 			return;
-
-		if ( sinceSubmit < SubmitInterval )
-			return;
-
-		sinceSubmit = 0;
 
 		var removed = new List<string>();
 

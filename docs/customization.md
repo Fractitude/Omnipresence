@@ -12,8 +12,7 @@ What a player's character wears (clothing, model, colors) belongs to the **host*
   keeps), read when the player's object starts and written on every change. A player keeps the outfit on any computer.
   Presets (the Presets tab) still live in the player's own cookies.
 - **Changing it**: the owner calls `PlayerCustomization.Request` (the customizer's Apply and Default Avatar do). The owner's
-  screen puts the outfit on at once, and `Submit` (`[Rpc.Host]`) asks the host: caller must be the owner, one change per
-  quarter second, then `CustomizationRules` cleans it and the result is saved and synced. What the host cleans, it writes
+  screen puts the outfit on at once, and `Submit` (`[Rpc.Host]`) asks the host: caller must be the owner (no limit on how often), then `CustomizationRules` cleans it and the result is saved and synced. What the host cleans, it writes
   the same way the owner's screen did, so the echo is not dressed twice.
 - **Validation and rules** (`CustomizationRules`): the outfit must parse and be under 32 KB; at most 40 items; every other
   field must be a number or a flag; colors at most 64; at most 16 well-formed `org.package` idents. Then the item rules in
