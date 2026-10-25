@@ -2,10 +2,11 @@
 
 // The window, its list and its buttons are MenuWindow's. This is the editor's own content.
 
-.editor
+// Both classes: MenuWindow's own .menu-list { gap: 12px } comes later and would win over .editor alone.
+.menu-list.editor
 {
 	flex-direction: column;
-	gap: 16px;
+	gap: 32px;
 }
 
 .section
@@ -42,7 +43,7 @@
 	&.tall
 	{
 		min-height: 90px;
-	}
+	}
 }
 
 // A button never gives up its width, whatever is beside it.
