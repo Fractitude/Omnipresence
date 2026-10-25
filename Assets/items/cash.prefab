@@ -19,7 +19,8 @@
     "__type": "Sandbox.WorldItem",
     "__guid": "0c7bfd15-9895-4431-9aad-b327db1f0288",
     "__enabled": true,
-    "Flags": 0
+    "Flags": 0,
+    "Kind": "cash"
    },
    {
     "__type": "Sandbox.BoxCollider",

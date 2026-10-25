@@ -36,6 +36,11 @@ public sealed class WorldItemFile
 	public int Version { get; set; } = CurrentVersion;
 
 	public List<WorldItemRecord> Items { get; set; } = new();
+
+	/// <summary>
+	/// What was taken from items placed by hand in the editor (<see cref="HandPlacedRules"/>). Additive: an old file has none.
+	/// </summary>
+	public List<HandPlacedRecord> HandPlaced { get; set; } = new();
 }
 
 /// <summary>
@@ -57,6 +62,8 @@ public static class WorldItemRules
 	public static int Sanitise( WorldItemFile file, int maxPerScene )
 	{
 		file.Items ??= new();
+		file.HandPlaced ??= new();
+		HandPlacedRules.Sanitise( file.HandPlaced );
 		var before = file.Items.Count;
 		var ids = new HashSet<string>();
 		var clean = new List<WorldItemRecord>();

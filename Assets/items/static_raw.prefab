@@ -19,7 +19,8 @@
     "__type": "Sandbox.WorldItem",
     "__guid": "55511155-e951-41c5-a746-52f00b849f3e",
     "__enabled": true,
-    "Flags": 0
+    "Flags": 0,
+    "Kind": "static_raw"
    },
    {
     "__type": "Sandbox.BoxCollider",

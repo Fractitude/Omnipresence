@@ -55,6 +55,9 @@ public static class PhysFreeze
 		var at = go.WorldPosition;
 		var angles = go.WorldRotation.Angles();
 
+		// An item the map placed by hand is a normal saved item from the moment it is held or frozen.
+		go.Components.Get<WorldItem>()?.Adopt();
+
 		if ( go.Components.Get<PlacedObject>( FindMode.EverythingInSelfAndParent ) is { } placed
 		     && !string.IsNullOrEmpty( placed.ObjectId ) )
 		{

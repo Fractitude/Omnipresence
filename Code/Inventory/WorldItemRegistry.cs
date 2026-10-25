@@ -125,6 +125,45 @@ public static class WorldItemRegistry
 		Changed();
 	}
 
+	// -- Items placed by hand -----------------------------------------------------------------------------------------
+
+	/// <summary>
+	/// What a hand-placed item does as its scene loads (<see cref="HandPlacedRules.Decide"/>). Host only.
+	/// </summary>
+	public static HandPlacedDecision DecideHandPlaced( Scene scene, string id ) =>
+		HandPlacedRules.Decide( Loaded.HandPlaced, SceneKey( scene ), id );
+
+	/// <summary>
+	/// Record that a hand-placed item is gone for good: picked up, taken from its place, or fallen out of the world. It is
+	/// removed from the scene on every later load. Host only.
+	/// </summary>
+	public static void MarkCollected( Scene scene, string id )
+	{
+		if ( HandPlacedRules.Collect( Loaded.HandPlaced, SceneKey( scene ), id ) )
+			Changed();
+	}
+
+	/// <summary>
+	/// Forget what was taken from the hand-placed items of a scene (or of every scene, with null), so they are as the
+	/// editor has them the next time the scene loads. The objects already gone from the running scene come back then, not
+	/// now. Returns how many records went. Host only.
+	/// </summary>
+	public static int ResetHandPlaced( Scene scene )
+	{
+		var removed = HandPlacedRules.Reset( Loaded.HandPlaced, scene.IsValid() ? SceneKey( scene ) : null );
+
+		if ( removed > 0 )
+			Changed();
+
+		return removed;
+	}
+
+	/// <summary>
+	/// The hand-placed item id of this object, or empty if it is not one (or is no longer, once it has been moved).
+	/// </summary>
+	public static string HandPlacedIdOf( GameObject go ) =>
+		go.IsValid() && go.Components.Get<WorldItem>() is { } item ? item.HandPlacedId : "";
+
 	/// <summary>
 	/// Write down that the Physgun froze or unfroze an item, and where it stands now. Nothing is written when the state
 	/// is what the file already says. Host only.
@@ -157,6 +196,15 @@ public static class WorldItemRegistry
 	/// </summary>
 	public static void SetItem( GameObject go, ItemData item )
 	{
+		// What is left of a hand-placed item is what the scene shows next time.
+		if ( item is not null && HandPlacedIdOf( go ) is { Length: > 0 } handId )
+		{
+			if ( HandPlacedRules.SetRemaining( Loaded.HandPlaced, SceneKey( go.Scene ), handId, item ) )
+				Changed();
+
+			return;
+		}
+
 		if ( item is null || Find( IdOf( go ) ) is not { } record )
 			return;
 
@@ -167,7 +215,14 @@ public static class WorldItemRegistry
 	/// <summary>
 	/// Forget a world item that is gone for good (picked up, out of bounds). Host only.
 	/// </summary>
-	public static void Forget( GameObject go ) => Forget( IdOf( go ) );
+	public static void Forget( GameObject go )
+	{
+		// A hand-placed item that is taken is recorded as collected, so the scene does not bring it back.
+		if ( HandPlacedIdOf( go ) is { Length: > 0 } handId )
+			MarkCollected( go.Scene, handId );
+
+		Forget( IdOf( go ) );
+	}
 
 	/// <summary>
 	/// Forget the item with this id. Host only.
@@ -201,6 +256,9 @@ public static class WorldItemRegistry
 		}
 
 		Loaded.Items.Clear();
+
+		// The same wipe gives the hand-placed items back: they are as the editor has them at the next load.
+		Loaded.HandPlaced.Clear();
 		Changed();
 		Flush();
 		return removed;

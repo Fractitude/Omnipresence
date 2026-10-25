@@ -5,6 +5,27 @@ items are **saved between sessions** (see "Saved between sessions"): what was dr
 the scene starts on the host. There is no despawn timer; the only limit is `WorldItem.MaxInScene` (300) per scene, beyond
 which a drop is refused with a message and the item stays in the bag.
 
+## Placing items by hand in the editor
+
+A world item can be put in a scene by hand, like a wad of cash on a desk.
+
+1. Drag a prefab from `Assets/items/` into the scene (`cash.prefab`, `static_tab.prefab`, `haze_vial.prefab`, ...; or `world_item.prefab` for any kind). Each already has its **Kind**. Put it where you want it (on the desk, not inside it: it is a physics object and settles).
+2. In the inspector, group **Item (placed by hand)** on the `WorldItem` component: set **Count** (up to the kind's stack size, 256 for the drugs' items), **Quality** (0 to 100), and for cash **Amount** (dollars, 1 up to the wallet's cap; the default is 100). **Name override** and **Description override** replace the kind's own. For `world_item.prefab` type the **Kind** (the ids are `cash`, `static_tab`, `static_raw`, `static_culture`, `haze_seed`, `haze_raw`, `haze_vial`; a parcel is made by the game and cannot be placed).
+3. The scene view writes what the item will be above it: `Static tabs x12 q61`, `$1,250`, or in red what is wrong (`Item: unknown kind 'zzz'`, `Item: no Kind is set`).
+4. Play. The item is made from those fields and from then on is exactly a dropped item: the same synced data, the same prompt ("Pick up $1,250"), partial pickups, the merge rules, cash into the wallet, the Physgun and freezing. A count above the stack size, a quality outside 0 to 100 and a cash amount outside 1 to the cap are cut, with a warning in the log. An item with no kind or an unknown one is **disabled** and logged with its name and id.
+
+`HandPlacedRules.Build` is the one function that turns the fields into an item (pure, tested); `WorldItem.PlaceByHand` runs it on the host in `OnStart` when the item arrived with no data (an item the game drops has its data set before it starts, so the fields are ignored for it). The cash prefab keeps one model whatever the amount.
+
+### What is remembered about hand-placed items
+
+A hand-placed item is part of the map: the scene file still holds it, so the world file only has to remember what the players did to it. Its id is its GameObject's guid in the scene (`WorldItem.HandPlacedId`), kept with the scene's key in `world_items.json` under `HandPlaced` (`HandPlacedRecord`; additive, an old file has none; `world_items_test.json` under `progress_test_data`).
+
+- **Picked up completely** (or fallen out of the world): recorded as `Collected`. On every later load the host removes that object from the scene, so cash picked up once is not there again after a restart (no cash exploit).
+- **Partly picked up**: the record keeps what is left (`Item`), and the next load makes the item with that instead of the editor's numbers.
+- **Moved, held or frozen**: from then on it is an ordinary saved item. `WorldItem.Adopt` records the scene's copy as `Collected` (so it is not made again) and tracks the object like a drop at its new place; the registry restores it like any dropped item (frozen or not). A small push is ignored: it must end up more than 8 units from where it settled (1.5 s after the scene started).
+- **Never duplicated**: a hand-placed item is not in the `Items` list until it is adopted, and the scene's copy is removed in the same step.
+- **Giving them back.** `world_items_clear` empties the whole file, including this record, so every hand-placed item is as the editor has it at the next load. `world_items_reset_scene` forgets only the hand-placed records of the current scene and leaves dropped items alone. Items already gone from the running scene return when it loads again (restart play), not at once. Both are in [console-commands.md](console-commands.md).
+
 ## How the player drops
 
 Drag an item out of the bag's window and let go outside it (`InventoryGrid.EndDrag` -> `PlayerInventory.Drop( slot )`), or
@@ -87,7 +108,7 @@ host reads or writes it; clients just see the networked objects.
   facts, `Contents`), and `Position` and `Angles`. The file is written with `FileProgressStore.WriteSafely` (a `.bak` of the
   previous good copy, read back if the file is damaged).
 - **What is tracked.** `WorldItem.Spawn` calls `WorldItemRegistry.Track` for everything it makes: a `WorldItem` and an
-  ordinary item that dropped as its own `PickupItem` prefab. Items pre-placed in a scene are not part of this.
+  ordinary item that dropped as its own `PickupItem` prefab. Items pre-placed in a scene are not part of this list: see "Placing items by hand in the editor".
 - **When it is written.** A change only marks the registry dirty; `WorldItemSystem` writes the file 3 seconds
   (`SaveDelay`) after the last change, never every frame. The changes are: a drop (`Track`), a pickup of all (`Forget`),
   a partial pickup (`SetItem`, the new count), an item that went out of bounds (`GameManager`, `Forget`), and an item that

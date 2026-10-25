@@ -23,6 +23,48 @@ public sealed class WorldItem : Component, IInteractionHandler
 	/// </summary>
 	public const int MaxInScene = 300;
 
+	// -- Placing by hand ------------------------------------------------------------------------------------------------
+
+	/// <summary>
+	/// What this item is, for one placed by hand in the editor: the id of a kind in the <see cref="ItemCatalog"/>
+	/// (<c>cash</c>, <c>static_tab</c>, <c>static_raw</c>, <c>static_culture</c>, <c>haze_seed</c>, <c>haze_raw</c>,
+	/// <c>haze_vial</c>). The prefabs in Assets/items have theirs set. Ignored for an item the game drops.
+	/// </summary>
+	[Property, Group( "Item (placed by hand)" ), Title( "Kind" )]
+	public string Kind { get; set; } = "";
+
+	/// <summary>How many are in the stack, up to the kind's stack size. Not used for cash.</summary>
+	[Property, Group( "Item (placed by hand)" ), Range( 1, 256 )]
+	public int Count { get; set; } = 1;
+
+	/// <summary>How good the batch is, 0 to 100. Not used for cash.</summary>
+	[Property, Group( "Item (placed by hand)" ), Range( 0, 100 )]
+	public int Quality { get; set; } = 50;
+
+	/// <summary>For cash: the dollars it holds, 1 up to the wallet's cap.</summary>
+	[Property, Group( "Item (placed by hand)" )]
+	public long Amount { get; set; } = 100;
+
+	/// <summary>Replaces the kind's name, if set.</summary>
+	[Property, Group( "Item (placed by hand)" ), Title( "Name override" )]
+	public string NameOverride { get; set; } = "";
+
+	/// <summary>Replaces the kind's description, if set.</summary>
+	[Property, Group( "Item (placed by hand)" ), Title( "Description override" )]
+	public string DescriptionOverride { get; set; } = "";
+
+	/// <summary>
+	/// The id this item has in its scene while it is still as the map placed it (untouched, or only part picked up), else
+	/// empty. Host only. Once it is moved or frozen it is an ordinary saved item (<see cref="Adopt"/>).
+	/// </summary>
+	public string HandPlacedId { get; private set; } = "";
+
+	Rigidbody body;
+	float still;
+	Vector3 home;
+	bool homeKnown;
+	TimeSince sinceStart;
+
 	/// <summary>
 	/// The item as JSON, set by the host. Read it through <see cref="Data"/>.
 	/// </summary>
@@ -193,6 +235,116 @@ public sealed class WorldItem : Component, IInteractionHandler
 	protected override void OnStart()
 	{
 		InteractionSetup.EnsureOption( this, PickupId, "Pick up", "back_hand" );
+		sinceStart = 0;
+
+		// An item the game dropped has its data already (Set, before it starts). One with none was placed by hand.
+		if ( Game.IsPlaying && string.IsNullOrEmpty( ItemJson ) && !(Networking.IsActive && !Networking.IsHost) )
+			PlaceByHand();
+	}
+
+	/// <summary>
+	/// Make the item of a hand-placed object: what the registry says is left of it, or what the editor's fields say. One that
+	/// was taken before is removed from the scene; one with nothing valid set is disabled and logged. Host only.
+	/// </summary>
+	void PlaceByHand()
+	{
+		var id = GameObject.Id.ToString();
+		var decision = WorldItemRegistry.DecideHandPlaced( Scene, id );
+
+		if ( decision.Action == HandPlacedAction.Destroy )
+		{
+			GameObject.Destroy();
+			return;
+		}
+
+		var item = decision.Item;
+
+		if ( item is null )
+		{
+			var made = HandPlacedRules.Build( Kind, Count, Quality, Amount, NameOverride, DescriptionOverride );
+
+			if ( made.Item is null )
+			{
+				Log.Warning( $"World item '{GameObject.Name}' ({id}) placed by hand is disabled: {made.Error}." );
+				GameObject.Enabled = false;
+				return;
+			}
+
+			if ( made.Warning != "" )
+				Log.Warning( $"World item '{GameObject.Name}' ({id}): {made.Warning}." );
+
+			item = made.Item;
+		}
+
+		Set( item );
+		HandPlacedId = id;
+	}
+
+	/// <summary>
+	/// Whether this item is still as the map placed it.
+	/// </summary>
+	public bool IsHandPlaced => !string.IsNullOrEmpty( HandPlacedId );
+
+	/// <summary>
+	/// A hand-placed item that was moved, held or frozen becomes an ordinary saved item: the scene's own copy is recorded as
+	/// gone (so it is not made again) and this one is tracked like a drop, at its new place. Does nothing for any other
+	/// item. Host only.
+	/// </summary>
+	public void Adopt()
+	{
+		if ( !IsHandPlaced || Data is not { } item || Networking.IsActive && !Networking.IsHost )
+			return;
+
+		var id = HandPlacedId;
+		HandPlacedId = "";
+		WorldItemRegistry.MarkCollected( Scene, id );
+		WorldItemRegistry.Track( GameObject, item, ItemCatalog.WorldPrefabOf( item.Kind ) );
+	}
+
+	protected override void OnFixedUpdate()
+	{
+		if ( !IsHandPlaced )
+			return;
+
+		body ??= Components.Get<Rigidbody>( FindMode.EverythingInSelfAndDescendants );
+		var speed = body.IsValid() && body.MotionEnabled ? body.Velocity.Length : 0f;
+
+		if ( speed > 2f )
+		{
+			still = 0;
+			return;
+		}
+
+		still += Time.Delta;
+
+		if ( still < 0.5f )
+			return;
+
+		// Where it settled after the scene started is where the map has it; pushed from there, it becomes a saved item.
+		if ( !homeKnown )
+		{
+			if ( sinceStart > 1.5f )
+			{
+				home = WorldPosition;
+				homeKnown = true;
+			}
+
+			return;
+		}
+
+		if ( WorldPosition.Distance( home ) > 8f )
+			Adopt();
+	}
+
+	protected override void DrawGizmos()
+	{
+		// The scene view says what a hand-placed item will be, and what is wrong with it. Not for an item the game dropped.
+		if ( !string.IsNullOrEmpty( ItemJson ) )
+			return;
+
+		var text = HandPlacedRules.Label( Kind, Count, Quality, Amount, out var valid );
+		Gizmo.Draw.Color = valid ? new Color( 0.4f, 1f, 0.55f, 1f ) : new Color( 1f, 0.3f, 0.3f, 1f );
+		Gizmo.Draw.Text( text, new Transform( Vector3.Up * 14f ) );
 	}
 
 	protected override void OnUpdate()
