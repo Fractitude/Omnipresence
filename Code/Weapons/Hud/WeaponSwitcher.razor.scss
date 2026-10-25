@@ -92,11 +92,12 @@ WeaponSwitcher
 			padding: 6px 0 10px 0;
 		}
 
-		.icon
+		.weapon-icon
 		{
 			width: 80%;
 			height: 80px;
 			object-fit: contain;
+			flex-shrink: 0;
 		}
 
 		.name
