@@ -1,7 +1,7 @@
 {
   "Title": "Grenade",
   "Icon": null,
-  "MaxReserve": 20,
+  "MaxReserve": 4,
   "__references": [],
   "__version": 0
 }
