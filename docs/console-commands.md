@@ -83,6 +83,7 @@ Code: `Code/Health/`.
 | `kill` | Kill yourself. You watch your ragdoll, then respawn after a few seconds or on a click. |
 | `god` | Toggle invulnerability (host, cheats). |
 | `omni.spawnprotection <seconds>` | Seconds of invulnerability after spawning. Default 5, 0 turns it off. Saved. |
+| `omni.noclip 0|1` | Let every player fly through the world with the Noclip key (N); the host always may. Default 0. Saved. |
 
 ## Weapons
 

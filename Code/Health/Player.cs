@@ -1,3 +1,5 @@
+using Sandbox.Movement;
+
 namespace Sandbox;
 
 /// <summary>
@@ -41,6 +43,42 @@ public sealed class Player : Component, Component.IDamageable, IKillSource
 	public static Player FindForConnection( Connection c ) => Players.For<Player>( c );
 
 	public bool IsLocalPlayer => !IsProxy;
+
+	/// <summary>
+	/// Whether this player is flying through the world. Synced so proxies animate correctly.
+	/// </summary>
+	[Sync] public bool IsNoclipping { get; internal set; }
+
+	/// <summary>
+	/// Whether any player may turn noclip on, not only the host's own. Noclip is the player's own movement, so the host
+	/// cannot enforce this on a modified client.
+	/// </summary>
+	[ConVar( "omni.noclip", ConVarFlags.Replicated | ConVarFlags.Saved,
+		Help = "Let every player fly through the world with the Noclip key (the host always may)." )]
+	public static bool AllowNoclip { get; set; }
+
+	protected override void OnUpdate()
+	{
+		if ( Controller.IsValid() && Controller.Renderer.IsValid() )
+			Controller.Renderer.Set( "b_noclip", IsNoclipping );
+
+		if ( !IsLocalPlayer || Input.Suppressed || Input.MouseCursorVisible )
+			return;
+
+		// not from a seat
+		if ( Input.Pressed( "Noclip" ) && GetComponentInParent<ISitTarget>() is null )
+			ToggleNoclip();
+	}
+
+	void ToggleNoclip()
+	{
+		if ( !AllowNoclip && Connection.Local?.IsHost != true )
+			return;
+
+		var noclip = GetComponent<NoclipMoveMode>( true ) ?? AddComponent<NoclipMoveMode>();
+		noclip.Enabled = IsNoclipping ? false : true;
+		IsNoclipping = noclip.Enabled;
+	}
 
 	/// <summary>
 	/// The model's object under the player, the one the skinned renderer is on.
