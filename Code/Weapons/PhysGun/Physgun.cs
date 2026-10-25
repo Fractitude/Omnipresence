@@ -217,7 +217,7 @@ public partial class Physgun
 	[Sync] public Transform _holdTarget { get; set; }
 
 	Transform _lastAimTransform;
-	Transform CurrentAimTransform => HasOwner ? Owner.EyeTransform : _lastAimTransform;
+	Transform CurrentAimTransform => HasOwner ? (IsProxy ? Owner.EyeTransform : AimTransform) : _lastAimTransform;
 
 	bool _preventReselect = false;
 
@@ -288,7 +288,7 @@ public partial class Physgun
 
 			if ( !_state.IsValid() && HasOwner && !IsProxy )
 			{
-				var aim = Owner.EyeTransform;
+				var aim = CurrentAimTransform;
 				var tr = Scene.Trace.Ray( aim.Position, aim.Position + aim.Forward * Range )
 					.IgnoreGameObjectHierarchy( GameObject.Root )
 					.Run();
@@ -363,7 +363,7 @@ public partial class Physgun
 			{
 				if ( Input.Pressed( "attack1" ) )
 				{
-					var force = player.EyeTransform.Rotation.Forward * LaunchForce;
+					var force = CurrentAimTransform.Rotation.Forward * LaunchForce;
 					Launch( _state.Body, force );
 					PlayGravityLaunchSound();
 
@@ -487,8 +487,8 @@ public partial class Physgun
 			return;
 		}
 
-		FindGrabbedBody( out var sh, player.EyeTransform, isPulling );
-		if ( isPulling ) sh = UpdatePullLock( pullLock, sh, player.EyeTransform );
+		FindGrabbedBody( out var sh, CurrentAimTransform, isPulling );
+		if ( isPulling ) sh = UpdatePullLock( pullLock, sh, CurrentAimTransform );
 		_stateHovered = sh;
 
 		if ( isPulling && Input.Pressed( "attack2" ) )
@@ -496,7 +496,7 @@ public partial class Physgun
 
 		if ( sh.IsValid() && sh.Pulling && sh.Body.MotionEnabled )
 		{
-			var eyePosition = player.EyeTransform.Position;
+			var eyePosition = CurrentAimTransform.Position;
 			var closest = FindClosestPoint( sh.Body, eyePosition );
 			var distance = closest.Distance( eyePosition );
 
