@@ -34,10 +34,13 @@
 	gap: 8px;
 	padding-left: 12px;
 
+	// An icon from the Material Icons font, which the text font has no bullet in.
 	.bullet
 	{
 		flex-shrink: 0;
-		font-size: 14px;
+		align-self: center;
+		font-family: Material Icons;
+		font-size: 8px;
 		opacity: 0.9;
 	}
 
