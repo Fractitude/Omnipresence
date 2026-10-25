@@ -54,7 +54,6 @@ public sealed partial class CuratedVehicle : Component, IVehicleGauges
 	[
 		("B", "DRIVING MODE"),
 		("L", "LIGHTS"),
-		(Input.GetButtonOrigin( "Use" ), "EXIT"),
 	];
 	private readonly Vector3[] hubs = new Vector3[4];
 	private TimeSince sinceShift;

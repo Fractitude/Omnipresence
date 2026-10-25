@@ -39,7 +39,6 @@ public sealed partial class FourWheelVehicle : IVehicleGauges
 	[
 		(Input.GetButtonOrigin( "Run" ), "TURBO"),
 		(Input.GetButtonOrigin( "Flashlight" ), "LIGHTS"),
-		(Input.GetButtonOrigin( "Use" ), "EXIT"),
 	];
 
 	private void UpdateGauges() => VehicleHud.Update( this, ref _gaugesHud );
