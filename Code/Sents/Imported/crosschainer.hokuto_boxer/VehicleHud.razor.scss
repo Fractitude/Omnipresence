@@ -77,10 +77,17 @@ VehicleHud
 		align-items: center;
 		justify-content: center;
 
+		// Above the dial, so it does not draw over the 4 on the RPM scale.
 		.rpm-label
 		{
-			font-size: 11px;
-			opacity: 0.6;
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: -24px;
+			justify-content: center;
+			text-align: center;
+			font-size: 12px;
+			opacity: 0.7;
 		}
 
 		.speed
