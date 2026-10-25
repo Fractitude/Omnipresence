@@ -18,7 +18,11 @@
 				<div class="menu-list welcome">
 					<div class="section">
 						<div class="menu-heading">@( returning ? text.WelcomeBackHeading : text.WelcomeHeading )</div>
-						<div class="text">@text.Intro</div>
+						@* A line break in the text is a line break on the screen; an empty line is a gap. *@
+						@foreach ( var line in text.Intro.Replace( "\r", "" ).Split( '\n' ) )
+{
+							<div class="text line">@line</div>
+						}
 					</div>
 
 					<div class="section">

@@ -21,6 +21,12 @@
 	line-height: 1.4;
 	opacity: 0.9;
 
+	// An empty line keeps its height, so a blank line in the text is a gap.
+	&.line
+	{
+		min-height: 20px;
+	}
+
 	&.dim
 	{
 		opacity: 0.6;
