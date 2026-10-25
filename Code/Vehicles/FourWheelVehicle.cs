@@ -289,5 +289,6 @@ public sealed partial class FourWheelVehicle : Component, IPlayerControllable
 
 		PoseRig();
 		UpdateDriverHands();
+		UpdateGauges();
 	}
 }

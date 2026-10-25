@@ -1,0 +1,113 @@
+@using Sandbox
+@using Sandbox.UI
+@using System
+@using System.Globalization
+@namespace Sandbox
+@inherits PanelComponent
+
+<root>
+	@if ( Source is { GaugesVisible: true } )
+	{
+		var maxRpm = Math.Max( 1000, Source.GaugeMaxRpm );
+		var rpmFraction = Math.Clamp( Source.GaugeRpm / maxRpm, 0, 1 );
+		var mode = Source.GaugeMode;
+
+		<div class="speedometer @( rpmFraction >= .9f ? "at-redline" : "" )">
+			<svg class="speedometer-dial" src="drift_district/ui/speedometer-dial.svg" />
+			@for ( var start = 135f; start < 135 + rpmFraction * 270; start += SliceDegrees )
+			{
+				<div class="rpm-active-sector" style="@SectorStyle( start, Math.Min( 135 + rpmFraction * 270, start + SliceDegrees ) )"></div>
+			}
+			@for ( var i = 0; i <= (int)(maxRpm / 1000); i++ )
+			{
+				var fraction = i * 1000 / maxRpm;
+				var angle = 135 + fraction * 270;
+				<div class="rpm-tick @( fraction >= .9f ? "redline" : "" )" style="@ArcStyle( angle )"></div>
+				<label class="rpm-number @( fraction >= .9f ? "redline-text" : "" )" style="@PointStyle( angle, 84.24 )">@i</label>
+			}
+			<div class="speed-reading">
+				<label class="rpm-label">RPM ×1000</label>
+				<label class="speed">@Math.Round( Source.GaugeSpeed )</label>
+				<label class="speed-unit">KM/H</label>
+				<label class="gear">@Source.GaugeGear</label>
+			</div>
+			@if ( mode is not null )
+			{
+				<label class="handling-label">@mode</label>
+			}
+			<div class="driving-prompts">
+				@foreach ( var (key, label) in Source.GaugePrompts )
+				{
+					<div><label class="key">@key</label><label>@label</label></div>
+				}
+			</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The vehicle the gauges read from. Not a property: an interface can't be one, and <see cref="Update"/> sets it.
+	/// </summary>
+	public IVehicleGauges Source { get; set; }
+
+	/// <summary>
+	/// Keeps a vehicle's speedometer: makes the HUD object while its driver is this machine's player and removes it when
+	/// they get out. Call it from the vehicle's <c>OnUpdate</c> with the field that holds the object.
+	/// </summary>
+	public static void Update( IVehicleGauges vehicle, ref GameObject hud )
+	{
+		if ( Application.IsDedicatedServer ) return;
+
+		if ( vehicle.GaugesVisible && !hud.IsValid() )
+		{
+			hud = new GameObject( true, "Vehicle driving HUD" ) { NetworkMode = NetworkMode.Never };
+			hud.Flags |= GameObjectFlags.NotSaved;
+			hud.Components.Create<ScreenPanel>().ZIndex = 20;
+			hud.Components.Create<VehicleHud>().Source = vehicle;
+		}
+		else if ( !vehicle.GaugesVisible && hud.IsValid() )
+		{
+			hud.Destroy();
+			hud = null;
+		}
+	}
+
+	static string Css( double value ) => value.ToString( "0.###", CultureInfo.InvariantCulture );
+
+	static string PointStyle( double angle, double radius ) =>
+		$"left: {Css( 151.2 + Math.Cos( angle * Math.PI / 180 ) * radius )}px; top: {Css( 151.2 + Math.Sin( angle * Math.PI / 180 ) * radius )}px;";
+
+	static string ArcStyle( double angle ) =>
+		$"{PointStyle( angle, 104.76 )} transform: translate(-50%, -50%) rotate({Css( angle )}deg);";
+
+	// The active part of the RPM scale is a band along the dial's outer ring, drawn as small quads (the polygon's four
+	// corners) so the edge follows the ring. Radii are fractions of the box, measured from the dial's picture; each
+	// slice is small enough that its straight edges look like the arc.
+	const float SliceDegrees = 6;
+	const double OuterRadius = 41.6;
+	const double InnerRadius = 40.2;
+
+	static string SectorStyle( double startAngle, double endAngle )
+	{
+		var start = startAngle * Math.PI / 180;
+		var end = endAngle * Math.PI / 180;
+		string P( double angle, double radius ) =>
+			$"{Css( 50 + Math.Cos( angle ) * radius )}% {Css( 50 + Math.Sin( angle ) * radius )}%";
+		return $"border-shape: polygon({P( start, OuterRadius )}, {P( end, OuterRadius )}, {P( end, InnerRadius )}, {P( start, InnerRadius )});";
+	}
+
+	protected override int BuildHash()
+	{
+		if ( Source is not { GaugesVisible: true } ) return 0;
+
+		var hash = HashCode.Combine( Math.Round( Source.GaugeSpeed ), Math.Round( Source.GaugeRpm / 25 ),
+			Source.GaugeGear, Source.GaugeMode );
+
+		foreach ( var (key, label) in Source.GaugePrompts )
+			hash = HashCode.Combine( hash, key, label );
+
+		return hash;
+	}
+}

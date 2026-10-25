@@ -1,6 +1,6 @@
-// The package's own stylesheet was not part of its published code, so this is written here to fit VehicleHud.razor:
-// a 302.4px dial (its centre is at 151.2px, which the tick and number positions assume), in Barlow Condensed (the
-// font files come with the package).
+// The driver's speedometer, for any vehicle (IVehicleGauges). It began as Hokuto Boxer's, whose published code had no
+// stylesheet, so this one is written to fit VehicleHud.razor: a 302.4px dial (its centre is at 151.2px, which the tick
+// and number positions assume), in Barlow Condensed (the font files are in Assets/fonts).
 
 VehicleHud
 {

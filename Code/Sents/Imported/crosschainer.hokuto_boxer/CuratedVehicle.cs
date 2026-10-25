@@ -6,7 +6,7 @@ namespace CuratedVehicles;
 
 /// <summary>A host-simulated car. Each SENT supplies its own authored stock assembly and tuning.</summary>
 [Title( "Vehicle by crosschainer" ), Category( "Vehicles" )]
-public sealed partial class CuratedVehicle : Component
+public sealed partial class CuratedVehicle : Component, IVehicleGauges
 {
 	[Property] public string CarId { get; set; }
 	[Property] public string DisplayName { get; set; }
@@ -41,6 +41,21 @@ public sealed partial class CuratedVehicle : Component
 	public bool LocalDriver => Driver.IsValid() && Driver.Network.IsOwner;
 	public float Speed => Body.IsValid() ? Body.Velocity.Length * 0.09144f : 0;
 	public bool Drift => Mode == 0;
+
+	// What the speedometer (Code/Vehicles/Hud) reads. Added when this was imported; the rest is the package's.
+	bool IVehicleGauges.GaugesVisible => LocalDriver;
+	float IVehicleGauges.GaugeSpeed => Speed;
+	float IVehicleGauges.GaugeRpm => Rpm;
+	float IVehicleGauges.GaugeMaxRpm => MaxRpm;
+	string IVehicleGauges.GaugeGear => Gear < 0 ? "R" : Gear == 0 ? "N" : Gear.ToString();
+	string IVehicleGauges.GaugeMode => Drift ? "DRIFT MODE" : "GRIP MODE";
+
+	IEnumerable<(string Key, string Label)> IVehicleGauges.GaugePrompts =>
+	[
+		("B", "DRIVING MODE"),
+		("L", "LIGHTS"),
+		(Input.GetButtonOrigin( "Use" ), "EXIT"),
+	];
 	private readonly Vector3[] hubs = new Vector3[4];
 	private TimeSince sinceShift;
 	private TimeSince sinceModeChange;

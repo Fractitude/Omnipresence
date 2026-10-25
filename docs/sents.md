@@ -46,6 +46,6 @@ system) needs that part ported first. Props and models with no code, and code th
 
 - `crosschainer.hokuto_boxer` (and `takeda_ascend`, same author, the same `CuratedVehicles` code): a driveable car.
   Its `VehicleSeat` is an engine `BaseChair`, which is itself a `Component.IPressable`, so the player's Use key sits in it
-  without our `Interactable`. `CuratedVehicle` creates its own speedometer (`VehicleHud.razor`) for the driver. The
-  package's stylesheet was not in its published code, so `VehicleHud.razor.scss` is ours. The dial picture and the
+  without our `Interactable`. `CuratedVehicle` implements `IVehicleGauges` (added by hand after the import) and so shows the game's own speedometer
+  (`Code/Vehicles/Hud/VehicleHud.razor`, shared with the buggy). The package's own HUD was not kept; running `sent_import` again would bring it back as a duplicate `VehicleHud`, so delete that copy. The dial picture and the
   sounds are assets of the package and come with it.

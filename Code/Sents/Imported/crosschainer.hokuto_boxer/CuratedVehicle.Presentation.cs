@@ -85,15 +85,8 @@ public sealed partial class CuratedVehicle
 		UpdateSmoke( dt );
 		UpdateAudio( dt );
 		UpdateBackfire( dt );
-		if ( LocalDriver && !hud.IsValid() )
-		{
-			hud = new GameObject( true, "Vehicle driving HUD" ) { NetworkMode = NetworkMode.Never };
-			hud.Flags |= GameObjectFlags.NotSaved;
-			var screen = hud.Components.Create<ScreenPanel>();
-			screen.ZIndex = 20;
-			hud.Components.Create<VehicleHud>().Vehicle = this;
-		}
-		else if ( !LocalDriver && hud.IsValid() ) { hud.Destroy(); hud = null; }
+		// The speedometer is this game's own (Code/Vehicles/Hud), fed by the IVehicleGauges members in CuratedVehicle.cs.
+		VehicleHud.Update( this, ref hud );
 	}
 
 	private void UpdateAudio( float dt )
