@@ -8,7 +8,7 @@ public partial class Npc
 	/// as before.
 	/// </summary>
 	[Property, Group( "Physics" )]
-	public float MaxPushMass { get; set; } = 300f;
+	public float MaxPushMass { get; set; } = 100f;
 
 	// The NPC body is a box this wide, and a little above the feet so a kerb doesn't count
 	private static readonly BBox BodyBounds = new( new Vector3( -14, -14, 12 ), new Vector3( 14, 14, 70 ) );
