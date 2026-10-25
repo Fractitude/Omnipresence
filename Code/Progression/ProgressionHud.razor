@@ -3,7 +3,7 @@
 @namespace Sandbox
 
 <root class="@( NaviInputCapture.Current is not null ? "seated" : "" )">
-	<div class="clock">@WorldClock.TimeOfDay <span class="date">@WorldClock.Day</span></div>
+	<div class="clock"><div class="time">@WorldClock.TimeOfDay</div><div class="date">@WorldClock.Day</div></div>
 	@if ( PlayerProgress.Local is { Loaded: true } progress )
 	{
 		<div class="level">Lv @progress.Level</div>
