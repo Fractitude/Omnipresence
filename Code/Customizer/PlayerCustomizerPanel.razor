@@ -182,8 +182,7 @@
 					<UIButton Text="Default Avatar" Icon="person" Tooltip="The clothing picked in the avatar menu" @onclick=@DefaultAvatar />
 					<UIButton Text="Undress" Icon="accessibility_new" @onclick=@Undress />
 					<div class="spacer"></div>
-					<UIButton Text="Revert" Icon="undo" Tooltip="Back to what you're wearing" @onclick=@Cancel />
-					<UIButton class="apply" Text="Apply" Icon="check" @onclick=@Apply />
+					<UIButton Text="Revert" Icon="undo" Tooltip="Back to what you wore when you opened this window" @onclick=@Revert />
 				</div>
 			</div>
 		</div>
@@ -298,6 +297,10 @@
 			Preview.SetOutfit( Draft, DraftColors );
 		}
 
+		// also after the window closed: nothing the player changed is lost
+		if ( _applyDirty && _sinceChange > ApplyDelay )
+			Apply();
+
 		UpdateWorkshopSearch();
 	}
 
@@ -306,10 +309,13 @@
 		Presets = OutfitPresets.Load();
 		_loadedPreset = null;
 		BuildCatalog();
+		// what Revert goes back to
 		_worn = Customizer.GetCurrentOutfit();
 		_wornColors = Customizer.GetCurrentColors();
 		DraftColors = OutfitColors.Copy( _wornColors );
+		_resetting = true;
 		SetDraft( Copy( _worn ), false );
+		_resetting = false;
 	}
 
 	void SetDraft( ClothingContainer outfit, bool isDefault )
@@ -319,6 +325,23 @@
 		_draftIsDefault = isDefault;
 		Preview?.SetOutfit( Draft, DraftColors );
 		_revision++;
+		QueueApply();
+	}
+
+	// Every change is applied and saved at once (a moment after the last one, so dragging a color is one request).
+	bool _applyDirty;
+	bool _resetting;
+	RealTimeSince _sinceChange;
+
+	const float ApplyDelay = 0.1f;
+
+	void QueueApply()
+	{
+		if ( _resetting )
+			return;
+
+		_applyDirty = true;
+		_sinceChange = 0;
 	}
 
 	static ClothingContainer Copy( ClothingContainer outfit ) => ClothingContainer.CreateFromJson( outfit.Serialize() );
@@ -593,6 +616,7 @@
 		_draftIsDefault = false;
 		Preview?.SetColors( DraftColors );
 		_revision++;
+		QueueApply();
 	}
 
 	void ResetColor( string key )
@@ -691,6 +715,8 @@
 
 	void Apply()
 	{
+		_applyDirty = false;
+
 		if ( !Customizer.IsValid() ) return;
 
 		if ( _draftIsDefault )
@@ -698,19 +724,15 @@
 		else
 			Customizer.ApplyOutfit( Draft, DraftColors );
 
-		// stays open: what was just applied is what Cancel goes back to
-		_worn = Copy( Draft );
-		_wornColors = OutfitColors.Copy( DraftColors );
 	}
 
-	// Closes without applying: what was not applied is dropped, like Escape.
 	void Close()
 	{
 		if ( Customizer.IsValid() )
 			Customizer.IsOpen = false;
 	}
 
-	void Cancel()
+	void Revert()
 	{
 		DraftColors = OutfitColors.Copy( _wornColors );
 		SetDraft( Copy( _worn ), false );
