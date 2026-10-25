@@ -55,6 +55,7 @@ system) needs that part ported first. Props and models with no code, and code th
   and explodes on its target. It used sandbox's `Player`; those uses were changed by hand to the engine's `PlayerController` (eyes) and our
   `PlayerHealth`, so a new import of it needs the same edits.
 - `gmk.aura`: a weapon (`AuraWeapon` on the engine's weapon base; click toggles the aura, which heals the holder and throws things away). Its sandbox `Player` uses became `PlayerController` and `PlayerHealth`, and `OnPrimaryDown` (an upstream hook not ported) became an empty `PrimaryAttack`.
+- `hl2npcs.metrocop` (and probably `combine_soldier`, `combine_elite`, `manhack`, same author and code): a Half-Life 2 Metro Police NPC (`CombineNpc`, 18 files). Edits made by hand after the import: sandbox's `Player` became `PlayerController`, its health became `PlayerHealth`, `TaskStatus` is aliased to `Sandbox.Npcs.TaskStatus` (it clashes with `System.Threading.Tasks`), and the kill feed call was removed. A metrocop spawned before the import stays broken (`AnimationLayer` NullReference, its `Npc` is a missing component): delete it and spawn a new one.
 
 ### Known not working
 
