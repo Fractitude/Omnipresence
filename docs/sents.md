@@ -54,6 +54,7 @@ system) needs that part ported first. Props and models with no code, and code th
 - `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at
   and explodes on its target. It used sandbox's `Player`; those uses were changed by hand to the engine's `PlayerController` (eyes) and our
   `PlayerHealth`, so a new import of it needs the same edits.
+- `gmk.aura`: a weapon (`AuraWeapon` on the engine's weapon base; click toggles the aura, which heals the holder and throws things away). Its sandbox `Player` uses became `PlayerController` and `PlayerHealth`, and `OnPrimaryDown` (an upstream hook not ported) became an empty `PrimaryAttack`.
 
 ### Known not working
 
