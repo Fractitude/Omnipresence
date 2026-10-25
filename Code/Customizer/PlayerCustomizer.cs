@@ -81,7 +81,7 @@ public sealed class PlayerCustomizer : Component
 	/// <summary>
 	/// The key that opens the menu, as shown to the player.
 	/// </summary>
-	public static string OpenKeyName => Input.GetButtonOrigin( OpenAction ) ?? "O";
+	public static string OpenKeyName => Input.GetButtonOrigin( OpenAction ) ?? "TAB";
 
 	const string OpenAction = "Customizer";
 

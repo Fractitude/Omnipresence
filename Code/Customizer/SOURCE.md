@@ -8,7 +8,7 @@ nothing here. What changed when it was brought in:
 
 - Namespace `Zontax.Addons` is `Sandbox`. The SCP-294 vending machine and the example entity in the same package were not kept.
 - It is no longer a spawnable entity: `PlayerCustomizer` (the logic) and `PlayerCustomizerPanel` (the window) are HUD pieces
-  (`Hud.cs`), opened with the `Customizer` input (O) or the `customize` command.
+  (`Hud.cs`), opened with the `Customizer` input (Tab) or the `customize` command.
 - The outfit is sent by `Player.BroadcastOutfit` (`Code/Health/Player.Outfit.cs`) on the player's own object, not by the entity.
 - The sandbox game's menu bar, spawn menu, notices and `Ownable` are gone; the Settings tab only has "restore last outfit".
 - The widgets it draws with (`UIButton`, `UIDropdown`, `UIModal`, ...) and `Theme.scss` are the sandbox game's
