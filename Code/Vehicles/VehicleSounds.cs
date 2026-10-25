@@ -159,7 +159,22 @@ public sealed class VehicleSounds : Component
 	/// </summary>
 	[Property, Group( "Tyres" )] public SoundEvent SkidSound { get; set; }
 
+	/// <summary>
+	/// How loud everything this vehicle plays is, on top of each sound's own volume: engine, tyres, crashes and
+	/// backfires. Set to sit near the Hokuto Boxer sent, whose engine is far quieter than the recordings are.
+	/// </summary>
+	[Property, Group( "Mix" ), Range( 0, 1 )] public float Volume { get; set; } = 0.3f;
+
 	public VehicleSoundState State => _state;
+
+	private SoundHandle PlaySound( SoundEvent sound, Vector3 position )
+	{
+		var handle = Sound.Play( sound, position );
+		if ( handle.IsValid() )
+			handle.Volume = Volume;
+
+		return handle;
+	}
 
 	private const float SkidThreshold = 10.0f;
 
@@ -477,7 +492,7 @@ public sealed class VehicleSounds : Component
 			return false;
 
 		if ( hit.Sound is not null )
-			Sound.Play( hit.Sound, WorldPosition );
+			PlaySound( hit.Sound, WorldPosition );
 
 		return true;
 	}
@@ -507,7 +522,7 @@ public sealed class VehicleSounds : Component
 			if ( SkidSound is not null )
 			{
 				_skidSound?.Stop( 0.1f );
-				_skidSound = skidding ? Sound.Play( SkidSound, WorldPosition ) : null;
+				_skidSound = skidding ? PlaySound( SkidSound, WorldPosition ) : null;
 			}
 		}
 
@@ -528,7 +543,7 @@ public sealed class VehicleSounds : Component
 		if ( sound is null ) return;
 
 		_stateSoundEvent = sound;
-		_stateSound = Sound.Play( sound, WorldPosition );
+		_stateSound = PlaySound( sound, WorldPosition );
 		if ( _stateSound.IsValid() )
 		{
 			_stateSound.Parent = GameObject;
@@ -546,7 +561,7 @@ public sealed class VehicleSounds : Component
 	private void PlayOneShot( SoundEvent sound )
 	{
 		if ( sound is null ) return;
-		Sound.Play( sound, WorldPosition );
+		PlaySound( sound, WorldPosition );
 	}
 
 	/// <summary>
@@ -600,7 +615,7 @@ public sealed class VehicleSounds : Component
 	{
 		var origin = Exhaust.IsValid() ? Exhaust.WorldPosition : WorldPosition;
 		if ( BackfireSound is not null )
-			Sound.Play( BackfireSound, origin );
+			PlaySound( BackfireSound, origin );
 
 		if ( !BackfireEffect.IsValid() || !Exhaust.IsValid() ) return;
 
