@@ -58,5 +58,4 @@ system) needs that part ported first. Props and models with no code, and code th
 
 ### Known not working
 
-- `sftatlas.claymoremine`: no code, only ActionGraphs compiled against the sandbox game (signals), which log errors from whatever
-  touches it (a drone's explosion shows them as `FixedUpdate on FpvDroneNpc`). It can't be imported; it needs sandbox's signal wiring ported.
+- `sftatlas.claymoremine`: the package has no code, only two ActionGraphs (on the prop's damage event and the trigger's enter event) that call `ClaymoreMine.ActivateMine`, a type its author never published. With the type missing, every touch logged `ActionGraph... Unable to resolve type binding` against whatever component was updating (the player's `WeaponInventory`, a drone's `FpvDroneNpc`). `Code/Sents/Ported/ClaymoreMine.cs` is a stand-in written from the prefab: it spawns the prefab's explosion and removes the mine. Any other sent whose graphs log this error is missing a type the same way: look for `"_type"` in its graphs (`Cloud.Load<ScriptedEntity>`, `Prefab.RootObject`).
