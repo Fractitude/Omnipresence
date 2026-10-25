@@ -11,10 +11,15 @@ namespace Sandbox;
 /// </remarks>
 public sealed class PlacedObjectSystem : GameObjectSystem<PlacedObjectSystem>
 {
-	/// <summary>Seconds after the game starts before the objects are made, so the map is up.</summary>
-	const float RestoreDelay = 1.5f;
+	/// <summary>How many saved things are made in one tick, so a long list does not hitch a frame. The first batch is made
+	/// on the first tick the scene is ready.</summary>
+	const int Batch = 50;
 
 	bool restored;
+	int total;
+	int batches;
+	float firstAt = -1f;
+	readonly HashSet<string> skip = new();
 	RealTimeSince sinceStart;
 	RealTimeSince sinceTick;
 
@@ -31,14 +36,27 @@ public sealed class PlacedObjectSystem : GameObjectSystem<PlacedObjectSystem>
 
 		if ( !restored )
 		{
-			if ( sinceStart < RestoreDelay )
+			// Not a fixed wait: the first tick the scene is ready (its maps loaded, something to stand on).
+			if ( !SceneReadiness.IsReady( Scene, sinceStart ) )
 				return;
 
-			restored = true;
-			var made = PlacedObjectRegistry.Restore( Scene );
+			var made = PlacedObjectRegistry.Restore( Scene, Batch, skip, out var attempted );
+			total += made;
+			batches++;
 
-			if ( made > 0 )
-				Log.Info( $"Placed objects: restored {made}" );
+			if ( made > 0 && firstAt < 0f )
+				firstAt = sinceStart;
+
+			// Fewer tried than a batch holds: nothing is left.
+			if ( attempted < Batch )
+			{
+				restored = true;
+
+				if ( total > 0 )
+					Log.Info(
+						$"Placed objects: restored {total} in {batches} tick(s)"
+						+ $", the first {firstAt * 1000f:0} ms and the last {sinceStart * 1000f:0} ms after the scene started" );
+			}
 
 			return;
 		}

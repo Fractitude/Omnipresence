@@ -120,7 +120,7 @@ host reads or writes it; clients just see the networked objects.
   Wired lies under the map in the same scene, and an item that falls out of the world is destroyed by the engine's
   out-of-bounds rule, which also forgets it. An object destroyed by anything else (not a pickup, not out of bounds) is
   not forgotten and comes back at the next start.
-- **Restore.** One second after play starts on the host, `WorldItemSystem` calls `WorldItemRegistry.Restore( scene )`: for
+- **Restore.** On the first host tick the scene is ready (`SceneReadiness`: every `MapInstance` in it has loaded and there is something to stand on, a map or a collider; it gives up waiting after 3 s), `WorldItemSystem` calls `WorldItemRegistry.Restore( scene, 50, ... )`, and again each tick until nothing is left, 50 per tick so a long list does not hitch a frame (it used to wait a fixed second). Measured on the test data (130 items): first batch 206 ms after the system started, last (the third) 261 ms. Objects are made at their saved transform, no floor trace; a failed entry is skipped for the rest of the session. For
   each entry whose `Scene` is this scene and whose id is not already live (`WorldItemKeeper.ItemId`), it calls
   `WorldItem.Spawn` with the saved item, position and rotation, zero velocity and the saved id: the same prefab choice and
   fallback as a drop, then the rigidbody wakes and settles at (or just above) where it lay. A second call, or a hot

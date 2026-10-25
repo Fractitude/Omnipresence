@@ -291,8 +291,18 @@ public static class PlacedObjectRegistry
 	/// alone, so calling this twice, or after a hot reload, never duplicates anything. Returns how many were made. Host
 	/// only.
 	/// </summary>
-	public static int Restore( Scene scene )
+	public static int Restore( Scene scene ) => Restore( scene, int.MaxValue, new HashSet<string>(), out _ );
+
+	/// <summary>
+	/// <see cref="Restore(Scene)"/> in batches: at most <paramref name="max"/> entries are tried in this call.
+	/// <paramref name="skip"/> holds the ids that could not be made (not tried again; the call adds to it).
+	/// <paramref name="attempted"/> is how many were tried; fewer than <paramref name="max"/> means nothing is left. Returns
+	/// how many were made.
+	/// </summary>
+	public static int Restore( Scene scene, int max, HashSet<string> skip, out int attempted )
 	{
+		attempted = 0;
+
 		if ( !scene.IsValid() || Networking.IsActive && !Networking.IsHost )
 			return 0;
 
@@ -300,15 +310,25 @@ public static class PlacedObjectRegistry
 		var live = scene.GetAllComponents<PlacedObject>().Select( x => x.ObjectId ).ToHashSet();
 		var made = 0;
 
-		foreach ( var record in Loaded.Objects.Where( x => x.Scene == key && !live.Contains( x.Id ) ).ToList() )
+		foreach ( var record in Loaded.Objects
+			         .Where( x => x.Scene == key && !live.Contains( x.Id ) && !skip.Contains( x.Id ) )
+			         .Take( max )
+			         .ToList() )
 		{
+			attempted++;
+
 			var go = Make( PlaceableCatalog.Find( record.Placeable ), record.Id, record.Owner, record.Position,
 				record.Angles.ToRotation(), scene, record.Frozen );
 
 			if ( go.IsValid() )
+			{
 				made++;
+			}
 			else
+			{
+				skip.Add( record.Id );
 				Log.Warning( $"Placed objects: could not restore {record.Placeable} ({record.Id})" );
+			}
 		}
 
 		return made;

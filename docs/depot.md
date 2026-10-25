@@ -10,7 +10,7 @@ cash and has them delivered.
 | **The shop** | `PlaceableShop.cs`, `Code/Apps/Depot/` | `Buy( buyer, id, now )` on the host: the order is made first, then `Transactions.Pay` to `depot`; a failed payment takes the order back. The app is Shared like Hush, works at home with the network on, and sends an object id only. |
 | **The id** | `PlacedObject.cs` | A component with a permanent `ObjectId` (synced from the host). `PlacedObject.IdOf( this )` is what `StorageBox.BoxId` and `GrowTray.TrayId` use: a bought object's id, else its object id (scene-placed objects keep the id they always had). |
 | **The registry** | `PlacedObjectRegistry.cs`, `PlacedObjectRules.cs` | `placed_objects.json` in the data folder (`placed_objects_test.json` under `progress_test_data`). Objects: id, placeable, buyer, scene, position, angles. Deliveries: id, buyer, arrival time. Written 3 s after the last change, atomically (`FileProgressStore.WriteSafely`). |
-| **The system** | `PlacedObjectSystem.cs` | Host only. Restores the scene's objects 1.5 s after start (by id, so never twice), makes due deliveries arrive once a second, tells buyers, saves. |
+| **The system** | `PlacedObjectSystem.cs` | Host only. Restores the scene's objects on the first tick the scene is ready (`SceneReadiness`, in batches of 50; about 200 ms after the system starts, where it used to wait 1.5 s), by id so never twice, makes due deliveries arrive once a second, tells buyers, saves. |
 | **The spot** | `DeliverySpot.cs` | Where a delivery lands. |
 
 ## Delivery

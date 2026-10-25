@@ -268,8 +268,18 @@ public static class WorldItemRegistry
 	/// Make the saved items of this scene again, at their saved places. An item already in the scene (by id) is left alone,
 	/// so calling this twice, or after a hot reload, never duplicates anything. Returns how many were made. Host only.
 	/// </summary>
-	public static int Restore( Scene scene )
+	public static int Restore( Scene scene ) => Restore( scene, int.MaxValue, new HashSet<string>(), out _ );
+
+	/// <summary>
+	/// <see cref="Restore(Scene)"/> in batches: at most <paramref name="max"/> entries are tried in this call, so a long list
+	/// does not make one frame hitch. <paramref name="skip"/> holds the ids that could not be made (they are not tried again
+	/// and the call adds to it). <paramref name="attempted"/> is how many were tried; fewer than <paramref name="max"/> means
+	/// nothing is left. Returns how many were made.
+	/// </summary>
+	public static int Restore( Scene scene, int max, HashSet<string> skip, out int attempted )
 	{
+		attempted = 0;
+
 		if ( !scene.IsValid() || Networking.IsActive && !Networking.IsHost )
 			return 0;
 
@@ -277,15 +287,25 @@ public static class WorldItemRegistry
 		var live = scene.GetAllComponents<WorldItemKeeper>().Select( x => x.ItemId ).ToHashSet();
 		var made = 0;
 
-		foreach ( var record in Loaded.Items.Where( x => x.Scene == key && !live.Contains( x.Id ) ).ToList() )
+		foreach ( var record in Loaded.Items
+			         .Where( x => x.Scene == key && !live.Contains( x.Id ) && !skip.Contains( x.Id ) )
+			         .Take( max )
+			         .ToList() )
 		{
+			attempted++;
+
 			var go = WorldItem.Spawn( record.Item.Clone(), record.Position, record.Angles.ToRotation(), Vector3.Zero,
 				record.Id, record.Frozen );
 
 			if ( go.IsValid() )
+			{
 				made++;
+			}
 			else
+			{
+				skip.Add( record.Id );
 				Log.Warning( $"World items: couldn't restore {record.Item.Name} ({record.Id})" );
+			}
 		}
 
 		return made;
