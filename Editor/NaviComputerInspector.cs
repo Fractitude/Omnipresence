@@ -6,7 +6,7 @@ namespace Omnipresence.Editor;
 /// so none of the three components has to be opened. Whether a section is open is remembered between sessions.
 /// </summary>
 [CustomEditor( typeof( NaviComputer ) )]
-public sealed class NaviComputerInspector : ComponentEditorWidget
+public sealed partial class NaviComputerInspector : ComponentEditorWidget
 {
 	readonly List<Section> sections = [];
 
@@ -78,6 +78,20 @@ public sealed class NaviComputerInspector : ComponentEditorWidget
 
 			return Host( sheet );
 		} );
+
+		var hardware = computerObject.GetProperty( nameof( NaviComputer.Hardware ) );
+
+		if ( hardware is not null )
+		{
+			Add( "Hardware", "memory", false, () => SerializedObject.IsMultipleTargets
+				? (Widget)new Label( "Several computers are selected. Select one computer to change its hardware.", this )
+				{
+					WordWrap = true,
+					Color = Hex( "#8a95a3" ),
+					MinimumHeight = 30,
+				}
+				: new HardwarePanel( this, computer, computerObject, hardware ) );
+		}
 
 		Add( "Seat and network", "event_seat", false, () => Sheet( computerObject,
 			nameof( NaviComputer.RequireSeat ), nameof( NaviComputer.SeatTimeout ), nameof( NaviComputer.NetworkRange ),
