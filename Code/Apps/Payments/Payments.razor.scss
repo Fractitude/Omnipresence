@@ -181,95 +181,282 @@ i
 	}
 }
 
-// The Exchange screen.
-.exchange-card
+// The Exchange screen: the venue's name beside the title, then the tabs, the card the amount is typed into, the deal
+// it makes and the button that makes it.
+.topbar .venue
+{
+	flex-grow: 1;
+	justify-content: flex-end;
+	font-size: 10px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	color: #6f7a8c;
+}
+
+.tabs
+{
+	flex-direction: row;
+	flex-shrink: 0;
+	gap: 3px;
+	padding: 3px;
+	border-radius: 10px;
+	background-color: #11161f;
+
+	.tab
+	{
+		flex-grow: 1;
+		justify-content: center;
+		padding: 5px 0;
+		border-radius: 8px;
+		font-size: 11px;
+		font-weight: 700;
+		color: #7d8798;
+		cursor: pointer;
+		transition: all 0.12s ease;
+
+		&:hover
+		{
+			color: #cfd8e6;
+		}
+
+		&.active
+		{
+			background-color: #3dd68c;
+			color: #08130d;
+		}
+	}
+}
+
+// Under the tabs: the card, the deal and the button. It scrolls rather than pushing the button out of the window,
+// which the Convert tab comes close to at this size.
+.exchange-body
+{
+	flex-direction: column;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-height: 0;
+	gap: 10px;
+	overflow-y: scroll;
+}
+
+.trade-card
 {
 	flex-direction: column;
 	flex-shrink: 0;
-	gap: 6px;
-	padding: 12px 14px;
+	gap: 8px;
+	padding: 9px 10px;
 	border-radius: 12px;
-	background-image: linear-gradient( 135deg, #1f6f5c 0%, #1b4a7a 60%, #3a2f7a 100% );
-	box-shadow: 0px 6px 18px rgba( 0, 0, 0, 0.45 );
+	background-color: #141a24;
+	border: 1px solid #202a3a;
 
-	.exchange-top
+	.trade-top
 	{
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
+		gap: 8px;
 	}
 
-	.exchange-name
-	{
-		font-size: 14px;
-		font-weight: 700;
-		color: white;
-	}
-
-	.exchange-badge
-	{
-		padding: 2px 6px;
-		border-radius: 6px;
-		background-color: rgba( 255, 255, 255, 0.16 );
-		font-size: 9px;
-		font-weight: 700;
-		letter-spacing: 1px;
-		text-transform: uppercase;
-		color: white;
-	}
-
-	.exchange-tagline
-	{
-		font-size: 11px;
-		color: rgba( 255, 255, 255, 0.78 );
-	}
-}
-
-.holdings
-{
-	flex-direction: row;
-	gap: 8px;
-	flex-shrink: 0;
-
-	.holding
-	{
-		flex-direction: column;
-		flex-grow: 1;
-		gap: 2px;
-		padding: 8px 10px;
-		border-radius: 10px;
-		background-color: #141a24;
-		border: 1px solid #202a3a;
-	}
-
-	.holding-label
+	.entry-caption
 	{
 		font-size: 10px;
 		letter-spacing: 1px;
 		text-transform: uppercase;
 		color: #6f7a8c;
 	}
+}
 
-	.holding-value
+.available
+{
+	flex-shrink: 0;
+	font-size: 10px;
+	color: #6f7a8c;
+}
+
+// The two-way switch beside the amount: which currency the number is in.
+.unit-toggle
+{
+	flex-direction: row;
+	flex-shrink: 0;
+	gap: 2px;
+	padding: 2px;
+	border-radius: 8px;
+	background-color: #0a0d12;
+	border: 1px solid #202a3a;
+
+	.unit
 	{
-		flex-direction: row;
-		align-items: center;
-		gap: 4px;
-		font-size: 15px;
+		padding: 2px 7px;
+		border-radius: 6px;
+		font-size: 10px;
 		font-weight: 700;
-		color: white;
+		color: #7d8798;
+		cursor: pointer;
 
-		.ticker
+		&:hover
 		{
-			font-size: 10px;
+			color: #cfd8e6;
+		}
+
+		&.on
+		{
+			background-color: rgba( 61, 214, 140, 0.18 );
+			color: #6ee7a9;
 		}
 	}
 }
 
-.rate-line
+// A currency pill, on the Convert rows: the one picked, and the one it turns into.
+.picker
 {
-	font-size: 11px;
+	flex-direction: row;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 7px;
+	border-radius: 14px;
+	background-color: #0a0d12;
+	border: 1px solid #202a3a;
+	cursor: pointer;
+
+	.picker-name
+	{
+		font-size: 11px;
+		font-weight: 700;
+		color: #e3e8ef;
+	}
+
+	i
+	{
+		font-size: 14px;
+		color: #6f7a8c;
+	}
+
+	&:hover
+	{
+		border-color: #3dd68c;
+	}
+
+	// The second row's pill is what the first one turns into, not something to press.
+	&.static
+	{
+		padding-left: 8px;
+		border-color: transparent;
+		background-color: transparent;
+		cursor: default;
+
+		&:hover
+		{
+			border-color: transparent;
+		}
+	}
+}
+
+.swap
+{
+	flex-shrink: 0;
+	justify-content: center;
+	align-items: center;
 	color: #6f7a8c;
+	font-size: 16px;
+	cursor: pointer;
+
+	&:hover
+	{
+		color: #3dd68c;
+	}
+}
+
+.amount-row
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 0;
+	flex-shrink: 0;
+
+	.sign
+	{
+		flex-shrink: 0;
+		font-size: 24px;
+		font-weight: 700;
+		color: #3dd68c;
+	}
+
+	.amount
+	{
+		flex-grow: 1;
+		font-size: 26px;
+		font-weight: 700;
+		color: white;
+	}
+
+	.figure
+	{
+		font-size: 26px;
+		font-weight: 700;
+		color: #cfd8e6;
+	}
+
+	.ticker
+	{
+		font-size: 12px;
+	}
+}
+
+.hint
+{
+	flex-shrink: 0;
+	padding: 0 2px;
+	font-size: 11px;
+	color: #8b95a7;
+}
+
+// What the deal costs: the rate, the exchange's cut and what comes back, one line each.
+.deal
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 3px;
+	padding: 7px 10px;
+	border-radius: 10px;
+	background-color: #11161f;
+
+	.deal-row
+	{
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	.deal-label
+	{
+		flex-shrink: 0;
+		font-size: 10px;
+		letter-spacing: 0.5px;
+		text-transform: uppercase;
+		color: #6f7a8c;
+	}
+
+	.deal-value
+	{
+		flex-shrink: 0;
+		font-size: 12px;
+		font-weight: 600;
+		color: #cfd8e6;
+
+		&.loss
+		{
+			color: #ff9b9b;
+		}
+
+		&.strong
+		{
+			font-weight: 700;
+			color: #6ee7a9;
+		}
+	}
 }
 
 .section

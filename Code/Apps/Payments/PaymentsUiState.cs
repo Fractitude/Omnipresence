@@ -15,7 +15,26 @@ public enum PaymentsScreen
 	Success,
 }
 
-/// <summary>What a payment to another player carries.</summary>
+/// <summary>
+/// What the Exchange screen is doing: buying Ethereum with dollars, selling it, or converting either way, with the
+/// direction chosen on the screen itself.
+/// </summary>
+public enum ExchangeTab
+{
+	/// <summary>Dollars in, Ethereum out.</summary>
+	Buy,
+
+	/// <summary>Ethereum in, dollars out.</summary>
+	Sell,
+
+	/// <summary>Either way round, picked on the screen.</summary>
+	Convert,
+}
+
+/// <summary>
+/// One of the two things the app moves: what a payment to another player carries, and what an exchange amount is typed
+/// in.
+/// </summary>
 public enum PaymentsCurrency
 {
 	/// <summary>Dollars.</summary>
@@ -76,15 +95,14 @@ public sealed record PaymentsUiState
 	/// <summary>What went wrong, or right, with the last attempt.</summary>
 	public string Notice { get; init; } = "";
 
+	/// <summary>Whether <see cref="Notice"/> is the exchange's good news rather than a refusal.</summary>
+	public bool NoticeGood { get; init; }
+
 	/// <summary>The exchange the Exchange screen deals with.</summary>
 	public string ExchangeName { get; init; } = "";
 
-	public string ExchangeTagline { get; init; } = "";
-
-	/// <summary>What selling and buying at that exchange cost, in a sentence.</summary>
-	public string SellRate { get; init; } = "";
-
-	public string BuyRate { get; init; } = "";
+	/// <summary>The Exchange screen; null on every other one.</summary>
+	public ExchangeView Exchange { get; init; }
 
 	/// <summary>The first letter of a name, for its avatar.</summary>
 	public static string InitialOf( string name ) =>
@@ -103,6 +121,53 @@ public sealed record PaymentsUiState
 public sealed record PayeeRow( string Id, string Name )
 {
 	public string Initial => PaymentsUiState.InitialOf( Name );
+}
+
+/// <summary>One of the quick buttons under the amount: what it says, and the key the view model reads it as.</summary>
+public sealed record QuickChip( string Label, string Key );
+
+/// <summary>
+/// The Exchange screen, worked out whole by <see cref="PaymentsViewModel"/>: the amount being typed, what it deals at
+/// the Government Exchange and the buttons for it. A record like the state around it, replaced whole on every change.
+/// </summary>
+public sealed record ExchangeView
+{
+	public ExchangeTab Tab { get; init; }
+
+	/// <summary>The currency the amount is typed in.</summary>
+	public PaymentsCurrency Unit { get; init; }
+
+	/// <summary>The currency that comes back: the other one.</summary>
+	public PaymentsCurrency To => Unit == PaymentsCurrency.Dollars ? PaymentsCurrency.Crypto : PaymentsCurrency.Dollars;
+
+	/// <summary>The digits typed so far.</summary>
+	public string Amount { get; init; } = "";
+
+	/// <summary>What the typed number is, such as "You pay".</summary>
+	public string EntryLabel { get; init; } = "";
+
+	/// <summary>How much of the typed currency can be dealt with, with its sign or ticker.</summary>
+	public string Available { get; init; } = "";
+
+	/// <summary>The rate before the exchange's cut.</summary>
+	public string Rate { get; init; } = "";
+
+	/// <summary>The cut, as a percentage and as money: "2% · -$2".</summary>
+	public string FeeText { get; init; } = "";
+
+	/// <summary>What comes back: as a figure for the big result row, and as an amount with its currency.</summary>
+	public string ResultFigure { get; init; } = "0";
+
+	public string ResultText { get; init; } = "";
+
+	/// <summary>A line about the amount: that there is nothing to deal with, or that it is more than there is.</summary>
+	public string Hint { get; init; } = "";
+
+	/// <summary>What the button at the bottom does.</summary>
+	public string ActionLabel { get; init; } = "";
+
+	/// <summary>The four quick buttons.</summary>
+	public IReadOnlyList<QuickChip> Quick { get; init; } = [];
 }
 
 /// <summary>

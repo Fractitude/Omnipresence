@@ -101,65 +101,143 @@
 			@ConfirmLabel
 		</div>
 	}
-	else if ( UiState.Screen == PaymentsScreen.Exchange )
+	else if ( UiState.Screen == PaymentsScreen.Exchange && UiState.Exchange is { } exchange )
 	{
+		var convert = exchange.Tab == ExchangeTab.Convert;
+
+		@* Three tabs over one card: the amount typed, and under it what it deals. Buying and selling say which *@
+		@* currency the number is in with a two-way switch beside it; converting says it with the currency pills of *@
+		@* its two rows, and shows what comes back in the second. *@
 		<div class="topbar">
 			<div class="back" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )><i>arrow_back</i></div>
 			<div class="title">Exchange</div>
+			<div class="venue">@UiState.ExchangeName</div>
 		</div>
 
-		<div class="exchange-card">
-			<div class="exchange-top">
-				<div class="exchange-name">@UiState.ExchangeName</div>
-				<div class="exchange-badge">Regulated</div>
-			</div>
-			<div class="exchange-tagline">@UiState.ExchangeTagline</div>
-		</div>
-
-		<div class="holdings">
-			<div class="holding">
-				<div class="holding-label">Dollars</div>
-				<div class="holding-value">@UiState.Balance</div>
-			</div>
-			<div class="holding">
-				<div class="holding-label">@PaymentsUiState.CryptoName</div>
-				<div class="holding-value">
-					<div class="figure">@UiState.Crypto</div>
-					<div class="ticker">@PaymentsUiState.CryptoUnit</div>
+		<div class="tabs">
+			@foreach ( var option in ExchangeTabs )
+			{
+				<div class="tab @( exchange.Tab == option ? "active" : "" )"
+				     @onclick=@( () => Navi.Act( PaymentsViewModel.ExchangeTabAction, option.ToString() ) )>
+					@option
 				</div>
-			</div>
+			}
 		</div>
 
-		<div class="section">
-			<div class="heading">Buy @PaymentsUiState.CryptoName</div>
-			<div class="rate-line">@UiState.BuyRate</div>
-			<div class="quick">
-				@foreach ( var value in BuyAmounts )
+		<div class="exchange-body">
+			<div class="trade-card">
+				<div class="trade-top">
+					@if ( convert )
+					{
+						<div class="picker" @onclick=@Swap>
+							<div class="picker-name">@CurrencyName( exchange.Unit )</div>
+							<i>swap_vert</i>
+						</div>
+					}
+					else
+					{
+						<div class="entry-caption">@exchange.EntryLabel</div>
+					}
+					<div class="available">@exchange.Available</div>
+				</div>
+
+				<div class="amount-row">
+					@if ( exchange.Unit == PaymentsCurrency.Dollars )
+					{
+						<div class="sign">$</div>
+					}
+					<TextEntry @ref=ExchangeEntry class="amount" Value=@( exchange.Amount ) Placeholder="0"
+					           MaxLength=@( 12 ) OnTextEdited=@ExchangeAmountEdited/>
+					@if ( exchange.Unit == PaymentsCurrency.Crypto )
+					{
+						<div class="ticker">@PaymentsUiState.CryptoUnit</div>
+					}
+					@if ( !convert )
+					{
+						<div class="unit-toggle">
+							@foreach ( var option in ExchangeUnits )
+							{
+								<div class="unit @( exchange.Unit == option ? "on" : "" )"
+								     @onclick=@( () => Navi.Act( PaymentsViewModel.ExchangeUnitAction, option.ToString() ) )>
+									@SignOf( option )
+								</div>
+							}
+						</div>
+					}
+				</div>
+
+				@if ( !convert )
 				{
-					<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.BuyAction, value ) )>
-						@( value == PaymentsViewModel.AllAmount ? "All" : $"${value}" )
+					<div class="quick">
+						@foreach ( var chip in exchange.Quick )
+						{
+							<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.QuickAction, chip.Key ) )>@chip.Label</div>
+						}
 					</div>
 				}
 			</div>
-		</div>
 
-		<div class="section">
-			<div class="heading">Sell @PaymentsUiState.CryptoName</div>
-			<div class="rate-line">@UiState.SellRate</div>
-			<div class="quick">
-				@foreach ( var value in SellAmounts )
+			@if ( convert )
+			{
+				<div class="swap" @onclick=@Swap><i>arrow_downward</i></div>
+
+				<div class="trade-card">
+					<div class="trade-top">
+						<div class="picker static"><div class="picker-name">@CurrencyName( exchange.To )</div></div>
+						<div class="available">after the fee</div>
+					</div>
+
+					<div class="amount-row">
+						<div class="figure">@exchange.ResultFigure</div>
+						@if ( exchange.To == PaymentsCurrency.Crypto )
+						{
+							<div class="ticker">@PaymentsUiState.CryptoUnit</div>
+						}
+					</div>
+				</div>
+
+				<div class="quick">
+					@foreach ( var chip in exchange.Quick )
+					{
+						<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.QuickAction, chip.Key ) )>@chip.Label</div>
+					}
+				</div>
+			}
+
+			@if ( exchange.Hint != "" )
+			{
+				<div class="hint">@exchange.Hint</div>
+			}
+
+			@* What the deal costs, on every tab: the rate, the cut, and — where the result is not already the big figure *@
+			@* of a row above — what comes back. *@
+			<div class="deal">
+				<div class="deal-row">
+					<div class="deal-label">Rate</div>
+					<div class="deal-value">@exchange.Rate</div>
+				</div>
+				<div class="deal-row">
+					<div class="deal-label">You lose</div>
+					<div class="deal-value loss">@exchange.FeeText</div>
+				</div>
+				@if ( !convert )
 				{
-					<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.SellAction, value ) )>
-						@( value == PaymentsViewModel.AllAmount ? "All" : value )
+					<div class="deal-row">
+						<div class="deal-label">You get</div>
+						<div class="deal-value strong">@exchange.ResultText</div>
 					</div>
 				}
 			</div>
-		</div>
 
-		@if ( UiState.Notice != "" )
-		{
-			<div class="notice ok">@UiState.Notice</div>
-		}
+			@if ( UiState.Notice != "" )
+			{
+				<div class="notice @( UiState.NoticeGood ? "ok" : "" )">@UiState.Notice</div>
+			}
+
+			<div class="button confirm" @onclick=@( () => Navi.Act( PaymentsViewModel.TradeAction ) )>
+				@exchange.ActionLabel
+			</div>
+		</div>
 	}
 	else
 	{
@@ -179,7 +257,7 @@
 			<div class="icon"><i>swap_horiz</i></div>
 			<div class="details">
 				<div class="peer">Exchange</div>
-				<div class="when">Buy or sell @PaymentsUiState.CryptoName</div>
+				<div class="when">Buy, sell or convert @PaymentsUiState.CryptoName</div>
 			</div>
 			<i class="go">chevron_right</i>
 		</div>
@@ -245,11 +323,14 @@
 @code
 {
 	static readonly string[] QuickAmounts = ["10", "50", "100", "500"];
-	static readonly string[] BuyAmounts = ["10", "50", "100", PaymentsViewModel.AllAmount];
-	static readonly string[] SellAmounts = ["10", "50", "100", PaymentsViewModel.AllAmount];
 
 	/// <summary>A property, not a static field: a hot reload keeps a static array of the assembly's own enum.</summary>
 	static PaymentsCurrency[] SendCurrencies => System.Enum.GetValues<PaymentsCurrency>();
+
+	/// <summary>The Exchange tabs and the currencies it deals in, for the same reason.</summary>
+	static ExchangeTab[] ExchangeTabs => System.Enum.GetValues<ExchangeTab>();
+
+	static PaymentsCurrency[] ExchangeUnits => [PaymentsCurrency.Dollars, PaymentsCurrency.Crypto];
 
 	/// <summary>
 	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
@@ -261,9 +342,12 @@
 		Navi.IsViewer ? Navi.GetState<PaymentsUiState>() ?? PaymentsUiState.Empty : ViewModel.UiState;
 
 	/// <summary>
-	/// The amount field. Plain view plumbing: what is typed goes to the host as it changes, and comes back in the state.
+	/// The amount fields of a payment and of the exchange. Plain view plumbing: what is typed goes to the host as it
+	/// changes, and comes back in the state.
 	/// </summary>
 	TextEntry AmountEntry { get; set; }
+
+	TextEntry ExchangeEntry { get; set; }
 
 	/// <summary>The confirm button says what it sends, so nobody sends Ethereum thinking they sent dollars.</summary>
 	string ConfirmLabel => UiState.Currency == PaymentsCurrency.Crypto
@@ -274,9 +358,7 @@
 
 	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
 
-	/// <summary>
-	/// Whole numbers only: anything else typed or pasted is dropped before the host hears of it.
-	/// </summary>
+	/// <summary>Whole numbers only: anything else typed or pasted is dropped before the host hears of it.</summary>
 	void AmountEdited( string text )
 	{
 		var digits = new string( text.Where( char.IsAsciiDigit ).ToArray() );
@@ -295,6 +377,29 @@
 		Navi.Act( PaymentsViewModel.AmountAction, digits );
 	}
 
+	void ExchangeAmountEdited( string text )
+	{
+		var digits = new string( text.Where( char.IsAsciiDigit ).ToArray() );
+
+		if ( digits != text && ExchangeEntry is { IsValid: true } )
+			ExchangeEntry.Text = digits;
+
+		Navi.Act( PaymentsViewModel.ExchangeAmountAction, digits );
+	}
+
+	/// <summary>The way round on Convert: there are only two currencies, so the other one is the answer.</summary>
+	void Swap()
+	{
+		var other = UiState.Exchange?.To ?? PaymentsCurrency.Dollars;
+		Navi.Act( PaymentsViewModel.ExchangeUnitAction, other.ToString() );
+	}
+
+	static string CurrencyName( PaymentsCurrency unit ) =>
+		unit == PaymentsCurrency.Dollars ? "Dollars" : PaymentsUiState.CryptoName;
+
+	static string SignOf( PaymentsCurrency unit ) =>
+		unit == PaymentsCurrency.Dollars ? "$" : PaymentsUiState.CryptoUnit;
+
 	public override void Tick()
 	{
 		base.Tick();
@@ -304,6 +409,11 @@
 
 		ViewModel.Tick();
 		Navi.Publish( ViewModel.UiState );
+
+		// The field keeps what was typed into it, so a quick button, a tab or a currency switch has to set it by hand.
+		if ( ViewModel.UiState.Exchange is { } exchange && ExchangeEntry is { IsValid: true }
+		                                          && ExchangeEntry.Text != exchange.Amount )
+			ExchangeEntry.Text = exchange.Amount;
 	}
 
 	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );

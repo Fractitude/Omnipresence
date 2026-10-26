@@ -15,7 +15,7 @@ The game has three currencies. Each belongs to a place, and credits never mix wi
 3. **Each currency is spent in its own world.** Cash buys real-world things (hardware, mail, posters). Credits buy Wired things. Crypto buys dark web things.
 4. **Credits never convert to anything.** No code path turns credits into cash or crypto, or the other way round.
 5. **Crypto and cash convert only through an exchange** (`Exchange`, `Code/Crime/Exchange.cs`), and which exchange you use is what it costs: the **Government Exchange**, in the Payments app, asks 2 percent to buy crypto and 5 percent to sell it, and pays at once; the **darknet Exchange**, in Hush, asks 4 and 8 and makes the dollars wait 2 minutes. The rate is one to one everywhere, and getting there and back always loses money. The terms are per venue in **`ExchangeCatalog`** (`Code/Wallet/ExchangeVenue.cs`); adding an exchange is one line there.
-6. **The Payments app moves dollars and crypto** between players, and changes either into the other at the Government Exchange. Hush changes money only at the darknet's.
+6. **The Payments app moves dollars and crypto** between players, and changes either into the other at the Government Exchange, in **Buy**, **Sell** and **Convert** tabs: an amount typed in dollars or in Ethereum (a switch beside it) or a quick amount (25, 50, 75 percent of the holding on Convert), the rate, the cut and the result always under it. Buy spends dollars, Sell spends Ethereum, and Convert is either way round, as its currency pills pick. Hush changes money only at the darknet's.
 7. **XP is separate.** XP and level come from either world and are not a currency. Hacking XP and hacking level are a second skill that only hacking puzzles feed.
 
 ## In code
