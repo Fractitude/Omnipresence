@@ -293,6 +293,22 @@ public static class SentImporter
 		if ( File.Exists( path ) )
 			return Same( File.ReadAllText( path ), document.Text ) ? Fate.Same : Fate.Edited;
 
+		// The folder was reorganised here (a file moved into another subfolder): that file is the package's, not a new one.
+		var moved = Directory.Exists( target )
+			? Directory.EnumerateFiles( target, Path.GetFileName( path ), SearchOption.AllDirectories ).FirstOrDefault()
+			: null;
+
+		if ( moved is not null )
+			return Same( File.ReadAllText( moved ), document.Text ) ? Fate.Same : Fate.Edited;
+
+		// The game has its own copy of this file, declaring the same types (a HUD piece it shares): that one stays.
+		var codeRoot = Path.Combine( Project.Current.GetRootPath(), "Code" );
+
+		if ( Directory.EnumerateFiles( codeRoot, Path.GetFileName( path ), SearchOption.AllDirectories )
+			    .Where( x => !x.StartsWith( importedRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase ) )
+			    .Any( x => DeclaresSameTypes( File.ReadAllText( x ), document.Text ) ) )
+			return Fate.Superseded;
+
 		// A library several sents carry (one author's shared vehicle code) is imported once. A second copy would
 		// declare the same types again, so it is left out, whether it is the same or was adapted in the first import.
 		if ( !Directory.Exists( importedRoot ) )
