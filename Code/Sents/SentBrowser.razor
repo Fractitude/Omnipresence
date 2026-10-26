@@ -141,6 +141,7 @@
 			if ( SentLocal.IsIntegrated( entry.Ident ) )
 			{
 				entries.Add( new ContextEntry( "integrated", "Integrated into project", "check_circle", false, () => { } ) );
+				entries.Add( new ContextEntry( "update", "Update imported code", "sync", true, () => Update( entry ) ) );
 				entries.Add( new ContextEntry( "remove", "Remove from project", "delete", true, () => ConfirmRemove( entry ) ) );
 			}
 			else
@@ -158,6 +159,12 @@
 			new ContextEntry( "yes", "Delete its files (keeps code other sents use)", "delete_forever", true, () => Remove( entry ) ),
 			new ContextEntry( "no", "Cancel", "close", true, () => { } ),
 		} );
+	}
+
+	static void Update( SentCatalog.Entry entry )
+	{
+		Log.Info( $"sents: updating the imported code of {entry.Ident}; the result is in the console." );
+		ConsoleSystem.Run( $"sent_import {entry.Ident} update" );
 	}
 
 	static void Remove( SentCatalog.Entry entry )
