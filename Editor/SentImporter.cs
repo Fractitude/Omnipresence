@@ -13,7 +13,8 @@ namespace Sandbox;
 /// Brings the code of a sent into this game. A sent that carries code (<c>IncludeCode</c>) was compiled against the
 /// sandbox game, so it cannot compile here and its components load as missing. Its source is inside the package the
 /// engine downloads, so <c>sent_import org.package</c> fetches the package if it is not there yet, writes the source to
-/// <c>Code/Sents/Imported/org.package/</c>, where the game compiles it like its own, and then says what did not compile
+/// <c>Code/Sents/Imported/org/package/</c> (<see cref="Sents.Folder"/>, so one author's sents sit together), where the
+/// game compiles it like its own, and then says what did not compile
 /// and what to do about it (<see cref="SentDiagnosis"/>). See docs/sents.md.
 /// <para>
 /// Safe to run again: the first run writes the files, and every later run only reports what the package has that the
@@ -94,7 +95,7 @@ public static class SentImporter
 		}
 
 		var importedRoot = Path.Combine( Project.Current.GetRootPath(), "Code", "Sents", "Imported" );
-		var target = Path.Combine( importedRoot, ident );
+		var target = Path.Combine( importedRoot, Sents.AuthorOf( ident ), Sents.PackageOf( ident ) );
 		var firstImport = !Directory.Exists( target );
 		var update = string.Equals( mode, "update", StringComparison.OrdinalIgnoreCase );
 
@@ -113,7 +114,7 @@ public static class SentImporter
 		var namespaces = NamespacesOf( documents );
 		await WriteManifest( target, ident, namespaces );
 
-		var summary = $"sent_import: {ident}: {written} file(s) written to Code/Sents/Imported/{ident}, "
+		var summary = $"sent_import: {ident}: {written} file(s) written to Code/Sents/Imported/{Sents.Folder( ident )}, "
 		              + $"{fates.Count( x => x.Fate == Fate.Same )} already there, "
 		              + $"{fates.Count( x => x.Fate == Fate.Shared )} shared with another import";
 

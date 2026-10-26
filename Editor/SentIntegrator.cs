@@ -9,9 +9,9 @@ namespace Sandbox;
 
 /// <summary>
 /// <c>sent_integrate org.package</c>: makes a workshop sent ours. Its code is brought in as <c>sent_import</c> does
-/// (<c>Code/Sents/Imported/&lt;ident&gt;/</c>), its prefab is saved as a file of the project
-/// (<c>Assets/sents/&lt;ident&gt;/&lt;name&gt;.prefab</c>, the name being the ident after the author's, component types
-/// named in full) and <c>source.json</c> beside it says
+/// (<c>Code/Sents/Imported/&lt;author&gt;/&lt;package&gt;/</c>), its prefab is saved as a file of the project
+/// (<c>Assets/sents/&lt;author&gt;/&lt;package&gt;/&lt;name&gt;.prefab</c>, the name being the ident after the author's,
+/// component types named in full) and <c>source.json</c> beside it says
 /// who made it and where its page is. From then on <c>spawn_sent</c> uses our copy and an update by the author changes
 /// nothing; we are free to edit the prefab and the code. See <see cref="SentLocal"/> for what still comes from the
 /// workshop (the assets).
@@ -77,7 +77,8 @@ public static class SentIntegrator
 			built = imported.Built ?? true;
 		}
 
-		var folder = Path.Combine( Project.Current.GetRootPath(), "Assets", "sents", ident );
+		var folder = Path.Combine( Project.Current.GetRootPath(), "Assets", "sents", Sents.AuthorOf( ident ),
+			Sents.PackageOf( ident ) );
 		var prefabFile = Path.Combine( folder, $"{SentLocal.PrefabName( ident )}.prefab" );
 		var wrote = !File.Exists( prefabFile );
 
@@ -95,7 +96,7 @@ public static class SentIntegrator
 		// The assets become files of the project too, so the workshop is not needed to see the sent.
 		await SentAssets.ImportAsync( ident );
 
-		Log.Info( $"sent_integrate: {ident}: {(wrote ? "prefab saved to" : "prefab already in")} Assets/sents/{ident}/ "
+		Log.Info( $"sent_integrate: {ident}: {(wrote ? "prefab saved to" : "prefab already in")} Assets/sents/{Sents.Folder( ident )}/ "
 		          + $"(source: {SentSource.Describe( package )})."
 		          + (built ? "" : " Its code does not build yet (see the report above): fix it, then spawn it.")
 		          + $" Try it with sent_test {ident}." );
@@ -144,7 +145,7 @@ public static class SentIntegrator
 			["workshopUpdated"] = package?.Updated.ToString( "yyyy-MM-dd" ),
 			["integrated"] = DateTime.Now.ToString( "yyyy-MM-dd" ),
 			["includesCode"] = entity.IncludeCode,
-			["code"] = entity.IncludeCode ? $"Code/Sents/Imported/{ident}/" : null,
+			["code"] = entity.IncludeCode ? $"Code/Sents/Imported/{Sents.Folder( ident )}/" : null,
 			["codeFile"] = code?.File,
 			["codeSha256"] = code?.Sha256,
 			["codeSize"] = code?.Size,
@@ -172,6 +173,7 @@ public static class SentIntegrator
 	public static int Provenance( string ident )
 	{
 		var root = Path.Combine( Project.Current.GetRootPath(), "Assets", "sents" );
+		ident = ident?.Trim().ToLowerInvariant();
 
 		if ( !Directory.Exists( root ) )
 		{
@@ -179,9 +181,10 @@ public static class SentIntegrator
 			return 0;
 		}
 
+		// Two levels: the author's folder, then the package's inside it.
 		IEnumerable<string> folders = string.IsNullOrWhiteSpace( ident )
-			? Directory.EnumerateDirectories( root )
-			: [Path.Combine( root, ident.Trim().ToLowerInvariant() )];
+			? Directory.EnumerateDirectories( root ).SelectMany( Directory.EnumerateDirectories )
+			: [Path.Combine( root, Sents.AuthorOf( ident ), Sents.PackageOf( ident ) )];
 
 		var written = 0;
 		var missing = new List<string>();
@@ -193,7 +196,7 @@ public static class SentIntegrator
 			if ( !File.Exists( file ) )
 			{
 				if ( !string.IsNullOrWhiteSpace( ident ) )
-					Log.Warning( $"sent_provenance: {Path.GetFileName( folder )} has no source.json: it is not integrated." );
+					Log.Warning( $"sent_provenance: {ident} has no source.json: it is not integrated." );
 
 				continue;
 			}

@@ -5,9 +5,9 @@ namespace Sandbox;
 
 /// <summary>
 /// <c>sent_remove org.package</c>: takes an integrated or imported sent out of the project again. Its prefab folder
-/// (<c>Assets/sents/&lt;ident&gt;/</c>) is only its own and goes whole. In its code folder
-/// (<c>Code/Sents/Imported/&lt;ident&gt;/</c>) a file stays if another import relies on it: a library one author's
-/// sents share is imported once, into the first sent's folder, and the later sents leave those files out
+/// (<c>Assets/sents/&lt;author&gt;/&lt;package&gt;/</c>) is only its own and goes whole. In its code folder
+/// (<c>Code/Sents/Imported/&lt;author&gt;/&lt;package&gt;/</c>) a file stays if another import relies on it: a library
+/// one author's sents share is imported once, into the first sent's folder, and the later sents leave those files out
 /// (<see cref="SentImporter"/>). So for every other import, the files its package has and its folder has not are the
 /// ones it needs from elsewhere, and a file here with such a name stays. This is read from the packages, not guessed
 /// from the code: a name test misses extension methods and namespaces. If another import's package is not downloaded
@@ -33,8 +33,10 @@ public static class SentRemover
 
 		var root = Project.Current.GetRootPath();
 		var importedRoot = Path.Combine( root, "Code", "Sents", "Imported" );
-		var prefabFolder = Path.Combine( root, "Assets", "sents", ident );
-		var codeFolder = Path.Combine( importedRoot, ident );
+		var authorName = Sents.AuthorOf( ident );
+		var packageName = Sents.PackageOf( ident );
+		var prefabFolder = Path.Combine( root, "Assets", "sents", authorName, packageName );
+		var codeFolder = Path.Combine( importedRoot, authorName, packageName );
 
 		if ( !Directory.Exists( prefabFolder ) && !Directory.Exists( codeFolder ) )
 		{
@@ -46,9 +48,9 @@ public static class SentRemover
 
 		if ( Directory.Exists( importedRoot ) )
 		{
-			foreach ( var other in Directory.GetDirectories( importedRoot ) )
+			foreach ( var other in ImportedFolders( importedRoot ) )
 			{
-				var otherIdent = Path.GetFileName( other );
+				var otherIdent = other.Ident;
 
 				if ( otherIdent.Equals( ident, StringComparison.OrdinalIgnoreCase ) )
 					continue;
@@ -64,7 +66,7 @@ public static class SentRemover
 
 				foreach ( var document in SentImporter.ReadDocuments( package ) )
 				{
-					var local = Path.Combine( other, document.Path.Replace( '/', Path.DirectorySeparatorChar ) );
+					var local = Path.Combine( other.Folder, document.Path.Replace( '/', Path.DirectorySeparatorChar ) );
 
 					if ( !File.Exists( local ) )
 						needed.Add( Path.GetFileName( document.Path ) );
@@ -90,6 +92,7 @@ public static class SentRemover
 			}
 
 			DeleteEmptyFolders( codeFolder );
+			DeleteIfEmpty( Path.GetDirectoryName( codeFolder ) );
 		}
 
 		if ( Directory.Exists( prefabFolder ) )
@@ -97,6 +100,7 @@ public static class SentRemover
 			removed += SentAssets.Remove( ident );
 			Directory.Delete( prefabFolder, true );
 			removed++;
+			DeleteIfEmpty( Path.GetDirectoryName( prefabFolder ) );
 			SentLocal.SetRemoved( ident, true );
 		}
 
@@ -105,7 +109,7 @@ public static class SentRemover
 		if ( kept.Count > 0 )
 		{
 			var names = kept.Select( x => Path.GetRelativePath( codeFolder, x ).Replace( '\\', '/' ) );
-			message += $"; kept {kept.Count} code file(s) that other sents use, still in Code/Sents/Imported/{ident}/: "
+			message += $"; kept {kept.Count} code file(s) that other sents use, still in Code/Sents/Imported/{Sents.Folder( ident )}/: "
 			           + string.Join( ", ", names );
 		}
 
@@ -121,4 +125,18 @@ public static class SentRemover
 		if ( !Directory.EnumerateFileSystemEntries( folder ).Any() )
 			Directory.Delete( folder );
 	}
+
+	// An author's folder goes with its last sent.
+	static void DeleteIfEmpty( string folder )
+	{
+		if ( folder is not null && Directory.Exists( folder ) && !Directory.EnumerateFileSystemEntries( folder ).Any() )
+			Directory.Delete( folder );
+	}
+
+	// Every imported sent's code folder under Code/Sents/Imported, with the ident its two folders make
+	// (crosschainer/hokuto_boxer is crosschainer.hokuto_boxer).
+	static IEnumerable<(string Ident, string Folder)> ImportedFolders( string importedRoot ) =>
+		Directory.GetDirectories( importedRoot )
+			.SelectMany( author => Directory.GetDirectories( author )
+				.Select( folder => ($"{Path.GetFileName( author )}.{Path.GetFileName( folder )}", folder) ) );
 }

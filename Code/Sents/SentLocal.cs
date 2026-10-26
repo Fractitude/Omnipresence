@@ -4,9 +4,10 @@ namespace Sandbox;
 
 /// <summary>
 /// A sent that was integrated into this project (<c>sent_integrate</c>, the Integrate entry of the Workshop Entities
-/// window): its prefab is a file of ours in <c>Assets/sents/&lt;ident&gt;/</c> and its code, if it has any, is in
-/// <c>Code/Sents/Imported/&lt;ident&gt;/</c>, so spawning it needs neither the workshop's prefab nor its code, and an
-/// update by the author changes nothing here. <c>source.json</c> beside the prefab says where it came from.
+/// window): its prefab is a file of ours in <c>Assets/sents/&lt;author&gt;/&lt;package&gt;/</c> and its code, if it has
+/// any, is in <c>Code/Sents/Imported/&lt;author&gt;/&lt;package&gt;/</c> (<see cref="Sents.Folder"/>), so spawning it
+/// needs neither the workshop's prefab nor its code, and an update by the author changes nothing here. <c>source.json</c>
+/// beside the prefab says where it came from.
 /// <para>
 /// What stays on the workshop are the sent's <b>assets</b> (models, materials, sounds): a package ships them compiled,
 /// without sources, so they cannot be kept as files of ours. They are mounted from the package when the sent is spawned
@@ -18,13 +19,13 @@ public static class SentLocal
 	/// <summary>
 	/// Where the prefab of an integrated sent lives, relative to <c>Assets/</c>.
 	/// </summary>
-	public static string PrefabPath( string ident ) => $"sents/{ident}/{PrefabName( ident )}.prefab";
+	public static string PrefabPath( string ident ) => $"sents/{Sents.Folder( ident )}/{PrefabName( ident )}.prefab";
 
 	/// <summary>
 	/// The file name of an integrated sent's prefab, without the extension: its ident without the author, so
 	/// <c>hl2npcs.metrocop</c> is <c>metrocop</c>.
 	/// </summary>
-	public static string PrefabName( string ident ) => ident[(ident.IndexOf( '.' ) + 1)..];
+	public static string PrefabName( string ident ) => Sents.PackageOf( ident );
 
 	/// <summary>
 	/// The integrated prefab of <paramref name="ident"/>, or null if it was not integrated (or the editor has not

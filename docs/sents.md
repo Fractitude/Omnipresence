@@ -21,7 +21,15 @@ Files in `Code/Sents/`, each with one job:
   next page loads when the list is scrolled near the bottom.
 - `SentLocal.cs`: the integrated sents (below): where their prefab is, and mounting their assets.
 - `Ported/`: types a sent needs and its author never published (`ClaymoreMine`, `Mineexplosion`).
-- `Imported/<ident>/`: the code of imported sents (below).
+- `Imported/<author>/<package>/`: the code of imported sents, one folder per author with the package's inside it (below).
+
+**Both trees are grouped by author**: `Code/Sents/Imported/<author>/<package>/` and `Assets/sents/<author>/<package>/`,
+where the author is the ident before its dot and the package after it (`Sents.AuthorOf`, `Sents.PackageOf`, and
+`Sents.Folder` for the pair, `crosschainer/hokuto_boxer`). Nothing stores an ident's folders any other way, so moving a
+sent by hand means moving both folders, its `source.json` field `code`, and the `__Prefab.Path` of every scene or prefab
+instance of its prefab (`home.scene` holds four; the `__Prefab.Id` is the prefab's GUID and does not change). A moved
+prefab is otherwise picked up by the editor's asset system on the next scan — until that happens a session that moved the
+files under it answers `SentLocal.Find` with nothing for the ones no open scene has reloaded.
 
 ## Integrating a sent (making it ours)
 
@@ -30,11 +38,11 @@ its code are the author's current ones. **Integrate** keeps a copy of both in th
 nothing here and we can edit it freely. Right-click a tile and choose *Integrate into project* (editor only), or run
 `sent_integrate org.package` (`Editor/SentIntegrator.cs`). It:
 
-1. imports the code if the sent has any (`sent_import`: `Code/Sents/Imported/<ident>/`, builds, reports errors);
-2. saves the prefab as `Assets/sents/<ident>/<name>.prefab` (the ident without its author, `metrocop` for `hl2npcs.metrocop`), with each component type named in full (`Hl2Metrocop.CombineNpc`), so
+1. imports the code if the sent has any (`sent_import`: `Code/Sents/Imported/<author>/<package>/`, builds, reports errors);
+2. saves the prefab as `Assets/sents/<author>/<package>/<name>.prefab` (the ident without its author, `metrocop` for `hl2npcs.metrocop`), with each component type named in full (`Hl2Metrocop.CombineNpc`), so
    a plain clone finds its types. It is only written if it is not there, so edits to it are never overwritten; delete it to
    take the workshop's again;
-3. writes `Assets/sents/<ident>/source.json`: title, **author**, **workshop page link**, the workshop version and date it was
+3. writes `Assets/sents/<author>/<package>/source.json`: title, **author**, **workshop page link**, the workshop version and date it was
    taken from, the date integrated, the code folder, namespaces, and the assets it still needs from the workshop. The code's
    `SentPackage.cs` carries a `// Source:` line with the same origin. Keep this for anything brought in.
 
@@ -112,7 +120,7 @@ package.facepunch.sandbox`, then `Missing Component`). The source is inside the 
 fix is to compile it as part of this game:
 
 1. `sent_import org.package` (editor console, `Editor/SentImporter.cs`) downloads the package if it is not there, and writes its source to
-   `Code/Sents/Imported/org.package/`, and the `SentPackage.cs` manifest. Files another import already has, unchanged, are
+   `Code/Sents/Imported/org/package/`, and the `SentPackage.cs` manifest. Files another import already has, unchanged, are
    skipped, because one author's sents often share a library (`takeda_ascend` shares all 14 files with Hokuto Boxer: nothing is
    written twice). It is safe to run again: a folder that exists gets only the manifest and a report of what the package has
    that the folder has not (`new`) or has changed (`edited`); `sent_import org.package update` also writes the new files. **A

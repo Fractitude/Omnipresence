@@ -60,7 +60,7 @@ public static class SentAssets
 		}
 
 		var root = Project.Current.GetRootPath();
-		var folder = Path.Combine( root, "Assets", "sents", ident );
+		var folder = Path.Combine( root, "Assets", "sents", Sents.AuthorOf( ident ), Sents.PackageOf( ident ) );
 		var sourceFile = Path.Combine( folder, "source.json" );
 
 		if ( !Directory.Exists( folder ) )
@@ -180,15 +180,16 @@ public static class SentAssets
 	{
 		var root = Project.Current.GetRootPath();
 		var sents = Path.Combine( root, "Assets", "sents" );
-		var own = ListOf( Path.Combine( sents, ident, "source.json" ) );
+		var ownFolder = Path.Combine( sents, Sents.AuthorOf( ident ), Sents.PackageOf( ident ) );
+		var own = ListOf( Path.Combine( ownFolder, "source.json" ) );
 		var others = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
 		if ( Directory.Exists( sents ) )
 		{
-			foreach ( var other in Directory.GetDirectories( sents ) )
+			foreach ( var folder in Directory.GetDirectories( sents ).SelectMany( Directory.GetDirectories ) )
 			{
-				if ( !string.Equals( Path.GetFileName( other ), ident, StringComparison.OrdinalIgnoreCase ) )
-					others.UnionWith( ListOf( Path.Combine( other, "source.json" ) ) );
+				if ( !string.Equals( folder, ownFolder, StringComparison.OrdinalIgnoreCase ) )
+					others.UnionWith( ListOf( Path.Combine( folder, "source.json" ) ) );
 			}
 		}
 

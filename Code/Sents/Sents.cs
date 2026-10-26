@@ -48,6 +48,24 @@ public static class Sents
 	public static bool IsIdent( string ident ) => !string.IsNullOrEmpty( ident ) && IdentPattern.IsMatch( ident );
 
 	/// <summary>
+	/// The author of a sent's ident, <c>crosschainer</c> of <c>crosschainer.hokuto_boxer</c>: the org's ident, the same
+	/// for everything they publish. An imported sent's folders are grouped under it.
+	/// </summary>
+	public static string AuthorOf( string ident ) => ident[..ident.IndexOf( '.' )];
+
+	/// <summary>
+	/// The package of a sent's ident, <c>hokuto_boxer</c> of <c>crosschainer.hokuto_boxer</c>: the sent's own name.
+	/// </summary>
+	public static string PackageOf( string ident ) => ident[(ident.IndexOf( '.' ) + 1)..];
+
+	/// <summary>
+	/// An ident as the folders an imported sent lives in, <c>crosschainer/hokuto_boxer</c>: the author's folder with the
+	/// package's inside it, so one author's sents sit together. Under <c>Code/Sents/Imported/</c> and
+	/// <c>Assets/sents/</c> alike.
+	/// </summary>
+	public static string Folder( string ident ) => $"{AuthorOf( ident )}/{PackageOf( ident )}";
+
+	/// <summary>
 	/// Spawns a sent from the cloud in front of you, e.g. <c>spawn_sent crosschainer.hokuto_boxer</c>.
 	/// </summary>
 	[ConCmd( "spawn_sent" )]
