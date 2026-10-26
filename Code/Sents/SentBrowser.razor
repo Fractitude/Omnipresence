@@ -138,12 +138,32 @@
 		// Integrating writes code and assets into the project, which only the editor can do.
 		if ( Application.IsEditor )
 		{
-			entries.Add( SentLocal.IsIntegrated( entry.Ident )
-				? new ContextEntry( "integrated", "Integrated into project", "check_circle", false, () => { } )
-				: new ContextEntry( "integrate", "Integrate into project", "download", true, () => Integrate( entry ) ) );
+			if ( SentLocal.IsIntegrated( entry.Ident ) )
+			{
+				entries.Add( new ContextEntry( "integrated", "Integrated into project", "check_circle", false, () => { } ) );
+				entries.Add( new ContextEntry( "remove", "Remove from project", "delete", true, () => ConfirmRemove( entry ) ) );
+			}
+			else
+				entries.Add( new ContextEntry( "integrate", "Integrate into project", "download", true, () => Integrate( entry ) ) );
 		}
 
 		ContextMenu.Show( MenuName, entry.Title, entries.ToArray() );
+	}
+
+	// Deleting files is not undone by the editor, so the menu asks once more.
+	static void ConfirmRemove( SentCatalog.Entry entry )
+	{
+		ContextMenu.Show( MenuName, $"Remove {entry.Title}?", new[]
+		{
+			new ContextEntry( "yes", "Delete its files (keeps code other sents use)", "delete_forever", true, () => Remove( entry ) ),
+			new ContextEntry( "no", "Cancel", "close", true, () => { } ),
+		} );
+	}
+
+	static void Remove( SentCatalog.Entry entry )
+	{
+		Log.Info( $"sents: removing {entry.Ident} from the project; the result is in the console." );
+		ConsoleSystem.Run( $"sent_remove {entry.Ident}" );
 	}
 
 	static void Integrate( SentCatalog.Entry entry )
