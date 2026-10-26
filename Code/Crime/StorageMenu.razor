@@ -15,8 +15,7 @@
 					<div class="column">
 						<div class="heading-row">
 							<div class="menu-heading">@( $"Your bag ({used}/{bag.SlotCount})" )</div>
-							<div class="menu-button compact" tooltip="The same kinds together, from the first slot"
-							     @onclick=@( () => SortBag() )>Sort</div>
+							<div class="menu-button compact" @onclick=@( () => SortBag() )>Sort</div>
 						</div>
 						<div @ref="bagGridRef" class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
 							@for ( var i = 0; i < bag.SlotCount; i++ )
@@ -52,8 +51,7 @@
 						{
 							<div class="heading-row">
 								<div class="menu-heading">@( $"{target.Title} ({target.ViewCount}/{target.Capacity})" )</div>
-								<div class="menu-button compact" tooltip="The same kinds together, from the first slot"
-								     @onclick=@( () => SortBox() )>Sort</div>
+								<div class="menu-button compact" @onclick=@( () => SortBox() )>Sort</div>
 							</div>
 							<div @ref="boxGridRef" class="grid" style="width: @( target.ColumnCount * (SlotSize + Gap) )px">
 								@for ( var i = 0; i < target.Capacity; i++ )

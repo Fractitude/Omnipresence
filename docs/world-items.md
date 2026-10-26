@@ -104,9 +104,11 @@ the bag keeps its quality). Use `CanMerge` or `PickupRules.Plan` for anything th
 The player's own Shift-combine (`StackRules.Plan`) still averages, because they chose it. `PlayerInventory.Add`, `AddItem`
 and the storage code do not top up stacks and were left as they were.
 
-A tidy (`InventorySort`, the **Sort** buttons of the Character menu's bag and of the storage window) puts together the
-stacks it may merge, on the same rule and only with the same quality, so it too never averages one; it groups the rest
-by kind and packs the grid from its first slot.
+A tidy (`InventorySort`, the **Sort** buttons of the Character menu's bag and of the storage window) only moves whole
+stacks unless the grid's `CombineStacksOnSort` is on (`PlayerInventory` for the bag, the box or cargo component for its
+grid; off by default). With it on, the tidy puts together the stacks it may merge, on the same rule and only with the
+same quality, so it too never averages one. Either way it groups the items by kind and packs the grid from its first
+slot.
 
 ## Saved between sessions
 

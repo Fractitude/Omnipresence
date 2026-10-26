@@ -7,8 +7,7 @@
 		<div class="heading">Inventory</div>
 		@if ( Inventory is not null )
 		{
-			<div class="menu-button compact" tooltip="The same kinds together, from the first slot"
-			     @onclick=@( () => PlayerInventory.Local?.Sort() )>Sort</div>
+			<div class="menu-button compact" @onclick=@( () => PlayerInventory.Local?.Sort() )>Sort</div>
 		}
 	</div>
 	<div class="hint">@StackDrag.Hint</div>

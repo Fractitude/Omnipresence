@@ -218,9 +218,9 @@ public static class StorageRules
 	}
 
 	/// <summary>
-	/// Tidy the bag: the same kinds together, stacks put together where the game may merge them, and everything packed
-	/// from the first slot with no gaps (<see cref="InventorySort"/>). Nothing moves and nothing is synced when it is
-	/// already tidy. Host only.
+	/// Tidy the bag: the same kinds together and everything packed from the first slot with no gaps
+	/// (<see cref="InventorySort"/>), on the bag's own terms (<see cref="PlayerInventory.CombineStacksOnSort"/> says
+	/// whether stacks are put together as well). Nothing moves and nothing is synced when it is already tidy. Host only.
 	/// </summary>
 	public static CrimeResult SortBag( PlayerInventory bag )
 	{
@@ -235,7 +235,7 @@ public static class StorageRules
 	/// Tidy a box's visible grid the same way. Slots beyond <paramref name="capacity"/> are not part of the grid and
 	/// are left as they are: a box made smaller still holds what is past its size, and a tidy must not lose it.
 	/// </summary>
-	public static CrimeResult Sort( CrimeRecord crime, string boxId, int capacity )
+	public static CrimeResult Sort( CrimeRecord crime, string boxId, int capacity, bool combine )
 	{
 		var box = Find( crime, boxId );
 		var count = System.Math.Clamp( capacity, 0, MaxSlots );
@@ -248,7 +248,7 @@ public static class StorageRules
 		for ( var i = 0; i < count; i++ )
 			visible[i] = At( box, i );
 
-		var ordered = InventorySort.Order( visible );
+		var ordered = InventorySort.Order( visible, combine );
 
 		var moved = false;
 

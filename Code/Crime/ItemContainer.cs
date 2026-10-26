@@ -36,6 +36,14 @@ public abstract class ItemContainer : Component
 	public abstract float Reach { get; }
 
 	/// <summary>
+	/// Whether the window's Sort also puts stacks of a kind together, as well as ordering what is in the grid. Off: a
+	/// tidy only moves whole stacks. The bag half of the window follows the bag's own
+	/// <see cref="PlayerInventory.CombineStacksOnSort"/>.
+	/// </summary>
+	[Property]
+	public bool CombineStacksOnSort { get; set; }
+
+	/// <summary>
 	/// Whether a position is within <see cref="Reach"/> of this container.
 	/// </summary>
 	public virtual bool IsNear( Vector3 position ) => WorldPosition.Distance( position ) <= Reach;
@@ -161,8 +169,8 @@ public abstract class ItemContainer : Component
 	}
 
 	/// <summary>
-	/// Tidy the container: the same kinds together, stacks put together where the game may merge them, and everything
-	/// packed from the first slot with no gaps (<see cref="StorageRules.Sort"/>).
+	/// Tidy the container: the same kinds together and everything packed from the first slot with no gaps
+	/// (<see cref="StorageRules.Sort"/>), putting stacks together too when <see cref="CombineStacksOnSort"/> is on.
 	/// </summary>
 	[Rpc.Host]
 	public void RequestSort()
@@ -171,7 +179,7 @@ public abstract class ItemContainer : Component
 			return;
 
 		var (record, id) = Contents( who );
-		Reply( who, StorageRules.Sort( record, id, Capacity ) );
+		Reply( who, StorageRules.Sort( record, id, Capacity, CombineStacksOnSort ) );
 	}
 
 	/// <summary>

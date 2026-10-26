@@ -15,6 +15,13 @@ public sealed class PlayerInventory : Component
 
 	[Property, Range( 1, 12 )] public int Rows { get; set; } = 5;
 
+	/// <summary>
+	/// Whether <see cref="Sort"/> also puts stacks of a kind together, as well as ordering what is in the bag. Off: a
+	/// tidy only moves whole stacks, which is what players expect of it.
+	/// </summary>
+	[Property]
+	public bool CombineStacksOnSort { get; set; }
+
 	public int SlotCount => Columns * Rows;
 
 	/// <summary>
@@ -360,9 +367,9 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
-	/// Tidy the bag: the same kinds together, stacks put together where the game may merge them, and everything packed
-	/// from the first slot with no gaps (<see cref="InventorySort"/>). No count and no quality changes. On the player's
-	/// client this asks the host.
+	/// Tidy the bag: the same kinds together and everything packed from the first slot with no gaps
+	/// (<see cref="InventorySort"/>). Stacks are put together too when <see cref="CombineStacksOnSort"/> is on; no count
+	/// and no quality ever changes. On the player's client this asks the host.
 	/// </summary>
 	public void Sort()
 	{
@@ -423,7 +430,7 @@ public sealed class PlayerInventory : Component
 	void DoSort()
 	{
 		Resize();
-		var ordered = InventorySort.Order( slots );
+		var ordered = InventorySort.Order( slots, CombineStacksOnSort );
 
 		// Nothing to do when the slots already hold the tidy order: the items are handed back as they are, so this is a
 		// reference check, and a bag that is already tidy is not written and synced again.

@@ -10,25 +10,64 @@ namespace Sandbox;
 /// seed, raw and product sit together; a kind the catalogue no longer has goes after them, and ordinary items come
 /// last, by name.</item>
 /// <item>Inside a group the better quality comes first, and a fuller stack before a partial one.</item>
-/// <item>Two stacks are put together exactly when <see cref="StackRules.CanMerge(ItemData, ItemData)"/> would allow it
-/// and they hold the same quality: the rule a pickup follows, so a tidy never averages a quality. They become whole
-/// stacks of the kind's size and a remainder.</item>
+/// <item>Two stacks are put together only when the grid asks for it (see <see cref="PlayerInventory.CombineStacksOnSort"/>
+/// and <see cref="ItemContainer.CombineStacksOnSort"/>, both off), and then exactly when
+/// <see cref="StackRules.CanMerge(ItemData, ItemData)"/> would allow it and they hold the same quality: the rule a
+/// pickup follows, so a tidy never averages a quality. They become whole stacks of the kind's size and a
+/// remainder.</item>
 /// </list>
 /// </summary>
 public static class InventorySort
 {
 	/// <summary>
 	/// The items of <paramref name="slots"/> in their tidy order, the empties left out: the first one belongs in the
-	/// first slot. The items themselves are handed back, so a caller can tell a tidy that changes nothing by comparing
-	/// the order with what the slots hold; only a stack that is put together with another is a new object.
+	/// first slot. With <paramref name="combine"/> off every stack is one entry and only moves; with it on, the stacks
+	/// of a kind are put together first. The items themselves are handed back, so a caller can tell a tidy that changes
+	/// nothing by comparing the order with what the slots hold; only a stack that is put together with another is a new
+	/// object.
 	/// </summary>
-	public static List<ItemData> Order( IReadOnlyList<ItemData> slots )
+	public static List<ItemData> Order( IReadOnlyList<ItemData> slots, bool combine )
 	{
 		var tidy = new List<ItemData>();
 
 		if ( slots is null )
 			return tidy;
 
+		if ( combine )
+			AddCombined( tidy, slots );
+		else
+			AddWhole( tidy, slots );
+
+		// Sorted with the place each entry came from, so entries that compare equal keep theirs (List.Sort is not a
+		// stable sort): sorting an already tidy grid again changes nothing.
+		var ranked = tidy.Select( ( item, index ) => (Item: item, Index: index) ).ToList();
+
+		ranked.Sort( ( a, b ) =>
+		{
+			var order = Compare( a.Item, b.Item );
+			return order != 0 ? order : a.Index.CompareTo( b.Index );
+		} );
+
+		return ranked.Select( x => x.Item ).ToList();
+	}
+
+	/// <summary>
+	/// Add every item as its own entry: a tidy that only decides where things go.
+	/// </summary>
+	static void AddWhole( List<ItemData> tidy, IReadOnlyList<ItemData> slots )
+	{
+		foreach ( var item in slots )
+		{
+			if ( item is not null )
+				tidy.Add( item );
+		}
+	}
+
+	/// <summary>
+	/// Add the stacks of a kind put together, so the order holds fewer entries than the slots did.
+	/// </summary>
+	static void AddCombined( List<ItemData> tidy, IReadOnlyList<ItemData> slots )
+	{
 		var groups = new Dictionary<MergeKey, List<ItemData>>();
 
 		foreach ( var item in slots )
@@ -53,18 +92,6 @@ public static class InventorySort
 
 		foreach ( var group in groups.Values )
 			AddMerged( tidy, group );
-
-		// Sorted with the place each entry came from, so entries that compare equal keep theirs (List.Sort is not a
-		// stable sort): sorting an already tidy grid again changes nothing.
-		var ranked = tidy.Select( ( item, index ) => (Item: item, Index: index) ).ToList();
-
-		ranked.Sort( ( a, b ) =>
-		{
-			var order = Compare( a.Item, b.Item );
-			return order != 0 ? order : a.Index.CompareTo( b.Index );
-		} );
-
-		return ranked.Select( x => x.Item ).ToList();
 	}
 
 	/// <summary>
