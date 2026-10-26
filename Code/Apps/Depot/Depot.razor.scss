@@ -84,6 +84,69 @@ i
 	gap: 6px;
 }
 
+.where
+{
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 4px;
+}
+
+.places
+{
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.place
+{
+	flex-direction: column;
+	flex-grow: 1;
+	flex-basis: 0;
+	gap: 2px;
+	padding: 6px 10px;
+	border-radius: 10px;
+	background-color: #1f1a10;
+	border: 1px solid #3a3020;
+	cursor: pointer;
+
+	.place-title
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 6px;
+		font-weight: 700;
+
+		i
+		{
+			font-size: 16px;
+			color: #f0a63a;
+		}
+	}
+
+	.place-note
+	{
+		color: #7d725c;
+	}
+
+	&.chosen
+	{
+		background-color: #2b2312;
+		border: 1px solid #f0a63a;
+
+		.place-note
+		{
+			color: #cfc4ad;
+		}
+	}
+
+	&.disabled
+	{
+		cursor: default;
+		opacity: 0.5;
+	}
+}
+
 .heading
 {
 	margin-top: 4px;

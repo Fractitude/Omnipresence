@@ -7,11 +7,29 @@ cash and has them delivered.
 | Piece | Code | Notes |
 | --- | --- | --- |
 | **The catalog** | `Code/Placeables/PlaceableCatalog.cs` | `Placeable( Id, Name, Description, Icon, Price, Prefab, DeliverSeconds )`. Data only: a new object is one more line. Prices are first guesses (box $150, tray $400, press $600, table $350; 2 to 5 minutes). |
-| **The shop** | `PlaceableShop.cs`, `Code/Apps/Depot/` | `Buy( buyer, id, now )` on the host: the order is made first, then `Transactions.Pay` to `depot`; a failed payment takes the order back. The app is Shared like Hush, works at home with the network on, and sends an object id only. |
+| **The shop** | `PlaceableShop.cs`, `Code/Apps/Depot/` | `Buy( buyer, id, now, destination, around )` on the host: the order is made first, then `Transactions.Pay` to `depot`; a failed payment takes the order back. The app is Shared like Hush, works at home with the network on, and sends an object id and one of the two words for where to deliver, never a place. |
 | **The id** | `PlacedObject.cs` | A component with a permanent `ObjectId` (synced from the host). `PlacedObject.IdOf( this )` is what `StorageBox.BoxId` and `GrowTray.TrayId` use: a bought object's id, else its object id (scene-placed objects keep the id they always had). |
-| **The registry** | `PlacedObjectRegistry.cs`, `PlacedObjectRules.cs` | `placed_objects.json` in the data folder (`placed_objects_test.json` under `progress_test_data`). Objects: id, placeable, buyer, scene, position, angles. Deliveries: id, buyer, arrival time. Written 3 s after the last change, atomically (`FileProgressStore.WriteSafely`). |
+| **The registry** | `PlacedObjectRegistry.cs`, `PlacedObjectRules.cs` | `placed_objects.json` in the data folder (`placed_objects_test.json` under `progress_test_data`). Objects: id, placeable, buyer, scene, position, angles. Deliveries: id, buyer, arrival time, where it goes and
+the terminal it was ordered at. Written 3 s after the last change, atomically (`FileProgressStore.WriteSafely`). |
 | **The system** | `PlacedObjectSystem.cs` | Host only. Restores the scene's objects on the first tick the scene is ready (`SceneReadiness`, in batches of 50; about 200 ms after the system starts, where it used to wait 1.5 s), by id so never twice, makes due deliveries arrive once a second, tells buyers, saves. |
-| **The spot** | `DeliverySpot.cs` | Where a delivery lands. |
+| **The spot** | `DeliverySpot.cs` | Where a delivery lands: a delivery point for a store pickup, the buyer's mailbox for a home delivery. |
+
+## The two places
+
+The app asks where the next order goes, in a row of two at the top of its window, and `PlaceableShop.Buy` settles it on
+the host:
+
+- **Collect at the store, now.** The object is put down at a delivery point within `DeliverySpot.Range` (1500 units,
+  38 m) of the computer the order is placed at, in the same call that takes the money. The choice is only offered where
+  the app can see a bay, and a bay has to have room before the money is taken, so nothing is bought that would have to
+  wait.
+- **Deliver home, later.** Mailed, as it always was: it arrives beside the buyer's mailbox after the object's
+  `DeliverSeconds`, or in front of a spawn point if the mailboxes are full. The table's delivery times are for this.
+
+A delivery point is any object the level tags **`delivery_point`**; an empty is enough, and its yaw is the way round the
+deliveries are laid, so a bay should face out of its wall. None is tagged yet: a store needs a tagged empty per bay and
+a computer that has the Depot. The Hardware Store's own computer is a kiosk with only its app on it
+([hardware.md](hardware.md)), so it needs a second one.
 
 ## Delivery
 
@@ -20,13 +38,28 @@ An order is in the world file, not in the buyer's record, so it arrives on time 
 that: a season wipe of the crime state does not clear it, so the wipe must call `PlacedObjectRegistry.Wipe( scene )`
 (also `placed_objects_clear`). At most `PlaceableCatalog.MaxInTransit` (6) per player on their way.
 
-When it is due the system picks a spot: beside an object tagged **`delivery_point`** if the scene has one (none yet: add
-a tagged empty object in the editor to choose the place), else beside the buyer's mailbox (or any mailbox that is not
-another player's), else in front of a spawn point. Rings of 8 spots at 130 to 340 units around the anchor are tried; a
-spot is used if it is within 24 units of the anchor's height (not on a wall's top), the object's box fits there and
-nothing stands in it, and no object was put there in the same pass. With no free spot the delivery waits and is
-retried. The buyer is told in chat ("Your Storage Box has arrived beside your mailbox."), at once if they are playing, or
-the next time they are here.
+When it is due the place is picked: for a store pickup, the delivery points in range, nearest first; for a home
+delivery, beside the buyer's mailbox (or any mailbox that is not another player's), else in front of a spawn point. At
+each of those places, in order:
+
+1. **The ground**, on rings of 8 spots at 0, 130, 200, 270 and 340 units around the anchor. A spot is used if it is
+   within 24 units of the anchor's height (not on a wall's top), the object's box fits there and nothing stands in it.
+2. **A stack**, at the anchor itself: on top of whatever already stands there, laid flat (the anchor's yaw, level), if the
+   top is no more than `MaxStackRise` (300 units, five of the biggest object) above the floor and the box fits above it.
+
+The ground is tried at every place before a stack at any of them, so an object only goes on top when there is no floor
+left anywhere. With no free spot the delivery waits and is retried.
+
+**The stack is what keeps a bay that someone has blocked usable.** An object left on a delivery point, a car parked over
+it, a wall built on it: the next delivery goes on top instead of failing, so a bay takes five objects of the blocker's
+own before it is full, and any other bay in range is tried first. Past that it is the level's job: three or four bays
+per store is much harder to shut down than one.
+
+Two deliveries in the same pass are the one case the physics world cannot answer, because an object that was just made
+has no body yet: the spots chosen are kept in a list, and a stack climbs over them (`DeliverySpot.AboveTaken`).
+
+The buyer is told in chat ("Your Storage Box has arrived beside your mailbox."), at once if they are playing, or the next
+time they are here.
 
 ## The object in the world
 

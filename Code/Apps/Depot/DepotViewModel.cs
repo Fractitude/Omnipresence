@@ -4,21 +4,38 @@ namespace OmnipresenceApps;
 
 /// <summary>
 /// Everything the Depot does: a furniture and equipment store that sells the big objects a player places in the world
-/// (<see cref="PlaceableCatalog"/>) for cash and delivers them after a wait. Runs in the host's copy only (the app is
-/// shared), because the money and the deliveries are the host's. It only works at home, with the network on.
+/// (<see cref="PlaceableCatalog"/>) for cash. An order is either mailed home, to arrive beside the buyer's mailbox after
+/// a wait, or collected at the store the moment it is paid for: the store's bays are the objects tagged
+/// <c>delivery_point</c> within <see cref="DeliverySpot.Range"/> of the computer the order is placed at. Runs in the
+/// host's copy only (the app is shared), because the money and the deliveries are the host's. It only works at home, with
+/// the network on.
 /// </summary>
 /// <remarks>
-/// Who buys is always the player in the seat, worked out from the computer. The only action carries an object id: the
-/// price, the delivery time and the limit are checked on the host (<see cref="PlaceableShop"/>).
+/// Who buys is always the player in the seat, worked out from the computer. An action carries an object id, and where to
+/// deliver it; the price, the delivery time, the bay and the limit are all checked on the host
+/// (<see cref="PlaceableShop"/>), never taken from what the panel says.
 /// </remarks>
 public sealed class DepotViewModel
 {
 	public const string BuyAction = "buy";
 
+	/// <summary>Changes where the next order goes; its one argument is <see cref="Store"/> or <see cref="Home"/>.</summary>
+	public const string DeliverAction = "deliver";
+
+	/// <summary>The two places an order can go, as the panel sends them.</summary>
+	public const string Store = PlacedObjectRules.DeliveryStore;
+
+	/// <inheritdoc cref="Store"/>
+	public const string Home = PlacedObjectRules.DeliveryHome;
+
+	/// <summary>Units are inches, so this is how many metres one of them is.</summary>
+	const float MetresPerUnit = 0.0254f;
+
 	readonly Func<Connection> getSeat;
 	readonly Func<NaviComputer> getComputer;
 
 	string notice = "";
+	string destination = Home;
 	Guid lastSeatId;
 	string signature;
 	int revision;
@@ -43,6 +60,7 @@ public sealed class DepotViewModel
 		{
 			lastSeatId = seat?.Id ?? default;
 			notice = "";
+			destination = Home;
 		}
 
 		if ( Signature( seat ) != signature )
@@ -53,9 +71,16 @@ public sealed class DepotViewModel
 	{
 		var seat = getSeat();
 
-		if ( action == BuyAction && args.Length > 0 && CanWork( seat ) && PlayerCrime.For( seat ) is { Ready: true } crime )
+		if ( action == DeliverAction && args.Length > 0 )
 		{
-			var result = PlaceableShop.Buy( seat, args[0], WorldClock.Now );
+			Choose( seat, args[0] );
+		}
+		else if ( action == BuyAction && args.Length > 0 && CanWork( seat ) && PlayerCrime.For( seat ) is { Ready: true } crime )
+		{
+			var terminal = Terminal();
+			var result = PlaceableShop.Buy( seat, args[0], WorldClock.Now, destination, terminal?.At,
+				terminal?.Scene );
+
 			notice = result.Message;
 			crime.Tell( result );
 		}
@@ -63,8 +88,39 @@ public sealed class DepotViewModel
 		UiState = Build();
 	}
 
+	/// <summary>
+	/// Change where the next order goes. The store is only offered where this computer can see one; the shop checks the
+	/// same thing again before it takes the money, so the panel cannot talk it into an impossible order.
+	/// </summary>
+	void Choose( Connection seat, string where )
+	{
+		if ( !CanWork( seat ) || !PlacedObjectRules.IsDestination( where ) )
+			return;
+
+		if ( where == Store && !StoreNear( seat ) )
+			return;
+
+		destination = where;
+	}
+
 	bool CanWork( Connection seat ) =>
 		seat is not null && WiredTravel.PlaceOf( seat ) == WiredPlace.Home && GameAppNetwork.IsOnline( getComputer() );
+
+	/// <summary>
+	/// Where this computer is: the place in the scene that delivery points are looked for around. Null when there is no
+	/// computer, or it is not in a scene (a viewer's copy; only the host's copy asks).
+	/// </summary>
+	(Vector3 At, Scene Scene)? Terminal()
+	{
+		if ( getComputer() is not { } computer || computer.Scene is not { } scene )
+			return null;
+
+		return (computer.WorldPosition, scene);
+	}
+
+	/// <summary>Whether a delivery point is near enough to this computer for the Depot to hand an order over here.</summary>
+	bool StoreNear( Connection seat ) =>
+		CanWork( seat ) && Terminal() is { } place && DeliverySpot.HasPointNear( place.Scene, place.At );
 
 	string Signature( Connection seat ) =>
 		HashCode.Combine(
@@ -73,6 +129,7 @@ public sealed class DepotViewModel
 			GameAppNetwork.IsOnline( getComputer() ),
 			seat is null ? default : WiredTravel.PlaceOf( seat ),
 			notice,
+			destination,
 			// Countdowns redraw once a second, while something is on its way.
 			seat is not null && PlacedObjectRegistry.OnTheWay( (ulong)seat.SteamId ).Count > 0 ? WorldClock.Now : 0,
 			PlacedObjectRegistry.Data.Deliveries.Count ).ToString();
@@ -99,12 +156,30 @@ public sealed class DepotViewModel
 			return state with { Message = "Connecting..." };
 
 		var now = WorldClock.Now;
+		var terminal = Terminal();
+
+		// The store's bays: the delivery points near this computer, nearest first. With none in reach the orders go
+		// home, and a choice of the store left over from before falls back with it.
+		var bays = terminal is { } place
+			? DeliverySpot.StorePlaces( place.Scene, place.At )
+			: new List<DeliverySpot.DeliveryPlace>();
+
+		if ( bays.Count == 0 )
+			destination = Home;
 
 		return state with
 		{
 			HasAccount = true,
 			Cash = $"${wallet.Cash:N0}",
-			Shop = PlaceableCatalog.All.Select( x => BuildRow( seat, x ) ).ToList(),
+			StoreAvailable = bays.Count > 0,
+			StoreChosen = destination == Store,
+			StoreDetail = bays.Count == 0
+				? "There is no delivery point near this computer."
+				: $"Handed over now, at the bay {Distance( bays[0].Anchor, terminal?.At ?? default )}.",
+			HomeDetail = $"Mailed to your mailbox in "
+			             + $"{InteractionSetup.Countdown( PlaceableCatalog.All.Min( x => x.DeliverSeconds ) )}"
+			             + $" to {InteractionSetup.Countdown( PlaceableCatalog.All.Max( x => x.DeliverSeconds ) )}.",
+			Shop = PlaceableCatalog.All.Select( x => BuildRow( seat, x, destination == Store ) ).ToList(),
 			Incoming = PlacedObjectRegistry.OnTheWay( (ulong)seat.SteamId )
 				.Select( x => new DepotIncomingRow(
 					PlaceableCatalog.Find( x.Placeable )?.Name ?? "Order",
@@ -114,11 +189,18 @@ public sealed class DepotViewModel
 		};
 	}
 
-	static DepotRow BuildRow( Connection seat, Placeable item )
+	static DepotRow BuildRow( Connection seat, Placeable item, bool store )
 	{
 		var reason = PlaceableShop.WhyNot( seat, item ) ?? "";
+		var delivery = store
+			? "At the delivery point, now"
+			: $"Mailed, in {InteractionSetup.Countdown( item.DeliverSeconds )}";
 
-		return new DepotRow( item.Id, item.Name, item.Description, item.Icon, $"${item.Price:N0}",
-			$"Delivered in {InteractionSetup.Countdown( item.DeliverSeconds )}", reason == "", reason );
+		return new DepotRow( item.Id, item.Name, item.Description, item.Icon, $"${item.Price:N0}", delivery, reason == "",
+			reason );
 	}
+
+	/// <summary>A distance as the panel shows it: the game's units are inches.</summary>
+	static string Distance( Vector3 from, Vector3 to ) =>
+		$"{MathF.Round( from.Distance( to ) * MetresPerUnit )} m away";
 }

@@ -68,15 +68,17 @@ public static class PlacedObjectRegistry
 		.ToList();
 
 	/// <summary>
-	/// Put an order on its way. The caller takes the money after this succeeded. Returns the delivery, or null when the
+	/// Put an order on its way: to the mailbox after a wait, or to a delivery point near <paramref name="around"/>
+	/// (the terminal) at once. The caller takes the money after this succeeded. Returns the delivery, or null when the
 	/// player has too many on their way. Host only.
 	/// </summary>
-	public static PlacedDeliveryRecord Order( ulong owner, Placeable item, long now )
+	public static PlacedDeliveryRecord Order( ulong owner, Placeable item, long now,
+		string destination = PlacedObjectRules.DeliveryHome, Vector3 around = default )
 	{
 		if ( Networking.IsActive && !Networking.IsHost )
 			return null;
 
-		var delivery = PlacedObjectRules.Order( Loaded, owner, item, now );
+		var delivery = PlacedObjectRules.Order( Loaded, owner, item, now, destination, around );
 
 		if ( delivery is not null )
 			Changed();

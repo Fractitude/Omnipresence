@@ -28,6 +28,18 @@ public sealed record DepotUiState
 
 	public string Cash { get; init; } = "";
 
+	/// <summary>True when a delivery point is near this computer: the Depot can hand an order over at the store.</summary>
+	public bool StoreAvailable { get; init; }
+
+	/// <summary>True when the next order is collected at the store instead of mailed home.</summary>
+	public bool StoreChosen { get; init; }
+
+	/// <summary>How store pickup works here, worded for the panel, or why it is not offered.</summary>
+	public string StoreDetail { get; init; } = "";
+
+	/// <summary>How a home delivery works, worded for the panel.</summary>
+	public string HomeDetail { get; init; } = "";
+
 	public IReadOnlyList<DepotRow> Shop { get; init; } = [];
 
 	public IReadOnlyList<DepotIncomingRow> Incoming { get; init; } = [];

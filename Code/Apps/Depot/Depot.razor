@@ -4,7 +4,8 @@
 
 @* The game's own system app, part of the OS: described by Assets/navi/system/depot.napp, so it is always installed and *@
 @* has root. A store for the big objects a player places in the world (storage box, grow tray, press bench, packing *@
-@* table), paid in cash and delivered after a wait. It only works at home. *@
+@* table), paid in cash. An order goes home to the buyer's mailbox after a wait, or is collected at the store at once *@
+@* when the computer stands near a delivery point (DeliverySpot.Range, 1500 units). It only works at home. *@
 @* It is shared: the host's copy takes the order and the money, and every player sees the same window. Whoever buys *@
 @* is the player in the seat, worked out on the host, never from what the panel sends. *@
 
@@ -37,9 +38,25 @@
 			<div class="notice">@UiState.Notice</div>
 		}
 
+		<div class="where">
+			<div class="heading">Deliver to</div>
+			<div class="places">
+				<div class="place @( UiState.StoreChosen ? "chosen" : "" ) @( UiState.StoreAvailable ? "" : "disabled" )"
+				     @onclick=@( () => Navi.Act( DepotViewModel.DeliverAction, DepotViewModel.Store ) )>
+					<div class="place-title"><i>storefront</i>Collect at the store</div>
+					<div class="place-note">@UiState.StoreDetail</div>
+				</div>
+				<div class="place @( UiState.StoreChosen ? "" : "chosen" )"
+				     @onclick=@( () => Navi.Act( DepotViewModel.DeliverAction, DepotViewModel.Home ) )>
+					<div class="place-title"><i>home</i>Deliver home</div>
+					<div class="place-note">@UiState.HomeDetail</div>
+				</div>
+			</div>
+		</div>
+
 		<div class="body">
 			<div class="heading">Furniture and equipment</div>
-			<div class="meta">Delivered to your mailbox area. Place it with the Physgun.</div>
+			<div class="meta">Place it with the Physgun.</div>
 			<div class="cards">
 				@foreach ( var item in UiState.Shop )
 				{

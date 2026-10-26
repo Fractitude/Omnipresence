@@ -82,20 +82,7 @@ public sealed class PlacedObjectSystem : GameObjectSystem<PlacedObjectSystem>
 		var taken = new List<Vector3>();
 
 		foreach ( var delivery in PlacedObjectRules.Due( data, now ) )
-		{
-			var item = PlaceableCatalog.Find( delivery.Placeable );
-
-			if ( item is null || DeliverySpot.Find( Scene, delivery.Owner, taken ) is not { } spot )
-				continue;
-
-			var yaw = Rotation.FromYaw( System.Random.Shared.Next( 0, 360 ) );
-
-			if ( PlacedObjectRegistry.Create( item, delivery.Id, delivery.Owner, spot.Position, yaw, Scene ).IsValid() )
-			{
-				taken.Add( spot.Position );
-				PlacedObjectRegistry.MarkArrived( delivery, spot.Where );
-			}
-		}
+			Deliver( Scene, delivery, taken );
 
 		foreach ( var delivery in data.Deliveries.Where( x => x.Arrived ).ToList() )
 		{
@@ -108,6 +95,38 @@ public sealed class PlacedObjectSystem : GameObjectSystem<PlacedObjectSystem>
 			crime.Tell( CrimeResult.Success( $"Your {name} has arrived {delivery.Where}." ) );
 			PlacedObjectRegistry.Told( delivery );
 		}
+	}
+
+	/// <summary>
+	/// Put one delivery down where its destination allows and write it down as arrived: a store pickup at a delivery
+	/// point near the terminal it was bought at (nearest bay first), a home delivery beside the buyer's mailbox. Returns
+	/// whether the object was made. Host only; <paramref name="taken"/> holds the spots chosen earlier in the same
+	/// pass, which have no body yet.
+	/// </summary>
+	public static bool Deliver( Scene scene, PlacedDeliveryRecord delivery, List<Vector3> taken )
+	{
+		if ( delivery is null || !scene.IsValid() )
+			return false;
+
+		if ( PlaceableCatalog.Find( delivery.Placeable ) is not { } item )
+			return false;
+
+		var spot = delivery.Destination == PlacedObjectRules.DeliveryStore
+			? DeliverySpot.FindStore( scene, delivery.Around, taken )
+			: DeliverySpot.FindHome( scene, delivery.Owner, taken );
+
+		if ( spot is not { } place )
+			return false;
+
+		var go = PlacedObjectRegistry.Create( item, delivery.Id, delivery.Owner, place.Position,
+			Rotation.FromYaw( place.Yaw ), scene );
+
+		if ( !go.IsValid() )
+			return false;
+
+		taken?.Add( place.Position );
+		PlacedObjectRegistry.MarkArrived( delivery, place.Where );
+		return true;
 	}
 
 	public override void Dispose()

@@ -49,6 +49,19 @@ public sealed class PlacedDeliveryRecord
 	/// <summary>Game seconds (<see cref="WorldClock.Now"/>) when it arrives.</summary>
 	public long ArriveAt { get; set; }
 
+	/// <summary>
+	/// Where it goes: <see cref="PlacedObjectRules.DeliveryStore"/> for a delivery point near the terminal it was bought
+	/// at (at once), or <see cref="PlacedObjectRules.DeliveryHome"/> for the mailbox (after a wait). Additive: a file
+	/// without it loads as a home delivery.
+	/// </summary>
+	public string Destination { get; set; } = PlacedObjectRules.DeliveryHome;
+
+	/// <summary>
+	/// What a store order looks for delivery points around: the terminal it was placed at. Only a store order reads it,
+	/// so its object lands at the same store after the buyer has walked away.
+	/// </summary>
+	public Vector3 Around { get; set; }
+
 	/// <summary>The object stands in the world.</summary>
 	public bool Arrived { get; set; }
 
@@ -76,6 +89,12 @@ public sealed class PlacedObjectFile
 /// </summary>
 public static class PlacedObjectRules
 {
+	/// <summary>A home delivery: mailed to the buyer's mailbox, arriving after the object's delivery time.</summary>
+	public const string DeliveryHome = "home";
+
+	/// <summary>Store pickup: handed over at a delivery point near the terminal, the moment it is paid for.</summary>
+	public const string DeliveryStore = "store";
+
 	public const int MaxText = 260;
 
 	/// <summary>The most placed objects one scene keeps.</summary>
@@ -83,6 +102,9 @@ public static class PlacedObjectRules
 
 	/// <summary>The most deliveries (arrived and waiting to be told, or on their way) the file keeps.</summary>
 	public const int MaxDeliveries = 200;
+
+	/// <summary>Whether a value names one of the two places an order can go.</summary>
+	public static bool IsDestination( string destination ) => destination is DeliveryHome or DeliveryStore;
 
 	/// <summary>
 	/// A fresh id for an object: letters and digits only, so every save that keys on it accepts it.
@@ -143,7 +165,15 @@ public static class PlacedObjectRules
 			.ToList();
 
 		foreach ( var delivery in file.Deliveries )
+		{
 			delivery.Where = Limit( delivery.Where );
+
+			if ( !IsDestination( delivery.Destination ) )
+				delivery.Destination = DeliveryHome;
+
+			if ( !IsPlace( delivery.Around ) )
+				delivery.Around = default;
+		}
 
 		file.Version = PlacedObjectFile.CurrentVersion;
 		return before - file.Objects.Count - file.Deliveries.Count;
@@ -159,15 +189,21 @@ public static class PlacedObjectRules
 	/// Add an order to the file, if the player may have another one on its way. Returns the delivery, or null. Taking the
 	/// money is the caller's job and comes after this succeeded.
 	/// </summary>
-	public static PlacedDeliveryRecord Order( PlacedObjectFile file, ulong owner, Placeable item, long now )
+	public static PlacedDeliveryRecord Order( PlacedObjectFile file, ulong owner, Placeable item, long now,
+		string destination = DeliveryHome, Vector3 around = default )
 	{
-		if ( owner == 0 || item is null || InTransit( file, owner ) >= PlaceableCatalog.MaxInTransit
+		if ( owner == 0 || item is null || !IsDestination( destination )
+		     || InTransit( file, owner ) >= PlaceableCatalog.MaxInTransit
 		     || file.Deliveries.Count >= MaxDeliveries )
 			return null;
 
+		// A store pickup is handed over the moment it is paid for; a home delivery is mailed.
+		var arriveAt = destination == DeliveryStore ? now : now + item.DeliverSeconds;
+
 		var delivery = new PlacedDeliveryRecord
 		{
-			Id = NewId(), Placeable = item.Id, Owner = owner, ArriveAt = now + item.DeliverSeconds,
+			Id = NewId(), Placeable = item.Id, Owner = owner, ArriveAt = arriveAt, Destination = destination,
+			Around = IsPlace( around ) ? around : default,
 		};
 
 		file.Deliveries.Add( delivery );
