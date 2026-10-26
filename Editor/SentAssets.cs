@@ -29,6 +29,9 @@ public static class SentAssets
 		@"[A-Za-z0-9_\-./]+\.(?:vmdl|vmat|vtex|vsnd|sound|vanmgrph|vpcf|vmorph|vagrp|vphys|vseq|vrmap|clip)",
 		RegexOptions.IgnoreCase );
 
+	// Folders of the engine's own assets (and of cloud packages the engine mounts): a copy here would shadow the real ones.
+	static readonly string[] EngineRoots = ["models", "textures", "materials", "shaders", "particles", "effects"];
+
 	static readonly Regex Generated = new( @"\.generated\.vtex$", RegexOptions.IgnoreCase );
 
 	[ConCmd( "sent_assets" )]
@@ -104,6 +107,7 @@ public static class SentAssets
 		// The code's strings reach every sent's assets; only what is under a folder the prefab itself uses is this sent's.
 		var prefabRoots = starts.Where( x => IsInPrefab( folder, x ) )
 			.Select( x => x.Split( '/' )[0] )
+			.Where( x => !EngineRoots.Contains( x, StringComparer.OrdinalIgnoreCase ) )
 			.ToHashSet( StringComparer.OrdinalIgnoreCase );
 
 		var files = found.Where( x => prefabRoots.Contains( x.Key.Split( '/' )[0] ) ).OrderBy( x => x.Key ).ToList();

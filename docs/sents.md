@@ -41,11 +41,7 @@ nothing here and we can edit it freely. Right-click a tile and choose *Integrate
 `spawn_sent` (`Sents.SpawnAsync`) uses `SentLocal.Find( ident )` first: an integrated sent is cloned from our prefab, and the
 tile in the window shows a green check. The cloud copy is used only for a sent that was not integrated.
 
-**What stays on the workshop: the assets** (models, materials, sounds, textures). A package ships them compiled, with no
-source files, so they cannot be kept as files of ours; the sent's own folder in the package (`hl2_metrocop/...`) is mounted
-from the engine's downloaded copy when it is spawned (`SentLocal.Mount`, `Package.MountAsync( false )`: assets, no code).
-`source.json` lists them (`assetsFromWorkshop`). If the author deletes a package, a machine that never downloaded it loses
-those; one that has it keeps the cached copy.
+**The assets are files of the project too** (`Editor/SentAssets.cs`, `sent_assets`, run by `sent_integrate`). A package ships them compiled, but the engine keeps the compiled files it downloaded (`download/assets/<path>.<hash>.vmdl_c`), and a compiled file placed in `Assets/` under its own path loads like one the editor compiled. The tool follows the paths written inside the compiled files, starting from the paths the prefab and the imported code name, and copies what it finds without the hash (`Assets/drift_district/...`; a `.gitignore` with `!*_c` in the folder keeps them out of the `*_c` ignore). The copied files are listed in `source.json` (`assetFiles`); `sent_remove` deletes the ones no other sent lists. Engine folders (`models`, `textures`, `materials`, `shaders`, `particles`, `effects`) are never copied, since a copy would shadow the engine's own. A texture the engine never loaded was never downloaded, so it is missing in the workshop's copy as well. `SentLocal.Mount` still mounts the package when a sent is spawned, as a fallback for anything not copied.
 
 ## How a sent is built
 

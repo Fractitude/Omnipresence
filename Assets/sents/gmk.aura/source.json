@@ -17,5 +17,11 @@
     "aura_weapon/music.sound",
     "models/dev/box.vmdl",
     "textures/generated/imagefile/eb5c32ad36976a8d.vtex"
-  ]
+  ],
+  "assetFiles": [
+    "aura_weapon/aura.vmat_c",
+    "aura_weapon/music.sound_c",
+    "aura_weapon/music.vsnd_c"
+  ],
+  "assetsInProject": true
 }
