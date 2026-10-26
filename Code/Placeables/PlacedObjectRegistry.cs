@@ -201,6 +201,11 @@ public static class PlacedObjectRegistry
 		placed.BuyerId = owner;
 		placed.Rest = position;
 
+		// The buyer holds title from the moment the object exists, until game code sells it on
+		// (OwnershipRegistry.Transfer). A title is the registry's: this only seeds it.
+		if ( owner != 0 )
+			go.Components.GetOrCreate<OwnershipComponent>().DefaultOwner = Ownership.Player( owner );
+
 		if ( !go.Components.Get<Rigidbody>( FindMode.EverythingInSelfAndDescendants ).IsValid() )
 			go.Components.Create<Rigidbody>();
 

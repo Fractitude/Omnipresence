@@ -12,6 +12,13 @@ public enum OrgAction
 	Restyle,
 
 	Disband,
+
+	/// <summary>
+	/// Change an organization's property or hand it on: what is inside the crew's box, the name on its door, or the
+	/// box itself sold to somebody. Only the founder, which is what <see cref="OwnershipRules"/> asks about an
+	/// organization-owned thing.
+	/// </summary>
+	Transfer,
 }
 
 /// <summary>What <see cref="OrgRules.Split"/> worked out: who is paid what, and what the receiver keeps.</summary>

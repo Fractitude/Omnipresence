@@ -16,7 +16,7 @@ Testing only. They ask the host, which refuses unless it is the editor (`PlayerP
 | `progress_give_credits <amount>` | Give yourself credits. |
 | `progress_give_crypto <amount>` | Give yourself crypto (`GrantUntracked`: no transaction). |
 | `progress_show` | Log your level, XP, hacking level and XP, dollars, credits and crypto. |
-| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the transaction ledger in `transactions_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json`, the storage claims in `storage_test.json`, the dropped items in `world_items_test.json` the organizations in `orgs_test.json` and the stats log in `stats_test/`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
+| `progress_test_data [on\|off]` | Keep progress in `progress_test/`, the transaction ledger in `transactions_test/`, the clock in `world_test.json`, the mailbox claims in `mailboxes_test.json`, the storage claims in `storage_test.json`, the dropped items in `world_items_test.json` the organizations in `orgs_test.json`, the ownership titles in `ownership_test.json` and the stats log in `stats_test/`, so a test never touches the real save (`off` goes back). Editor only, on the host, and only before the player has spawned. |
 
 ## Stats
 
@@ -54,6 +54,19 @@ Testing only, for the organization the Organizations app runs ([organizations.md
 | `org_invite_test [org] [role] [share] [respectCooldown]` | Send yourself an invitation from a made-up organization (made if missing; each name has its own founder): `org_invite_test "Test Syndicate" Courier 15`. Opens the invitation popup. Needs `progress_test_data on` and you in no organization. A rejection wait is cleared first unless the last argument is `true`. |
 | `org_dump` | Log every organization, its members and shares, its waiting invitations, and the shares waiting for an absent member. |
 | `org_clear` | Delete every organization. |
+
+## Ownership
+
+Editor only, on the host: they refuse anywhere else ([ownership.md](ownership.md)). `ownership_give` and
+`ownership_claim` work on the object in the crosshair within 400 units. Code: `Code/Ownership/OwnershipCommands.cs`.
+
+| Command | What it does |
+| --- | --- |
+| `ownership_give <owner>` | Give what you look at to `<owner>`: `player:<steamId>` (or the bare id), `org:<orgId>`, `public`, `government`, or `nobody` to release it. This is the game's own hand: it skips the permission a player's transfer goes through. |
+| `ownership_claim` | Claim what you look at for yourself, if nobody owns it. |
+| `ownership_show [key]` | Log what you look at — or the thing with this key — with its owner, since when, and the last changes of hands. |
+| `ownership_list <owner>` | Log everything that owner holds: `ownership_list player:76561197960287930`, `org:a1b2c3d4e5f6`, `public`. |
+| `ownership_clear` | Forget every title, and clear the copies on the objects in the scene (`ownership.json`, or `ownership_test.json` under `progress_test_data`). |
 
 ## World items
 

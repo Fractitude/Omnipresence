@@ -105,9 +105,13 @@ last resting place.
 
 ## Ownership
 
-`BuyerId` and the record's `Owner` are the buyer's Steam id, kept for the ownership design
-([plans/ownership.md](../plans/ownership.md)). They grant nothing: a bought box is claimed by its first use exactly like
-a scene-placed one (`StorageRegistry`), and a tray shows each player their own crop.
+A bought object's legal owner is its buyer: `PlacedObjectRegistry.Make` gives it an `OwnershipComponent` whose
+`DefaultOwner` is the buyer, and the first run writes that title to `ownership.json` ([ownership.md](ownership.md)).
+The title is the record there; `BuyerId` here and `PlacedObjectRecord.Owner` are copies kept for this file's own sake.
+
+A title still grants nothing to use: a bought box is claimed by its first use exactly like a scene-placed one
+(`StorageBox.CanUse`, `StorageRegistry`), and a tray shows each player their own crop. Moving a container's claim onto
+its title needs its contents to move first: they live in the owner's record, and a sale must not leave them behind.
 
 ## Limits
 

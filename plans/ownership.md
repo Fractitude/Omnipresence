@@ -2,6 +2,11 @@
 
 A reminder to come back to this. Today ownership is a quick placeholder: **the first player to use a thing claims it**, and everyone else is locked out. That was enough to get the loop working, but it will not hold up once there is more than one player in a home.
 
+**Update:** the ownership system itself has landed — `OwnershipComponent` and `ownership.json`, a title that is a
+player, an organization, the public or the government, transfer with a history, and queries (see
+[ownership.md](../docs/ownership.md)). The claims below have not moved onto it yet: a mailbox and a storage box are
+still claimed by first use, and the questions at the bottom of this note are still open.
+
 ## What exists now
 
 | Thing | Who owns it | How |

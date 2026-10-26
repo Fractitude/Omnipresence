@@ -11,8 +11,8 @@ namespace Sandbox;
 /// <remarks>
 /// Every machine has the component (the id and the type are synced from the host, because a client's tray text and
 /// prompts read the id). Only the host tracks where the object comes to rest and writes it down, so a moved object is
-/// still there next session. The buyer is kept for the ownership design (see <c>plans/ownership.md</c>) and grants
-/// nothing: a box is still claimed by first use.
+/// still there next session. The buyer is kept here as well as in the object's <see cref="OwnershipComponent"/>, which
+/// is where the legal title lives (see <c>docs/ownership.md</c>); this copy grants nothing.
 /// <para>
 /// It also adds the option "Load into vehicle" to the object's <see cref="Interactable"/>: one row for each vehicle with a
 /// cargo area within <see cref="VehicleCargo.LoadReach"/> (at most <see cref="MaxLoadOptions"/>, nearest first), labelled with
