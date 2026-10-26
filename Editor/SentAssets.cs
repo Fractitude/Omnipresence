@@ -94,6 +94,7 @@ public static class SentAssets
 			starts.UnionWith( fromCode.Where( x => prefabRoots.Contains( x.Split( '/' )[0] ) ) );
 		}
 
+		var incomplete = new List<string>();
 		var found = new Dictionary<string, byte[]>( StringComparer.OrdinalIgnoreCase );
 		var queue = new Queue<string>( starts );
 
@@ -116,12 +117,26 @@ public static class SentAssets
 			var bytes = FileSystem.Mounted.ReadAllBytes( name ).ToArray();
 
 			if ( name.EndsWith( ".vtex_c", StringComparison.OrdinalIgnoreCase ) )
-				bytes = FullTexture( bytes );
+			{
+				var whole = FullTexture( bytes );
+
+				if ( ReferenceEquals( whole, bytes ) && IsStreamed( bytes ) )
+					incomplete.Add( name );
+
+				bytes = whole;
+			}
 
 			found[name] = bytes;
 
 			foreach ( Match match in Reference.Matches( System.Text.Encoding.Latin1.GetString( bytes ) ) )
 				queue.Enqueue( match.Value );
+		}
+
+		if ( incomplete.Count > 0 )
+		{
+			Log.Warning( $"sent_assets: {ident}: {incomplete.Count} texture(s) are copied without their top mip level, because the engine has "
+			             + "not downloaded their whole file yet; they will show as noise up close. Spawn the sent once (spawn_sent) so the engine "
+			             + $"streams them, then run sent_assets {ident} again. First: {incomplete.First()}" );
 		}
 
 		var files = found.OrderBy( x => x.Key ).ToList();
@@ -259,6 +274,30 @@ public static class SentAssets
 	}
 
 	static Dictionary<long, List<string>> webTextures;
+
+	// A texture bigger than 256 pixels keeps its top mips out of the resident file, so one that is not whole is cut short.
+	static bool IsStreamed( byte[] file )
+	{
+		try
+		{
+			var blocks = BitConverter.ToInt32( file, 12 );
+			var offset = 8 + BitConverter.ToInt32( file, 8 );
+
+			for ( var i = 0; i < blocks; i++, offset += 12 )
+			{
+				if ( System.Text.Encoding.ASCII.GetString( file, offset, 4 ) != "DATA" )
+					continue;
+
+				var data = offset + 4 + BitConverter.ToInt32( file, offset + 4 );
+				return Math.Max( BitConverter.ToUInt16( file, data + 20 ), BitConverter.ToUInt16( file, data + 22 ) ) > 256;
+			}
+		}
+		catch ( Exception )
+		{
+		}
+
+		return false;
+	}
 
 	static List<string> ListOf( string sourceFile )
 	{
