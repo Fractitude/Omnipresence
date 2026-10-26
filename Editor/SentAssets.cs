@@ -27,8 +27,21 @@ public static class SentAssets
 		@"[A-Za-z0-9_\-./]+\.(?:vmdl|vmat|vtex|vsnd|sound|vanmgrph|vpcf|vmorph|vagrp|vphys|vseq|vrmap|clip)",
 		RegexOptions.IgnoreCase );
 
-	// Folders of the engine's own assets (and of cloud packages the engine mounts): a copy here would shadow the real ones.
-	static readonly string[] EngineRoots = ["models", "textures", "materials", "shaders", "particles", "effects"];
+	/// <summary>
+	/// The engine's own compiled assets (<c>core/shaders/complex.shader_c</c>): a copy of one in the project would
+	/// shadow it, so what is there is left alone. A package's own shaders (<c>shaders/drift_wrap_paint.shader</c>)
+	/// are not, and are copied.
+	/// </summary>
+	static string CoreRoot()
+	{
+		for ( var dir = Path.GetDirectoryName( Environment.ProcessPath ); dir is not null; dir = Path.GetDirectoryName( dir ) )
+		{
+			if ( Directory.Exists( Path.Combine( dir, "core" ) ) )
+				return Path.Combine( dir, "core" );
+		}
+
+		return null;
+	}
 
 	[ConCmd( "sent_assets" )]
 	public static void Run( string ident ) => _ = ImportAsync( ident );
@@ -59,18 +72,25 @@ public static class SentAssets
 		// Has the engine fetch the package, so its files are in the download folder.
 		await SentLocal.Mount( ident );
 
+		var core = CoreRoot();
 		var starts = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
 		foreach ( var prefab in Directory.EnumerateFiles( folder, "*.prefab" ) )
 			AddReferences( starts, File.ReadAllText( prefab ) );
 
-		// Code names assets too (a sound, a particle) in strings.
+		// Code names assets too (a sound, a particle) in strings: those in a folder the prefab itself uses are this
+		// sent's (the code of every sent is searched, as a car's shared code is in another sent's folder).
+		var prefabRoots = starts.Select( x => x.Split( '/' )[0] ).ToHashSet( StringComparer.OrdinalIgnoreCase );
 		var imported = Path.Combine( root, "Code", "Sents", "Imported" );
 
 		if ( Directory.Exists( imported ) )
 		{
+			var fromCode = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+
 			foreach ( var code in Directory.EnumerateFiles( imported, "*.cs", SearchOption.AllDirectories ) )
-				AddReferences( starts, File.ReadAllText( code ) );
+				AddReferences( fromCode, File.ReadAllText( code ) );
+
+			starts.UnionWith( fromCode.Where( x => prefabRoots.Contains( x.Split( '/' )[0] ) ) );
 		}
 
 		var found = new Dictionary<string, byte[]>( StringComparer.OrdinalIgnoreCase );
@@ -85,6 +105,9 @@ public static class SentAssets
 			if ( found.ContainsKey( name ) || !FileSystem.Mounted.FileExists( name ) )
 				continue;
 
+			if ( core is not null && File.Exists( Path.Combine( core, name.Replace( '/', Path.DirectorySeparatorChar ) ) ) )
+				continue;
+
 			var bytes = FileSystem.Mounted.ReadAllBytes( name ).ToArray();
 			found[name] = bytes;
 
@@ -92,13 +115,8 @@ public static class SentAssets
 				queue.Enqueue( match.Value );
 		}
 
-		// The code's strings reach every sent's assets; only what is under a folder the prefab itself uses is this sent's.
-		var prefabRoots = starts.Where( x => IsInPrefab( folder, x ) )
-			.Select( x => x.Split( '/' )[0] )
-			.Where( x => !EngineRoots.Contains( x, StringComparer.OrdinalIgnoreCase ) )
-			.ToHashSet( StringComparer.OrdinalIgnoreCase );
-
-		var files = found.Where( x => prefabRoots.Contains( x.Key.Split( '/' )[0] ) ).OrderBy( x => x.Key ).ToList();
+		var files = found.OrderBy( x => x.Key ).ToList();
+		var tops = files.Select( x => x.Key.Split( '/' )[0] ).Distinct( StringComparer.OrdinalIgnoreCase ).ToList();
 		var assets = Path.Combine( root, "Assets" );
 		var written = 0;
 
@@ -115,7 +133,7 @@ public static class SentAssets
 		}
 
 		// *_c is git-ignored (compiled assets); these are not the editor's output, so they are kept.
-		foreach ( var top in prefabRoots )
+		foreach ( var top in tops )
 		{
 			var ignore = Path.Combine( assets, top, ".gitignore" );
 
@@ -125,7 +143,7 @@ public static class SentAssets
 
 		WriteList( sourceFile, files.Select( x => x.Key ).ToList() );
 		Log.Info( $"sent_assets: {ident}: {files.Count} asset file(s) in the project, {written} copied, under "
-		          + $"{string.Join( ", ", prefabRoots.Select( x => $"Assets/{x}/" ) )}. The workshop is no longer needed for them." );
+		          + $"{string.Join( ", ", tops.Select( x => $"Assets/{x}/" ) )}. The workshop is no longer needed for them." );
 
 		return files.Count;
 	}
@@ -185,9 +203,6 @@ public static class SentAssets
 
 		return true;
 	}
-
-	static bool IsInPrefab( string folder, string reference ) =>
-		Directory.EnumerateFiles( folder, "*.prefab" ).Any( x => File.ReadAllText( x ).Contains( reference, StringComparison.OrdinalIgnoreCase ) );
 
 	static void AddReferences( HashSet<string> into, string text )
 	{
