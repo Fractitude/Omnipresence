@@ -62,6 +62,31 @@ a `CombineNpc`. Here they share one assembly, and a prefab's plain `"CombineNpc"
 `SentPackage.cs` beside the code with the namespaces the package declares, and the data build names each component by the
 first of them that has the type (`Hl2Metrocop.CombineNpc`). Nothing is kept by hand.
 
+Why upstream never has this problem, read from the engine (`sbox/bin/managed`, this install):
+
+- Every package's code is compiled into **its own assembly**, named `package.<ident>`
+  (`Compiler.cs`: `AssemblyName = "package." + name`), shipped as `download/assets/_bin/package_<ident>.<hash>.cll`.
+  `PackageLoader` loads each into its own collectible `IsolatedAssemblyContext`, keyed by assembly name, so two packages
+  are two assemblies and their types simply coexist.
+- Nothing renames or prefixes a namespace: the types in a published `.cll` are exactly as the author wrote them
+  (`package.tiowevolve.npctank` has `TankAi` in the global namespace and a `Sandbox.Healthbar`).
+- A prefab refers to a component by its **full** type name, so it is unique as long as the author's namespace is:
+  the four Combine sents ship `Hl2Combine.CombineNpc`, `Hl2CombineElite.CombineNpc`, `Hl2CombinePrisonGuard.CombineNpc`
+  and `Hl2Metrocop.CombineNpc` — the same class name, four different namespaces, written by hand in each project.
+- Resolution is by name only, and the engine picks the **first** of equals without a word: `GameObject` deserialization
+  asks `TypeLibrary.GetType<Component>( __type, preferAddonAssembly: true )` (`GameObject.cs`), which matches `FullName`
+  first — then, only if nothing matched, the short name after the last dot, and finally makes a `MissingComponent`.
+  So two packages with the *same* full name are silently one class, whichever the type library happens to answer first.
+- A dependency (a library package a sent refers to) is referenced by assembly name and loaded before the sent's own
+  code (`PackageLoader.LoadPackage` walks `EnumeratePackageReferences()`); both sents then share that one assembly, so a
+  shared library is never imported twice. One version per ident is loaded — `PackageManager.Find` takes the first
+  active package by name — so two sents wanting different versions of one library cannot both be right.
+
+The lesson for us: the collisions we hit on import are the ones where two packages use the same namespace *and* class
+name, which upstream resolves by never putting them in one assembly. Ours share `omnipresence`, so identical full names
+must still be renamed (or one of them dropped) by hand; names that differ only by class name already work through the
+data build.
+
 ## Who may spawn
 
 A sent can carry code (`IncludeCode`) that runs in the game with no sandbox, permissions or prompt, as with a Navi
