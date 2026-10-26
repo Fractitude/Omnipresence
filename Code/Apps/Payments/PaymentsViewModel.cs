@@ -207,7 +207,7 @@ public sealed class PaymentsViewModel
 		if ( !result.Ok )
 			notice = result.Failure == TxFailure.Insufficient && !crypto ? "Not enough money." : result.Message;
 		else
-			Succeeded( crypto ? $"{value:N0} crypto" : $"${value:N0}", to.DisplayName );
+			Succeeded( crypto ? $"{value:N0}" : $"${value:N0}", to.DisplayName );
 	}
 
 	void Succeeded( string amountText, string name )
@@ -353,14 +353,12 @@ public sealed class PaymentsViewModel
 	static PaymentRow ToRow( TransactionEntry entry )
 	{
 		var incoming = entry.Amount > 0;
-		var when = $"{WorldClock.Format( entry.At )} - {LabelOf( entry )}";
+		var crypto = entry.Currency == TransactionCurrency.Crypto;
 
-		var amount = entry.Currency == TransactionCurrency.Crypto
-			? $"{(incoming ? "+" : "-")}{Math.Abs( entry.Amount ):N0} crypto"
-			: $"{(incoming ? "+" : "-")}${Math.Abs( entry.Amount ):N0}";
+		var amount = $"{(incoming ? "+" : "-")}{(crypto ? "" : "$")}{Math.Abs( entry.Amount ):N0}";
 
-		return new PaymentRow( string.IsNullOrEmpty( entry.PeerName ) ? "Unknown" : entry.PeerName, amount, when,
-			incoming );
+		return new PaymentRow( string.IsNullOrEmpty( entry.PeerName ) ? "Unknown" : entry.PeerName, amount,
+			LabelOf( entry ), WorldClock.Format( entry.At ), incoming, crypto );
 	}
 
 	/// <summary>What the activity list calls a transaction: its kind, and the note when there is one.</summary>

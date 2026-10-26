@@ -28,7 +28,13 @@
 				<div class="ring late"></div>
 				<div class="badge"><i>check</i></div>
 			</div>
-			<div class="sent-amount">@UiState.SentAmount</div>
+			<div class="sent-amount">
+				<div class="figure">@UiState.SentAmount</div>
+				@if ( UiState.Currency == PaymentsCurrency.Crypto )
+				{
+					<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+				}
+			</div>
 			<div class="sent-to">sent to @paid.Name</div>
 			<div class="button done" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )>Done</div>
 		</div>
@@ -44,9 +50,14 @@
 			<div class="avatar big">@target.Initial</div>
 			<div class="recipient-name">@target.Name</div>
 			<div class="recipient-hint">
-				@( UiState.Currency == PaymentsCurrency.Crypto
-					? $"Available: {UiState.Crypto} crypto"
-					: $"Available: {UiState.Balance}" )
+				<div class="caption">Available</div>
+				<div class="figure">
+					@( UiState.Currency == PaymentsCurrency.Crypto ? UiState.Crypto : UiState.Balance )
+				</div>
+				@if ( UiState.Currency == PaymentsCurrency.Crypto )
+				{
+					<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+				}
 			</div>
 		</div>
 
@@ -66,7 +77,7 @@
 			           OnTextEdited=@AmountEdited/>
 			@if ( UiState.Currency == PaymentsCurrency.Crypto )
 			{
-				<div class="unit">crypto</div>
+				<div class="coin-mark unit">@PaymentsUiState.CryptoSymbol</div>
 			}
 		</div>
 
@@ -110,7 +121,10 @@
 			</div>
 			<div class="holding">
 				<div class="holding-label">Crypto</div>
-				<div class="holding-value">@UiState.Crypto</div>
+				<div class="holding-value">
+					<div class="figure">@UiState.Crypto</div>
+					<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+				</div>
 			</div>
 		</div>
 
@@ -153,7 +167,10 @@
 				<div class="card-owner">@UiState.Owner</div>
 			</div>
 			<div class="balance">@UiState.Balance</div>
-			<div class="card-crypto">@UiState.Crypto crypto</div>
+			<div class="card-crypto">
+				<div class="figure">@UiState.Crypto</div>
+				<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+			</div>
 		</div>
 
 		<div class="action-row" @onclick=@( () => Navi.Act( PaymentsViewModel.ExchangeAction ) )>
@@ -201,10 +218,21 @@
 					<div class="row">
 						<div class="avatar @( row.Incoming ? "in" : "out" )">@row.Initial</div>
 						<div class="details">
-							<div class="peer">@row.Peer</div>
-							<div class="when">@row.When</div>
+							<div class="top">
+								<div class="peer">@row.Peer</div>
+								<div class="amount @( row.Incoming ? "in" : "out" )">
+									<div class="figure">@row.Amount</div>
+									@if ( row.Crypto )
+									{
+										<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+									}
+								</div>
+							</div>
+							<div class="meta">
+								<div class="kind">@row.Kind</div>
+								<div class="when">@row.When</div>
+							</div>
 						</div>
-						<div class="amount-text @( row.Incoming ? "in" : "out" )">@row.Amount</div>
 					</div>
 				}
 			</div>
