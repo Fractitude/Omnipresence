@@ -73,6 +73,7 @@ public static class SentAssets
 		await SentLocal.Mount( ident );
 
 		var core = CoreRoot();
+		webTextures = null;
 		var starts = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
 		foreach ( var prefab in Directory.EnumerateFiles( folder, "*.prefab" ) )
