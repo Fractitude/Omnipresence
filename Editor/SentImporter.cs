@@ -32,7 +32,7 @@ public static class SentImporter
 	/// <summary>
 	/// One source file of a package.
 	/// </summary>
-	sealed record Document( string Path, string Text );
+	internal sealed record Document( string Path, string Text );
 
 	enum Fate
 	{
@@ -198,7 +198,7 @@ public static class SentImporter
 	/// <summary>
 	/// The newest download of a package: the file the engine keeps the package's code in.
 	/// </summary>
-	static FileInfo FindPackage( string ident )
+	internal static FileInfo FindPackage( string ident )
 	{
 		var bin = Path.Combine( Path.GetDirectoryName( Environment.ProcessPath ), "download", "assets", "_bin" );
 
@@ -213,7 +213,7 @@ public static class SentImporter
 	/// <summary>
 	/// The source files inside a package. They are JSON arrays of { Text, LocalPath } in the package's container.
 	/// </summary>
-	static List<Document> ReadDocuments( FileInfo package )
+	internal static List<Document> ReadDocuments( FileInfo package )
 	{
 		string text;
 

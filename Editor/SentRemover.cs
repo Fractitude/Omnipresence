@@ -1,25 +1,20 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace Sandbox;
 
 /// <summary>
 /// <c>sent_remove org.package</c>: takes an integrated or imported sent out of the project again. Its prefab folder
 /// (<c>Assets/sents/&lt;ident&gt;/</c>) is only its own and goes whole. In its code folder
-/// (<c>Code/Sents/Imported/&lt;ident&gt;/</c>) a file stays if a type it declares is named by anything else that is
-/// kept: another import's code, <c>Code/Sents/Ported/</c> or another sent's prefab. That is how a library one author's
-/// sents share (imported once, into the first sent's folder, see <see cref="SentImporter"/>) survives the removal of
-/// the sent that carried it. A file that only a kept file needs stays too.
-/// <para>
-/// The test is by name, so it errs towards keeping: a file stays if its type's name appears anywhere in the others.
-/// </para>
+/// (<c>Code/Sents/Imported/&lt;ident&gt;/</c>) a file stays if another import relies on it: a library one author's
+/// sents share is imported once, into the first sent's folder, and the later sents leave those files out
+/// (<see cref="SentImporter"/>). So for every other import, the files its package has and its folder has not are the
+/// ones it needs from elsewhere, and a file here with such a name stays. This is read from the packages, not guessed
+/// from the code: a name test misses extension methods and namespaces. If another import's package is not downloaded
+/// the removal is refused, as its needs are not known.
 /// </summary>
 public static class SentRemover
 {
-	static readonly Regex TypePattern = new( @"\b(?:class|struct|enum|interface|record)\s+([A-Za-z_]\w*)" );
-	static readonly Regex Word = new( @"\b[A-Za-z_]\w*\b" );
-
 	[ConCmd( "sent_remove" )]
 	public static void Remove( string ident ) => RemoveSent( ident );
 
@@ -37,10 +32,8 @@ public static class SentRemover
 		}
 
 		var root = Project.Current.GetRootPath();
-		var prefabs = Path.Combine( root, "Assets", "sents" );
 		var importedRoot = Path.Combine( root, "Code", "Sents", "Imported" );
-		var portedRoot = Path.Combine( root, "Code", "Sents", "Ported" );
-		var prefabFolder = Path.Combine( prefabs, ident );
+		var prefabFolder = Path.Combine( root, "Assets", "sents", ident );
 		var codeFolder = Path.Combine( importedRoot, ident );
 
 		if ( !Directory.Exists( prefabFolder ) && !Directory.Exists( codeFolder ) )
@@ -49,51 +42,53 @@ public static class SentRemover
 			return false;
 		}
 
-		// Everything the rest of the project names: the words of every other sent's code and prefabs.
-		var used = new HashSet<string>();
+		var needed = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
-		foreach ( var folder in SiblingFolders( importedRoot, codeFolder ).Append( portedRoot ) )
-			AddWords( used, folder, "*.cs", "*.razor" );
+		if ( Directory.Exists( importedRoot ) )
+		{
+			foreach ( var other in Directory.GetDirectories( importedRoot ) )
+			{
+				var otherIdent = Path.GetFileName( other );
 
-		foreach ( var folder in SiblingFolders( prefabs, prefabFolder ) )
-			AddWords( used, folder, "*.prefab" );
+				if ( otherIdent.Equals( ident, StringComparison.OrdinalIgnoreCase ) )
+					continue;
+
+				var package = SentImporter.FindPackage( otherIdent );
+
+				if ( package is null )
+				{
+					Log.Warning( $"sent_remove: nothing was removed. The package of {otherIdent} is not downloaded, so what it "
+					             + $"needs from {ident} is not known: spawn it once (spawn_sent {otherIdent}), then try again." );
+					return false;
+				}
+
+				foreach ( var document in SentImporter.ReadDocuments( package ) )
+				{
+					var local = Path.Combine( other, document.Path.Replace( '/', Path.DirectorySeparatorChar ) );
+
+					if ( !File.Exists( local ) )
+						needed.Add( Path.GetFileName( document.Path ) );
+				}
+			}
+		}
 
 		var kept = new List<string>();
 		var removed = 0;
 
 		if ( Directory.Exists( codeFolder ) )
 		{
-			var files = Directory.EnumerateFiles( codeFolder, "*", SearchOption.AllDirectories )
-				.Where( x => !Path.GetFileName( x ).Equals( "SentPackage.cs", StringComparison.OrdinalIgnoreCase ) )
-				.ToDictionary( x => x, Declared );
-
-			// A kept file brings the words it uses into play, so what it needs stays as well.
-			bool changed;
-
-			do
+			foreach ( var file in Directory.EnumerateFiles( codeFolder, "*", SearchOption.AllDirectories ).ToList() )
 			{
-				changed = false;
-
-				foreach ( var (file, declared) in files.ToList() )
+				if ( needed.Contains( Path.GetFileName( file ) ) )
 				{
-					if ( kept.Contains( file ) || !IsStyleOf( file, kept ) && !declared.Any( used.Contains ) )
-						continue;
-
 					kept.Add( file );
-					changed = true;
-
-					if ( Path.GetExtension( file ) is ".cs" or ".razor" )
-						AddWords( used, File.ReadAllText( file ) );
+					continue;
 				}
-			} while ( changed );
 
-			foreach ( var file in files.Keys.Except( kept ) )
-			{
 				File.Delete( file );
 				removed++;
 			}
 
-			File.Delete( Path.Combine( codeFolder, "SentPackage.cs" ) );
 			DeleteEmptyFolders( codeFolder );
 		}
 
@@ -115,57 +110,6 @@ public static class SentRemover
 		Log.Info( message + "." );
 		return true;
 	}
-
-	static IEnumerable<string> SiblingFolders( string parent, string own ) =>
-		Directory.Exists( parent )
-			? Directory.GetDirectories( parent ).Where( x => !SamePath( x, own ) )
-			: [];
-
-	static bool SamePath( string a, string b ) =>
-		string.Equals( Path.GetFullPath( a ).TrimEnd( '\\', '/' ), Path.GetFullPath( b ).TrimEnd( '\\', '/' ),
-			StringComparison.OrdinalIgnoreCase );
-
-	static void AddWords( HashSet<string> words, string folder, params string[] patterns )
-	{
-		foreach ( var pattern in patterns )
-		{
-			if ( !Directory.Exists( folder ) )
-				continue;
-
-			foreach ( var file in Directory.EnumerateFiles( folder, pattern, SearchOption.AllDirectories ) )
-				AddWords( words, File.ReadAllText( file ) );
-		}
-	}
-
-	static void AddWords( HashSet<string> words, string text )
-	{
-		foreach ( Match match in Word.Matches( text ) )
-			words.Add( match.Value );
-	}
-
-	// The names a file stands for: the types it declares, and a razor panel's file name.
-	static List<string> Declared( string file )
-	{
-		var extension = Path.GetExtension( file ).ToLowerInvariant();
-
-		if ( extension is not (".cs" or ".razor") )
-			return [];
-
-		var names = TypePattern.Matches( File.ReadAllText( file ) ).Select( m => m.Groups[1].Value ).ToList();
-
-		if ( extension == ".razor" )
-			names.Add( Path.GetFileNameWithoutExtension( file ) );
-
-		return names;
-	}
-
-	// A stylesheet follows the razor panel of the same name.
-	static bool IsStyleOf( string file, List<string> kept ) =>
-		file.EndsWith( ".scss", StringComparison.OrdinalIgnoreCase ) || file.EndsWith( ".css", StringComparison.OrdinalIgnoreCase )
-			? kept.Any( x => x.EndsWith( ".razor", StringComparison.OrdinalIgnoreCase )
-			                 && Path.GetFileNameWithoutExtension( file ).StartsWith( Path.GetFileNameWithoutExtension( x ),
-				                 StringComparison.OrdinalIgnoreCase ) )
-			: false;
 
 	static void DeleteEmptyFolders( string folder )
 	{
