@@ -67,8 +67,8 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
   that sits beside a heading), `menu-empty`, `menu-notice`, `menu-hint`, and `warn` / `urgent` for deadlines
   (`CrimeCatalog.DeadlineClass`). They work on everything inside the window, whatever file made it. **But a
   `.razor.scss` loads with its own panel, not with the project**: these rules are in effect only while a `MenuWindow`
-  exists, so a window that is not one draws them as plain text — the Character menu carries its own copy of the button
-  it borrows (`CharacterMenu.razor.scss`, `.sort-button`).
+  exists, so a window that is not one draws them as plain text — the Character menu's bag carries its own copy of the
+  button it borrows (`InventoryGrid.razor.scss`, `.sort-button`).
 - A window that has more than one list of its own (the storage grids) puts them in its own `body`; the window never grows
   past the screen, and `body` scrolls (`overflow: scroll`).
 

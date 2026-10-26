@@ -3,7 +3,13 @@
 @namespace Sandbox
 
 <root>
-	<div class="heading">Inventory</div>
+	<div class="heading-row">
+		<div class="heading">Inventory</div>
+		@if ( Inventory is not null )
+		{
+			<div class="sort-button" @onclick=@( () => PlayerInventory.Local?.Sort() )>Sort</div>
+		}
+	</div>
 	<div class="hint">@StackDrag.Hint</div>
 	@if ( Inventory is { } inventory )
 	{

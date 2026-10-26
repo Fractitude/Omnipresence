@@ -3,10 +3,40 @@ InventoryGrid
 	flex-direction: column;
 	gap: 10px;
 
+	// The heading and the Sort button on the same line, the button at the right end: the panel is as wide as the grid,
+	// which is the window's right edge.
+	.heading-row
+	{
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
 	.heading
 	{
 		font-size: 22px;
 		font-weight: 700;
+	}
+
+	// The Sort button, looking like the small `.menu-button` of the other windows. Those rules live in
+	// MenuWindow.razor.scss, which loads only with a MenuWindow, and this menu is not one, so the few lines are here.
+	.sort-button
+	{
+		flex-shrink: 0;
+		padding: 4px 12px;
+		font-size: 13px;
+		font-weight: 700;
+		white-space: nowrap;
+		border-radius: 6px;
+		background-color: rgba(127, 209, 255, 0.25);
+		border: 1px solid rgba(127, 209, 255, 0.6);
+		cursor: pointer;
+
+		&:hover
+		{
+			background-color: rgba(127, 209, 255, 0.4);
+		}
 	}
 
 	.hint
