@@ -9,6 +9,9 @@
   "integrated": "2026-10-25",
   "includesCode": true,
   "code": "Code/Sents/Imported/hl2npcs.metrocop/",
+  "codeFile": "package_hl2npcs_metrocop.63c08cf5e41ed40e.cll",
+  "codeSha256": "7ac4602c621bec4b69d66c993bf828e2d1291120efd22ba293bcc5905d595a6c",
+  "codeSize": 110470,
   "namespaces": [
     "Hl2Metrocop"
   ],

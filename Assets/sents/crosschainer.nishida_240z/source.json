@@ -9,6 +9,9 @@
   "integrated": "2026-10-26",
   "includesCode": true,
   "code": "Code/Sents/Imported/crosschainer.nishida_240z/",
+  "codeFile": "package_crosschainer_nishida_240z.39c1a65b12e2a81e.cll",
+  "codeSha256": "86414a58d5559a54440e11ea1991b09eb4ae648b992866ee1e5a9d6af963a622",
+  "codeSize": 13133,
   "namespaces": [
     "CuratedVehicles"
   ],
