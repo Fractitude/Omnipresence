@@ -538,6 +538,9 @@ public sealed class PaymentsViewModel
 		var affordable = Affordable( wallet );
 		var feePercent = spendsCrypto ? Venue.SellFeePercent : Venue.BuyFeePercent;
 
+		// What the player would have of the currency coming in once the deal is done, not just what this deal brings.
+		var held = received == PaymentsCurrency.Crypto ? wallet?.Crypto ?? 0 : wallet?.Cash ?? 0;
+
 		var hint = "";
 		if ( purse < 1 )
 			hint = NothingText( convert, spendsCrypto );
@@ -559,6 +562,7 @@ public sealed class PaymentsViewModel
 			FeeText = $"{feePercent}% · -{AmountText( fee, spent )}",
 			ResultFigure = received == PaymentsCurrency.Dollars ? $"${gets:N0}" : $"{gets:N0}",
 			ResultText = AmountText( gets, received ),
+			HoldingText = AmountText( held + gets, received ),
 			Hint = hint,
 			ActionLabel = convert
 				? $"Convert to {UnitName( received )}"

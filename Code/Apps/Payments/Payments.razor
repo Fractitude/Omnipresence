@@ -207,8 +207,8 @@
 				<div class="hint">@exchange.Hint</div>
 			}
 
-			@* What the deal costs, on every tab: the rate, the cut, and — where the result is not already the big figure *@
-			@* of a row above — what comes back. *@
+			@* What the deal costs, on every tab: the rate, the cut, and — where the result is not already the big *@
+			@* figure of a row above — what comes back. *@
 			<div class="deal">
 				<div class="deal-row">
 					<div class="deal-label">Rate</div>
@@ -223,6 +223,10 @@
 					<div class="deal-row">
 						<div class="deal-label">You get</div>
 						<div class="deal-value strong">@exchange.ResultText</div>
+					</div>
+					<div class="deal-row">
+						<div class="deal-label">You'll have</div>
+						<div class="deal-value">@exchange.HoldingText</div>
 					</div>
 				}
 			</div>
@@ -347,7 +351,7 @@
 
 	TextEntry ExchangeEntry { get; set; }
 
-	/// <summary>The trade count the field was last emptied for; -1 until the first frame of the Exchange screen.</summary>
+	/// <summary>The trade count the field was last emptied for; -1 until the Exchange screen's first frame.</summary>
 	int settledSeen = -1;
 
 	/// <summary>The confirm button says what it sends, so nobody sends Ethereum thinking they sent dollars.</summary>
@@ -408,8 +412,8 @@
 	}
 
 	/// <summary>
-	/// A quick button fills the field itself, with the digits the host works out for it too, because the field keeps what
-	/// was typed into it and would not take them from the state.
+	/// A quick button fills the field itself, with the digits the host works out for it too: the field keeps what was
+	/// typed into it and would not take them from the state.
 	/// </summary>
 	void PickQuick( QuickChip chip )
 	{

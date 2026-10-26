@@ -163,6 +163,9 @@ public sealed record ExchangeView
 
 	public string ResultText { get; init; } = "";
 
+	/// <summary>What the player would hold of the currency coming in once the deal is done: balance plus this.</summary>
+	public string HoldingText { get; init; } = "";
+
 	/// <summary>A line about the amount: that there is nothing to deal with, or that it is more than there is.</summary>
 	public string Hint { get; init; } = "";
 
