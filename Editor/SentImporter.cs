@@ -306,7 +306,8 @@ public static class SentImporter
 
 		if ( Directory.EnumerateFiles( codeRoot, Path.GetFileName( path ), SearchOption.AllDirectories )
 			    .Where( x => !x.StartsWith( importedRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase ) )
-			    .Any( x => DeclaresSameTypes( File.ReadAllText( x ), document.Text ) ) )
+			    .Any( x => path.EndsWith( ".razor", StringComparison.OrdinalIgnoreCase )
+			    || DeclaresSameTypes( File.ReadAllText( x ), document.Text ) ) )
 			return Fate.Superseded;
 
 		// A library several sents carry (one author's shared vehicle code) is imported once. A second copy would
