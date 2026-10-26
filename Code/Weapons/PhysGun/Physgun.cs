@@ -230,12 +230,11 @@ public partial class Physgun
 	Transform _lastAimTransform;
 
 	/// <summary>
-	/// Where the crosshair is on this frame: the point <see cref="AimRay"/> meets, traced once in
-	/// <see cref="OnControl"/>. In third person the camera sits behind and beside the player, so the camera's aim ray
-	/// and a ray from the player's eyes meet a wall at different points.
+	/// The point under the crosshair, worked out in <see cref="UpdateCrosshair"/> once a frame while the physgun is
+	/// being controlled. Null when there is nothing to correct: in first person, where the eyes are on the camera's own
+	/// line, and while the physgun is holstered and its control isn't running.
 	/// </summary>
-	Vector3 _crosshairPoint;
-	bool _crosshairHit;
+	Vector3? _crosshair;
 
 	Transform CurrentAimTransform => HasOwner ? (IsProxy ? Owner.EyeTransform : AimTransform) : _lastAimTransform;
 
@@ -370,7 +369,7 @@ public partial class Physgun
 	{
 		var player = Owner;
 
-		UpdateCrosshairPoint();
+		UpdateCrosshair();
 		_lastAimTransform = AimTransform;
 
 		// Spinning a held object takes the mouse; looking around is off meanwhile.
@@ -777,58 +776,34 @@ public partial class Physgun
 
 			// In third person the aim ray starts at the camera; hold from the player's eyes, as in first person
 			var position = HasOwner ? Owner.EyeTransform.Position : ray.Position;
-			var forward = ray.Forward;
-
-			// ...and point that ray at what the crosshair is on. The camera is offset from the eyes, so its own
-			// direction only passes beside the crosshair's point when it is traced from the eyes.
-			if ( HasOwner && _crosshairHit )
-			{
-				var toCrosshair = _crosshairPoint - position;
-
-				// Right on top of the player, or behind them: nothing useful to aim at, so keep the camera's direction
-				if ( toCrosshair.Length > 16.0f && toCrosshair.Normal.Dot( ray.Forward ) > 0.2f )
-					forward = toCrosshair.Normal;
-			}
+			var forward = HasOwner && _crosshair is { } crosshair ? (crosshair - position).Normal : ray.Forward;
 
 			return new Transform( position, Rotation.LookAt( forward ) );
 		}
 	}
 
 	/// <summary>
-	/// Finds where the crosshair is, for <see cref="AimTransform"/>. Only needed in third person: in first person the
-	/// eyes are on the aim ray, so the ray already points at the crosshair.
+	/// Works out <see cref="_crosshair"/> for <see cref="AimTransform"/>. In third person the camera sits behind and
+	/// beside the eyes, so a ray from the eyes along the camera's forward passes beside the crosshair. Take what that
+	/// ray reaches, slide it onto the camera's line - which keeps its depth - and aim the eyes there, so the beam lands
+	/// under the crosshair. A ray that reaches nothing ends at its range, which slides to nearly straight ahead.
 	/// </summary>
-	void UpdateCrosshairPoint()
+	void UpdateCrosshair()
 	{
-		_crosshairHit = false;
+		_crosshair = null;
 
 		if ( !HasOwner || IsProxy || !Owner.ThirdPerson ) return;
 
 		var ray = AimRay;
-
-		// What the crosshair is on, traced from the camera, exactly as the engine's guns do
-		var tr = Scene.Trace.Ray( ray.Position, ray.Position + ray.Forward * Range )
-			.IgnoreGameObjectHierarchy( GameObject.Root )
-			.Run();
-
-		if ( tr.Hit )
-		{
-			_crosshairPoint = tr.EndPosition;
-			_crosshairHit = true;
-			return;
-		}
-
-		// The camera is inside something (a tight room, a doorway), so its own ray reports nothing. Keep the depth the
-		// beam reaches from the eyes, and slide that point onto the crosshair's line, so the beam still lands in the
-		// middle of the screen.
 		var eye = Owner.EyeTransform.Position;
-		var eyeTrace = Scene.Trace.Ray( eye, eye + ray.Forward * Range )
+		var tr = Scene.Trace.Ray( eye, eye + ray.Forward * Range )
 			.IgnoreGameObjectHierarchy( GameObject.Root )
 			.Run();
 
-		var reached = eyeTrace.EndPosition;
-		_crosshairPoint = ray.Position + ray.Forward * (reached - ray.Position).Dot( ray.Forward );
-		_crosshairHit = true;
+		// Right on top of the player: the correction would swing the aim anywhere, so leave it straight ahead
+		if ( tr.EndPosition.Distance( eye ) < 16.0f ) return;
+
+		_crosshair = ray.Position + ray.Forward * (tr.EndPosition - ray.Position).Dot( ray.Forward );
 	}
 
 	bool CanMove( GrabState state )
