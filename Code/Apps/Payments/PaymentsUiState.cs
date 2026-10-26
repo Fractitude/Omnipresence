@@ -123,8 +123,11 @@ public sealed record PayeeRow( string Id, string Name )
 	public string Initial => PaymentsUiState.InitialOf( Name );
 }
 
-/// <summary>One of the quick buttons under the amount: what it says, and the key the view model reads it as.</summary>
-public sealed record QuickChip( string Label, string Key );
+/// <summary>
+/// One of the quick buttons under the amount: what it says, the key the view model reads it as, and the digits it fills
+/// the field with.
+/// </summary>
+public sealed record QuickChip( string Label, string Key, string Digits );
 
 /// <summary>
 /// The Exchange screen, worked out whole by <see cref="PaymentsViewModel"/>: the amount being typed, what it deals at
@@ -168,6 +171,12 @@ public sealed record ExchangeView
 
 	/// <summary>The four quick buttons.</summary>
 	public IReadOnlyList<QuickChip> Quick { get; init; } = [];
+
+	/// <summary>
+	/// How many trades have gone through while the screen was open. The panel empties its amount field when this moves:
+	/// the field keeps its own text, so the host clearing the amount doesn't reach it on its own.
+	/// </summary>
+	public int Settled { get; init; }
 }
 
 /// <summary>

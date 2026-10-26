@@ -64,6 +64,7 @@ public sealed class PaymentsViewModel
 	string sentTo = "";
 	string notice = "";
 	bool noticeGood;
+	int settled;
 	Guid lastSeatId;
 	string signature;
 	int revision;
@@ -358,7 +359,10 @@ public sealed class PaymentsViewModel
 		Say( result.Message, result.Ok );
 
 		if ( result.Ok )
+		{
 			exchangeAmount = "";
+			settled++;
+		}
 	}
 
 	/// <summary>Whether the deal spends Ethereum (selling) rather than spending dollars (buying).</summary>
@@ -559,27 +563,33 @@ public sealed class PaymentsViewModel
 			ActionLabel = convert
 				? $"Convert to {UnitName( received )}"
 				: spendsCrypto ? $"Sell {PaymentsUiState.CryptoUnit}" : $"Buy {PaymentsUiState.CryptoUnit}",
-			Quick = QuickChips( tab, typedIn ),
+			Quick = QuickChips( tab, typedIn, affordable ),
+			Settled = settled,
 		};
 	}
 
 	/// <summary>
 	/// The four buttons under the amount: a share of everything there is for Convert, where the point is to change all of
-	/// a holding, and a round amount in the currency being typed for Buy and Sell.
+	/// a holding, and a round amount in the currency being typed for Buy and Sell. Each carries the digits it fills in,
+	/// worked out here rather than in the panel, so the field and the amount the host deals agree.
 	/// </summary>
-	static IReadOnlyList<QuickChip> QuickChips( ExchangeTab tab, PaymentsCurrency typedIn )
+	static IReadOnlyList<QuickChip> QuickChips( ExchangeTab tab, PaymentsCurrency typedIn, long all )
 	{
 		if ( tab == ExchangeTab.Convert )
-			return [new( "25%", "p25" ), new( "50%", "p50" ), new( "75%", "p75" ), new( "Max", AllAmount )];
+			return Quick( all, ("25%", "p25", 25), ("50%", "p50", 50), ("75%", "p75", 75), ("Max", AllAmount, 100) );
 
 		return
 		[
-			new( AmountText( 10, typedIn ), "10" ),
-			new( AmountText( 50, typedIn ), "50" ),
-			new( AmountText( 100, typedIn ), "100" ),
-			new( "Max", AllAmount ),
+			new( AmountText( 10, typedIn ), "10", "10" ),
+			new( AmountText( 50, typedIn ), "50", "50" ),
+			new( AmountText( 100, typedIn ), "100", "100" ),
+			new( "Max", AllAmount, Digits( all.ToString() ) ),
 		];
 	}
+
+	/// <summary>Quick buttons that deal a share of everything there is, in percent.</summary>
+	static IReadOnlyList<QuickChip> Quick( long all, params (string Label, string Key, int Percent)[] shares ) =>
+		shares.Select( x => new QuickChip( x.Label, x.Key, Digits( (all * x.Percent / 100).ToString() ) ) ).ToList();
 
 	/// <summary>The currency in a sentence, where the ticker would be too terse.</summary>
 	static string UnitName( PaymentsCurrency of ) =>

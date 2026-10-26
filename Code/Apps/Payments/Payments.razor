@@ -117,8 +117,7 @@
 		<div class="tabs">
 			@foreach ( var option in ExchangeTabs )
 			{
-				<div class="tab @( exchange.Tab == option ? "active" : "" )"
-				     @onclick=@( () => Navi.Act( PaymentsViewModel.ExchangeTabAction, option.ToString() ) )>
+				<div class="tab @( exchange.Tab == option ? "active" : "" )" @onclick=@( () => PickTab( option ) )>
 					@option
 				</div>
 			}
@@ -157,8 +156,7 @@
 						<div class="unit-toggle">
 							@foreach ( var option in ExchangeUnits )
 							{
-								<div class="unit @( exchange.Unit == option ? "on" : "" )"
-								     @onclick=@( () => Navi.Act( PaymentsViewModel.ExchangeUnitAction, option.ToString() ) )>
+								<div class="unit @( exchange.Unit == option ? "on" : "" )" @onclick=@( () => PickUnit( option ) )>
 									@SignOf( option )
 								</div>
 							}
@@ -171,7 +169,7 @@
 					<div class="quick">
 						@foreach ( var chip in exchange.Quick )
 						{
-							<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.QuickAction, chip.Key ) )>@chip.Label</div>
+							<div class="chip" @onclick=@( () => PickQuick( chip ) )>@chip.Label</div>
 						}
 					</div>
 				}
@@ -199,7 +197,7 @@
 				<div class="quick">
 					@foreach ( var chip in exchange.Quick )
 					{
-						<div class="chip" @onclick=@( () => Navi.Act( PaymentsViewModel.QuickAction, chip.Key ) )>@chip.Label</div>
+						<div class="chip" @onclick=@( () => PickQuick( chip ) )>@chip.Label</div>
 					}
 				</div>
 			}
@@ -349,6 +347,9 @@
 
 	TextEntry ExchangeEntry { get; set; }
 
+	/// <summary>The trade count the field was last emptied for; -1 until the first frame of the Exchange screen.</summary>
+	int settledSeen = -1;
+
 	/// <summary>The confirm button says what it sends, so nobody sends Ethereum thinking they sent dollars.</summary>
 	string ConfirmLabel => UiState.Currency == PaymentsCurrency.Crypto
 		? $"Confirm and send {PaymentsUiState.CryptoUnit}"
@@ -388,10 +389,40 @@
 	}
 
 	/// <summary>The way round on Convert: there are only two currencies, so the other one is the answer.</summary>
-	void Swap()
+	void Swap() => PickUnit( UiState.Exchange?.To ?? PaymentsCurrency.Dollars );
+
+	void PickTab( ExchangeTab tab )
 	{
-		var other = UiState.Exchange?.To ?? PaymentsCurrency.Dollars;
-		Navi.Act( PaymentsViewModel.ExchangeUnitAction, other.ToString() );
+		EmptyAmount();
+		Navi.Act( PaymentsViewModel.ExchangeTabAction, tab.ToString() );
+	}
+
+	/// <summary>
+	/// Type the amount in another currency, or turn Convert the other way round. The field empties, as the host empties
+	/// its own copy: a hundred dollars is not a hundred Ethereum.
+	/// </summary>
+	void PickUnit( PaymentsCurrency unit )
+	{
+		EmptyAmount();
+		Navi.Act( PaymentsViewModel.ExchangeUnitAction, unit.ToString() );
+	}
+
+	/// <summary>
+	/// A quick button fills the field itself, with the digits the host works out for it too, because the field keeps what
+	/// was typed into it and would not take them from the state.
+	/// </summary>
+	void PickQuick( QuickChip chip )
+	{
+		if ( ExchangeEntry is { IsValid: true } )
+			ExchangeEntry.Text = chip.Digits;
+
+		Navi.Act( PaymentsViewModel.QuickAction, chip.Key );
+	}
+
+	void EmptyAmount()
+	{
+		if ( ExchangeEntry is { IsValid: true } )
+			ExchangeEntry.Text = "";
 	}
 
 	static string CurrencyName( PaymentsCurrency unit ) =>
@@ -404,16 +435,23 @@
 	{
 		base.Tick();
 
-		if ( Navi.IsViewer )
+		if ( !Navi.IsViewer )
+		{
+			ViewModel.Tick();
+			Navi.Publish( ViewModel.UiState );
+		}
+
+		if ( UiState.Exchange is not { } exchange )
 			return;
 
-		ViewModel.Tick();
-		Navi.Publish( ViewModel.UiState );
-
-		// The field keeps what was typed into it, so a quick button, a tab or a currency switch has to set it by hand.
-		if ( ViewModel.UiState.Exchange is { } exchange && ExchangeEntry is { IsValid: true }
-		                                          && ExchangeEntry.Text != exchange.Amount )
-			ExchangeEntry.Text = exchange.Amount;
+		// A trade empties the amount on the host, and the field keeps whatever it was given, so it is emptied here too.
+		if ( settledSeen < 0 )
+			settledSeen = exchange.Settled;
+		else if ( exchange.Settled != settledSeen )
+		{
+			settledSeen = exchange.Settled;
+			EmptyAmount();
+		}
 	}
 
 	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
