@@ -147,7 +147,10 @@ system) needs that part ported first. Props and models with no code, and code th
 
 - `crosschainer.hokuto_boxer` (and `takeda_ascend`, same author, the same `CuratedVehicles` code): a driveable car.
   Its `VehicleSeat` is an engine `BaseChair`, which is itself a `Component.IPressable`, so the player's Use key sits in it
-  without our `Interactable`. `CuratedVehicle` implements `IVehicleGauges` (added by hand after the import) and so shows the game's own speedometer
+  without our `Interactable`. It gives the driver the player's two views: first person from the car's `Driver eyes` (the
+  seat's `EyePosition`, which is that object in every prefab), and the chase camera behind the car; the engine's own
+  `View` key (`PlayerController.ToggleCameraModeButton`, set in `Assets/Player.prefab`) flips `ThirdPerson`, and in first
+  person `VehicleSeat` leaves the camera alone so the engine's seated camera is used. `CuratedVehicle` implements `IVehicleGauges` (added by hand after the import) and so shows the game's own speedometer
   (`Code/Vehicles/Hud/VehicleHud.razor`, shared with the buggy). The package's own HUD was not kept (running `sent_import ... update` would bring it back as a duplicate `VehicleHud`, so do not use `update` on it). The dial picture and the
   sounds are assets of the package and come with it.
 - `gmk.fpv_drone_enemy` (and `fpv_drone_friendly`, same code): an NPC (`FpvDroneNpc`) on the ported NPC system, which flies at and explodes on its target. It needed no edits once our player was named `Player` like upstream's.

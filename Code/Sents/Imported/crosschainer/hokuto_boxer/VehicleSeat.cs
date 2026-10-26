@@ -1,27 +1,50 @@
 using Sandbox;
 using System;
+using System.Linq;
 
 namespace CuratedVehicles;
 
-/// <summary>Native seating with a third-person car view; never changes the player's camera preferences.</summary>
+/// <summary>
+/// Native seating with the player's two views: first person from the driver's eyes, and a camera that orbits the car
+/// from behind. The switch is the engine's own - <see cref="PlayerController.ToggleCameraModeButton"/> ("View") flips
+/// <see cref="PlayerController.ThirdPerson"/> - so it never changes the player's camera preference.
+/// </summary>
 public sealed class VehicleSeat : BaseChair, ICameraModifier
 {
+	/// <summary>
+	/// How far behind the car the third-person camera sits, inches.
+	/// </summary>
+	private const float OrbitDistance = 240f;
+
 	private PlayerController cameraDriver;
 	private Angles orbit;
-	private float cameraDistance;
+	private float cameraDistance = OrbitDistance;
+	private bool thirdPerson;
 	int ICameraModifier.CameraOrder => 1000;
+
+	protected override void OnStart()
+	{
+		// The first-person view is the engine's seated camera, which sits at the chair's eye: the car's "Driver eyes".
+		if ( !EyePosition.IsValid() )
+			EyePosition = GameObject.Children.FirstOrDefault( child => child.Name == "Driver eyes" );
+	}
 
 	protected override void OnUpdate()
 	{
 		var driver = GetOccupant();
 		if ( !driver.IsValid() || !driver.Network.IsOwner ) driver = null;
-		if ( driver != cameraDriver )
+
+		// A new driver, or the view switched: the camera starts again from behind the car.
+		if ( driver != cameraDriver || (driver.IsValid() && driver.ThirdPerson != thirdPerson) )
 		{
 			cameraDriver = driver;
+			thirdPerson = driver.IsValid() && driver.ThirdPerson;
 			orbit = new Angles( 12, WorldRotation.Yaw(), 0 );
-			cameraDistance = 240;
+			cameraDistance = OrbitDistance;
 		}
-		if ( !cameraDriver.IsValid() ) return;
+
+		if ( !cameraDriver.IsValid() || !thirdPerson ) return;
+
 		if ( !Input.Suppressed && !Input.MouseCursorVisible )
 		{
 			orbit.yaw += Input.AnalogLook.yaw;
@@ -33,10 +56,15 @@ public sealed class VehicleSeat : BaseChair, ICameraModifier
 	{
 		var driver = GetOccupant();
 		if ( !driver.IsValid() || !driver.Network.IsOwner || Scene.Camera != camera ) return;
+
+		// First person is the engine's seated camera, and there is nothing to add to it: PlayerController puts it at
+		// the chair's eye, turns it with the car, and clamps the mouse look to the chair's yaw and pitch range.
+		if ( !driver.ThirdPerson ) return;
+
 		var vehicle = GetComponent<CuratedVehicle>();
 		var target = WorldPosition + Vector3.Up * 38;
 		var rotation = orbit.ToRotation();
-		var targetDistance = 240 + Math.Clamp( vehicle?.Speed ?? 0, 0, 180 ) * 0.35f;
+		var targetDistance = OrbitDistance + Math.Clamp( vehicle?.Speed ?? 0, 0, 180 ) * 0.35f;
 		cameraDistance = cameraDistance.LerpTo( targetDistance, Time.Delta * 3 );
 		var desired = target + rotation.Backward * cameraDistance;
 		var trace = Scene.Trace.FromTo( target, desired ).Radius( 8 ).IgnoreGameObjectHierarchy( GameObject ).Run();
