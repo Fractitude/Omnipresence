@@ -67,7 +67,7 @@ public sealed partial class GameManager
 		var connection = Connection.All.FirstOrDefault( c => c.SteamId == steamId );
 		name = connection?.DisplayName ?? name;
 
-		if ( !BanList.Add( steamId, name, reason, by?.SteamId ?? 0, duration ) )
+		if ( !BanList.Add( steamId, name, reason, by?.SteamId ?? 0UL, duration ) )
 			return false;
 
 		StatsLog.Banned( steamId, name, reason, by );

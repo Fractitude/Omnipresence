@@ -80,8 +80,8 @@ public sealed partial class CombineNpc
 			line.Additive = true;
 			line.CastShadows = false;
 			line.Color = Color.White;
-			var texture = CombineTracer.EffectTexture( "hl2_metrocop/fx/physbeam.vmat" );
-			if ( texture is not null ) line.Texturing = line.Texturing with { Texture = texture, UnitsPerTexture = 8f };
+			var material = Material.Load( "hl2_metrocop/fx/physbeam.vmat" );
+			if ( material is not null ) line.Texturing = line.Texturing with { Material = material, UnitsPerTexture = 8f };
 		}
 
 		// Kept, not looked up: a hidden object's components don't show up in GetComponent

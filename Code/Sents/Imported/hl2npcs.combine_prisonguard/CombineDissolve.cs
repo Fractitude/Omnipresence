@@ -170,9 +170,9 @@ public sealed class CombineDissolve : Component
 		line.Color = new Color( 0.75f, 0.85f, 1f );
 		line.Width = Game.Random.Float( 2f, 4f );
 
-		var texture = CombineTracer.EffectTexture( "hl2_combine_prisonguard/fx/lgtning.vmat" );
-		if ( texture is not null )
-			line.Texturing = line.Texturing with { Texture = texture, UnitsPerTexture = 24f };
+		var material = Material.Load( "hl2_combine_prisonguard/fx/lgtning.vmat" );
+		if ( material is not null )
+			line.Texturing = line.Texturing with { Material = material, UnitsPerTexture = 24f };
 
 		// A jagged path between the two points
 		var points = new List<Vector3> { from };

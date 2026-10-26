@@ -185,6 +185,9 @@ public sealed class MetrocopScreenFlash : Component
 		}
 
 		var alpha = Color.a * (1f - _started / Duration);
-		camera.Hud.DrawRect( new Rect( 0, 0, Screen.Width, Screen.Height ), Color.WithAlpha( alpha ) );
+		using var painter = camera.BeginHud();
+		painter.Fill = Color.WithAlpha( alpha );
+		painter.Stroke = Stroke.None;
+		painter.Rect( new Rect( 0, 0, Screen.Width, Screen.Height ), 0f );
 	}
 }

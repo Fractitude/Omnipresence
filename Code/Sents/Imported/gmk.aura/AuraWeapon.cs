@@ -286,7 +286,7 @@ public sealed class AuraWeapon : BaseSandboxWeapon
 		_shape.Flow( Time.Delta );
 
 		var grow = MathF.Min( 1f, _sinceOn / 0.35f );
-		var time = _music.IsValid() && _music.ElapsedTime > 0f ? _music.ElapsedTime : (float)_sinceOn;
+		var time = _music.IsValid() && _music.Time > 0f ? _music.Time : (float)_sinceOn;
 		var beat = MathF.Exp( -(time % Beat / Beat) * 5f );
 		_field.Beat = beat;
 		_field.Opacity = grow * (Owner.IsProxy ? 1f : 0.6f);
