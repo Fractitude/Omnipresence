@@ -641,6 +641,7 @@
     "hl2_metrocop/models/weapons/w_shotgun.vmdl_c",
     "hl2_metrocop/models/weapons/w_smg1.vmdl_c",
     "hl2_metrocop/models/weapons/w_stunstick.vmdl_c",
+    "hl2_metrocop/shaders/hl2_energy.shader_c",
     "hl2_metrocop/sounds/ar2_fire.sound_c",
     "hl2_metrocop/sounds/ar2_reload.sound_c",
     "hl2_metrocop/sounds/ar2/fire1.vsnd_c",

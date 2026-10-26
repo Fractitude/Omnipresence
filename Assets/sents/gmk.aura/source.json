@@ -21,7 +21,8 @@
   "assetFiles": [
     "aura_weapon/aura.vmat_c",
     "aura_weapon/music.sound_c",
-    "aura_weapon/music.vsnd_c"
+    "aura_weapon/music.vsnd_c",
+    "shaders/aura_volume.shader_c"
   ],
   "assetsInProject": true
 }
