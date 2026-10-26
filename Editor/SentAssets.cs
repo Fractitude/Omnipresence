@@ -24,7 +24,7 @@ public static class SentAssets
 {
 	// A path of an asset, as it is written inside a compiled file or a prefab.
 	static readonly Regex Reference = new(
-		@"[A-Za-z0-9_\-./]+\.(?:vmdl|vmat|vtex|vsnd|sound|vanmgrph|vpcf|vmorph|vagrp|vphys|vseq|vrmap|clip)",
+		@"[A-Za-z0-9_\-./]+\.(?:vmdl|vmat|vtex|vsnd|sound|shader|vanmgrph|vpcf|vmorph|vagrp|vphys|vseq|vrmap|clip)",
 		RegexOptions.IgnoreCase );
 
 	/// <summary>
@@ -103,6 +103,10 @@ public static class SentAssets
 			var name = reference + "_c";
 
 			if ( found.ContainsKey( name ) || !FileSystem.Mounted.FileExists( name ) )
+				continue;
+
+			// Generic engine folders (the engine's cloud models and textures): not part of the sent.
+			if ( name.StartsWith( "models/", StringComparison.OrdinalIgnoreCase ) || name.StartsWith( "textures/", StringComparison.OrdinalIgnoreCase ) )
 				continue;
 
 			if ( core is not null && File.Exists( Path.Combine( core, name.Replace( '/', Path.DirectorySeparatorChar ) ) ) )
