@@ -82,6 +82,7 @@ public static class SentIntegrator
 		var wrote = !File.Exists( prefabFile );
 
 		Directory.CreateDirectory( folder );
+		SentLocal.SetRemoved( ident, false );
 
 		if ( wrote )
 			File.WriteAllText( prefabFile, PrefabText( entity, namespaces ) );

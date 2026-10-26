@@ -31,7 +31,23 @@ public static class SentLocal
 	/// compiled the file yet).
 	/// </summary>
 	public static PrefabFile Find( string ident ) =>
-		Sents.IsIdent( ident ) && ResourceLibrary.TryGet<PrefabFile>( PrefabPath( ident ), out var prefab ) ? prefab : null;
+		Sents.IsIdent( ident ) && !removed.Contains( ident )
+		&& ResourceLibrary.TryGet<PrefabFile>( PrefabPath( ident ), out var prefab ) ? prefab : null;
+
+	// The resource library keeps a deleted prefab until the editor restarts, so a removal is remembered here (not
+	// readonly, so a hot reload keeps it).
+	static HashSet<string> removed = new();
+
+	/// <summary>
+	/// Remembers that the sent's prefab was deleted (<c>sent_remove</c>), or is back (<c>sent_integrate</c>).
+	/// </summary>
+	public static void SetRemoved( string ident, bool gone )
+	{
+		if ( gone )
+			removed.Add( ident );
+		else
+			removed.Remove( ident );
+	}
 
 	public static bool IsIntegrated( string ident ) => Find( ident ) is not null;
 

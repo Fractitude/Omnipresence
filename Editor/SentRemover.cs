@@ -96,6 +96,7 @@ public static class SentRemover
 		{
 			Directory.Delete( prefabFolder, true );
 			removed++;
+			SentLocal.SetRemoved( ident, true );
 		}
 
 		var message = $"sent_remove: {ident} removed ({removed} file(s) and folder(s) deleted)";
