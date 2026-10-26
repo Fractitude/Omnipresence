@@ -87,7 +87,10 @@ public static class SentIntegrator
 		if ( wrote )
 			File.WriteAllText( prefabFile, PrefabText( entity, namespaces ) );
 
-		File.WriteAllText( Path.Combine( folder, "source.json" ), SourceText( ident, entity, package, namespaces ) );
+		// The archive the code was read from, so what we keep can be traced back to one published build.
+		var code = SentImporter.Fingerprint( ident );
+
+		File.WriteAllText( Path.Combine( folder, "source.json" ), SourceText( ident, entity, package, namespaces, code ) );
 
 		// The assets become files of the project too, so the workshop is not needed to see the sent.
 		await SentAssets.ImportAsync( ident );
@@ -117,11 +120,12 @@ public static class SentIntegrator
 			["__version"] = 2,
 		};
 
-		return file.ToJsonString( Pretty ).Replace( "\r\n", "\n" ).Replace( "\n", "\r\n" );
+		return PrettyText( file );
 	}
 
 	// Where the sent came from, and what it still needs from the workshop.
-	static string SourceText( string ident, ScriptedEntity entity, Package package, List<string> namespaces )
+	static string SourceText( string ident, ScriptedEntity entity, Package package, List<string> namespaces,
+		SentImporter.CodeArchive code )
 	{
 		var assets = AssetPath.Matches( entity.Prefab.RootObject.ToJsonString() )
 			.Select( x => x.Groups[1].Value )
@@ -141,11 +145,112 @@ public static class SentIntegrator
 			["integrated"] = DateTime.Now.ToString( "yyyy-MM-dd" ),
 			["includesCode"] = entity.IncludeCode,
 			["code"] = entity.IncludeCode ? $"Code/Sents/Imported/{ident}/" : null,
+			["codeFile"] = code?.File,
+			["codeSha256"] = code?.Sha256,
+			["codeSize"] = code?.Size,
 			["namespaces"] = new JsonArray( namespaces.Select( x => (JsonNode)x ).ToArray() ),
 			["description"] = entity.Description,
 			["assetsFromWorkshop"] = new JsonArray( assets.Select( x => (JsonNode)x ).ToArray() ),
 		};
 
-		return source.ToJsonString( Pretty ).Replace( "\r\n", "\n" ).Replace( "\n", "\r\n" );
+		return PrettyText( source );
 	}
+
+	/// <summary>
+	/// <c>sent_provenance [org.package]</c>: write the code archive's SHA-256 and size into the <c>source.json</c> of
+	/// every integrated sent, or of one, from the <c>.cll</c> the engine has downloaded now. For the sents integrated
+	/// before that was kept; <c>sent_integrate</c> writes it from the start. Nothing else in the file changes.
+	/// </summary>
+	[ConCmd( "sent_provenance" )]
+	public static void Refresh( string ident = null ) => Provenance( ident );
+
+	/// <summary>
+	/// The number of <c>source.json</c> files written, for a probe. A sent without code has no archive to fingerprint
+	/// and is left alone; one whose code is not downloaded is named and skipped, so the gap is known rather than
+	/// mistaken for a clean file.
+	/// </summary>
+	public static int Provenance( string ident )
+	{
+		var root = Path.Combine( Project.Current.GetRootPath(), "Assets", "sents" );
+
+		if ( !Directory.Exists( root ) )
+		{
+			Log.Warning( "sent_provenance: there is no Assets/sents: nothing is integrated." );
+			return 0;
+		}
+
+		IEnumerable<string> folders = string.IsNullOrWhiteSpace( ident )
+			? Directory.EnumerateDirectories( root )
+			: [Path.Combine( root, ident.Trim().ToLowerInvariant() )];
+
+		var written = 0;
+		var missing = new List<string>();
+
+		foreach ( var folder in folders )
+		{
+			var file = Path.Combine( folder, "source.json" );
+
+			if ( !File.Exists( file ) )
+			{
+				if ( !string.IsNullOrWhiteSpace( ident ) )
+					Log.Warning( $"sent_provenance: {Path.GetFileName( folder )} has no source.json: it is not integrated." );
+
+				continue;
+			}
+
+			var source = JsonNode.Parse( File.ReadAllText( file ) ) as JsonObject;
+			var name = source?["ident"]?.GetValue<string>() ?? Path.GetFileName( folder );
+
+			if ( source?["includesCode"]?.GetValue<bool>() != true )
+				continue;
+
+			var code = SentImporter.Fingerprint( name );
+
+			if ( code is null )
+			{
+				missing.Add( name );
+				continue;
+			}
+
+			File.WriteAllText( file, PrettyText( WithCodeArchive( source, code ) ) );
+			written++;
+		}
+
+		Log.Info( $"sent_provenance: {written} source.json file(s) carry the SHA-256 of the code archive they came from"
+		          + (missing.Count > 0
+			          ? $"; {missing.Count} skipped, the engine has not downloaded their code ({string.Join( ", ", missing )}): import one, then run this again."
+			          : ".") );
+
+		return written;
+	}
+
+	// source.json with the archive's file, hash and size, after "code": every other key keeps its place.
+	static JsonObject WithCodeArchive( JsonObject source, SentImporter.CodeArchive code )
+	{
+		var result = new JsonObject();
+
+		foreach ( var (key, value) in source )
+		{
+			result[key] = value?.DeepClone();
+
+			if ( key == "code" )
+				AddCodeArchive( result, code );
+		}
+
+		if ( !result.ContainsKey( "codeFile" ) )
+			AddCodeArchive( result, code );
+
+		return result;
+	}
+
+	static void AddCodeArchive( JsonObject json, SentImporter.CodeArchive code )
+	{
+		json["codeFile"] = code.File;
+		json["codeSha256"] = code.Sha256;
+		json["codeSize"] = code.Size;
+	}
+
+	// The file as we write it: two-space indented JSON, CRLF, no trailing newline.
+	static string PrettyText( JsonObject json ) =>
+		json.ToJsonString( Pretty ).Replace( "\r\n", "\n" ).Replace( "\n", "\r\n" );
 }

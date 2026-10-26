@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -208,6 +209,30 @@ public static class SentImporter
 		return new DirectoryInfo( bin ).GetFiles( $"package_{ident.Replace( '.', '_' )}.*.cll" )
 			.OrderByDescending( x => x.LastWriteTimeUtc )
 			.FirstOrDefault();
+	}
+
+	/// <summary>
+	/// What an import was read from: the package file the engine downloaded (the <c>.cll</c> that holds the source),
+	/// its SHA-256 in lowercase hex, and its size in bytes. Kept in <c>source.json</c> so what we have can be traced
+	/// back to one published build.
+	/// </summary>
+	public sealed record CodeArchive( string File, string Sha256, long Size );
+
+	/// <summary>
+	/// The fingerprint of the newest download of a sent's code, or null if there is none (a sent without code, or one
+	/// the engine has never downloaded here).
+	/// </summary>
+	public static CodeArchive Fingerprint( string ident )
+	{
+		var package = FindPackage( ident );
+
+		if ( package is null )
+			return null;
+
+		using var stream = File.OpenRead( package.FullName );
+		var hash = Convert.ToHexString( SHA256.HashData( stream ) ).ToLowerInvariant();
+
+		return new CodeArchive( package.Name, hash, package.Length );
 	}
 
 	/// <summary>

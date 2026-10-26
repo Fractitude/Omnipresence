@@ -38,6 +38,15 @@ nothing here and we can edit it freely. Right-click a tile and choose *Integrate
    taken from, the date integrated, the code folder, namespaces, and the assets it still needs from the workshop. The code's
    `SentPackage.cs` carries a `// Source:` line with the same origin. Keep this for anything brought in.
 
+   It also records **what the code was read from**: `codeFile` (the `.cll` the engine downloaded), `codeSha256` (its
+   SHA-256, lowercase hex) and `codeSize` (bytes), written by `SentImporter.Fingerprint` from the newest
+   `download/assets/_bin/package_<ident>.<hash>.cll`. That is the only trace of the build we took: the compiled assembly
+   itself is never kept, since it was built against the sandbox game and cannot load here. `sent_provenance`
+   (`SentIntegrator.Provenance`) writes the three fields into the `source.json` of every integrated sent, for the ones
+   integrated before they were kept; it changes nothing else in the file. Because it fingerprints whatever the engine
+   downloaded *now*, re-run it only while the workshop's version is still the one recorded in `workshopVersion`: a
+   newer download is a different file and a different hash.
+
 `spawn_sent` (`Sents.SpawnAsync`) uses `SentLocal.Find( ident )` first: an integrated sent is cloned from our prefab, and the
 tile in the window shows a green check. The cloud copy is used only for a sent that was not integrated.
 
