@@ -119,7 +119,7 @@ public sealed class PlacedObjectSystem : GameObjectSystem<PlacedObjectSystem>
 			return false;
 
 		var go = PlacedObjectRegistry.Create( item, delivery.Id, delivery.Owner, place.Position,
-			Rotation.FromYaw( place.Yaw ), scene );
+			Rotation.FromYaw( place.Yaw ), scene, true );
 
 		if ( !go.IsValid() )
 			return false;

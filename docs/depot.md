@@ -50,6 +50,11 @@ each of those places, in order:
 The ground is tried at every place before a stack at any of them, so an object only goes on top when there is no floor
 left anywhere. With no free spot the delivery waits and is retried.
 
+Everything put down at a place is turned to that place's yaw, and turned a quarter more when the object's longest side
+runs along its own left axis (`PlacedObjectRegistry.LongSideIsLeft`), so the deliveries at a bay all point the same way,
+long side first and level. A square object is left as the prefab has it, and so is one whose bounds cannot be read yet.
+A restore turns nothing: a saved object comes back exactly as it was left.
+
 **The stack is what keeps a bay that someone has blocked usable.** An object left on a delivery point, a car parked over
 it, a wall built on it: the next delivery goes on top instead of failing, so a bay takes five objects of the blocker's
 own before it is full, and any other bay in range is tried first. Past that it is the level's job: three or four bays

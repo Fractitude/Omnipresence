@@ -40,7 +40,11 @@ public static class DeliverySpot
 	/// <summary>How far above or below the anchor a floor may be and still count.</summary>
 	const float MaxStep = 24f;
 
-	/// <summary>One place a delivery may land: where the search starts, how to describe it, and which way round.</summary>
+	/// <summary>
+/// One place a delivery may land: where the search starts, how to describe it, and which way round things there face.
+/// Everything put down at a place is turned to its yaw, and then turned again so its own longest side faces that way
+/// (<see cref="PlacedObjectRegistry"/>).
+/// </summary>
 	public readonly record struct DeliveryPlace( Vector3 Anchor, string Where, float Yaw );
 
 	/// <summary>
@@ -54,11 +58,12 @@ public static class DeliverySpot
 		if ( !scene.IsValid() || places is null )
 			return null;
 
-		// The ground at any place first: a delivery is better beside the one before it than on top of it.
+		// The ground at any place first: a delivery is better beside the one before it than on top of it. It is laid
+		// the way the place faces, so everything delivered there points the same way.
 		foreach ( var place in places )
 		{
 			if ( OnGround( scene, place.Anchor, taken ) is { } floor )
-				return (floor, place.Where, System.Random.Shared.Next( 0, 360 ));
+				return (floor, place.Where, place.Yaw);
 		}
 
 		foreach ( var place in places )

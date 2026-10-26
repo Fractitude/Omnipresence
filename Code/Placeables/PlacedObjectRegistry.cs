@@ -136,13 +136,14 @@ public static class PlacedObjectRegistry
 	/// <see cref="Restore"/>.) Returns null when it cannot be made. Host only.
 	/// </summary>
 	public static GameObject Create(
-		Placeable item, string id, ulong owner, Vector3 position, Rotation rotation, Scene scene = null )
+		Placeable item, string id, ulong owner, Vector3 position, Rotation rotation, Scene scene = null,
+		bool faceLongSide = false )
 	{
 		if ( item is null || !PlacedObjectRules.IsId( id ) || Networking.IsActive && !Networking.IsHost )
 			return null;
 
 		scene ??= Game.ActiveScene;
-		var go = Make( item, id, owner, position, rotation, scene );
+		var go = Make( item, id, owner, position, rotation, scene, false, faceLongSide );
 
 		if ( !go.IsValid() )
 			return null;
@@ -157,8 +158,9 @@ public static class PlacedObjectRegistry
 
 		record.Prefab = PlacedObjectRules.CleanPrefab( item.Prefab );
 		record.Scene = WorldItemRegistry.SceneKey( scene );
-		record.Position = position;
-		record.Angles = rotation.Angles();
+		// What the object was actually made as: a delivery's own long side may have turned it a quarter.
+		record.Position = go.WorldPosition;
+		record.Angles = go.WorldRotation.Angles();
 
 		// Made new, or put down again from a vehicle's cargo: it stands on the floor, unfrozen.
 		record.Frozen = false;
@@ -172,8 +174,8 @@ public static class PlacedObjectRegistry
 	/// for the Physgun (the prefabs' colliders are static, as a scene-placed object should be), the id, and the host as
 	/// the keeper of it if the player who last held it leaves.
 	/// </summary>
-	static GameObject Make(
-		Placeable item, string id, ulong owner, Vector3 position, Rotation rotation, Scene scene, bool frozen = false )
+	static GameObject Make( Placeable item, string id, ulong owner, Vector3 position, Rotation rotation, Scene scene,
+		bool frozen = false, bool faceLongSide = false )
 	{
 		GameObject go;
 
@@ -206,11 +208,30 @@ public static class PlacedObjectRegistry
 			collider.Static = false;
 
 		go.Enabled = true;
+
+		// A delivery faces the way its place does, long side first: a row of them at a bay all point the same way.
+		if ( faceLongSide && LongSideIsLeft( go ) )
+			go.WorldRotation = Rotation.FromYaw( rotation.Yaw() + 90f );
+
 		go.NetworkMode = NetworkMode.Object;
 		go.NetworkSpawn();
 		go.Network.SetOrphanedMode( NetworkOrphaned.Host );
 		PhysFreeze.Apply( go, frozen );
 		return go;
+	}
+
+	/// <summary>How much longer one side has to be than the other before it counts as the long one.</summary>
+	const float LongSideTolerance = 1.05f;
+
+	/// <summary>
+	/// Whether an object's longest side runs along its own left axis, so lining that side up with the way its place
+	/// faces takes a quarter turn. Never true for a square object (no side to choose), nor for one whose bounds cannot
+	/// be read yet (a model that has not loaded): it is then left as the prefab has it.
+	/// </summary>
+	static bool LongSideIsLeft( GameObject go )
+	{
+		var size = go.GetLocalBounds().Size;
+		return size.y > size.x * LongSideTolerance;
 	}
 
 	/// <summary>
