@@ -141,6 +141,21 @@ public static class ItemCatalog
 	}
 
 	/// <summary>
+	/// A batch of a kind holding exactly <paramref name="count"/>, even more than one stack of it holds: for code that
+	/// hands a total to <see cref="PlayerInventory.AddItem"/> (or <see cref="PlayerInventory.Add"/>), which splits it
+	/// into stacks. Null like <see cref="Make"/>.
+	/// </summary>
+	public static ItemData MakeBatch( string kind, int count, int quality, string orderId = "" )
+	{
+		var item = Make( kind, 1, quality, orderId );
+
+		if ( item is not null )
+			item.Count = count;
+
+		return item;
+	}
+
+	/// <summary>
 	/// A pile of cash worth <paramref name="amount"/> dollars (cut to the wallet's cap), or null for less than a dollar.
 	/// </summary>
 	public static ItemData MakeCash( long amount )

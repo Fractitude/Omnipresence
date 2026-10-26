@@ -93,8 +93,9 @@ public static class StorageRules
 	}
 
 	/// <summary>
-	/// Move the item in a box slot to the first free bag slot. Nothing changes when the slot is empty or the bag is
-	/// full. A slot beyond the box's size is still reachable, so a box made smaller does not lock items away.
+	/// Move the item in a box slot into the bag: onto a stack of the same item it may merge with, else into the first
+	/// free slot. Nothing changes when the slot is empty or the bag cannot take it. A slot beyond the box's size is still
+	/// reachable, so a box made smaller does not lock items away.
 	/// </summary>
 	public static CrimeResult Take( CrimeRecord crime, string boxId, PlayerInventory bag, int boxSlot )
 	{
@@ -103,8 +104,9 @@ public static class StorageRules
 		if ( bag is null || boxSlot < 0 || boxSlot >= MaxSlots || At( box, boxSlot ) is not { } item )
 			return CrimeResult.Fail( "There is nothing in that slot." );
 
-		// The bag takes it first; the box lets go only when it did.
-		if ( !bag.HasRoom || !bag.Add( item ) )
+		// The bag takes it first; the box lets go only when it did. A full bag can still take it onto a stack of the
+		// same item it may merge with (<see cref="PlayerInventory.Add"/>).
+		if ( !bag.Add( item ) )
 			return CrimeResult.Fail( "Your bag is full. Make room first." );
 
 		Set( box, boxSlot, null );
@@ -195,27 +197,11 @@ public static class StorageRules
 	}
 
 	/// <summary>
-	/// Put an item in a given, empty bag slot. The bag only adds to its first free slot, so it goes there and is then
-	/// moved. False, with the bag as it was, when there is no free slot.
+	/// Put an item in a given, empty bag slot, as it is: no move and no topping up of a stack, so what the player
+	/// dropped on that slot stays where they put it. False when the slot is not empty.
 	/// </summary>
-	static bool PlaceInBag( PlayerInventory bag, ItemData item, int slot )
-	{
-		if ( bag.At( slot ) is not null || !bag.Add( item ) )
-			return false;
-
-		for ( var i = 0; i < bag.SlotCount; i++ )
-		{
-			if ( ReferenceEquals( bag.At( i ), item ) )
-			{
-				if ( i != slot )
-					bag.Move( i, slot );
-
-				return true;
-			}
-		}
-
-		return false;
-	}
+	static bool PlaceInBag( PlayerInventory bag, ItemData item, int slot ) =>
+		bag.At( slot ) is null && bag.SetSlot( slot, item );
 
 	/// <summary>
 	/// Tidy the bag: the same kinds together and everything packed from the first slot with no gaps

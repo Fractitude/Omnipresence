@@ -82,14 +82,17 @@ public sealed class PlayerInventory : Component
 	}
 
 	/// <summary>
-	/// Put an item in the first free slot. The caller removes the item from the world when this returns true. Host only.
+	/// Put an item in the bag (<see cref="Add(ItemData)"/>). The caller removes the item from the world when this
+	/// returns true. Host only.
 	/// </summary>
 	public bool Add( IItem item ) => item is not null && Add( ItemData.From( item ) );
 
 	/// <summary>
-	/// Put an item in the first free slot. Returns false when there is none. A batch above its kind's stack size takes
-	/// as many slots as it needs, all or nothing: <paramref name="data"/> itself becomes the first, full stack and the
-	/// rest are copies. Host only.
+	/// Put an item in the bag. A stackable batch first tops up the stacks it may merge with
+	/// (<see cref="StackRules.CanMerge"/>: the same kind, order and addressee, and the same quality when the kind's
+	/// quality matters, so no quality is ever averaged), and then puts what is left in free slots as full stacks. All or
+	/// nothing: false, and nothing added, when the bag cannot hold every one of its count. Works the same way as a
+	/// pickup (<see cref="PickupRules"/>), except that a pickup may take only part of the batch. Host only.
 	/// </summary>
 	public bool Add( ItemData data )
 	{
@@ -97,26 +100,38 @@ public sealed class PlayerInventory : Component
 			return false;
 
 		Resize();
-		var cap = data.IsBatch ? data.MaxStack : int.MaxValue;
-		var needed = data.IsBatch ? ItemCatalog.SlotsFor( data.Kind, data.Count ) : 1;
 
-		if ( needed < 1 || FreeSlots < needed )
+		if ( PickupRules.Plan( slots, data, planned ) < data.Count )
 			return false;
 
-		var left = data.Count;
-		data.Count = System.Math.Min( left, cap );
-		left -= data.Count;
-		slots[System.Array.FindIndex( slots, x => x is null )] = data;
-
-		while ( left > 0 )
-		{
-			var part = data.Clone();
-			part.Count = System.Math.Min( left, cap );
-			left -= part.Count;
-			slots[System.Array.FindIndex( slots, x => x is null )] = part;
-		}
+		foreach ( var write in planned )
+			slots[write.Slot] = write.Item;
 
 		Changed();
+		return true;
+	}
+
+	/// <summary>
+	/// Whether <see cref="Add"/> would take every one of <paramref name="items"/> right now, all of them together, as
+	/// they are added one after the other. A dry run: nothing changes. Works on every machine, from the synced slots.
+	/// </summary>
+	public bool CanAdd( params ItemData[] items )
+	{
+		Resize();
+		var asIf = new ItemData[slots.Length];
+
+		for ( var i = 0; i < slots.Length; i++ )
+			asIf[i] = slots[i];
+
+		foreach ( var item in items )
+		{
+			if ( item is null || PickupRules.Plan( asIf, item, planned ) < item.Count )
+				return false;
+
+			foreach ( var write in planned )
+				asIf[write.Slot] = write.Item;
+		}
+
 		return true;
 	}
 
@@ -157,19 +172,15 @@ public sealed class PlayerInventory : Component
 	readonly List<SlotWrite> planned = new();
 
 	/// <summary>
-	/// Put a new batch of a catalog kind in the free slots: as many full stacks (the kind's
-	/// <see cref="ItemDef.MaxStack"/>) as the count needs, then the remainder, all of the same quality. All or nothing:
-	/// false, and nothing added, when there is no room for all of it, no such kind or nothing to add. Host only.
+	/// Put a new batch of a catalog kind in the bag: it tops up the stacks it may merge with, then takes free slots for
+	/// the rest as full stacks (the kind's <see cref="ItemDef.MaxStack"/>) and the remainder, all of the same quality.
+	/// All or nothing: false, and nothing added, when the bag cannot hold all of it, no such kind or nothing to add.
+	/// Host only.
 	/// </summary>
 	public bool AddItem( string kind, int count, int quality, string orderId = "" )
 	{
-		if ( ItemCatalog.Find( kind ) is null || count < 1 || ItemCatalog.SlotsFor( kind, count ) > FreeSlots )
-			return false;
-
-		// The catalogue's cap on a saved total is for records; a count asked for here is added in full.
-		var first = ItemCatalog.Make( kind, ItemCatalog.MaxStackOf( kind ), quality, orderId );
-		first.Count = count;
-		return Add( first );
+		var item = ItemCatalog.MakeBatch( kind, count, quality, orderId );
+		return item is not null && Add( item );
 	}
 
 	/// <summary>

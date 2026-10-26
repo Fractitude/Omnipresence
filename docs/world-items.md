@@ -101,8 +101,16 @@ both stackable (`MaxStack` above 1), same order id and addressee, and, when the 
 the same quality. `QualityMatters` is true for every drug item (`ProductCatalog.WithDefaults`), so stacks of different
 quality are never auto-merged and no quality is ever averaged. A kind with it off merges whatever the quality (the stack in
 the bag keeps its quality). Use `CanMerge` or `PickupRules.Plan` for anything that puts a stack into the bag on its own.
-The player's own Shift-combine (`StackRules.Plan`) still averages, because they chose it. `PlayerInventory.Add`, `AddItem`
-and the storage code do not top up stacks and were left as they were.
+The player's own Shift-combine (`StackRules.Plan`) still averages, because they chose it.
+
+**Everything that adds to the bag tops up first**: `PlayerInventory.Add` (so `AddItem`, a restore, taking an item out of a
+box) tops up the stacks it may merge with, then puts the rest in free slots as full stacks, and is still all or nothing
+(false and nothing added when the whole count does not fit). `AddPartial` does the same but may take part
+(`PickupRules.Plan`, the one planner both use). `PlayerInventory.CanAdd` is the dry run of `Add` for several stacks at
+once, for code that must give more than one or none (`PlayerCrime.Harvest`): each stack is planned on what the ones before
+it would leave, so it never counts a slot twice. Storage boxes are not affected: `StorageRules` adds whole stacks to a box
+and the box is never topped up, while a move *into* the bag merges like any other, except a drop onto a chosen bag slot
+(`StorageRules.PlaceInBag`), which puts the item in that slot as it is.
 
 A tidy (`InventorySort`, the **Sort** buttons of the Character menu's bag and of the storage window) only moves whole
 stacks unless the grid's `CombineStacksOnSort` is on (`PlayerInventory` for the bag, the box or cargo component for its

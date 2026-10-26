@@ -392,13 +392,15 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return CrimeResult.Fail( "It isn't ready yet." );
 
 		var product = ProductCatalog.OfTray( tray.Kind );
+		var raw = ItemCatalog.MakeBatch( product.Raw.Id, product.HarvestRaw, tray.Quality );
+		var seeds = ItemCatalog.MakeBatch( product.Seed.Id, product.HarvestSeeds, 50 );
 
-		if ( Inventory.FreeSlots < ItemCatalog.SlotsFor( product.Raw.Id, product.HarvestRaw )
-		     + ItemCatalog.SlotsFor( product.Seed.Id, product.HarvestSeeds ) )
+		// Both go in or neither does; the bag may take them onto stacks of the same items it may merge with.
+		if ( !Inventory.CanAdd( raw, seeds ) )
 			return CrimeResult.Fail( "Your inventory is full." );
 
-		Inventory.AddItem( product.Raw.Id, product.HarvestRaw, tray.Quality );
-		Inventory.AddItem( product.Seed.Id, product.HarvestSeeds, 50 );
+		Inventory.Add( raw );
+		Inventory.Add( seeds );
 		tray.Planted = false;
 
 		Changed();
@@ -452,17 +454,20 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		var used = made * product.RawPerProduct;
 
-		// The product needs its slots, one more of them free if the raw is used up and frees its own.
-		if ( Inventory.FreeSlots + (used == batch.Count ? 1 : 0) < ItemCatalog.SlotsFor( product.Product.Id, made ) )
-			return CrimeResult.Fail( "Your inventory is full." );
-
+		// The raw comes out first and goes back if the bag cannot take the product: what is left of the batch is in
+		// that slot either way, and the product may go onto a stack of the same drug it may merge with.
 		if ( Inventory.TakeFrom( slot, used ) is not { } taken )
 			return CrimeResult.Fail( "Nothing happens." );
 
 		var spread = product.PressQualitySpread;
 		var quality = taken.Quality + random.Next( -spread, spread + 1 );
 
-		Inventory.AddItem( product.Product.Id, made, quality );
+		if ( !Inventory.AddItem( product.Product.Id, made, quality ) )
+		{
+			Inventory.Return( slot, taken );
+			return CrimeResult.Fail( "Your inventory is full." );
+		}
+
 		Changed();
 		return CrimeResult.Success( $"Pressed {made} {product.Product.Name}." );
 	}
