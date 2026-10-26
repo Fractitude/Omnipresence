@@ -30,6 +30,28 @@ CharacterMenu
 	border-radius: 10px;
 }
 
+// The window's Sort button, at the right edge and centred on the window's height. It looks like the small
+// `.menu-button` of the other windows (MenuWindow.razor.scss), whose stylesheet only loads with a MenuWindow, and this
+// window is not one, so the few lines are repeated here.
+.sort-button
+{
+	flex-shrink: 0;
+	align-self: center;
+	padding: 4px 12px;
+	font-size: 13px;
+	font-weight: 700;
+	white-space: nowrap;
+	border-radius: 6px;
+	background-color: rgba(127, 209, 255, 0.25);
+	border: 1px solid rgba(127, 209, 255, 0.6);
+	cursor: pointer;
+
+	&:hover
+	{
+		background-color: rgba(127, 209, 255, 0.4);
+	}
+}
+
 .character
 {
 	width: 420px;

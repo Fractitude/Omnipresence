@@ -19,6 +19,10 @@
 				<WalletStrip/>
 			</div>
 			<InventoryGrid class="inventory"/>
+			@if ( PlayerInventory.Local is not null )
+			{
+				<div class="sort-button" @onclick=@( () => PlayerInventory.Local?.Sort() )>Sort</div>
+			}
 		</div>
 
 		@if ( InventoryGrid.Dragged is { } dragged )

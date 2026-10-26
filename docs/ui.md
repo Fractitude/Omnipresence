@@ -65,8 +65,10 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
 - The shared classes: `menu-heading`, `heading-row` (a heading with a button at its right end), `menu-list`, `menu-row`
   (+ `roomy`, `selectable`, `selected`, `unavailable`), `menu-icon`, `menu-button` (+ `disabled`, and `compact` for one
   that sits beside a heading), `menu-empty`, `menu-notice`, `menu-hint`, and `warn` / `urgent` for deadlines
-  (`CrimeCatalog.DeadlineClass`). They work on everything inside the window, whatever file made it; `heading-row` and
-  `menu-button` also work outside one, as the Character menu's bag and the Welcome editor use them.
+  (`CrimeCatalog.DeadlineClass`). They work on everything inside the window, whatever file made it. **But a
+  `.razor.scss` loads with its own panel, not with the project**: these rules are in effect only while a `MenuWindow`
+  exists, so a window that is not one draws them as plain text — the Character menu carries its own copy of the button
+  it borrows (`CharacterMenu.razor.scss`, `.sort-button`).
 - A window that has more than one list of its own (the storage grids) puts them in its own `body`; the window never grows
   past the screen, and `body` scrolls (`overflow: scroll`).
 
