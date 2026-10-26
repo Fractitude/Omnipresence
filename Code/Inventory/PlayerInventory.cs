@@ -359,6 +359,19 @@ public sealed class PlayerInventory : Component
 			HostDrop( slot );
 	}
 
+	/// <summary>
+	/// Tidy the bag: the same kinds together, stacks put together where the game may merge them, and everything packed
+	/// from the first slot with no gaps (<see cref="InventorySort"/>). No count and no quality changes. On the player's
+	/// client this asks the host.
+	/// </summary>
+	public void Sort()
+	{
+		if ( IsAuthority )
+			DoSort();
+		else
+			HostSort();
+	}
+
 	[Rpc.Host]
 	void HostMove( int from, int to )
 	{
@@ -380,6 +393,13 @@ public sealed class PlayerInventory : Component
 			DoDrop( slot );
 	}
 
+	[Rpc.Host]
+	void HostSort()
+	{
+		if ( IsOwnerCalling() )
+			DoSort();
+	}
+
 	/// <summary>
 	/// The connection that called the running RPC is the player who owns this inventory (or it is the host itself).
 	/// </summary>
@@ -397,6 +417,27 @@ public sealed class PlayerInventory : Component
 			return;
 
 		(slots[from], slots[to]) = (slots[to], slots[from]);
+		Changed();
+	}
+
+	void DoSort()
+	{
+		Resize();
+		var ordered = InventorySort.Order( slots );
+
+		// Nothing to do when the slots already hold the tidy order: the items are handed back as they are, so this is a
+		// reference check, and a bag that is already tidy is not written and synced again.
+		var moved = false;
+
+		for ( var i = 0; i < slots.Length && !moved; i++ )
+			moved = !ReferenceEquals( slots[i], i < ordered.Count ? ordered[i] : null );
+
+		if ( !moved )
+			return;
+
+		for ( var i = 0; i < slots.Length; i++ )
+			slots[i] = i < ordered.Count ? ordered[i] : null;
+
 		Changed();
 	}
 

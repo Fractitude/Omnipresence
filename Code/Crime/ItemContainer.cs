@@ -161,6 +161,33 @@ public abstract class ItemContainer : Component
 	}
 
 	/// <summary>
+	/// Tidy the container: the same kinds together, stacks put together where the game may merge them, and everything
+	/// packed from the first slot with no gaps (<see cref="StorageRules.Sort"/>).
+	/// </summary>
+	[Rpc.Host]
+	public void RequestSort()
+	{
+		if ( Begin() is not { } who )
+			return;
+
+		var (record, id) = Contents( who );
+		Reply( who, StorageRules.Sort( record, id, Capacity ) );
+	}
+
+	/// <summary>
+	/// Tidy the bag half of the window the same way, asked here rather than of the inventory so the reach check applies
+	/// while the window is open (<see cref="StorageRules.SortBag"/>).
+	/// </summary>
+	[Rpc.Host]
+	public void RequestSortBag()
+	{
+		if ( Begin() is not { } who )
+			return;
+
+		Reply( who, StorageRules.SortBag( who.Bag ) );
+	}
+
+	/// <summary>
 	/// Move the item in a bag slot to a chosen slot of the container (a drag). An item there goes to the freed bag slot.
 	/// </summary>
 	[Rpc.Host]

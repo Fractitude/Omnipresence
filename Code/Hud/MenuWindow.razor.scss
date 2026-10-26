@@ -72,6 +72,23 @@ $max-height: 80%;
 	opacity: 0.7;
 }
 
+// A heading with a button at its right end: the grids of the storage window, the Welcome editor's sections.
+.heading-row
+{
+	flex-shrink: 0;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+// A menu button a size smaller, to sit beside a heading rather than in a row of its own.
+.menu-button.compact
+{
+	padding: 4px 12px;
+	font-size: 13px;
+}
+
 .menu-notice
 {
 	flex-shrink: 0;

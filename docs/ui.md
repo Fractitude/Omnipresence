@@ -62,9 +62,11 @@ A window that takes the mouse (packing, planting, press, storage) is a `PanelCom
 - **Lists scroll and rows do not shrink.** Put rows in a `menu-list` (it scrolls and may shrink) and give every row the
   class `menu-row` (it has `flex-shrink: 0`). Headings, notice, hint and header are `flex-shrink: 0` too. A row that is
   not a `menu-row` gets squashed instead of scrolling: do not write your own row without `flex-shrink: 0`.
-- The shared classes: `menu-heading`, `menu-list`, `menu-row` (+ `roomy`, `selectable`, `selected`, `unavailable`),
-  `menu-icon`, `menu-button` (+ `disabled`), `menu-empty`, `menu-notice`, `menu-hint`, and `warn` / `urgent` for deadlines
-  (`CrimeCatalog.DeadlineClass`). They work on everything inside the window, whatever file made it.
+- The shared classes: `menu-heading`, `heading-row` (a heading with a button at its right end), `menu-list`, `menu-row`
+  (+ `roomy`, `selectable`, `selected`, `unavailable`), `menu-icon`, `menu-button` (+ `disabled`, and `compact` for one
+  that sits beside a heading), `menu-empty`, `menu-notice`, `menu-hint`, and `warn` / `urgent` for deadlines
+  (`CrimeCatalog.DeadlineClass`). They work on everything inside the window, whatever file made it; `heading-row` and
+  `menu-button` also work outside one, as the Character menu's bag and the Welcome editor use them.
 - A window that has more than one list of its own (the storage grids) puts them in its own `body`; the window never grows
   past the screen, and `body` scrolls (`overflow: scroll`).
 

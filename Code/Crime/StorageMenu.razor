@@ -13,7 +13,11 @@
 			<ChildContent>
 				<div class="body">
 					<div class="column">
-						<div class="menu-heading">@( $"Your bag ({used}/{bag.SlotCount})" )</div>
+						<div class="heading-row">
+							<div class="menu-heading">@( $"Your bag ({used}/{bag.SlotCount})" )</div>
+							<div class="menu-button compact" tooltip="The same kinds together, from the first slot"
+							     @onclick=@( () => SortBag() )>Sort</div>
+						</div>
 						<div @ref="bagGridRef" class="grid" style="width: @( bag.Columns * (SlotSize + Gap) )px">
 							@for ( var i = 0; i < bag.SlotCount; i++ )
 							{
@@ -46,7 +50,11 @@
 						}
 						else
 						{
-							<div class="menu-heading">@( $"{target.Title} ({target.ViewCount}/{target.Capacity})" )</div>
+							<div class="heading-row">
+								<div class="menu-heading">@( $"{target.Title} ({target.ViewCount}/{target.Capacity})" )</div>
+								<div class="menu-button compact" tooltip="The same kinds together, from the first slot"
+								     @onclick=@( () => SortBox() )>Sort</div>
+							</div>
 							<div @ref="boxGridRef" class="grid" style="width: @( target.ColumnCount * (SlotSize + Gap) )px">
 								@for ( var i = 0; i < target.Capacity; i++ )
 								{
@@ -280,6 +288,29 @@
 
 		if ( target.IsValid() && PlayerInventory.Local?.At( slot ) is not null )
 			target.RequestStore( slot );
+	}
+
+	/// <summary>
+	/// Ask the host to tidy the bag half of the window: the same kinds together, from the first slot. The host checks
+	/// who asks and how far they are, as it does for any other move here.
+	/// </summary>
+	static void SortBag()
+	{
+		CancelDrag();
+
+		if ( target.IsValid() )
+			target.RequestSortBag();
+	}
+
+	/// <summary>
+	/// Ask the host to tidy the box (or the cargo) beside the bag.
+	/// </summary>
+	static void SortBox()
+	{
+		CancelDrag();
+
+		if ( target.IsValid() )
+			target.RequestSort();
 	}
 
 	/// <summary>
