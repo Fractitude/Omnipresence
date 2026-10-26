@@ -17,8 +17,8 @@
 		@if ( PlayerWallet.Local is { } wallet )
 		{
 			<div class="money">$@wallet.Cash.ToString( "N0" )</div>
-			<div class="credits">@wallet.Credits.ToString( "N0" ) credits</div>
-			<div class="crypto">@wallet.Crypto.ToString( "N0" ) crypto</div>
+			<div class="credits">@wallet.Credits.ToString( "N0" ) Credits</div>
+			<div class="ethereum">@wallet.Crypto.ToString( "N0" ) Ethereum</div>
 		}
 	}
 </root>
