@@ -26,8 +26,9 @@ public sealed class AmmoPickup : Component, IInteractionHandler
 		if ( !Game.IsPlaying )
 			return;
 
-		_ = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
+		var interactable = Components.Get<Interactable>( FindMode.EnabledInSelfAndDescendants )
 			?? GameObject.Components.Create<Interactable>();
+		interactable.Range = 80f;
 
 		InteractionSetup.EnsureOption( this, "take", "Take", "inventory_2", "" );
 	}
