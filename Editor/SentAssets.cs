@@ -113,6 +113,10 @@ public static class SentAssets
 				continue;
 
 			var bytes = FileSystem.Mounted.ReadAllBytes( name ).ToArray();
+
+			if ( name.EndsWith( ".vtex_c", StringComparison.OrdinalIgnoreCase ) )
+				bytes = FullTexture( bytes );
+
 			found[name] = bytes;
 
 			foreach ( Match match in Reference.Matches( System.Text.Encoding.Latin1.GetString( bytes ) ) )
@@ -217,6 +221,43 @@ public static class SentAssets
 				into.Add( match.Value );
 		}
 	}
+
+	// The mounted file of a package's texture is only its resident part: the file stops after the mips of up to 256
+	// pixels, and the top ones (a 512 or 1024 texture) are streamed from the CDN as the texture is needed. The engine
+	// keeps the whole file, with the top mips compressed at the end, next to the resident one in download/web-textures
+	// (<hash>.vtex_c is the resident part, <hash>.vtex_c.resident the whole). Without it the project's copy has
+	// nothing to draw its top mip from and shows whatever memory the GPU gave it.
+	static byte[] FullTexture( byte[] resident )
+	{
+		var folder = Path.Combine( Path.GetDirectoryName( Environment.ProcessPath ), "download", "web-textures" );
+
+		if ( !Directory.Exists( folder ) )
+			return resident;
+
+		webTextures ??= Directory.EnumerateFiles( folder, "*.vtex_c" )
+			.GroupBy( x => new FileInfo( x ).Length )
+			.ToDictionary( x => x.Key, x => x.ToList() );
+
+		if ( !webTextures.TryGetValue( resident.Length, out var candidates ) )
+			return resident;
+
+		foreach ( var candidate in candidates )
+		{
+			var whole = candidate + ".resident";
+
+			if ( !File.Exists( whole ) || !File.ReadAllBytes( candidate ).AsSpan().SequenceEqual( resident ) )
+				continue;
+
+			var bytes = File.ReadAllBytes( whole );
+
+			if ( bytes.Length > resident.Length && bytes.AsSpan( 0, resident.Length ).SequenceEqual( resident ) )
+				return bytes;
+		}
+
+		return resident;
+	}
+
+	static Dictionary<long, List<string>> webTextures;
 
 	static List<string> ListOf( string sourceFile )
 	{
