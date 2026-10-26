@@ -15,17 +15,21 @@ i
 	font-family: Material Icons;
 }
 
-// An amount is a row of panels, never one string: the figure, and for crypto the game's own coin after it. The mark is
-// a panel of its own because it wears a colour of its own, so the figure still says which way the money went.
+// An amount is a row of panels, never one string: the figure, and for Ethereum the ticker after it. The ticker is a
+// panel of its own because it is smaller and lighter than the figure, and keeps the currency's colour whatever the
+// figure's says about money coming in or going out.
 .figure
 {
 	flex-shrink: 0;
 }
 
-.coin-mark
+.ticker
 {
 	flex-shrink: 0;
-	color: #c4a2ff;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	color: #b8a0ff;
 }
 
 // Shown in place of the account while the computer is offline.
@@ -108,9 +112,9 @@ i
 		font-size: 11px;
 		color: rgba( 255, 255, 255, 0.8 );
 
-		.coin-mark
+		.ticker
 		{
-			font-size: 12px;
+			font-size: 10px;
 			color: rgba( 255, 255, 255, 0.92 );
 		}
 	}
@@ -255,9 +259,9 @@ i
 		font-weight: 700;
 		color: white;
 
-		.coin-mark
+		.ticker
 		{
-			font-size: 13px;
+			font-size: 10px;
 		}
 	}
 }
@@ -428,9 +432,9 @@ i
 			color: #cfd8e6;
 		}
 
-		.coin-mark
+		.ticker
 		{
-			font-size: 13px;
+			font-size: 10px;
 		}
 	}
 }
@@ -462,9 +466,9 @@ i
 		color: white;
 	}
 
-	.unit
+	.ticker
 	{
-		font-size: 15px;
+		font-size: 12px;
 	}
 }
 
@@ -695,9 +699,9 @@ i
 		color: white;
 		animation: rise-in 0.5s ease-out 0.35s 1 both;
 
-		.coin-mark
+		.ticker
 		{
-			font-size: 26px;
+			font-size: 15px;
 		}
 	}
 

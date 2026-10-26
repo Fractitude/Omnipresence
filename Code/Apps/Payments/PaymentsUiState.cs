@@ -91,11 +91,13 @@ public sealed record PaymentsUiState
 		string.IsNullOrWhiteSpace( name ) ? "?" : name.Trim()[..1].ToUpperInvariant();
 
 	/// <summary>
-	/// What a crypto amount carries after its figure in place of the word: the game's own coin, a lone diamond drawn in
-	/// the colour of <c>.coin-mark</c>. Escaped rather than written out, so the file stays plain ASCII. One place for
-	/// the mark, so it is the same on the card, in the activity list, in the amount field and on the success screen.
+	/// What an Ethereum amount carries after its figure in place of the word: the ticker. One place for it, so it is the
+	/// same on the card, in the activity list, in the amount field and on the success screen.
 	/// </summary>
-	public static string CryptoSymbol => "\u25C6";
+	public static string CryptoUnit => "ETH";
+
+	/// <summary>The currency's name, for the places that want a word rather than the ticker.</summary>
+	public static string CryptoName => "Ethereum";
 }
 
 public sealed record PayeeRow( string Id, string Name )
@@ -105,7 +107,7 @@ public sealed record PayeeRow( string Id, string Name )
 
 /// <summary>
 /// One line of the activity list: who, how much, and what it was. The figure is drawn without its unit — the row puts
-/// <see cref="PaymentsUiState.CryptoSymbol"/> after a crypto amount — and the what and the when are separate so the
+/// <see cref="PaymentsUiState.CryptoUnit"/> after an Ethereum amount — and the what and the when are separate so the
 /// row can lay them out on their own line.
 /// </summary>
 public sealed record PaymentRow( string Peer, string Amount, string Kind, string When, bool Incoming, bool Crypto )

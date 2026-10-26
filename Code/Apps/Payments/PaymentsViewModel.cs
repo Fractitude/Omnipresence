@@ -263,7 +263,8 @@ public sealed class PaymentsViewModel
 	}
 
 	/// <summary>The most this screen takes at once, in the currency it is set to.</summary>
-	string MostText() => currency == PaymentsCurrency.Crypto ? $"{MaxPayment:N0} crypto" : $"${MaxPayment:N0}";
+	string MostText() =>
+		currency == PaymentsCurrency.Crypto ? $"{MaxPayment:N0} {PaymentsUiState.CryptoUnit}" : $"${MaxPayment:N0}";
 
 	/// <summary>When selling at the Exchange delivers the dollars.</summary>
 	static string PayoutText() => Venue.PaysAtOnce
@@ -346,7 +347,7 @@ public sealed class PaymentsViewModel
 			ExchangeName = Venue.Name,
 			ExchangeTagline = Venue.Tagline,
 			SellRate = $"1 to 1, minus {Venue.SellFeePercent}%; {PayoutText()}",
-			BuyRate = $"1 to 1, minus {Venue.BuyFeePercent}%; the crypto arrives at once.",
+			BuyRate = $"1 to 1, minus {Venue.BuyFeePercent}%; the {PaymentsUiState.CryptoUnit} arrives at once.",
 		};
 	}
 

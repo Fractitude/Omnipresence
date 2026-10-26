@@ -32,7 +32,7 @@
 				<div class="figure">@UiState.SentAmount</div>
 				@if ( UiState.Currency == PaymentsCurrency.Crypto )
 				{
-					<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+					<div class="ticker">@PaymentsUiState.CryptoUnit</div>
 				}
 			</div>
 			<div class="sent-to">sent to @paid.Name</div>
@@ -43,7 +43,9 @@
 	{
 		<div class="topbar">
 			<div class="back" @onclick=@( () => Navi.Act( PaymentsViewModel.BackAction ) )><i>arrow_back</i></div>
-			<div class="title">Send @( UiState.Currency == PaymentsCurrency.Crypto ? "crypto" : "money" )</div>
+			<div class="title">
+				Send @( UiState.Currency == PaymentsCurrency.Crypto ? PaymentsUiState.CryptoName : "money" )
+			</div>
 		</div>
 
 		<div class="recipient">
@@ -56,7 +58,7 @@
 				</div>
 				@if ( UiState.Currency == PaymentsCurrency.Crypto )
 				{
-					<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+					<div class="ticker">@PaymentsUiState.CryptoUnit</div>
 				}
 			</div>
 		</div>
@@ -66,7 +68,7 @@
 			{
 				<div class="chip @( UiState.Currency == option ? "on" : "" )"
 				     @onclick=@( () => Navi.Act( PaymentsViewModel.CurrencyAction, option.ToString() ) )>
-					@( option == PaymentsCurrency.Crypto ? "Crypto" : "Dollars" )
+					@( option == PaymentsCurrency.Crypto ? PaymentsUiState.CryptoName : "Dollars" )
 				</div>
 			}
 		</div>
@@ -77,7 +79,7 @@
 			           OnTextEdited=@AmountEdited/>
 			@if ( UiState.Currency == PaymentsCurrency.Crypto )
 			{
-				<div class="coin-mark unit">@PaymentsUiState.CryptoSymbol</div>
+				<div class="ticker">@PaymentsUiState.CryptoUnit</div>
 			}
 		</div>
 
@@ -96,7 +98,7 @@
 		}
 
 		<div class="button confirm" @onclick=@( () => Navi.Act( PaymentsViewModel.SendAction ) )>
-			@( UiState.Currency == PaymentsCurrency.Crypto ? "Confirm and send crypto" : "Confirm and send" )
+			@ConfirmLabel
 		</div>
 	}
 	else if ( UiState.Screen == PaymentsScreen.Exchange )
@@ -120,16 +122,16 @@
 				<div class="holding-value">@UiState.Balance</div>
 			</div>
 			<div class="holding">
-				<div class="holding-label">Crypto</div>
+				<div class="holding-label">@PaymentsUiState.CryptoName</div>
 				<div class="holding-value">
 					<div class="figure">@UiState.Crypto</div>
-					<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+					<div class="ticker">@PaymentsUiState.CryptoUnit</div>
 				</div>
 			</div>
 		</div>
 
 		<div class="section">
-			<div class="heading">Buy crypto</div>
+			<div class="heading">Buy @PaymentsUiState.CryptoName</div>
 			<div class="rate-line">@UiState.BuyRate</div>
 			<div class="quick">
 				@foreach ( var value in BuyAmounts )
@@ -142,7 +144,7 @@
 		</div>
 
 		<div class="section">
-			<div class="heading">Sell crypto</div>
+			<div class="heading">Sell @PaymentsUiState.CryptoName</div>
 			<div class="rate-line">@UiState.SellRate</div>
 			<div class="quick">
 				@foreach ( var value in SellAmounts )
@@ -169,7 +171,7 @@
 			<div class="balance">@UiState.Balance</div>
 			<div class="card-crypto">
 				<div class="figure">@UiState.Crypto</div>
-				<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+				<div class="ticker">@PaymentsUiState.CryptoUnit</div>
 			</div>
 		</div>
 
@@ -177,7 +179,7 @@
 			<div class="icon"><i>swap_horiz</i></div>
 			<div class="details">
 				<div class="peer">Exchange</div>
-				<div class="when">Buy or sell crypto</div>
+				<div class="when">Buy or sell @PaymentsUiState.CryptoName</div>
 			</div>
 			<i class="go">chevron_right</i>
 		</div>
@@ -224,7 +226,7 @@
 									<div class="figure">@row.Amount</div>
 									@if ( row.Crypto )
 									{
-										<div class="coin-mark">@PaymentsUiState.CryptoSymbol</div>
+										<div class="ticker">@PaymentsUiState.CryptoUnit</div>
 									}
 								</div>
 							</div>
@@ -262,6 +264,11 @@
 	/// The amount field. Plain view plumbing: what is typed goes to the host as it changes, and comes back in the state.
 	/// </summary>
 	TextEntry AmountEntry { get; set; }
+
+	/// <summary>The confirm button says what it sends, so nobody sends Ethereum thinking they sent dollars.</summary>
+	string ConfirmLabel => UiState.Currency == PaymentsCurrency.Crypto
+		? $"Confirm and send {PaymentsUiState.CryptoUnit}"
+		: "Confirm and send";
 
 	Connection GetSeat() => GameAppSeat.UserOf( this );
 
