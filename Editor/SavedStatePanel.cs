@@ -20,7 +20,12 @@ sealed class SavedStatePanel : Widget
 	const string DriveTitle = "Files";
 	const string ClearText = "Move selected to Recycle Bin";
 
-	static readonly Part[] Parts =
+	/// <summary>
+	/// Every part that can be cleared on its own, in the order they are offered. Built here rather than kept in a static
+	/// field: a field holding our own types keeps its value across a hot reload, so a part added to this list would not
+	/// appear until the editor restarted.
+	/// </summary>
+	static Part[] Parts =>
 	[
 		new( "Apps",
 			"Installed apps and packages. The scene's apps will be installed again.",
@@ -32,6 +37,13 @@ sealed class SavedStatePanel : Widget
 				s.TaskbarOrder = d.TaskbarOrder;
 				s.StartFavorites = d.StartFavorites;
 				s.InstalledAt = d.InstalledAt;
+			} ),
+		new( "Hardware",
+			"The hardware installed, and what is turned off. The scene's hardware comes back on the next start.",
+			( s, d ) =>
+			{
+				s.Hardware = d.Hardware;
+				s.DisabledHardware = d.DisabledHardware;
 			} ),
 		new( "Permissions",
 			"Granted permissions and root apps.",
