@@ -1,0 +1,24 @@
+{
+  "ident": "crosschainer.nishida_240z",
+  "title": "Nishida 240Z",
+  "author": "crosschainer",
+  "authorIdent": "crosschainer",
+  "page": "https://sbox.game/crosschainer/nishida_240z",
+  "workshopVersion": 409926,
+  "workshopUpdated": "2026-10-03",
+  "integrated": "2026-10-26",
+  "includesCode": true,
+  "code": "Code/Sents/Imported/crosschainer.nishida_240z/",
+  "namespaces": [
+    "CuratedVehicles"
+  ],
+  "description": "Nishida 240Z by crosschainer. An automatic car with grip and drift handling, third-person driving, suspension and lights.",
+  "assetsFromWorkshop": [
+    "drift_district/audio/gtr2000.sound",
+    "drift_district/project/nissan_datsun_240z/body.vmdl",
+    "drift_district/project/nissan_datsun_240z/frontbump0.vmdl",
+    "drift_district/project/nissan_datsun_240z/rearbump0.vmdl",
+    "drift_district/project/nissan_datsun_240z/wheel.vmdl",
+    "drift_district/project/shared/exhausts_1/part.vmdl"
+  ]
+}

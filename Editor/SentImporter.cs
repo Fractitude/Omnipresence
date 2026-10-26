@@ -47,6 +47,9 @@ public static class SentImporter
 
 		/// <summary>Another import has this very file (a library one author's sents share).</summary>
 		Shared,
+
+		/// <summary>Another import has a file of that name declaring the same types, changed here: that one stays.</summary>
+		Superseded,
 	}
 
 	/// <summary>
@@ -118,6 +121,11 @@ public static class SentImporter
 
 		if ( edited.Count > 0 )
 			summary += $", {edited.Count} edited here and kept ({string.Join( ", ", edited )})";
+
+		var superseded = fates.Where( x => x.Fate == Fate.Superseded ).Select( x => x.Document.Path ).ToList();
+
+		if ( superseded.Count > 0 )
+			summary += $", {superseded.Count} left out because another import has a changed copy ({string.Join( ", ", superseded )})";
 
 		if ( waiting.Count > 0 )
 			summary += $", {waiting.Count} new in the package and not written ({string.Join( ", ", waiting )}): sent_import {ident} update";
@@ -285,12 +293,20 @@ public static class SentImporter
 		if ( File.Exists( path ) )
 			return Same( File.ReadAllText( path ), document.Text ) ? Fate.Same : Fate.Edited;
 
-		// A library several sents carry (one author's shared vehicle code) is imported once.
-		var shared = Directory.Exists( importedRoot )
-		             && Directory.EnumerateFiles( importedRoot, Path.GetFileName( path ), SearchOption.AllDirectories )
-			             .Any( x => !x.StartsWith( target, StringComparison.OrdinalIgnoreCase ) && Same( File.ReadAllText( x ), document.Text ) );
+		// A library several sents carry (one author's shared vehicle code) is imported once. A second copy would
+		// declare the same types again, so it is left out, whether it is the same or was adapted in the first import.
+		if ( !Directory.Exists( importedRoot ) )
+			return Fate.New;
 
-		return shared ? Fate.Shared : Fate.New;
+		var others = Directory.EnumerateFiles( importedRoot, Path.GetFileName( path ), SearchOption.AllDirectories )
+			.Where( x => !x.StartsWith( target + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase ) )
+			.Select( File.ReadAllText )
+			.ToList();
+
+		if ( others.Any( x => Same( x, document.Text ) ) )
+			return Fate.Shared;
+
+		return others.Any( x => DeclaresSameTypes( x, document.Text ) ) ? Fate.Superseded : Fate.New;
 	}
 
 	/// <summary>
@@ -304,7 +320,28 @@ public static class SentImporter
 		return path.StartsWith( folder, StringComparison.OrdinalIgnoreCase ) ? path : null;
 	}
 
-	static bool Same( string a, string b ) => a.Replace( "\r\n", "\n" ) == b.Replace( "\r\n", "\n" );
+	// Equal apart from whitespace (line endings, indentation, blank lines).
+	static bool Same( string a, string b ) => Squeezed( a ) == Squeezed( b );
+
+	static string Squeezed( string text ) => Regex.Replace( text, @"\s+", "" );
+
+	static readonly Regex TypePattern = new( @"\b(?:class|struct|enum|interface|record)\s+([A-Za-z_]\w*)" );
+
+	// The namespaces and type names a source file declares: tells two copies of a library file from two files that
+	// only share a name.
+	static string Declarations( string text )
+	{
+		var namespaces = NamespacePattern.Matches( text ).Select( m => m.Groups[1].Value );
+		var types = TypePattern.Matches( text ).Select( m => m.Groups[1].Value );
+
+		return string.Join( ",", namespaces.Concat( types ).Distinct().OrderBy( x => x ) );
+	}
+
+	static bool DeclaresSameTypes( string a, string b )
+	{
+		var declared = Declarations( a );
+		return declared.Contains( ',' ) && declared == Declarations( b );
+	}
 
 	static void WriteSource( string target, Document document )
 	{
