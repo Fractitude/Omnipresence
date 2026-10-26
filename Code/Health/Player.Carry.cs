@@ -121,7 +121,7 @@ public sealed partial class Player
 		if ( !Input.Pressed( "use" ) || IsSeated )
 			return;
 
-		if ( Controller.Hovered.IsValid() || Controller.Pressed.IsValid() )
+		if ( Controller.Hovered.IsValid() || Controller.Pressed.IsValid() || Interactable.Focused.IsValid() )
 			return;
 
 		if ( !TryPickup( FindCarryTarget() ) )

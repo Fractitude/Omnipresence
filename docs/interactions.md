@@ -38,6 +38,22 @@ usable, then runs it. The GameObject must be a network object. Never trust a cli
 
 `Range` (default 50) is how far the player's eye can be from the object's colliders (its origin if it has none). Beyond it the prompt is hidden and the press does nothing. A press also has to pass a line-of-sight check: a ray from the eye to one of the object's colliders must hit that collider first. The host runs the same check on every press from a client, from the player's own eye. The engine only finds what the player looks at within `PlayerController.ReachLength`, so that is the most `Range` can reach. 0 turns the checks off.
 
+## Third person
+
+`PlayerController` traces its own look from the eye. In first person that ray is the crosshair, but in third person the camera
+sits behind and beside the eye, so the engine's ray meets the world at a different point: an object under the crosshair could be
+ignored while one beside it was picked, and its reach was measured along a line the player was not looking down.
+
+`CrosshairInteraction` (`Code/Interaction/CrosshairInteraction.cs`) takes the job over while the player is in third person. It
+traces the crosshair's own line, started beside the eye where the camera sits beside it, so `ReachLength` is still measured from
+the player's eye and nothing is harder to reach than in first person. What it finds is driven through the engine's own
+`Component.IPressable` calls (`Hover`, `Look`, `Blur`, `StartPressing`, `StopPressing`), so `Interactable`, chairs and every
+other pressable behave as before. It turns `PlayerController.EnablePressing` off while it has the job and back on in first
+person, where the engine's ray is the crosshair.
+
+`PlayerController.Hovered` therefore stays empty in third person: read `Interactable.Focused` to know what the local player is
+looking at.
+
 ## Windows hide the prompts
 
 While any full-screen window (a menu that takes the mouse) is open, no interaction prompt or crosshair is drawn, the mouse wheel does not move the picked row, and Use does nothing (`Interactable.Press`). `GameMenus` (`Code/Hud/GameMenus.cs`) is the one switch. **A new window must register with it**: `GameMenus.SetOpen( "name", true )` when it opens and `SetOpen( "name", false )` on every way it closes (its Close, `OnDisabled`, the player leaving). The Character menu, the Ability menu and every `MenuWindow` menu do (see [ui.md](ui.md)). `Crosshair.razor` and `Interactable` read `GameMenus.IsAnyOpen`; do not add another hard-coded menu check.
