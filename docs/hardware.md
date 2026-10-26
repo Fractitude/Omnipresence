@@ -19,11 +19,11 @@ Wired: every terminal gives more attempts and removes wrong words
 
 | App | Where | Kind | What it does |
 | --- | --- | --- | --- |
-| **Intrusion** | Home computer, the Wired | System app | Cracks dead servers: a word puzzle that pays hacking XP, credits and blueprints. Its Operations tab holds the heists, see [hacking.md](hacking.md). |
+| **Intrusion** | Home computer, the Wired | Normal app | Cracks dead servers: a word puzzle that pays hacking XP, credits and blueprints. Its Operations tab holds the heists, see [hacking.md](hacking.md). |
 | **Hardware Store** | The store's computer only | Normal app | Sells parts for dollars. Has the staff login hack. |
-| **Workbench** | Home computer | System app | Installs and removes parts. Sells nothing. |
+| **Workbench** | Home computer | Normal app | Installs and removes parts. Sells nothing. |
 
-Code: `Code/Apps/Intrusion`, `Code/Apps/HardwareStore`, `Code/Apps/Workbench`. Each is a shared Navi app split into a view model, a UI state and a stateless panel (see `Libraries/navi/docs/app-architecture.md`). Manifests are in `Assets/navi/system/` (Intrusion, Workbench) and `Assets/navi/shop/` (Hardware Store).
+Code: `Code/Apps/Intrusion`, `Code/Apps/HardwareStore`, `Code/Apps/Workbench`. Each is a shared Navi app split into a view model, a UI state and a stateless panel (see `Libraries/navi/docs/app-architecture.md`). Manifests are in `Assets/navi/game/` (Intrusion, Workbench) and `Assets/navi/shop/` (Hardware Store). None of them is part of the OS: the player installs Intrusion and Workbench from Packages, and the store's computer is a kiosk with the Hardware Store as its only app.
 
 ## Hardware
 
@@ -119,7 +119,7 @@ All changes go through `PlayerProgress` on the host (`TryOrder`, `TryReroute`, `
 
 - The seat decides who acts. Apps work out the player from the computer's seat, never from what an action says. Actions carry only an id, and the host checks the price, the blueprint, the stock, whether the staff panel is open and the slot room.
 - The puzzle's password stays in the host's puzzle object. It is never put in the UI state, which goes to every player.
-- Tags and the kiosk list only limit where an app goes. Core system apps (Intrusion, Workbench) are installed everywhere and tags don't change that, so they check the world themselves (Wired or home).
+- Tags and the kiosk list only limit where an app goes. Nothing is preinstalled: the player installs Intrusion and Workbench from Packages, so the apps check the world themselves (Wired or home).
 - The kiosk setting is a scene property that is never saved and that no app or `User...` call can change.
 - Known limit from AGENTS.md: hostile code in the game can still read or change host state. None of this stops that.
 

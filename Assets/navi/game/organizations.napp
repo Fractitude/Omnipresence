@@ -10,7 +10,7 @@
   "MinSize": "380,320",
   "Shared": true,
   "Permissions": [],
-  "IsSystem": true,
+  "IsSystem": false,
   "__references": [],
   "__version": 0
 }

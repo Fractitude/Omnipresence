@@ -70,8 +70,8 @@ Both options run on the host (`RunOn.Host`), which is where the flags live, and 
 
 ## The app
 
-`Code/Apps/Security/`, described by `Assets/navi/system/security.napp`. A core app (`IsSystem` + prepackaged, so it is
-installed on every computer with root), and **shared**: the host's copy decides, everyone near the screen sees it.
+`Code/Apps/Security/`, described by `Assets/navi/game/security.napp`. An ordinary app the player installs from
+Packages, asking for no root, and **shared**: the host's copy decides, everyone near the screen sees it.
 
 | File | Holds |
 |---|---|

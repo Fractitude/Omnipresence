@@ -99,7 +99,7 @@ Sizes are rough: **S** about 30 minutes, **M** about an hour or two, **L** a few
 
 **App side** (three files, copied from the Hardware Store pattern)
 
-- `Code/Apps/Hush/`: `HushUiState.cs`, `HushViewModel.cs`, `Hush.razor` (+ `.scss`). Registered in `Assets/navi/system/hush.napp`.
+- `Code/Apps/Hush/`: `HushUiState.cs`, `HushViewModel.cs`, `Hush.razor` (+ `.scss`). Registered in `Assets/navi/game/hush.napp`.
 - Tabs for v0: **Orders**, **Shipments**, **Wallet**, **Reviews**, **Exchange** (crypto to dollars at a fixed rate with an 8 percent fee and a short delay, and dollars to crypto at 4 percent). Trends, Shop and Security come later.
 - **Crypto is the third currency.** Add `Crypto` to `ProgressRecord` and `PlayerProgress` (synced, host-only changes, own cap, `AddCrypto`/`TrySpendCrypto`), and update `docs/currency.md` from "planned" to as-built. No path may turn credits into crypto.
 - Actions carry only ids (`accept <orderId>` in Hush; the packing table sends nothing but the press). The seat comes from `GameAppSeat`. The host re-checks everything.

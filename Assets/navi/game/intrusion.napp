@@ -9,7 +9,7 @@
   "CanResize": false,
   "Shared": true,
   "Permissions": [],
-  "IsSystem": true,
+  "IsSystem": false,
   "__references": [],
   "__version": 0
 }

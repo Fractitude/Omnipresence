@@ -18,7 +18,7 @@ order. The players run it in the **Organizations** app; the rules and the payout
 | `OrgRegistry` | `Code/Org/OrgRegistry.cs` | The host's data and every change to it (each is checked by `OrgRules` first, then saved at once). Finds a player's organization from their Steam id, also while they are away. |
 | `OrgPayouts` | `Code/Org/OrgPayouts.cs` | `Distribute`: the one function that shares a payment. |
 | `OrgSystem` | `Code/Org/OrgSystem.cs` | Every 5 s delivers the shares that wait for absent members. |
-| Organizations app | `Code/Apps/Organizations/`, `Assets/navi/system/organizations.napp` | `OrganizationsViewModel` / `OrganizationsUiState` / a stateless `Organizations.razor`, like Hush and Payments. Shared app: the host's copy runs it; every action carries only an id, a role or icon name, a small step or typed text, and acts as the player in the seat (`GameAppSeat`). |
+| Organizations app | `Code/Apps/Organizations/`, `Assets/navi/game/organizations.napp` | `OrganizationsViewModel` / `OrganizationsUiState` / a stateless `Organizations.razor`, like Hush and Payments. Shared app: the host's copy runs it; every action carries only an id, a role or icon name, a small step or typed text, and acts as the player in the seat (`GameAppSeat`). |
 
 ## Rules
 

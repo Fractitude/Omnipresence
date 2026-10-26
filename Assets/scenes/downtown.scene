@@ -372,7 +372,6 @@
                 },
                 "Property": "InstalledApps",
                 "Value": [
-                  "navi/system/thewired.napp",
                   "navi/apps/files.napp",
                   "navi/apps/webbrowser.napp",
                   "navi/apps/filepicker.napp",
@@ -394,8 +393,7 @@
                   "navi/apps/files.napp",
                   "navi/apps/textedit.napp",
                   "navi/apps/codeedit.napp",
-                  "navi/apps/messages.napp",
-                  "navi/system/thewired.napp"
+                  "navi/apps/messages.napp"
                 ]
               },
               {
@@ -405,7 +403,6 @@
                 },
                 "Property": "StartFavorites",
                 "Value": [
-                  "navi/system/thewired.napp",
                   "navi/apps/textedit.napp"
                 ]
               }

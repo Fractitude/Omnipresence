@@ -1,8 +1,8 @@
 # The Depot: buying big objects
 
 A storage box, a grow tray, a press bench or a packing table is not an item in the bag: it is an object the player puts
-down in the world with the Physgun. The **Depot** (a Navi system app, `Assets/navi/system/depot.napp`) sells them for
-cash and has them delivered.
+down in the world with the Physgun. The **Depot** (a Navi app, `Assets/navi/game/depot.napp`, installed from
+Packages) sells them for cash and has them delivered.
 
 | Piece | Code | Notes |
 | --- | --- | --- |
