@@ -89,6 +89,9 @@ public static class SentIntegrator
 
 		File.WriteAllText( Path.Combine( folder, "source.json" ), SourceText( ident, entity, package, namespaces ) );
 
+		// The assets become files of the project too, so the workshop is not needed to see the sent.
+		await SentAssets.ImportAsync( ident );
+
 		Log.Info( $"sent_integrate: {ident}: {(wrote ? "prefab saved to" : "prefab already in")} Assets/sents/{ident}/ "
 		          + $"(source: {SentSource.Describe( package )})."
 		          + (built ? "" : " Its code does not build yet (see the report above): fix it, then spawn it.")

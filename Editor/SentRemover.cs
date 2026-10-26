@@ -94,6 +94,7 @@ public static class SentRemover
 
 		if ( Directory.Exists( prefabFolder ) )
 		{
+			removed += SentAssets.Remove( ident );
 			Directory.Delete( prefabFolder, true );
 			removed++;
 			SentLocal.SetRemoved( ident, true );
