@@ -5,7 +5,7 @@
     "Flags": 0,
     "Name": "pickup_health",
     "Position": "0,0,0",
-    "Rotation": "0,0,0,1",
+    "Rotation": "0,0,0.707106769,0.707106769",
     "Scale": "1,1,1",
     "Tags": "",
     "Enabled": true,
@@ -16,7 +16,7 @@
     "OwnerTransfer": 1,
     "Components": [
       {
-        "__type": "HealthPickup",
+        "__type": "Sandbox.HealthPickup",
         "__guid": "2829bd15-7b6e-43d6-aa33-375d6893e0f5",
         "__enabled": true,
         "Flags": 0,
@@ -27,7 +27,10 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "PickupSound": "sounds/equip_health.sound"
+        "PickupSound": {
+          "Id": "3ccf4a00-c92e-48f8-a264-9163bbc72afe",
+          "Path": "sounds/equip_health.sound"
+        }
       },
       {
         "__type": "Sandbox.ModelCollider",
@@ -38,7 +41,10 @@
         "Elasticity": null,
         "Friction": null,
         "IsTrigger": false,
-        "Model": "models/props/health_pickup/health_pickup.vmdl",
+        "Model": {
+          "Id": "44971e17-46b1-4982-ba2e-610dcbc78fb9",
+          "Path": "models/props/health_pickup/health_pickup.vmdl"
+        },
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
@@ -65,6 +71,7 @@
         "Gravity": true,
         "GravityScale": 1,
         "ImpactDamage": 0,
+        "InertiaScale": 1,
         "LinearDamping": 0,
         "Locking": {
           "X": false,
@@ -86,6 +93,7 @@
         "OnComponentUpdate": null,
         "OverrideMassCenter": false,
         "RigidbodyFlags": 0,
+        "SleepThreshold": 2,
         "StartAsleep": false
       }
     ],
@@ -117,7 +125,10 @@
             "MaterialGroup": null,
             "MaterialOverride": null,
             "Materials": null,
-            "Model": "models/props/health_pickup/health_pickup.vmdl",
+            "Model": {
+              "Id": "44971e17-46b1-4982-ba2e-610dcbc78fb9",
+              "Path": "models/props/health_pickup/health_pickup.vmdl"
+            },
             "OnComponentDestroy": null,
             "OnComponentDisabled": null,
             "OnComponentEnabled": null,
@@ -139,6 +150,7 @@
     ],
     "__properties": {
       "NetworkInterpolation": true,
+      "PhysicsMode": "Physics3D",
       "TimeScale": 1,
       "WantsSystemScene": true,
       "Metadata": {},

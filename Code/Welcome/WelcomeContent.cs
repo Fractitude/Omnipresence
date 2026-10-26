@@ -25,8 +25,7 @@ public sealed class WelcomeData
 	public string Title { get; set; } = "Omnipresence";
 
 	public string Intro { get; set; } =
-		"Omnipresence is a roleplaying game. You live in two world, the real one and the Wired, the network under "
-		+ "it. Earn, trade and hide your work, and reach the Wired from a computer.";
+		"Omnipresence is a detailed realistic roleplaying game, with the fidelity of interactions you'd expect from the likes of Skyrim or other RPGs. ";
 
 	public string RulesHeading { get; set; } = "Rules";
 

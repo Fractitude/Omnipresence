@@ -3,7 +3,7 @@
     "__guid": "3ec32ba9-4c8d-4312-954c-2787639c319e",
     "__version": 2,
     "Flags": 0,
-    "Name": "GrowTray",
+    "Name": "grow_tray",
     "Position": "0,0,0",
     "Rotation": "0,0,0,1",
     "Scale": "1,1,1",
@@ -19,7 +19,13 @@
         "__type": "Sandbox.GrowTray",
         "__guid": "37aa03f9-853e-41e6-9b27-feb23b415d77",
         "__enabled": true,
-        "Flags": 0
+        "Flags": 0,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "Sandbox.Interactable",
@@ -27,7 +33,12 @@
         "__enabled": true,
         "Flags": 0,
         "HandlerObject": null,
-        "Range": 200,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
         "Options": [
           {
             "Id": "tray",
@@ -39,7 +50,44 @@
             "Cooldown": 0,
             "OnInteract": null
           }
-        ]
+        ],
+        "Range": 200
+      },
+      {
+        "__type": "Sandbox.Rigidbody",
+        "__guid": "d4cd9cab-0533-4422-81da-4ff971fe4ac8",
+        "__enabled": true,
+        "Flags": 0,
+        "AngularDamping": 0,
+        "EnableImpactDamage": true,
+        "EnhancedCcd": false,
+        "Gravity": true,
+        "GravityScale": 1,
+        "ImpactDamage": 0,
+        "InertiaScale": 1,
+        "LinearDamping": 0,
+        "Locking": {
+          "X": false,
+          "Y": false,
+          "Z": false,
+          "Pitch": false,
+          "Yaw": false,
+          "Roll": false
+        },
+        "MassCenterOverride": "0,0,0",
+        "MassOverride": 100,
+        "MinImpactDamageSpeed": 500,
+        "MotionEnabled": true,
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null,
+        "OverrideMassCenter": false,
+        "RigidbodyFlags": 0,
+        "SleepThreshold": 2,
+        "StartAsleep": false
       }
     ],
     "Children": [
@@ -50,7 +98,7 @@
         "Name": "Model",
         "Position": "0,0,7.5",
         "Rotation": "0,0,0,1",
-        "Scale": "1.5,1,0.3",
+        "Scale": "1.5,1,0.300000012",
         "Tags": "",
         "Enabled": true,
         "NetworkMode": 2,
@@ -64,12 +112,30 @@
             "__guid": "e5bde876-691a-465a-9a11-efb2b34aad63",
             "__enabled": true,
             "Flags": 0,
+            "BodyGroups": 18446744073709551615,
+            "CreateAttachments": false,
+            "LodOverride": null,
+            "MaterialGroup": null,
+            "MaterialOverride": null,
+            "Materials": null,
             "Model": {
               "Id": "8a84e5a0-01f8-0000-f0db-b088f8010000",
               "Path": "models/dev/box.vmdl"
             },
-            "Tint": "0.2,0.55,0.2,1",
-            "RenderType": "On"
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "RenderOptions": {
+              "GameLayer": true,
+              "OverlayLayer": false,
+              "BloomLayer": false,
+              "AfterUILayer": false
+            },
+            "RenderType": "On",
+            "Tint": "0.2,0.55,0.2,1"
           },
           {
             "__type": "Sandbox.BoxCollider",
@@ -77,15 +143,58 @@
             "__enabled": true,
             "Flags": 0,
             "Center": "0,0,0",
+            "ColliderFlags": 0,
+            "Elasticity": null,
+            "Friction": null,
+            "IsTrigger": false,
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null,
+            "OnObjectTriggerEnter": null,
+            "OnObjectTriggerExit": null,
+            "OnTriggerEnter": null,
+            "OnTriggerExit": null,
+            "RollingResistance": null,
             "Scale": "50,50,50",
-            "Static": true
+            "Static": true,
+            "Surface": null,
+            "SurfaceVelocity": "0,0,0"
           }
         ],
         "Children": []
       }
-    ]
+    ],
+    "__properties": {
+      "NetworkInterpolation": true,
+      "PhysicsMode": "Physics3D",
+      "TimeScale": 1,
+      "WantsSystemScene": true,
+      "Metadata": {},
+      "NavMesh": {
+        "Enabled": false,
+        "IncludeStaticBodies": true,
+        "IncludeKeyframedBodies": true,
+        "EditorAutoUpdate": false,
+        "AgentHeight": 64,
+        "AgentRadius": 16,
+        "AgentStepSize": 18,
+        "AgentMaxSlope": 40,
+        "ExcludedBodies": "",
+        "IncludedBodies": "",
+        "DeferGeneration": false,
+        "CustomBounds": false
+      }
+    },
+    "__variables": []
   },
-  "ResourceVersion": 1,
+  "ResourceVersion": 2,
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "DontBreakAsTemplate": false,
   "__references": [],
   "__version": 2
 }
