@@ -17,14 +17,16 @@ the terminal it was ordered at. Written 3 s after the last change, atomically (`
 ## The two places
 
 The app asks where the next order goes, in a row of two at the top of its window, and `PlaceableShop.Buy` settles it on
-the host:
+the host. **Collecting at the store is the default**: it is chosen wherever a bay is in reach, and home only when the
+player picks it or there is no bay near the computer.
 
 - **Collect at the store, now.** The object is put down at a delivery point within `DeliverySpot.Range` (1500 units,
   38 m) of the computer the order is placed at, in the same call that takes the money. The choice is only offered where
   the app can see a bay, and a bay has to have room before the money is taken, so nothing is bought that would have to
   wait.
 - **Deliver home, later.** Mailed, as it always was: it arrives beside the buyer's mailbox after the object's
-  `DeliverSeconds`, or in front of a spawn point if the mailboxes are full. The table's delivery times are for this.
+  `DeliverSeconds`. The row says the range in minutes ("Mailed to your mailbox in 2-5 mins."), the item's own row in
+  the shop its exact time. Where the mailboxes are full it arrives in front of a spawn point.
 
 A delivery point is any object the level tags **`delivery_point`**; an empty is enough, and its yaw is the way round the
 deliveries are laid, so a bay should face out of its wall. None is tagged yet: a store needs a tagged empty per bay and

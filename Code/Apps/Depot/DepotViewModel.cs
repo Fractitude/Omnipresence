@@ -28,14 +28,11 @@ public sealed class DepotViewModel
 	/// <inheritdoc cref="Store"/>
 	public const string Home = PlacedObjectRules.DeliveryHome;
 
-	/// <summary>Units are inches, so this is how many metres one of them is.</summary>
-	const float MetresPerUnit = 0.0254f;
-
 	readonly Func<Connection> getSeat;
 	readonly Func<NaviComputer> getComputer;
 
 	string notice = "";
-	string destination = Home;
+	string destination = Store;
 	Guid lastSeatId;
 	string signature;
 	int revision;
@@ -60,7 +57,7 @@ public sealed class DepotViewModel
 		{
 			lastSeatId = seat?.Id ?? default;
 			notice = "";
-			destination = Home;
+			destination = Store;
 		}
 
 		if ( Signature( seat ) != signature )
@@ -78,7 +75,7 @@ public sealed class DepotViewModel
 		else if ( action == BuyAction && args.Length > 0 && CanWork( seat ) && PlayerCrime.For( seat ) is { Ready: true } crime )
 		{
 			var terminal = Terminal();
-			var result = PlaceableShop.Buy( seat, args[0], WorldClock.Now, destination, terminal?.At,
+			var result = PlaceableShop.Buy( seat, args[0], WorldClock.Now, WhereNow( StoreNear( seat ) ), terminal?.At,
 				terminal?.Scene );
 
 			notice = result.Message;
@@ -122,6 +119,13 @@ public sealed class DepotViewModel
 	bool StoreNear( Connection seat ) =>
 		CanWork( seat ) && Terminal() is { } place && DeliverySpot.HasPointNear( place.Scene, place.At );
 
+	/// <summary>
+	/// Where the next order goes: the store when that is what was chosen and a bay is in reach, home otherwise.
+	/// Collecting at the store is the default, so a computer with no bay near it mails orders without the player having
+	/// to choose home first, and the store's choice comes back by itself when a bay is in reach again.
+	/// </summary>
+	string WhereNow( bool bayInReach ) => destination == Store && bayInReach ? Store : Home;
+
 	string Signature( Connection seat ) =>
 		HashCode.Combine(
 			seat?.Id,
@@ -158,28 +162,27 @@ public sealed class DepotViewModel
 		var now = WorldClock.Now;
 		var terminal = Terminal();
 
-		// The store's bays: the delivery points near this computer, nearest first. With none in reach the orders go
-		// home, and a choice of the store left over from before falls back with it.
+		// The store's bays: the delivery points near this computer, nearest first. Collecting at the store is the
+		// default, so only a computer with no bay in reach mails its orders home.
 		var bays = terminal is { } place
 			? DeliverySpot.StorePlaces( place.Scene, place.At )
 			: new List<DeliverySpot.DeliveryPlace>();
 
-		if ( bays.Count == 0 )
-			destination = Home;
+		var store = WhereNow( bays.Count > 0 ) == Store;
 
 		return state with
 		{
 			HasAccount = true,
 			Cash = $"${wallet.Cash:N0}",
 			StoreAvailable = bays.Count > 0,
-			StoreChosen = destination == Store,
+			StoreChosen = store,
 			StoreDetail = bays.Count == 0
 				? "There is no delivery point near this computer."
-				: $"Handed over now, at the bay {Distance( bays[0].Anchor, terminal?.At ?? default )}.",
+				: "Handed over now.",
 			HomeDetail = $"Mailed to your mailbox in "
-			             + $"{InteractionSetup.Countdown( PlaceableCatalog.All.Min( x => x.DeliverSeconds ) )}"
-			             + $" to {InteractionSetup.Countdown( PlaceableCatalog.All.Max( x => x.DeliverSeconds ) )}.",
-			Shop = PlaceableCatalog.All.Select( x => BuildRow( seat, x, destination == Store ) ).ToList(),
+			             + $"{Minutes( PlaceableCatalog.All.Min( x => x.DeliverSeconds ))}-"
+			             + $"{Minutes( PlaceableCatalog.All.Max( x => x.DeliverSeconds ))} mins.",
+			Shop = PlaceableCatalog.All.Select( x => BuildRow( seat, x, store ) ).ToList(),
 			Incoming = PlacedObjectRegistry.OnTheWay( (ulong)seat.SteamId )
 				.Select( x => new DepotIncomingRow(
 					PlaceableCatalog.Find( x.Placeable )?.Name ?? "Order",
@@ -200,7 +203,6 @@ public sealed class DepotViewModel
 			reason );
 	}
 
-	/// <summary>A distance as the panel shows it: the game's units are inches.</summary>
-	static string Distance( Vector3 from, Vector3 to ) =>
-		$"{MathF.Round( from.Distance( to ) * MetresPerUnit )} m away";
+	/// <summary>A delivery time as the panel shows it: whole minutes.</summary>
+	static long Minutes( long seconds ) => (long)MathF.Round( seconds / 60f );
 }
