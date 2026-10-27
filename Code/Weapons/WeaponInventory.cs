@@ -33,6 +33,12 @@ public sealed partial class WeaponInventory : BaseInventoryComponent
 	ISitTarget seat;
 	BaseSandboxWeapon weaponBeforeSeat;
 
+	/// <summary>
+	/// The weapon the player held last, so the Holster key can draw it again. A weapon put away for a seat is
+	/// handed back by <see cref="UpdateSeat"/> and is not tracked here.
+	/// </summary>
+	BaseSandboxWeapon lastHeldWeapon;
+
 	protected override void OnStart()
 	{
 		// The base equips the weapon already in hand when this player arrives in a joining client's snapshot (snapshots
@@ -49,6 +55,17 @@ public sealed partial class WeaponInventory : BaseInventoryComponent
 		// The host hands out every player's loadout, its own and the clients' (theirs are proxies here).
 		if ( Networking.IsHost )
 			_ = GiveLoadoutWhenReady();
+
+		// Remember every weapon that comes out, whichever way it was drawn (a slot key, the switcher, a pick-up), so
+		// the Holster key can put it back in hand. The snapshot's own weapon doesn't run the callback, hence the read.
+		ActiveItemChanged += OnActiveItemSwitched;
+		lastHeldWeapon = ActiveWeapon;
+	}
+
+	void OnActiveItemSwitched( BaseInventoryItem _, BaseInventoryItem newItem )
+	{
+		if ( newItem is BaseSandboxWeapon weapon )
+			lastHeldWeapon = weapon;
 	}
 
 	/// <summary>
@@ -196,7 +213,32 @@ public sealed partial class WeaponInventory : BaseInventoryComponent
 		if ( Input.Pressed( "Drop" ) && ActiveWeapon.IsValid() )
 			DropActiveWeapon();
 
+		// A computer or a menu has the keys.
+		if ( Input.Pressed( "Holster" ) && !Input.Suppressed && !Input.MouseCursorVisible
+		     && NaviInputCapture.Current is null )
+			ToggleHolster();
+
 		// The slot keys, the next and previous keys and the wheel are read by WeaponSwitcher, the menu that picks a weapon.
+	}
+
+	/// <summary>
+	/// The Holster key: puts the held weapon away, or draws the one put away last. A voluntary switch, so a weapon
+	/// that is not ready to be put away (mid-reload, say) can refuse it, and a client's press reaches the host the
+	/// same way a slot key's does. When there is nothing left to draw it falls back to the best weapon in the
+	/// inventory, so the key always brings one out if the player has any.
+	/// </summary>
+	void ToggleHolster()
+	{
+		if ( ActiveWeapon.IsValid() )
+		{
+			Switch( null, allowHolster: true );
+			return;
+		}
+
+		if ( lastHeldWeapon.IsValid() && lastHeldWeapon.Inventory == this )
+			Switch( lastHeldWeapon, allowHolster: true );
+		else
+			SwitchToBest();
 	}
 
 	/// <summary>
