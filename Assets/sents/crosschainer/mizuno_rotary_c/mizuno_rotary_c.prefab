@@ -2116,7 +2116,7 @@
           {
             "__type": "Sandbox.VehicleMirror",
             "__guid": "d2889c56-fcc2-424d-8ee7-250ff5f36305",
-            "__enabled": true,
+            "__enabled": false,
             "Flags": 0,
             "GlassNormal": "-0.94,-0.35,0",
             "GlassSize": "7.5,4.6",
@@ -2149,7 +2149,7 @@
           {
             "__type": "Sandbox.VehicleMirror",
             "__guid": "fd6751c1-f05d-427d-b879-fb49cec54d19",
-            "__enabled": true,
+            "__enabled": false,
             "Flags": 0,
             "GlassNormal": "-0.94,0.35,0",
             "GlassSize": "7.5,4.6",

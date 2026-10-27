@@ -411,7 +411,17 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 		return lens;
 	}
 
-	protected override void OnDisabled() => SetVisible( false );
+	/// <summary>Off is off: the pane and the camera go with the component rather than hanging about behind it.</summary>
+	protected override void OnDisabled()
+	{
+		SetVisible( false );
+
+		glass?.GameObject.Destroy();
+		glass = null;
+
+		lens?.GameObject.Destroy();
+		lens = null;
+	}
 
 	protected override void OnDestroy()
 	{
