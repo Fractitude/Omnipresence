@@ -29,6 +29,24 @@
         "OnComponentUpdate": null
       },
       {
+        "__type": "Sandbox.OwnershipComponent",
+        "__guid": "0d40e868-5221-4746-960b-9889e8fab447",
+        "__enabled": true,
+        "Flags": 0,
+        "ThingId": "",
+        "DefaultOwner": {
+          "Kind": 0,
+          "SteamId": 0,
+          "OrgId": ""
+        },
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
+      },
+      {
         "__type": "Sandbox.Interactable",
         "__guid": "bcb8a7c5-8c28-4f6a-83c1-c977de7ce53a",
         "__enabled": true,

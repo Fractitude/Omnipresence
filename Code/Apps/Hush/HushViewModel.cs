@@ -265,15 +265,26 @@ public sealed class HushViewModel
 		} ).ToList();
 	}
 
-	static IReadOnlyList<HushShipmentRow> BuildIncoming( PlayerCrime crime ) => crime.Deliveries
-		.Reverse()
-		.Select( x => new HushShipmentRow(
-			$"{ProductName( x.Kind )} x{x.Count}",
-			x.State == DeliveryState.InTransit
-				? $"On its way, arrives {Clock( x.ArriveAt )}"
-				: "Waiting in your mailbox",
-			x.State == DeliveryState.InMailbox ) )
-		.ToList();
+	static IReadOnlyList<HushShipmentRow> BuildIncoming( PlayerCrime crime )
+	{
+		var rows = crime.Deliveries
+			.Reverse()
+			.Select( x => new HushShipmentRow(
+				$"{ProductName( x.Kind )} x{x.Count}",
+				x.State == DeliveryState.InTransit
+					? $"On its way, arrives {Clock( x.ArriveAt )}"
+					: "Waiting in your mailbox",
+				x.State == DeliveryState.InMailbox ) )
+			.ToList();
+
+		// Mail that has reached a mailbox is in the box and not in the record (anyone may take it out of the box), so
+		// it is listed from the box itself.
+		foreach ( var letter in crime.MailInBox )
+			rows.Insert( 0, new HushShipmentRow(
+				$"{ProductName( letter.Kind )} x{letter.Count}", "Waiting in your mailbox", true ) );
+
+		return rows;
+	}
 
 	static IReadOnlyList<FilterChip> BuildStatusChips( PlayerCrime crime )
 	{

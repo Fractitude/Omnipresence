@@ -26,7 +26,9 @@ player picks it or there is no bay near the computer.
   wait.
 - **Deliver home, later.** Mailed, as it always was: it arrives beside the buyer's mailbox after the object's
   `DeliverSeconds`. The row says the range in minutes ("Mailed to your mailbox in 2-5 mins."), the item's own row in
-  the shop its exact time. Where the mailboxes are full it arrives in front of a spawn point.
+  the shop its exact time. Where the mailboxes are full it arrives in front of a spawn point. The buyer's mailbox is the
+  one whose `OwnershipComponent` title is theirs, or their organization's (`MailBox.IsTheirs`), so buying a box a home
+  delivery lands at is a matter of owning one.
 
 A delivery point is any object the level tags **`delivery_point`**; an empty is enough, and its yaw is the way round the
 deliveries are laid, so a bay should face out of its wall. None is tagged yet: a store needs a tagged empty per bay and
@@ -41,7 +43,8 @@ that: a season wipe of the crime state does not clear it, so the wipe must call 
 (also `placed_objects_clear`). At most `PlaceableCatalog.MaxInTransit` (6) per player on their way.
 
 When it is due the place is picked: for a store pickup, the delivery points in range, nearest first; for a home
-delivery, beside the buyer's mailbox (or any mailbox that is not another player's), else in front of a spawn point. At
+delivery, beside the buyer's mailbox (or any mailbox that is not somebody else's, a player's or an organization's),
+else in front of a spawn point. At
 each of those places, in order:
 
 1. **The ground**, on rings of 8 spots at 0, 130, 200, 270 and 340 units around the anchor. A spot is used if it is

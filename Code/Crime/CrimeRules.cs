@@ -14,6 +14,12 @@ public sealed class CrimeAdvance
 	/// <summary>Orders that were cancelled. A parcel for one is still in the bag of a player who is playing.</summary>
 	public List<string> CancelledOrders { get; } = new();
 
+	/// <summary>
+	/// Shop deliveries that reached the mailbox in this call. The caller moves them into the box they are addressed to
+	/// (<see cref="MailboxMail.Receive"/>), since this is record-only.
+	/// </summary>
+	public List<DeliveryRecord> Arrived { get; } = new();
+
 	/// <summary>Sentences for the player, if they are there to hear them.</summary>
 	public List<string> Messages { get; } = new();
 }
@@ -47,7 +53,7 @@ public static class CrimeRules
 			result.Changed = result.HardwareChanged = true;
 
 		result.Changed |= PostalSystem.Tick( crime, now, parcel => OnParcelDelivered( steamId, crime, parcel ) );
-		result.Changed |= PostalSystem.TickDeliveries( crime, now );
+		result.Changed |= PostalSystem.TickDeliveries( crime, now, result.Arrived.Add );
 		result.Changed |= CheckOrders( steamId, record, now, result );
 		result.Changed |= Exchange.Settle( steamId, record, now );
 

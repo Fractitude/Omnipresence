@@ -129,6 +129,9 @@ public sealed class OfflineCrimeProcessor
 			var now = clock();
 			var result = CrimeRules.Advance( steamId, record, now );
 
+			// A shop delivery that reached the mailbox goes into the box it is addressed to, where anyone may take it.
+			MailboxMail.Receive( steamId, record.Crime, result.Arrived );
+
 			// A parcel for a cancelled order is in the bag of a player who is not there: it is in the saved items.
 			foreach ( var orderId in result.CancelledOrders )
 				record.Crime.Items.RemoveAll( x => x.Kind == ItemCatalog.Parcel && x.OrderId == orderId );

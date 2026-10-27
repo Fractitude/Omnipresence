@@ -106,7 +106,10 @@ public static class DeliverySpot
 			.ToList();
 	}
 
-	/// <summary>Beside the buyer's mailbox (else any that is not another player's), then near a spawn point.</summary>
+	/// <summary>
+	/// Beside the buyer's mailbox (theirs, or their organization's; else any box that is not somebody else's), then
+	/// near a spawn point.
+	/// </summary>
 	public static List<DeliveryPlace> HomePlaces( Scene scene, ulong owner )
 	{
 		if ( !scene.IsValid() )
@@ -114,13 +117,13 @@ public static class DeliverySpot
 
 		var places = new List<DeliveryPlace>();
 
-		foreach ( var box in scene.GetAll<MailBox>().OrderBy( x => x.OwnerId == owner ? 0 : 1 ) )
+		foreach ( var box in scene.GetAll<MailBox>().OrderBy( x => x.IsTheirs( owner ) ? 0 : 1 ) )
 		{
-			if ( box.OwnerId != 0 && box.OwnerId != owner )
+			if ( box.Owner.IsOwned && !box.IsTheirs( owner ) )
 				continue;
 
 			places.Add( new DeliveryPlace( box.WorldPosition,
-				box.OwnerId == owner ? "beside your mailbox" : "beside the mailbox", box.WorldRotation.Yaw() ) );
+				box.IsTheirs( owner ) ? "beside your mailbox" : "beside the mailbox", box.WorldRotation.Yaw() ) );
 		}
 
 		foreach ( var spawn in scene.GetAll<SpawnPoint>() )

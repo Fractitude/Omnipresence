@@ -444,7 +444,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	// -- Mailbox ------------------------------------------------------------------------------------------------------
 
 	/// <summary>
-	/// The mailbox this player has claimed, or null.
+	/// The mailbox this player's shop deliveries arrive in: the last box they used, or null.
 	/// </summary>
 	public MailBox ClaimedMailBox()
 	{
@@ -456,47 +456,43 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Why this player may not use this mailbox, or null if they may: it is another player's, or they already use
-	/// another one. A claim on a mailbox that is no longer in the scene is let go. Host only.
+	/// The mail waiting in this player's mailbox, oldest first. Host only: the mail is in the box and not in the
+	/// record, because anyone may take it out of the box (<see cref="MailboxMail"/>).
 	/// </summary>
-	string CheckMailbox( MailBox box, out ulong steamId )
-	{
-		steamId = Progress.Owner.SteamId;
-
-		if ( box.OwnerId != 0 && box.OwnerId != steamId )
-			return "This isn't your mailbox.";
-
-		if ( Crime.MailboxId != "" && Crime.MailboxId != box.BoxId && ClaimedMailBox() is not null )
-			return "You already use another mailbox.";
-
-		return null;
-	}
+	public IReadOnlyList<MailLetter> MailInBox => ClaimedMailBox() is { } box ? MailboxMail.In( box.BoxId ) : [];
 
 	/// <summary>
-	/// Take what the shop delivered out of the mailbox, as much as the bag holds; the rest stays. The first of send or
-	/// collect to be used claims an unclaimed mailbox. Host only.
+	/// Take what is in the mailbox, as much as the bag holds; the rest stays in the box. It is the box's mail and not
+	/// the player's, so this takes another player's delivery too: any box is open to everyone, and what is in it is
+	/// there to be taken. The player's own mail that has no box to wait in (it arrived before they had used one) comes
+	/// out of their record as well. Using the box makes it the one their mail arrives in from now on, and claims it if
+	/// it belongs to nobody. Host only.
 	/// </summary>
 	public CrimeResult CollectParcels( MailBox box )
 	{
 		if ( !Ready || !box.IsValid() )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		if ( CheckMailbox( box, out var steamId ) is { } error )
-			return CrimeResult.Fail( error );
-
 		var crime = Crime;
-		var waiting = crime.Deliveries.Where( x => x.State == DeliveryState.InMailbox ).ToList();
-
-		if ( waiting.Count == 0 )
-			return CrimeResult.Fail( "Nothing waiting for you." );
-
-		box.OwnerId = steamId;
-		crime.MailboxId = box.BoxId;
-		MailboxRegistry.Claim( box.BoxId, steamId );
-
+		var steamId = Progress.Owner.SteamId;
 		var got = new List<string>();
+		var others = new Dictionary<ulong, int>();
 
-		foreach ( var delivery in waiting )
+		MailboxMail.Take( box.BoxId, letter =>
+		{
+			if ( !Inventory.AddItem( letter.Kind, letter.Count, letter.Quality ) )
+				return false;
+
+			got.Add( $"{letter.Count} {ItemCatalog.Find( letter.Kind )?.Name ?? letter.Kind}" );
+
+			if ( letter.For != 0 && letter.For != steamId )
+				others[letter.For] = others.GetValueOrDefault( letter.For ) + 1;
+
+			return true;
+		} );
+
+		// Mail that arrived before the player had used a box is still in their record: it is theirs, and it is here.
+		foreach ( var delivery in crime.Deliveries.Where( x => x.State == DeliveryState.InMailbox ).ToList() )
 		{
 			if ( !Inventory.AddItem( delivery.Kind, delivery.Count, delivery.Quality ) )
 				continue;
@@ -505,14 +501,31 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			got.Add( $"{delivery.Count} {ItemCatalog.Find( delivery.Kind )?.Name ?? delivery.Kind}" );
 		}
 
+		crime.MailboxId = box.BoxId;
+		box.UseBy( steamId );
+		UpdateFlag();
 		Changed();
-		var left = waiting.Count - got.Count;
+
+		foreach ( var (victim, count) in others )
+		{
+			if ( LiveCrimeOf( victim ) is { } theirs )
+				theirs.Tell( CrimeResult.Fail( $"Someone took {DeliveryCount( count )} out of your mailbox." ) );
+		}
 
 		if ( got.Count == 0 )
-			return CrimeResult.Fail( "Your bag is full. Make room first." );
+		{
+			var waiting = MailboxMail.CountOf( box.BoxId )
+			              + crime.Deliveries.Count( x => x.State == DeliveryState.InMailbox );
 
+			return CrimeResult.Fail( waiting > 0
+				? "Your bag is full. Make room first."
+				: "There is nothing in this mailbox." );
+		}
+
+		var left = MailboxMail.CountOf( box.BoxId );
 		var text = $"Collected {string.Join( ", ", got )}.";
-		return CrimeResult.Success( left > 0 ? $"{text} Your bag is full: {Plural( left )} still waiting." : text );
+
+		return CrimeResult.Success( left > 0 ? $"{text} Your bag is full: {Plural( left )} still in the box." : text );
 	}
 
 	/// <summary>
@@ -563,11 +576,12 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 	/// <summary>
 	/// Post every parcel the player carries from this mailbox, until the post is full (<see
-	/// cref="CrimeCatalog.MaxParcels"/>); the rest stay in the bag. A mailbox is claimed by the first player who posts
-	/// from it, and stays theirs; nobody else can use it. A parcel carries its sender, and is posted against the
+	/// cref="CrimeCatalog.MaxParcels"/>); the rest stay in the bag. Any box will do: posting is putting a parcel in the
+	/// post, so this asks nothing about who the box belongs to. A parcel carries its sender, and is posted against the
 	/// sender's order, whoever posts it (see <see cref="ParcelPostRules"/>): the sender's record gets the shipping and
 	/// is paid, never the poster. A parcel that cannot be posted stays in the bag and the poster is told why. The limit
-	/// counts the poster's own parcels and the ones they posted for others. Host only.
+	/// counts the poster's own parcels and the ones they posted for others. Using the box makes it the one the player's
+	/// mail arrives in from now on, and claims it if it belongs to nobody. Host only.
 	/// </summary>
 	public CrimeResult SendAllParcels( MailBox box )
 	{
@@ -575,9 +589,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 			return CrimeResult.Fail( "Nothing happens." );
 
 		var crime = Crime;
-
-		if ( CheckMailbox( box, out var steamId ) is { } error )
-			return CrimeResult.Fail( error );
+		var steamId = Progress.Owner.SteamId;
 
 		var slots = new List<int>();
 
@@ -649,9 +661,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		if ( sent == 0 && deferred.Count == 0 )
 			return CrimeResult.Fail( $"Nothing was posted.{note}" );
 
-		box.OwnerId = steamId;
+		box.UseBy( steamId );
 		crime.MailboxId = box.BoxId;
-		MailboxRegistry.Claim( box.BoxId, steamId );
 		UpdateFlag();
 		Changed();
 
@@ -776,16 +787,15 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 	static string Plural( int parcels ) => parcels == 1 ? "1 parcel" : $"{parcels} parcels";
 
+	static string DeliveryCount( int count ) => count == 1 ? "a delivery" : $"{count} deliveries";
+
 	/// <summary>
-	/// Put the flag of the player's mailbox up while a parcel waits for the mailman.
+	/// Put the flag of the player's mailbox up while a parcel of theirs waits for the mailman.
 	/// </summary>
 	void UpdateFlag()
 	{
 		if ( ClaimedMailBox() is { } box )
-		{
-			box.OwnerId = Progress.Owner.SteamId;
 			box.HasMail = PostalSystem.HasWaiting( Crime );
-		}
 	}
 
 	// -- Orders -------------------------------------------------------------------------------------------------------
@@ -982,6 +992,9 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		var result = CrimeRules.Advance( Progress.Owner.SteamId, Progress.Record, WorldClock.Now );
 
+		// A shop delivery that reached the mailbox goes into the box it is addressed to, where anyone may take it.
+		MailboxMail.Receive( Progress.Owner.SteamId, Progress.Record.Crime, result.Arrived );
+
 		foreach ( var orderId in result.CancelledOrders )
 			TakeParcelsOf( orderId );
 
@@ -1034,7 +1047,9 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		foreach ( var delivery in Crime.Deliveries )
 			delivery.ArriveAt = System.Math.Min( delivery.ArriveAt, WorldClock.Now );
 
-		PostalSystem.TickDeliveries( Crime, WorldClock.Now );
+		var arrived = new List<DeliveryRecord>();
+		PostalSystem.TickDeliveries( Crime, WorldClock.Now, arrived.Add );
+		MailboxMail.Receive( Progress.Owner.SteamId, Crime, arrived );
 		Changed();
 	}
 

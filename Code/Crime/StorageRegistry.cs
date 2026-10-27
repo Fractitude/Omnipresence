@@ -3,8 +3,9 @@ namespace Sandbox;
 /// <summary>
 /// Which player each storage box in the world belongs to, kept in <c>storage.json</c> so a restart does not forget. The
 /// contents are in the owner's record, but the box in the scene only learns its owner from here when it starts: a
-/// player who is away would otherwise leave their box looking unclaimed, and someone else could take it. Like
-/// <see cref="MailboxRegistry"/>, except that a player may own many boxes.
+/// player who is away would otherwise leave their box looking unclaimed, and someone else could take it. A player may
+/// own many boxes. (A mailbox's owner is a title instead, see <see cref="OwnershipComponent"/>; its contents are the
+/// box's, in <see cref="MailboxMail"/>.)
 /// </summary>
 /// <remarks>
 /// Host only. Not <c>readonly</c> (see AGENTS.md, "Static state and hot reload"): loaded the first time it is asked.

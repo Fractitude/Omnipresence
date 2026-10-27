@@ -94,9 +94,16 @@ Title says whose a thing is. What a player may do with it is `OwnershipRules` (u
 key or a picked door is a separate rule on top that can only ever be stricter or looser than this. That is what lets
 raiding land later without touching title.
 
-The claims of today's storage boxes and mailboxes are still their own files (`StorageRegistry`, `MailboxRegistry`), and
-an object's storage contents are still in its owner's record. Both have to move before a container can be sold: a title
-that changes hands must not leave its contents behind (see [depot.md](depot.md), "Ownership").
+**A mailbox is the first thing whose owner is a title.** Its root carries an `OwnershipComponent`, so a box can belong
+to a player or to an organization, and the first player to use a box that belongs to nobody claims it
+(`MailBox.UseBy`). The title grants nothing there: anyone may post from any box and collect what is in any box, which is
+how a delivery is stolen. What the title decides is where a home delivery from the Depot lands
+(`DeliverySpot.HomePlaces`). Its contents moved to the box itself for this (`mailboxes.json`, `MailboxMail`), because a
+title that can change hands must not leave its contents in the old owner's record (see [depot.md](depot.md),
+"Ownership").
+
+The storage box's claim is still its own file (`StorageRegistry`), and its contents are still in its owner's record.
+Both have to move before a box can be sold.
 
 ## A client knows less than the host
 
@@ -108,10 +115,10 @@ player's organization id onto their player (there is none today).
 
 ## Not yet
 
-- The storage box's and the mailbox's claims are not titles yet; they are the first candidates, and the contents have to
-  move to the thing's id first (see above).
+- The storage box's claim is not a title yet; the contents have to move to the thing's id first (see above).
 - Locks, keys, breaking in, and "hard, not immune" offline protection: access policy on top of a title.
 - A season wipe must call `OwnershipRegistry.Wipe( scene )`, like `PlacedObjectRegistry.Wipe`.
-- Nothing in a prefab sets `DefaultOwner` yet: the Depot's objects get it at run time, from the buyer.
+- Nothing in a prefab sets `DefaultOwner` to anything but `<nobody>` yet (a mailbox's is `<nobody>`, and a claim does
+  the rest): the Depot's objects get theirs at run time, from the buyer.
 
 Console commands are in [console-commands.md](console-commands.md), "Ownership".

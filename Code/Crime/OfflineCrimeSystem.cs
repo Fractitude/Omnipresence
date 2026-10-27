@@ -91,10 +91,8 @@ public sealed class OfflineCrimeSystem : GameObjectSystem<OfflineCrimeSystem>
 
 		var box = Scene.GetAll<MailBox>().FirstOrDefault( x => x.BoxId == record.Crime.MailboxId );
 
-		if ( !box.IsValid() || box.OwnerId != steamId )
-			return;
-
-		box.HasMail = PostalSystem.HasWaiting( record.Crime );
+		if ( box.IsValid() )
+			box.HasMail = PostalSystem.HasWaiting( record.Crime );
 	}
 
 	public override void Dispose()

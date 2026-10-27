@@ -4,14 +4,14 @@ A reminder to come back to this. Today ownership is a quick placeholder: **the f
 
 **Update:** the ownership system itself has landed — `OwnershipComponent` and `ownership.json`, a title that is a
 player, an organization, the public or the government, transfer with a history, and queries (see
-[ownership.md](../docs/ownership.md)). The claims below have not moved onto it yet: a mailbox and a storage box are
+[ownership.md](../docs/ownership.md)). A mailbox has moved onto it (a title that grants nothing, see below); a storage box is
 still claimed by first use, and the questions at the bottom of this note are still open.
 
 ## What exists now
 
 | Thing | Who owns it | How |
 | --- | --- | --- |
-| **Mailbox** | The first player who sends or collects from it | `MailBox.OwnerId`; the claim is saved in the player's record (`CrimeRecord.MailboxId`) and in `mailboxes.json`, so it survives a restart. Another player sees "This isn't your mailbox." |
+| **Mailbox** | A title: a player or an organization | **Moved onto the new system.** `OwnershipComponent` on the box's root, claimed by the first player who uses a box that belongs to nobody (`MailBox.UseBy`). The title grants nothing: anyone posts from any box and collects what is in any box, so a delivery can be stolen. `CrimeRecord.MailboxId` is only the box a player's mail arrives in. `mailboxes.json` now holds the mail in each box (`MailboxMail`), not claims. |
 | **Storage box** | The first player who uses it (in progress, like the mailbox) | Contents are saved in the owner's record. Others see it greyed out. |
 | **Grow tray** | Per player: a tray shows each player their own state | State is saved in the player's record by tray id. Two players share one object but not its contents. |
 | **Press bench, packing table** | Nobody | Any player can use them; they hold no state. |
@@ -42,7 +42,7 @@ still claimed by first use, and the questions at the bottom of this note are sti
 
 ## Where the code is
 
-- `Code/Objects/MailBox.cs`, `Code/Crime/MailboxRegistry.cs` (the claim file), `PlayerCrime.CheckMailbox`, `ClaimedMailBox`.
+- `Code/Objects/MailBox.cs`, `Code/Crime/MailboxMail.cs` (the mail in each box), `PlayerCrime.CollectParcels`, `ClaimedMailBox`.
 - The storage box component and its claim, from the storage work (see `docs/storage.md` when it lands).
 - `CrimeRecord` (`MailboxId`, trays, storage).
 - `docs/design-doc/crime-rp.md`, "Bases and raiding" and the decisions on offline raiding and seasons.

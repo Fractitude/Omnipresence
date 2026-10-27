@@ -49,18 +49,21 @@ public static class PostalSystem
 	public static int InPost( CrimeRecord crime ) => crime.Parcels.Count( x => x.State != ParcelState.Delivered );
 
 	/// <summary>
-	/// Deliveries bought in the shop whose time is up by <paramref name="now"/> reach the mailbox. Returns whether
-	/// anything changed.
+	/// Deliveries bought in the shop whose time is up by <paramref name="now"/> reach the mailbox. Calls
+	/// <paramref name="arrived"/> for each one, so the caller can move it into the box it is addressed to
+	/// (<see cref="MailboxMail.Receive"/>). Returns whether anything changed.
 	/// </summary>
-	public static bool TickDeliveries( CrimeRecord crime, long now )
+	public static bool TickDeliveries( CrimeRecord crime, long now, System.Action<DeliveryRecord> arrived = null )
 	{
 		var changed = false;
 
 		foreach ( var delivery in crime.Deliveries
-			         .Where( x => x.State == DeliveryState.InTransit && now >= x.ArriveAt ) )
+			.Where( x => x.State == DeliveryState.InTransit && now >= x.ArriveAt )
+			.ToList() )
 		{
 			delivery.State = DeliveryState.InMailbox;
 			changed = true;
+			arrived?.Invoke( delivery );
 		}
 
 		return changed;

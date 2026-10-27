@@ -10,7 +10,7 @@ A storage box holds what does not fit in the bag. A player walks up, opens it, a
 | **The panel** | `Code/Crime/StorageMenu.razor` (+ `.scss`) | A `MenuWindow` that `HudSystem` puts on the HUD object of every client (see [ui.md](ui.md)). Bag on the left, box on the right. Registered with `GameMenus` as `storage`, so the crosshair and prompts stand down. It takes the player's controls while open (`MenuControls.Free`) and closes on Close, Escape, walking out of reach, dying or `OnDisabled`. |
 | **The rules** | `Code/Crime/StorageRules.cs` | Pure functions on a `CrimeRecord` and a `PlayerInventory`: `Store`, `Take`, `MoveInBox`, `RemoveParcelsOf`, `Clean`. No box, no connection. |
 | **The record** | `Code/Crime/StorageRecord.cs`, `CrimeRecord.Storage` | One `StorageBoxRecord` per box (by box id), each a list of `{ Slot, Item }`. Only filled slots are listed. |
-| **The claims** | `Code/Crime/StorageRegistry.cs` | `storage.json` in the data folder: box id to Steam id. Read by the box when it starts, so an owner who is away keeps their box after a restart. A player may own many boxes. `MailboxRegistry` is untouched. |
+| **The claims** | `Code/Crime/StorageRegistry.cs` | `storage.json` in the data folder: box id to Steam id. Read by the box when it starts, so an owner who is away keeps their box after a restart. A player may own many boxes. A mailbox's owner is a title instead (`OwnershipComponent`), and its contents are the box's (`MailboxMail`). |
 
 ## Using it
 
