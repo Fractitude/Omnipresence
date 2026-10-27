@@ -83,6 +83,13 @@ Ported from Facepunch's open-source sandbox game (`Player.cs`, `GameManager.cs`,
 - `GameManager` also: out-of-bounds bodies are destroyed, `SpawnPlacement` picks a free, floor-settled spawn point (not the last one used), `Notify( text )` and `Kick` (`GameManager.Util.cs`; the `kick` command is the engine's), and `GameManager.PropImpactShake.cs` shakes nearby cameras when a prop hits the world (scaled by `omni.screenshake`).
 - Not ported: Steam stats, the kill feed, gibs, `HudElement` hiding, upstream's spawn, material and morph RPCs, `LimitsSystem`, `ServerSettings`, `CleanupSystem`.
 
+## Movement
+
+The player is the engine's `PlayerController` with `MoveModeWalk`; `Code/Movement/` adds to it (`NoclipMoveMode`, `MoveModeHover`, `RunAcceleration`, `SeatExitCollision`, `FirstPersonWorldInput`).
+
+- **`StepAssist` (`GameObjectSystem`) is what walks the player up steps at walking pace.** The engine's step up looks ahead by the wish velocity times the **frame** delta, which is shorter than how far the body actually moves in a physics tick as soon as the frame rate is above the tick rate. Walking into a kerb therefore left the body stopped against it, where the leftover velocity is far too small for the engine's second attempt to find the step: a step was climbed only while sprinting, which pushes hard enough for that attempt to land. `StepAssist` repeats the engine's forward / up / across / down trace before the physics step with a lookahead of a whole tick's walk (`TickRate`) plus the clearance an edge hides behind, so a step within `MoveModeWalk.StepUpHeight` is taken at any speed and any frame rate. It lifts only onto a standable surface with clearance, and does nothing on flat ground, while standing still, or when the top is out of reach.
+- **`MoveModeWalk.StepUpHeight` on `Assets/Player.prefab` is 30** (the engine's default is 18), which is what lets the player walk onto the map's taller kerbs and platforms; a step of the height itself is still too tall (the lift is exactly `StepUpHeight`), so keep a margin when raising it. `StepDownHeight` stays 18.
+
 ## Security cameras
 
 `SecurityCamera` (`Code/Security/`) is on the prefab `Assets/security/camera.prefab`, a wall camera made of boxes: the root is the camera's aim (+X forward, the `Lens Camera` child holds the `CameraComponent` the feed is drawn through), and `spawn_security_camera` puts one where you stand. A camera draws only while an app asks for its picture, and stops a second after the last ask (`RequestFeed`, `OnPreRender`), so one nobody watches costs nothing.
