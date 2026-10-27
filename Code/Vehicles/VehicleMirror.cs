@@ -260,16 +260,27 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 		var sight = ( centre - eye ).Normal;
 		var bounced = ( sight - 2f * Vector3.Dot( sight, normal ) * normal ).Normal;
 
+		// Both aim offsets are in the glass's own frame, never the world's: a mirror set once has to keep its aim
+		// after the car has driven off and turned a corner.
+		var paneRotation = pane.WorldRotation;
+		var paneUp = paneRotation.Left.Normal;
+
 		// Turned away from the car's flank: a mirror set from the driver's seat frames the road behind, not the
-		// rear quarter panel.
-		var outward = -MathF.Sign( normal.y ) * AimOutward;
-		bounced = Rotation.FromYaw( outward ) * bounced;
+		// rear quarter panel. Which way that is comes from the glass's own facing, so it stays the same side of the
+		// car however the car is turned.
+		var outward = -MathF.Sign( GlassNormal.Normal.y ) * AimOutward;
+		var aim = Rotation.FromAxis( paneUp, outward ) * bounced;
+
+		// The last word on the framing, also in the glass's frame.
+		aim = ( paneRotation * ( Rotation.From( LensAngles ) * ( paneRotation.Inverse * aim ) ) ).Normal;
 
 		// The two placements are the inspector's to move, separately: the pane by GlassProud, GlassShift and
 		// GlassAngles, the camera by LensBack, LensShift and LensAngles, each on top of the geometry above.
-		var paneRotation = pane.WorldRotation;
 		camera.WorldPosition = centre + paneRotation * new Vector3( LensShift.y, LensShift.x, LensBack );
-		camera.WorldRotation = Rotation.From( LensAngles ) * Rotation.LookAt( bounced, Vector3.Up );
+
+		// Straight up the glass when the aim is level with it, which is the one case LookAt cannot take.
+		var up = MathF.Abs( Vector3.Dot( aim, paneUp ) ) > 0.99f ? Vector3.Up : paneUp;
+		camera.WorldRotation = Rotation.LookAt( aim, up );
 
 		// A mirror shows exactly as much of that space as its glass covers from the driver's eye.
 		var distance = MathF.Max( ( centre - eye ).Length, 1f );
@@ -344,10 +355,9 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 	/// <summary>Where the quad sits on the glass: proud of it, then slid within its plane.</summary>
 	Vector3 GlassLocalPosition()
 	{
-		var normal = GlassNormal.Normal;
-		var across = Vector3.Up.Cross( normal ).Normal;
+		var rotation = GlassRotation();
 
-		return normal * GlassProud + Vector3.Up * GlassShift.x + across * GlassShift.y;
+		return rotation * Vector3.Up * GlassProud + rotation * Vector3.Left * GlassShift.x + rotation * Vector3.Forward * GlassShift.y;
 	}
 
 	/// <summary>Turn this object's face so its own +Z - the plane's front - points along the glass normal.</summary>
