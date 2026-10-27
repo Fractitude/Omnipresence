@@ -5,18 +5,23 @@ namespace Sandbox;
 /// <para>
 /// A tread has to be cleared in one physics tick: the body cannot move forward onto it while its feet are below it, so
 /// <see cref="StepAssist"/> lifts the whole tread height at once, and walking off one drops the body in one tick. The
-/// eye is the body, so the view snaps up and down a stair at a time, which is what makes a staircase feel like a ladder
-/// rather than a ramp.
+/// eye is the body, so the view snapped up and down a stair at a time, which is what made a staircase feel like a
+/// ladder rather than a ramp. In third person the character model snapped with it, under a camera that was eased.
 /// </para>
 /// <para>
-/// This holds the view back by whatever the body just jumped and lets it catch up over a fraction of a second, so the
-/// rise reads as a ramp. Only the picture moves: the body, the collider and the eye the game aims from are untouched.
-/// A fall is left alone, and so is a jump big enough to be a teleport.
+/// This holds the view back by whatever the body just jumped and lets it catch up over a fraction of a second, and it
+/// carries the character model with it, so the picture — camera and character together — reads as a ramp. Only the
+/// picture moves: the body, the collider, the eye other clients see and the network position are untouched, so there is
+/// nothing to sync. Each client smooths its own view and its own character. A fall is left alone, and so is a jump big
+/// enough to be a teleport.
 /// </para>
 /// <para>
-/// Because the view is what the player aims by, <see cref="BaseSandboxWeapon.AimRay"/> adds the same hold to the shot
-/// for the local player, so a shot taken mid-step goes exactly where the crosshair is. The hold is per client and never
-/// networked: each client only ever smooths its own view, and a held weapon's shot is traced by its owner.
+/// The character model cannot be moved directly: it is a networked child whose own transform is written back every
+/// tick, so it is put under a holder object of ours, which carries the hold instead.
+/// </para>
+/// <para>
+/// Because the view is what the player aims by, <see cref="BaseSandboxWeapon.AimRay"/> adds the same hold to the shot for
+/// the local player, so a shot taken mid-step goes exactly where the crosshair is.
 /// </para>
 /// </summary>
 public sealed class StepViewSmoothing : Component, ICameraModifier
@@ -37,12 +42,18 @@ public sealed class StepViewSmoothing : Component, ICameraModifier
 	/// <summary>The most the view may be held away from the body, so nothing odd can pile up.</summary>
 	const float MaxHold = 32f;
 
+	/// <summary>The object the character model is put under, so its hold survives the model's own transform sync.</summary>
+	const string HolderName = "Step View Smoothing";
+
 	/// <summary>The one on this client, for whoever needs the view's hold: the aim ray does.</summary>
 	static StepViewSmoothing instance;
 
 	float hold;
 	float lastZ;
 	bool primed;
+
+	/// <summary>The object the character model hangs under while it is eased, so it can be moved as one.</summary>
+	GameObject holder;
 
 	/// <summary>How far the view is held behind the body right now, in units. Zero when nothing is being smoothed.</summary>
 	public static float Hold => instance.IsValid() ? instance.hold : 0f;
@@ -51,9 +62,13 @@ public sealed class StepViewSmoothing : Component, ICameraModifier
 
 	protected override void OnDestroy()
 	{
+		RestoreBody();
+
 		if ( instance == this )
 			instance = null;
 	}
+
+	protected override void OnDisabled() => RestoreBody();
 
 	protected override void OnUpdate()
 	{
@@ -62,6 +77,7 @@ public sealed class StepViewSmoothing : Component, ICameraModifier
 		{
 			hold = 0f;
 			primed = false;
+			RestoreBody();
 			return;
 		}
 
@@ -80,6 +96,52 @@ public sealed class StepViewSmoothing : Component, ICameraModifier
 		primed = true;
 
 		hold = MathF.Abs( hold ) < 0.05f ? 0f : hold * MathF.Exp( -Time.Delta / CatchUp );
+		HoldBody( controller );
+	}
+
+	/// <summary>
+	/// Carry the character model with the view, so in third person the character and the camera rise together instead of
+	/// the character snapping up a step under a camera that is easing.
+	/// </summary>
+	void HoldBody( PlayerController controller )
+	{
+		if ( !controller.Renderer.IsValid() )
+		{
+			RestoreBody();
+			return;
+		}
+
+		var model = controller.Renderer.GameObject;
+
+		// The model's own transform is written back every tick (it is a networked child), so it goes under a holder of
+		// ours and the holder is what moves. Re-made if the model is ever put back on the player, or re-dressed.
+		if ( !holder.IsValid() || holder.Parent != controller.GameObject )
+		{
+			holder = controller.GameObject.Children.FirstOrDefault( x => x.Name == HolderName );
+			if ( !holder.IsValid() )
+			{
+				holder = new GameObject( controller.GameObject, true, HolderName );
+				holder.Flags |= GameObjectFlags.NotSaved;
+				holder.NetworkMode = NetworkMode.Never;
+			}
+		}
+
+		if ( model.Parent != holder )
+		{
+			var local = model.LocalPosition;
+			model.Parent = holder;
+			model.LocalPosition = local;
+		}
+
+		var up = holder.Parent.IsValid() ? holder.Parent.WorldRotation.Inverse * Vector3.Up : Vector3.Up;
+		holder.LocalPosition = up * hold;
+	}
+
+	/// <summary>Put the character model back where the player has it.</summary>
+	void RestoreBody()
+	{
+		if ( holder.IsValid() )
+			holder.LocalPosition = Vector3.Zero;
 	}
 
 	/// <summary>The camera pipeline: hold the composed view back by what is left of the last step.</summary>

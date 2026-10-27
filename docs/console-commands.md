@@ -103,7 +103,7 @@ Code: `Code/Health/`.
 | `omni.carry 0|1` | Players can pick up light props with Use (attack throws, aim lets go, holding Use turns it). Default 1. Saved. |
 | `omni.carry.maxmass <kg>` | The heaviest prop that can be picked up. Default 80. Saved. |
 | `omni.step_height <units>` | How high a step the player walks up: a kerb, a stair, a low ledge. Default 16. Saved. The engine's own step up is off (`MoveModeWalk.StepUpHeight` is 0 on `Assets/Player.prefab`) so that every step goes through `StepAssist`'s checks, which refuse anything the player is not walking into and any ledge hanging over a recess (a window sill, a rail, an awning). |
-| `omni.step_smoothing <seconds>` | Seconds the view takes to catch up after stepping up or down, so stairs read as a ramp. Default 0.09, 0 turns the smoothing off (the view snaps on every tread). Saved. The body is not smoothed, and the aim ray follows the view. |
+| `omni.step_smoothing <seconds>` | Seconds the view and the character model take to catch up after stepping up or down, so stairs read as a ramp in first and third person. Default 0.09, 0 turns the smoothing off (both snap on every tread). Saved. Only the picture moves — the body, the collider and the network position do not — and the aim ray follows the view. |
 
 ## Weapons
 
