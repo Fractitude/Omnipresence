@@ -2096,6 +2096,70 @@
         "OwnerTransfer": 0,
         "Components": [],
         "Children": []
+      },
+      {
+        "__guid": "2af398d9-9a4b-45b3-8f6a-a6ee33841e8f",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Mirror Left",
+        "Position": "15.6360,40.0200,10.6420",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 0,
+        "Components": [
+          {
+            "__type": "Sandbox.VehicleMirror",
+            "__guid": "d2889c56-fcc2-424d-8ee7-250ff5f36305",
+            "__enabled": true,
+            "Flags": 0,
+            "Side": "Left",
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null
+          }
+        ],
+        "Children": []
+      },
+      {
+        "__guid": "90782846-6d19-4e9a-ab3f-a5ed8aa9bfe7",
+        "__version": 2,
+        "Flags": 0,
+        "Name": "Mirror Right",
+        "Position": "15.6360,-40.5730,10.3650",
+        "Rotation": "0,0,0,1",
+        "Scale": "1,1,1",
+        "Tags": "",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "NetworkFlags": 0,
+        "NetworkOrphaned": 0,
+        "NetworkTransmit": true,
+        "OwnerTransfer": 0,
+        "Components": [
+          {
+            "__type": "Sandbox.VehicleMirror",
+            "__guid": "fd6751c1-f05d-427d-b879-fb49cec54d19",
+            "__enabled": true,
+            "Flags": 0,
+            "Side": "Right",
+            "OnComponentDestroy": null,
+            "OnComponentDisabled": null,
+            "OnComponentEnabled": null,
+            "OnComponentFixedUpdate": null,
+            "OnComponentStart": null,
+            "OnComponentUpdate": null
+          }
+        ],
+        "Children": []
       }
     ],
     "__properties": {

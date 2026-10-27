@@ -1,0 +1,36 @@
+@using Sandbox.UI
+@inherits PanelComponent
+@namespace Sandbox
+
+@* The little screen a VehicleMirror shows its feed on. Flipped horizontally: a plain backward-facing camera's *@
+@* picture reads backwards next to a real mirror's reflection, which swaps depth rather than left and right. *@
+
+<root>
+	@if ( Texture is not null )
+	{
+		<Image class="feed" Texture=@Texture/>
+	}
+</root>
+
+<style>
+	root
+	{
+		width: 100%;
+		height: 100%;
+	}
+
+	.feed
+	{
+		width: 100%;
+		height: 100%;
+		transform: scaleX( -1 );
+	}
+</style>
+
+@code
+{
+	/// <summary>The picture this mirror shows right now. Set every frame by <see cref="VehicleMirror"/>.</summary>
+	public Texture Texture { get; set; }
+
+	protected override int BuildHash() => System.HashCode.Combine( Texture );
+}
