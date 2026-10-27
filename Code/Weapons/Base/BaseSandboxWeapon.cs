@@ -308,7 +308,7 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 		if ( away <= 0f ) return;
 
 		model.WorldPosition += _viewModelView.Rotation * new Vector3( -PutAwayBack, 0f, -PutAwayDrop ) * away;
-		model.WorldRotation *= Rotation.FromPitch( -PutAwayPitch * away );
+		model.WorldRotation *= Rotation.FromPitch( PutAwayPitch * away );
 	}
 
 	/// <summary>
