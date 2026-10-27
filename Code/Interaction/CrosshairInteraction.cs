@@ -51,6 +51,7 @@ public sealed class CrosshairInteraction : GameObjectSystem<CrosshairInteraction
 		var found = FindPressable( controller, ray, e );
 
 		SetHovered( found, e );
+		ShowTooltip( controller, found, e );
 
 		// Use holds the press while the button is down, as it does in first person
 		var useButton = controller.UseButton;
@@ -78,6 +79,26 @@ public sealed class CrosshairInteraction : GameObjectSystem<CrosshairInteraction
 		var offset = camera.WorldPosition - eye;
 
 		return new Ray( eye + offset - forward * offset.Dot( forward ), forward );
+	}
+
+	/// <summary>
+	/// Puts what the crosshair found in the controller's tooltips, the way its own look does in first person. Third
+	/// person turns that look off (<see cref="PlayerController.EnablePressing"/>), and then
+	/// <see cref="PlayerController.Tooltips"/> is cleared every frame and never filled again: an object that says what
+	/// it is only through <see cref="Component.IPressable.GetTooltip"/>, like the engine's
+	/// <c>Sandbox.Mapping.Door</c> (it has no <see cref="Interactable"/> of ours to draw a menu from), showed no hint
+	/// at all. Only one tooltip is kept: the one of what the crosshair is on.
+	/// </summary>
+	static void ShowTooltip( PlayerController controller, Component found, in Component.IPressable.Event e )
+	{
+		controller.Tooltips.Clear();
+
+		if ( found is not Component.IPressable pressable || pressable.GetTooltip( e ) is not { } tooltip )
+			return;
+
+		tooltip.Enabled = tooltip.Enabled && pressable.CanPress( e );
+		tooltip.Pressable = pressable;
+		controller.Tooltips.Add( tooltip );
 	}
 
 	/// <summary>

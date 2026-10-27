@@ -51,6 +51,12 @@ the player's eye and nothing is harder to reach than in first person. What it fi
 other pressable behave as before. It turns `PlayerController.EnablePressing` off while it has the job and back on in first
 person, where the engine's ray is the crosshair.
 
+The engine fills `PlayerController.Tooltips` from its own look, and that look is off while this system has the job: it clears
+the list every frame and returns early, so the list stayed empty in third person. `CrosshairInteraction` therefore fills it
+itself from what the crosshair found (`ShowTooltip`), which is what `Crosshair.razor` draws when there are no
+`Interactable` rows. Without it, an object whose only voice is `Component.IPressable.GetTooltip` — the engine's
+`Sandbox.Mapping.Door`, which has no `Interactable` — showed no prompt at all in third person, though its press still worked.
+
 `PlayerController.Hovered` therefore stays empty in third person: read `Interactable.Focused` to know what the local player is
 looking at.
 
