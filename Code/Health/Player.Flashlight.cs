@@ -5,6 +5,17 @@ namespace Sandbox;
 /// prefab; here the lights are made on each machine when the player appears, as children that are never networked, and
 /// the only thing shared is <see cref="FlashlightOn"/>. The prefab is left as it is.
 /// </summary>
+/// <remarks>
+/// Neither light is anchored right at the eyes. <see cref="Player.EyeTransform"/> sits inside the head, so a beam
+/// that started there put the owner's own face and chest in its near field: lit up harshly, and throwing their own
+/// nose-and-shoulder shadow across whatever they were looking at, visible to anyone watching them in third person
+/// (the engine has no way to exclude one object from one light's illumination or shadows, so this can't be fixed by
+/// flagging the body). Both lights sit <see cref="FlashlightReach"/> units in front of the eyes instead, pulled back
+/// to whatever's actually in the way: a spot light only emits forward of its own position, so with the origin out
+/// past the whole body, the owner's body is behind it and never enters its cone - it neither lights nor shadows
+/// itself, on any client, while still being lit normally by anyone else's flashlight. Computed from the eyes the
+/// same way on every machine, so everyone agrees on where it sits.
+/// </remarks>
 public sealed partial class Player
 {
 	/// <summary>
@@ -13,9 +24,10 @@ public sealed partial class Player
 	[Sync] public bool FlashlightOn { get; set; }
 
 	/// <summary>
-	/// How far in front of the eyes the soft fill light sits. Pulled back if something is in the way.
+	/// How far in front of the eyes the lights are anchored - enough to clear the owner's own body, so the beam
+	/// never catches or shadows them. Pulled back if something is in the way.
 	/// </summary>
-	const float FlashlightFillDistance = 24f;
+	const float FlashlightReach = 24f;
 
 	SpotLight flashlight;
 	PointLight flashlightFill;
@@ -75,12 +87,16 @@ public sealed partial class Player
 			return;
 
 		var eye = EyeTransform;
-		flashlight.WorldTransform = eye;
-
-		var target = eye.Position + eye.Forward * FlashlightFillDistance;
+		var target = eye.Position + eye.Forward * FlashlightReach;
 		var tr = Scene.Trace.FromTo( eye.Position, target ).Radius( 4f ).WithoutTags( "ragdoll", "effect" )
 			.IgnoreGameObjectHierarchy( GameObject.Root ).Run();
 
-		flashlightFill.WorldPosition = tr.Hit ? tr.EndPosition : target;
+		// Clamp short of whatever the trace hit (a wall right in front of the player), but never so short the
+		// origin falls back behind the owner's own body - that would put them back in their own light.
+		var reach = tr.Hit ? MathF.Max( tr.Distance - 2f, FlashlightReach * 0.25f ) : FlashlightReach;
+		var origin = eye.Position + eye.Forward * reach;
+
+		flashlight.WorldTransform = new Transform( origin, eye.Rotation );
+		flashlightFill.WorldPosition = origin;
 	}
 }
