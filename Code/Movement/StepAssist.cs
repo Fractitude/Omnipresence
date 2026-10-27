@@ -76,6 +76,9 @@ public sealed class StepAssist : GameObjectSystem<StepAssist>
 	/// <summary>Narrowing attempts while the body overlaps geometry, as the engine uses.</summary>
 	const int ScaleSteps = 3;
 
+	/// <summary>The view smoothing this system keeps alive, so stepping does not snap the camera.</summary>
+	StepViewSmoothing viewSmoothing;
+
 	/// <summary>Directions probed around the way the player walks, in degrees: a kerb walked along sits to the side.</summary>
 	static readonly float[] Fan = { 0f, 35f, -35f, 70f, -70f };
 
@@ -87,6 +90,8 @@ public sealed class StepAssist : GameObjectSystem<StepAssist>
 
 	void Tick()
 	{
+		EnsureViewSmoothing();
+
 		// Movement is simulated by the owner. Everyone else's player is a proxy and must not be moved here.
 		var controller = Players.LocalController;
 		if ( !controller.IsValid() || controller.IsProxy || !controller.Body.IsValid() )
@@ -151,6 +156,21 @@ public sealed class StepAssist : GameObjectSystem<StepAssist>
 				}
 			}
 		}
+	}
+
+	/// <summary>
+	/// The camera modifier that takes the jolt out of a step lives on a component, and components have to be somewhere:
+	/// a hidden object of its own, made once, rather than anything added to the player prefab.
+	/// </summary>
+	void EnsureViewSmoothing()
+	{
+		if ( viewSmoothing.IsValid() )
+			return;
+
+		var go = new GameObject( true, "Step View Smoothing" );
+		go.Flags |= GameObjectFlags.NotSaved;
+		go.NetworkMode = NetworkMode.Never;
+		viewSmoothing = go.Components.Create<StepViewSmoothing>();
 	}
 
 	/// <summary>

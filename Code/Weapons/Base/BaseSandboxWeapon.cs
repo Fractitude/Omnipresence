@@ -33,6 +33,21 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	}
 
 	/// <summary>
+	/// Where the weapon is aiming. The view is held a step behind the body for a moment after stepping up or down
+	/// (<see cref="StepViewSmoothing"/>), and the player aims at what the view shows, so the shot is moved with it: a
+	/// shot taken mid-step goes exactly where the crosshair is.
+	/// </summary>
+	public override Ray AimRay
+	{
+		get
+		{
+			var aim = base.AimRay;
+			var hold = StepViewSmoothing.Hold;
+			return hold == 0f ? aim : aim with { Position = aim.Position + Vector3.Up * hold };
+		}
+	}
+
+	/// <summary>
 	/// When true, a seated player aims it where the camera looks instead of along the muzzle. Override in weapons
 	/// that support player-directed aim.
 	/// </summary>
