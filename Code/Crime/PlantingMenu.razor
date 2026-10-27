@@ -107,7 +107,7 @@
 
 		// Leave if the player walked away, the tray is taken, another menu took over, or Escape was pressed.
 		if ( Input.EscapePressed || NaviInputCapture.Current is not null || crime is null || !target.IsValid()
-		     || crime.TrayState( target.TrayId ).Planted
+		     || target.Planted
 		     || target.WorldPosition.Distance( Players.LocalController?.WorldPosition ?? default ) > GrowTray.Reach )
 		{
 			Input.EscapePressed = false;

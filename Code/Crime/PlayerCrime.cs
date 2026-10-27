@@ -9,18 +9,13 @@ namespace Sandbox;
 /// </summary>
 /// <remarks>
 /// <see cref="PlayerProgress"/> creates this component on the host if the player prefab doesn't have it, and refreshes
-/// the network object so clients get it. The views below (<see cref="TrayView"/>, <see cref="PackOrders"/>,
-/// <see cref="MailWaiting"/>) are not synced to everyone: the host keeps them, and sends them to the owning player
-/// alone (<see cref="RefreshViews"/>), so another player's client never holds a player's trays, orders or deliveries.
+/// the network object so clients get it. The views below (<see cref="PackOrders"/>, <see cref="MailWaiting"/>) are not
+/// synced to everyone: the host keeps them, and sends them to the owning player alone (<see cref="RefreshViews"/>), so
+/// another player's client never holds a player's orders or deliveries. A grow tray's crop is not one of them: it is
+/// the tray's, synced from the host on the tray itself (<see cref="GrowTray"/>).
 /// </remarks>
 public sealed class PlayerCrime : Component, Global.IInventoryEvents
 {
-	/// <summary>
-	/// This player's trays as "id,planted,readyAt,product;…", for the labels of the trays in the world. Held by the
-	/// host and by this player's own client only.
-	/// </summary>
-	public string TrayView { get; private set; } = "";
-
 	/// <summary>
 	/// The orders this player can pack now (accepted, in time) as "id|handle|kind|count|asked|deadline;…", for the
 	/// packing table and its panel. Only what the player already sees in Hush: never a buyer's personality. Held by the
@@ -105,9 +100,8 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	/// <summary>
 	/// Take new views here, and bump <see cref="Version"/> so panels redraw.
 	/// </summary>
-	void ApplyViews( string trays, string packOrders, int mailWaiting )
+	void ApplyViews( string packOrders, int mailWaiting )
 	{
-		TrayView = trays ?? "";
 		PackOrders = packOrders ?? "";
 		MailWaiting = mailWaiting;
 		Version++;
@@ -117,12 +111,12 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	/// The host's views reach the owning player here, and nobody else.
 	/// </summary>
 	[Rpc.Owner]
-	void SendViews( string trays, string packOrders, int mailWaiting )
+	void SendViews( string packOrders, int mailWaiting )
 	{
 		if ( Rpc.Caller is { IsHost: false } )
 			return;
 
-		ApplyViews( trays, packOrders, mailWaiting );
+		ApplyViews( packOrders, mailWaiting );
 	}
 
 	/// <summary>
@@ -133,7 +127,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	void RequestViews()
 	{
 		if ( Rpc.Caller is { } caller && caller == Network.Owner && caller != Connection.Local )
-			SendViews( TrayView, PackOrders, MailWaiting );
+			SendViews( PackOrders, MailWaiting );
 	}
 
 	/// <summary>
@@ -148,9 +142,6 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 		var crime = Crime;
 		var now = WorldClock.Now;
 
-		var trays = string.Join( ';', crime.Trays.Select(
-			x => $"{x.Id},{(x.Planted ? 1 : 0)},{x.ReadyAt},{ProductCatalog.OfTray( x.Kind ).Id}" ) );
-
 		var packOrders = string.Join( ';', crime.Orders
 			.Where( x => x.State == OrderState.Accepted && now <= x.Deadline )
 			.OrderBy( x => x.Deadline )
@@ -158,13 +149,13 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		var mailWaiting = crime.Deliveries.Count( x => x.State == DeliveryState.InMailbox );
 
-		if ( trays == TrayView && packOrders == PackOrders && mailWaiting == MailWaiting )
+		if ( packOrders == PackOrders && mailWaiting == MailWaiting )
 			return;
 
-		ApplyViews( trays, packOrders, mailWaiting );
+		ApplyViews( packOrders, mailWaiting );
 
 		if ( Network.Owner is { } owner && owner != Connection.Local )
-			SendViews( trays, packOrders, mailWaiting );
+			SendViews( packOrders, mailWaiting );
 	}
 
 	protected override void OnUpdate()
@@ -305,26 +296,6 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	static bool IsId( string id ) => !string.IsNullOrWhiteSpace( id ) && id.Length <= CrimeRecord.MaxIdLength
 		&& id.All( x => char.IsAsciiLetterOrDigit( x ) || x is '-' or '_' );
 
-	TrayRecord TrayAt( string id ) => Crime?.Trays.FirstOrDefault( x => x.Id == id );
-
-	/// <summary>
-	/// What a tray holds for this player, from the view the host sent, so it works on a client too: whether it is
-	/// planted, the game time it is ready, and the drug planted (<see cref="ProductDef.Id"/>; Static for a tray with
-	/// none).
-	/// </summary>
-	public (bool Planted, long ReadyAt, string Kind) TrayState( string id )
-	{
-		foreach ( var part in (TrayView ?? "").Split( ';', System.StringSplitOptions.RemoveEmptyEntries ) )
-		{
-			var fields = part.Split( ',' );
-
-			if ( fields.Length is 3 or 4 && fields[0] == id && long.TryParse( fields[2], out var readyAt ) )
-				return (fields[1] == "1", readyAt, ProductCatalog.OfTray( fields.Length == 4 ? fields[3] : "" ).Id);
-		}
-
-		return (false, 0, "");
-	}
-
 	/// <summary>
 	/// The player asks to plant a drug in a tray. The host takes the player from the network (<c>Rpc.Caller</c>),
 	/// checks the player is within reach of that tray, and runs <see cref="Plant"/>, which checks the rest. Only the
@@ -348,50 +319,48 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Plant a drug in a tray: takes one of its seeds from the inventory. The tray is ready after the drug's grow time.
-	/// The host checks the drug exists, the tray is empty and the seed is in the bag. Host only.
+	/// Plant a drug in a tray: takes one of its seeds from the inventory. The crop is the tray's, not the planter's,
+	/// and it is ready after the drug's grow time. The host checks the drug exists, the tray is empty and the seed is
+	/// in the bag. Host only.
 	/// </summary>
 	public CrimeResult Plant( string trayId, string productId )
 	{
 		if ( !Ready || !IsId( trayId ) || ProductCatalog.Find( productId ) is not { } product )
 			return CrimeResult.Fail( "Nothing happens." );
 
-		var crime = Crime;
-		var tray = TrayAt( trayId );
+		// The tray is in the world, not in the record: the host writes the crop on it, and every client reads it from
+		// the sync, so one tray has one crop for everybody.
+		if ( GrowTray.Find( trayId ) is not { } tray )
+			return CrimeResult.Fail( "There is no grow tray there any more." );
 
-		if ( tray is { Planted: true } )
+		if ( tray.Planted )
 			return CrimeResult.Fail( "Something is already growing here." );
-
-		if ( tray is null && crime.Trays.Count >= CrimeRecord.MaxTrays )
-			return CrimeResult.Fail( "You have too many trays." );
 
 		if ( !Inventory.TryTake( product.Seed.Id, 1, out _ ) )
 			return CrimeResult.Fail( $"You need a {product.Seed.Name}." );
 
-		if ( tray is null )
-			crime.Trays.Add( tray = new() { Id = trayId } );
+		var readyAt = WorldClock.Now + product.GrowSeconds;
+		var quality = random.Next( product.CropQualityMin, product.CropQualityMax + 1 );
 
-		tray.Kind = product.Id;
-		tray.Planted = true;
-		tray.ReadyAt = WorldClock.Now + product.GrowSeconds;
-		tray.Quality = random.Next( product.CropQualityMin, product.CropQualityMax + 1 );
+		tray.SetCrop( product.Id, readyAt, quality );
 
 		Changed();
 		return CrimeResult.Success( $"Planted {product.Name}." );
 	}
 
 	/// <summary>
-	/// Harvest a ready tray: gives the planted drug's raw (and its seed back). Host only.
+	/// Harvest a ready tray: gives the planted drug's raw (and its seed back) to whoever harvests, since the crop is
+	/// the tray's and not a player's. Host only.
 	/// </summary>
 	public CrimeResult Harvest( string trayId )
 	{
-		if ( !Ready || !IsId( trayId ) || TrayAt( trayId ) is not { Planted: true } tray )
+		if ( !Ready || !IsId( trayId ) || GrowTray.Find( trayId ) is not { Planted: true } tray )
 			return CrimeResult.Fail( "Nothing to harvest." );
 
-		if ( WorldClock.Now < tray.ReadyAt )
+		if ( !tray.IsReady )
 			return CrimeResult.Fail( "It isn't ready yet." );
 
-		var product = ProductCatalog.OfTray( tray.Kind );
+		var product = ProductCatalog.OfTray( tray.PlantedKind );
 		var raw = ItemCatalog.MakeBatch( product.Raw.Id, product.HarvestRaw, tray.Quality );
 		var seeds = ItemCatalog.MakeBatch( product.Seed.Id, product.HarvestSeeds, 50 );
 
@@ -401,7 +370,7 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 
 		Inventory.Add( raw );
 		Inventory.Add( seeds );
-		tray.Planted = false;
+		tray.ClearCrop();
 
 		Changed();
 		return CrimeResult.Success( $"Harvested {product.HarvestRaw} {product.Raw.Name}." );
@@ -1070,18 +1039,16 @@ public sealed class PlayerCrime : Component, Global.IInventoryEvents
 	}
 
 	/// <summary>
-	/// Testing only: every planted tray is ready now.
+	/// Testing only: every tray with a crop in it is ready now.
 	/// </summary>
 	[Rpc.Host]
 	public void DebugTraysReady()
 	{
-		if ( !IsDebugCaller() || !Ready )
+		if ( !IsDebugCaller() || !Game.ActiveScene.IsValid() )
 			return;
 
-		foreach ( var tray in Crime.Trays.Where( x => x.Planted ) )
-			tray.ReadyAt = WorldClock.Now;
-
-		Changed();
+		foreach ( var tray in Game.ActiveScene.GetAllComponents<GrowTray>().ToList() )
+			tray.RipenCrop();
 	}
 
 	/// <summary>

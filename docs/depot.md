@@ -112,7 +112,8 @@ A bought object's legal owner is its buyer: `PlacedObjectRegistry.Make` gives it
 The title is the record there; `BuyerId` here and `PlacedObjectRecord.Owner` are copies kept for this file's own sake.
 
 A title still grants nothing to use: a bought box is claimed by its first use exactly like a scene-placed one
-(`StorageBox.CanUse`, `StorageRegistry`), and a tray shows each player their own crop. Moving a container's claim onto
+(`StorageBox.CanUse`, `StorageRegistry`), and a grow tray's crop is the world's and the tray's rather than the owner's
+(`GrowTray`, in `trays.json`): anyone may plant in it and whoever harvests it keeps the raw. Moving a container's claim onto
 its title needs its contents to move first: they live in the owner's record, and a sale must not leave them behind.
 
 ## Limits

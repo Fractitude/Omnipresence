@@ -65,6 +65,7 @@ public static class ProgressCommands
 		TransactionLedger.UseFolder( test ? "transactions_test" : TransactionLedger.DefaultFolder );
 		PlacedObjectRegistry.UseFile( test ? "placed_objects_test.json" : "placed_objects.json" );
 		OwnershipRegistry.UseFile( test ? "ownership_test.json" : "ownership.json" );
+		TrayRegistry.UseFile( test ? "trays_test.json" : "trays.json" );
 		Log.Info( test ? "Test data: progress_test/ and world_test.json" : "Real data: progress/ and world.json" );
 	}
 

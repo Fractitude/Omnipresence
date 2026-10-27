@@ -12,7 +12,6 @@ public sealed class CrimeRecord
 	/// <summary>Orders, parcels and cash-outs kept in one list.</summary>
 	public const int MaxEntries = 50;
 
-	public const int MaxTrays = 20;
 	public const int MaxIdLength = 64;
 
 	/// <summary>
@@ -37,8 +36,6 @@ public sealed class CrimeRecord
 	/// crime state resets it too. See <see cref="StorageRules"/>.
 	/// </summary>
 	public List<StorageBoxRecord> Storage { get; set; } = new();
-
-	public List<TrayRecord> Trays { get; set; } = new();
 
 	/// <summary>Orders the player accepted, newest last. See <see cref="OrderState"/>.</summary>
 	public List<OrderRecord> Orders { get; set; } = new();
@@ -92,14 +89,6 @@ public sealed class CrimeRecord
 			.ToList();
 
 		Storage = StorageRules.Clean( Storage );
-
-		Trays ??= new();
-		Trays.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || x.Id.Length > MaxIdLength );
-		Trays = Trays.GroupBy( x => x.Id ).Select( x => x.First() ).Take( MaxTrays ).ToList();
-
-		// A tray saved before there were two drugs has no product: it holds Static. An unknown one does too.
-		foreach ( var tray in Trays )
-			tray.Kind = ProductCatalog.OfTray( tray.Kind ).Id;
 
 		Orders ??= new();
 		Orders.RemoveAll( x => x is null || string.IsNullOrWhiteSpace( x.Id ) || ItemCatalog.Find( x.Kind ) is null );
@@ -211,29 +200,6 @@ public sealed class CrimeRecord
 
 	static string Clean( string text, int max = MaxIdLength ) =>
 		string.IsNullOrWhiteSpace( text ) ? "" : text.Length > max ? text[..max] : text;
-}
-
-/// <summary>
-/// One grow tray of the player's, by the id of the tray object in the world. Absent from the list means empty.
-/// </summary>
-public sealed class TrayRecord
-{
-	public string Id { get; set; } = "";
-
-	/// <summary>
-	/// The id of the drug planted (<see cref="ProductDef.Id"/>). Empty in a tray saved before there were two drugs:
-	/// that is Static (<see cref="ProductCatalog.OfTray"/>, and <see cref="CrimeRecord.Sanitize"/> fills it in).
-	/// </summary>
-	public string Kind { get; set; } = "";
-
-	/// <summary>False when empty. A planted tray is growing until <see cref="ReadyAt"/>, then ready to harvest.</summary>
-	public bool Planted { get; set; }
-
-	/// <summary>Game seconds (<see cref="WorldClock.Now"/>) when the harvest is ready.</summary>
-	public long ReadyAt { get; set; }
-
-	/// <summary>The quality of the crop, fixed when it was planted.</summary>
-	public int Quality { get; set; }
 }
 
 /// <summary>
