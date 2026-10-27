@@ -26,11 +26,11 @@
     "PerMapRanking": false,
     "LeaderboardType": "None",
     "CsProjName": "",
-    "StartupScene": "scenes/home.scene",
+    "StartupScene": "scenes/downtown.scene",
     "RecommendedMinPlayers": 1,
     "RecommendedMaxPlayers": 0,
-    "Coop": false,
-    "Versus": false,
+    "Coop": true,
+    "Versus": true,
     "LaunchMode": "Normal",
     "MapSettings": {
       "UseCreateGameModal": false,
@@ -39,7 +39,7 @@
       "DefaultMap": null,
       "MapTarget": null
     },
-    "DedicatedServerStartupScene": "scenes/home.scene",
+    "DedicatedServerStartupScene": "scenes/downtown.scene",
     "ControlModes": {
       "Keyboard": true,
       "VR": false,
