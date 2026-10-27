@@ -13,7 +13,7 @@ namespace Sandbox;
 /// driver cannot see it. A quad is the glass.
 /// </remarks>
 [Title( "Vehicle Mirror" ), Category( "Vehicles" ), Icon( "directions_car" )]
-public sealed class VehicleMirror : Component
+public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 {
 	/// <summary>
 	/// Which way the glass faces, in this object's space: out of the mirror, towards the driver. The object itself sits
@@ -89,15 +89,30 @@ public sealed class VehicleMirror : Component
 	protected override void OnStart() => seat ??= GetComponentInParent<BaseChair>();
 
 	/// <summary>
+	/// In the editor a mirror draws for whoever is looking at the scene, at every frame it can, so its glass and its
+	/// camera can be lined up by hand. It runs from here as well as <see cref="OnPreRender"/> because a viewport that
+	/// is not playing does not always reach the render stage.
+	/// </summary>
+	protected override void OnUpdate()
+	{
+		if ( !Game.IsPlaying )
+			UpdateFeed();
+	}
+
+	/// <summary>
 	/// Show the feed only to the player actually driving, and only spend the render while they could see the mirror.
 	/// </summary>
-	protected override void OnPreRender()
+	protected override void OnPreRender() => UpdateFeed();
+
+	void UpdateFeed()
 	{
 		seat ??= GetComponentInParent<BaseChair>();
 
-		var driver = LocalDriver();
+		// Playing: the driver's own eye, and only while their own screen shows the mirror. Editing: no driver, so the
+		// editor's camera stands in for one and the feed is always drawn.
+		var eye = Game.IsPlaying ? LocalDriver()?.EyeTransform.Position : AdjustingEye();
 
-		if ( driver is null )
+		if ( eye is null )
 		{
 			SetVisible( false );
 			return;
@@ -105,12 +120,26 @@ public sealed class VehicleMirror : Component
 
 		SetVisible( true );
 
-		if ( !InLocalView() || sinceFrame < 1f / RefreshRate )
+		if ( ( Game.IsPlaying && !InLocalView() ) || sinceFrame < 1f / RefreshRate )
 			return;
 
 		sinceFrame = 0;
 
-		DrawFrom( driver.EyeTransform.Position );
+		DrawFrom( eye.Value );
+	}
+
+	/// <summary>
+	/// The eye an editor's mirror draws for: whatever camera is looking at the scene, or - a prefab tab has none, and
+	/// its camera comes and goes - a head forty inches in front of the glass, where a driver's would be.
+	/// </summary>
+	Vector3? AdjustingEye()
+	{
+		if ( Scene.Camera is { } camera )
+			return camera.WorldPosition;
+
+		var pane = EnsureGlass();
+
+		return pane.IsValid() ? pane.WorldPosition + pane.WorldRotation.Up.Normal * 40f : WorldPosition;
 	}
 
 	/// <summary>The local player, when they are the one sitting in this mirror's car.</summary>
@@ -146,7 +175,12 @@ public sealed class VehicleMirror : Component
 		// The feed goes on the pane's own scene object, not on its material: a material made in code carries no
 		// texture slot of its own, so an attribute set on it never reaches the shader.
 		if ( visible )
+		{
 			pane.SceneObject.Attributes.Set( "Feed", EnsureFeed() );
+
+			// Being lined up by hand, so the glass is tinted and its edges are easy to see.
+			pane.SceneObject.Attributes.Set( "Adjusting", Game.IsPlaying ? 0f : 1f );
+		}
 	}
 
 	Texture EnsureFeed() => feed ??= Texture.CreateRenderTarget()
