@@ -87,6 +87,9 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 	/// <summary>A copy that bowed out to a twin, before the end of the frame its destruction takes: it builds nothing.</summary>
 	bool retired;
 
+	/// <summary>The width of the plane model the pane is cut from, inches.</summary>
+	float planeSize = 100f;
+
 	/// <summary>
 	/// A prefab instance can arrive with more than one copy of this component: the engine matches an instance's
 	/// components to its prefab by id, and one it cannot match is added rather than taken over - so a scene whose
@@ -154,6 +157,9 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 
 		SetVisible( true );
 
+		if ( glass.IsValid() )
+			ApplyGlassPlacement( glass.GameObject );
+
 		if ( ( Game.IsPlaying && !InLocalView() ) || sinceFrame < 1f / RefreshRate )
 			return;
 
@@ -217,11 +223,21 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 		}
 	}
 
-	Texture EnsureFeed() => feed ??= Texture.CreateRenderTarget()
-		.WithSize( TextureSize.x, TextureSize.y )
-		.WithFormat( ImageFormat.RGBA16161616F )
-		.WithInitialColor( Color.Black )
-		.Create();
+	Texture EnsureFeed()
+	{
+		if ( feed.IsValid() && feed.Width == TextureSize.x && feed.Height == TextureSize.y )
+			return feed;
+
+		feed?.Dispose();
+
+		feed = Texture.CreateRenderTarget()
+			.WithSize( TextureSize.x, TextureSize.y )
+			.WithFormat( ImageFormat.RGBA16161616F )
+			.WithInitialColor( Color.Black )
+			.Create();
+
+		return feed;
+	}
 
 	/// <summary>
 	/// Draw one picture: what the driver's own sight would find if the glass were a perfect mirror, seen from the
@@ -282,15 +298,25 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 		if ( plane is null || plane.IsError )
 			return null;
 
-		var go = new GameObject( GameObject, true, "Mirror Glass" );
-		go.Flags |= GameObjectFlags.NotSaved;
-		go.NetworkMode = NetworkMode.Never;
-		go.Tags.Add( GlassTag );
-		go.LocalPosition = GlassNormal.Normal * GlassProud;
-		go.LocalRotation = GlassRotation();
-		go.LocalScale = new Vector3( GlassSize.x, GlassSize.y, 1f ) / plane.Bounds.Size.x;
+		// A pane an earlier build, or a copy that bowed out, left behind is taken over rather than joined by a
+		// second; anything beyond the first is an orphan and goes.
+		var panes = GameObject.Children.Where( x => x.Name == "Mirror Glass" && x.Tags.Has( GlassTag ) ).ToList();
+		var go = panes.FirstOrDefault();
 
-		glass = go.Components.Create<ModelRenderer>();
+		foreach ( var orphan in panes.Skip( 1 ) )
+			orphan.Destroy();
+
+		if ( go is null )
+		{
+			go = new GameObject( GameObject, true, "Mirror Glass" );
+			go.Flags |= GameObjectFlags.NotSaved;
+			go.NetworkMode = NetworkMode.Never;
+			go.Tags.Add( GlassTag );
+		}
+
+		planeSize = plane.Bounds.Size.x;
+
+		glass = go.Components.Get<ModelRenderer>() ?? go.Components.Create<ModelRenderer>();
 		glass.Model = plane;
 		glass.MaterialOverride = FeedMaterial();
 
@@ -299,7 +325,20 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 		glass.RenderOptions.Game = true;
 		glass.RenderOptions.AfterUI = false;
 
+		ApplyGlassPlacement( go );
+
 		return glass;
+	}
+
+	/// <summary>
+	/// Put the pane where the inspector says: size, the slide within the glass's plane, how far proud of it, and the
+	/// tilt. Read every frame, so a number typed into the inspector moves the glass as it is typed.
+	/// </summary>
+	void ApplyGlassPlacement( GameObject pane )
+	{
+		pane.LocalPosition = GlassLocalPosition();
+		pane.LocalRotation = GlassRotation() * Rotation.From( GlassAngles );
+		pane.LocalScale = new Vector3( GlassSize.x, GlassSize.y, 1f ) / planeSize;
 	}
 
 	/// <summary>Where the quad sits on the glass: proud of it, then slid within its plane.</summary>
@@ -337,11 +376,16 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 		if ( lens.IsValid() )
 			return lens;
 
-		var go = new GameObject( GameObject, true, "Mirror Lens" );
-		go.Flags |= GameObjectFlags.NotSaved;
-		go.NetworkMode = NetworkMode.Never;
+		var go = GameObject.Children.FirstOrDefault( x => x.Name == "Mirror Lens" );
 
-		lens = go.Components.Create<CameraComponent>();
+		if ( go is null )
+		{
+			go = new GameObject( GameObject, true, "Mirror Lens" );
+			go.Flags |= GameObjectFlags.NotSaved;
+			go.NetworkMode = NetworkMode.Never;
+		}
+
+		lens = go.Components.Get<CameraComponent>() ?? go.Components.Create<CameraComponent>();
 		lens.IsMainCamera = false;
 		lens.Enabled = false;
 		lens.ClearFlags = ClearFlags.All;
