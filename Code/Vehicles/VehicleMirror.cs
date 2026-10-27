@@ -84,7 +84,38 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 	Texture feed;
 	RealTimeSince sinceFrame = float.MaxValue;
 
-	protected override void OnEnabled() => EnsureGlass();
+	/// <summary>A copy that bowed out to a twin, before the end of the frame its destruction takes: it builds nothing.</summary>
+	bool retired;
+
+	/// <summary>
+	/// A prefab instance can arrive with more than one copy of this component: the engine matches an instance's
+	/// components to its prefab by id, and one it cannot match is added rather than taken over - so a scene whose
+	/// instance predates the mirror objects ends up with the prefab's copy and its own on the same object. One mirror
+	/// is enough: the copy with the lowest id keeps the job and the rest go before they build anything.
+	/// </summary>
+	protected override void OnEnabled()
+	{
+		var twins = GameObject.Components.GetAll<VehicleMirror>().ToList();
+
+		if ( twins.Count > 1 )
+		{
+			var keeper = twins.OrderBy( x => x.Id.ToString(), StringComparer.Ordinal ).First();
+
+			if ( keeper != this )
+			{
+				retired = true;
+				Destroy();
+				return;
+			}
+
+			foreach ( var extra in twins.Where( x => x != this ).ToList() )
+			{
+				Log.Warning( $"{GameObject.Name}: {twins.Count} VehicleMirror components on one object, keeping one" );
+				extra.retired = true;
+				extra.Destroy();
+			}
+		}
+	}
 
 	protected override void OnStart() => seat ??= GetComponentInParent<BaseChair>();
 
@@ -106,6 +137,9 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 
 	void UpdateFeed()
 	{
+		if ( retired )
+			return;
+
 		seat ??= GetComponentInParent<BaseChair>();
 
 		// Playing: the driver's own eye, and only while their own screen shows the mirror. Editing: no driver, so the
@@ -237,6 +271,9 @@ public sealed class VehicleMirror : Component, Component.ExecuteInEditor
 	/// </summary>
 	ModelRenderer EnsureGlass()
 	{
+		if ( retired )
+			return null;
+
 		if ( glass.IsValid() )
 			return glass;
 
