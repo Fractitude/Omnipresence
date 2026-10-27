@@ -141,24 +141,25 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	//
 
 	/// <summary>
-	/// <c>Input.Down( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
+	/// <c>Input.Down( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it. Nothing is
+	/// read while the weapon is being put away: it is lowered out of the hand over those few frames.
 	/// </summary>
-	protected bool Attack1Down => InputClaims.Down( "attack1", InputPriority.Weapon, this );
+	protected bool Attack1Down => !IsPuttingAway && InputClaims.Down( "attack1", InputPriority.Weapon, this );
 
 	/// <summary>
 	/// <c>Input.Pressed( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
 	/// </summary>
-	protected bool Attack1Pressed => InputClaims.Pressed( "attack1", InputPriority.Weapon, this );
+	protected bool Attack1Pressed => !IsPuttingAway && InputClaims.Pressed( "attack1", InputPriority.Weapon, this );
 
 	/// <summary>
 	/// <c>Input.Down( "attack2" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
 	/// </summary>
-	protected bool Attack2Down => InputClaims.Down( "attack2", InputPriority.Weapon, this );
+	protected bool Attack2Down => !IsPuttingAway && InputClaims.Down( "attack2", InputPriority.Weapon, this );
 
 	/// <summary>
 	/// <c>Input.Pressed( "attack2" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
 	/// </summary>
-	protected bool Attack2Pressed => InputClaims.Pressed( "attack2", InputPriority.Weapon, this );
+	protected bool Attack2Pressed => !IsPuttingAway && InputClaims.Pressed( "attack2", InputPriority.Weapon, this );
 
 	/// <summary>
 	/// <c>Input.Released( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
@@ -214,6 +215,77 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 	// camera animation moves the camera around the gun, not the gun with it.
 	CameraView _viewModelView;
 
+	/// <summary>
+	/// Seconds the view model takes to drop out of view when the weapon is put away, and to come back up when it
+	/// is drawn again: the draw is the same motion played backwards. See <see cref="BeginPutAway"/>.
+	/// </summary>
+	[Property, Group( "Put Away" )] public float HolsterTime { get; set; } = 0.3f;
+
+	/// <summary>
+	/// How far the view model drops, in inches, on its way out of view.
+	/// </summary>
+	[Property, Group( "Put Away" )] public float PutAwayDrop { get; set; } = 24f;
+
+	/// <summary>
+	/// How far the view model is pulled back towards the player, in inches, on its way out of view.
+	/// </summary>
+	[Property, Group( "Put Away" )] public float PutAwayBack { get; set; } = 10f;
+
+	/// <summary>
+	/// Degrees the view model tips down as it is put away.
+	/// </summary>
+	[Property, Group( "Put Away" )] public float PutAwayPitch { get; set; } = 20f;
+
+	float _putAwayFrom;
+	float _putAwayTarget;
+	float _putAwayLength = 0.001f;
+	TimeSince _sincePutAway;
+
+	/// <summary>
+	/// How far the view model is put away: 0 is in hand, 1 is out of view. Worked out from the motion rather than
+	/// stored, so turning a put-away into a draw half way through carries on from where it had got to.
+	/// </summary>
+	float PutAwayBlend
+	{
+		get
+		{
+			var t = (_sincePutAway.Relative / _putAwayLength).Clamp( 0f, 1f );
+
+			// Ease in and out: the weapon leaves the hand slowly and settles slowly.
+			return MathX.Lerp( _putAwayFrom, _putAwayTarget, t * t * ( 3f - 2f * t ) );
+		}
+	}
+
+	/// <summary>
+	/// True while the view model is on its way out of view, so nothing fires from a weapon being put away.
+	/// </summary>
+	public bool IsPuttingAway => _putAwayTarget > 0.5f;
+
+	/// <summary>
+	/// Lowers the view model out of view over <see cref="HolsterTime"/>. Answers how long that takes, so the caller
+	/// can put the weapon away once it has finished. Owner only: the view model is the owner's own.
+	/// </summary>
+	public float BeginPutAway()
+	{
+		_putAwayFrom = PutAwayBlend;
+		_putAwayTarget = 1f;
+		_putAwayLength = MathF.Max( HolsterTime, 0.001f );
+		_sincePutAway = 0;
+
+		return _putAwayLength;
+	}
+
+	/// <summary>
+	/// The weapon is in hand: the view model comes up from where a put-away would have left it.
+	/// </summary>
+	void BeginDraw()
+	{
+		_putAwayFrom = 1f;
+		_putAwayTarget = 0f;
+		_putAwayLength = MathF.Max( HolsterTime, 0.001f );
+		_sincePutAway = 0;
+	}
+
 	protected override void ModifyCamera( CameraComponent camera, ref CameraView view )
 	{
 		base.ModifyCamera( camera, ref view );
@@ -230,6 +302,13 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 
 		model.Place( _viewModelView );
 		model.FollowCameraEffects( camera, view );
+
+		// Put away: the weapon is lowered and tipped out of the way rather than vanishing from the hand.
+		var away = PutAwayBlend;
+		if ( away <= 0f ) return;
+
+		model.WorldPosition += _viewModelView.Rotation * new Vector3( -PutAwayBack, 0f, -PutAwayDrop ) * away;
+		model.WorldRotation *= Rotation.FromPitch( -PutAwayPitch * away );
 	}
 
 	/// <summary>
@@ -291,9 +370,23 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 		return true;
 	}
 
+	protected override void OnEquipped()
+	{
+		base.OnEquipped();
+
+		// Drawn: the put-away motion, backwards, so the weapon comes up into the hand instead of appearing.
+		BeginDraw();
+	}
+
 	protected override void OnHolstered()
 	{
 		base.OnHolstered();
+
+		// However it went away - the Holster key, a seat, a drop - it comes back up from out of view next time.
+		_putAwayFrom = 1f;
+		_putAwayTarget = 1f;
+		_putAwayLength = 0.001f;
+		_sincePutAway = 0;
 
 		_ = EnableIfDroppedAsync();
 	}

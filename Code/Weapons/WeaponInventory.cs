@@ -39,6 +39,11 @@ public sealed partial class WeaponInventory : BaseInventoryComponent
 	/// </summary>
 	BaseSandboxWeapon lastHeldWeapon;
 
+	/// <summary>
+	/// The weapon the Holster key is lowering out of view, until it is gone and can be put away.
+	/// </summary>
+	BaseSandboxWeapon holstering;
+
 	protected override void OnStart()
 	{
 		// The base equips the weapon already in hand when this player arrives in a joining client's snapshot (snapshots
@@ -229,9 +234,17 @@ public sealed partial class WeaponInventory : BaseInventoryComponent
 	/// </summary>
 	void ToggleHolster()
 	{
+		// A switch since the key was pressed means that weapon is not being lowered any more.
+		if ( holstering.IsValid() && ActiveWeapon != holstering )
+			holstering = null;
+
+		// Already on its way out of the hand: let the motion finish instead of cutting it short.
+		if ( holstering.IsValid() )
+			return;
+
 		if ( ActiveWeapon.IsValid() )
 		{
-			Switch( null, allowHolster: true );
+			_ = HolsterWhenLowered( ActiveWeapon );
 			return;
 		}
 
@@ -239,6 +252,27 @@ public sealed partial class WeaponInventory : BaseInventoryComponent
 			Switch( lastHeldWeapon, allowHolster: true );
 		else
 			SwitchToBest();
+	}
+
+	/// <summary>
+	/// Lowers the held weapon out of view and puts it away once it has gone, so the Holster key animates the weapon
+	/// down instead of snapping it out of the hand. Owner only - the view model is the owner's own, and the switch
+	/// itself reaches the host the usual way. A switch, a seat or a drop during the motion calls it off: the weapon
+	/// is not the one in hand any more.
+	/// </summary>
+	async Task HolsterWhenLowered( BaseSandboxWeapon weapon )
+	{
+		holstering = weapon;
+
+		await GameTask.DelaySeconds( weapon.BeginPutAway() );
+
+		if ( !this.IsValid() || holstering != weapon )
+			return;
+
+		holstering = null;
+
+		if ( ActiveWeapon == weapon )
+			Switch( null, allowHolster: true );
 	}
 
 	/// <summary>
