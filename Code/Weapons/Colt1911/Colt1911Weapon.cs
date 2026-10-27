@@ -1,10 +1,7 @@
 [Title( "Heritage .45" )]
 public sealed class Colt1911Weapon : IronSightsWeapon
 {
-	protected override bool WantsPrimaryAttack()
-	{
-		return Input.Pressed( "attack1" );
-	}
+	protected override bool WantsPrimaryAttack() => Attack1Pressed;
 
 	/// <summary>
 	/// Draws the outlined aiming dot with the current firing status.

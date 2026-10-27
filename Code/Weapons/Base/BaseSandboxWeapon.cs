@@ -130,6 +130,47 @@ public partial class BaseSandboxWeapon : BaseCombatWeapon, IPlayerControllable
 		return base.OnCanSwitchTo();
 	}
 
+	//
+	// The triggers, as this weapon sees them.
+	//
+	// An interface can hold them: the weapon switcher's menu confirms a pick with a click, and that click must
+	// not also fire the weapon being put away (it is still the active one on the frame the switch is asked for,
+	// and whether the menu or the weapon updates first is not something either of them can know). The menu
+	// claims both triggers every frame it is up, so reading them here - never Input directly - leaves the click
+	// to the menu, whichever of the two ran first.
+	//
+
+	/// <summary>
+	/// <c>Input.Down( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
+	/// </summary>
+	protected bool Attack1Down => InputClaims.Down( "attack1", InputPriority.Weapon, this );
+
+	/// <summary>
+	/// <c>Input.Pressed( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
+	/// </summary>
+	protected bool Attack1Pressed => InputClaims.Pressed( "attack1", InputPriority.Weapon, this );
+
+	/// <summary>
+	/// <c>Input.Down( "attack2" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
+	/// </summary>
+	protected bool Attack2Down => InputClaims.Down( "attack2", InputPriority.Weapon, this );
+
+	/// <summary>
+	/// <c>Input.Pressed( "attack2" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
+	/// </summary>
+	protected bool Attack2Pressed => InputClaims.Pressed( "attack2", InputPriority.Weapon, this );
+
+	/// <summary>
+	/// <c>Input.Released( "attack1" )</c>, unless something above <see cref="InputPriority.Weapon"/> holds it.
+	/// </summary>
+	protected bool Attack1Released => InputClaims.Released( "attack1", InputPriority.Weapon, this );
+
+	/// <inheritdoc />
+	protected override bool WantsPrimaryAttack() => PrimaryAutomatic ? Attack1Down : Attack1Pressed;
+
+	/// <inheritdoc />
+	protected override bool WantsSecondaryAttack() => SecondaryAutomatic ? Attack2Down : Attack2Pressed;
+
 	/// <summary>
 	/// A seated player can only control this while not holding a weapon of their own.
 	/// </summary>

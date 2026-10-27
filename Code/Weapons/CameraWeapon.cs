@@ -122,7 +122,7 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 			UpdateDepthOfField( dof );
 		}
 
-		if ( focusing && Input.Released( "attack1" ) )
+		if ( focusing && Attack1Released )
 		{
 			Game.TakeScreenshot();
 			Sandbox.Services.Stats.Increment( "photos", 1 );
@@ -130,7 +130,7 @@ public sealed class CameraWeapon : BaseSandboxWeapon
 			PlayAttackSound();
 		}
 
-		focusing = Input.Down( "attack1" );
+		focusing = Attack1Down;
 	}
 
 	private void EnsureDepthOfField()

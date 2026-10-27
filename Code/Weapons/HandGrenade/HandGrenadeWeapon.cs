@@ -87,8 +87,8 @@ public sealed class HandGrenadeWeapon : BaseSandboxWeapon
 			return;
 		}
 
-		// Start cooking on press
-		if ( !IsCooking && CanPrimaryAttack() && (Input.Pressed( "Attack1" ) || Input.Pressed( "Attack2" )) )
+		// Start cooking on press. A press a menu took (the weapon switcher confirming a pick) is not a throw.
+		if ( !IsCooking && CanPrimaryAttack() && (Attack1Pressed || Attack2Pressed) )
 		{
 			IsCooking = true;
 			TimeSinceCooked = 0;

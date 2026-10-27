@@ -11,6 +11,12 @@ public static class InputPriority
 	public const int Default = 0;
 
 	/// <summary>
+	/// A weapon's trigger. Below everything the player is doing with their hands, so a click that a menu took
+	/// never fires the gun.
+	/// </summary>
+	public const int Weapon = 50;
+
+	/// <summary>
 	/// Something the player is looking at, like an interaction menu.
 	/// </summary>
 	public const int Interaction = 100;
@@ -19,6 +25,12 @@ public static class InputPriority
 	/// A tool the player is working with right now, like the physgun holding an object.
 	/// </summary>
 	public const int Tool = 200;
+
+	/// <summary>
+	/// A menu the player is picking from, like the weapon switcher's. It takes the press that confirms a pick,
+	/// so the weapon being put away does not fire on it.
+	/// </summary>
+	public const int Menu = 300;
 }
 
 /// <summary>
@@ -102,4 +114,10 @@ public static class InputClaims
 	/// </summary>
 	public static bool Down( string action, int priority, object owner = null ) =>
 		!IsBlocked( action, priority, owner ) && Input.Down( action );
+
+	/// <summary>
+	/// <c>Input.Released</c>, or false while a higher priority holds the action.
+	/// </summary>
+	public static bool Released( string action, int priority, object owner = null ) =>
+		!IsBlocked( action, priority, owner ) && Input.Released( action );
 }

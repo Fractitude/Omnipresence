@@ -14,10 +14,7 @@ public sealed class SniperWeapon : BaseBulletWeapon
 
 	public bool IsScoped => _isScoped;
 
-	protected override bool WantsPrimaryAttack()
-	{
-		return Input.Pressed( "attack1" );
-	}
+	protected override bool WantsPrimaryAttack() => Attack1Pressed;
 
 	protected override bool WantsSecondaryAttack()
 	{

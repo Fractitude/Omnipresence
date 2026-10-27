@@ -131,15 +131,18 @@
 		if ( !IsSelecting )
 			return;
 
-		// don't let the click fire the weapon at this moment
+		// The menu takes the triggers while it is up, so the click that confirms a pick is the menu's and does not
+		// also fire the weapon being put away. The claim is renewed every frame, so it is live whichever of the menu
+		// and the weapon updates first (the weapon reads its triggers through InputClaims, see BaseSandboxWeapon).
+		InputClaims.Claim( "attack1", InputPriority.Menu, this );
+		InputClaims.Claim( "attack2", InputPriority.Menu, this );
+
 		if ( Input.Pressed( "attack1" ) )
 		{
-			Input.ReleaseAction( "attack1" );
 			Confirm();
 		}
 		else if ( Input.Pressed( "attack2" ) )
 		{
-			Input.ReleaseAction( "attack2" );
 			selected = null;
 		}
 		else if ( sinceSelectionChanged > SelectionTimeout )

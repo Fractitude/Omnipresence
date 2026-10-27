@@ -1,10 +1,7 @@
 [Title( "Ironwood .357" )]
 public sealed class RevolverWeapon : IronSightsWeapon
 {
-	protected override bool WantsPrimaryAttack()
-	{
-		return Input.Pressed( "attack1" );
-	}
+	protected override bool WantsPrimaryAttack() => Attack1Pressed;
 
 	protected override void DoRecoil()
 	{

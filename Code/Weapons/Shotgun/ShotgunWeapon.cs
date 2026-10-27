@@ -4,10 +4,7 @@ public sealed class ShotgunWeapon : IronSightsWeapon
 	// The volley (pellet count, spread, damage) comes from the engine Ballistics; recoil from
 	// BaseBulletWeapon.
 
-	protected override bool WantsPrimaryAttack()
-	{
-		return Input.Pressed( "attack1" );
-	}
+	protected override bool WantsPrimaryAttack() => Attack1Pressed;
 
 	/// <summary>
 	/// Draws a smooth spread ring and aiming dot with the current firing status.

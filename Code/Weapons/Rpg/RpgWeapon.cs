@@ -51,7 +51,7 @@ public sealed class RpgWeapon : BaseSandboxWeapon
 	{
 		base.OnControl();
 
-		if ( Input.Pressed( "attack2" ) )
+		if ( Attack2Pressed )
 			ToggleTrackedAim();
 
 		// Auto-reload after firing
