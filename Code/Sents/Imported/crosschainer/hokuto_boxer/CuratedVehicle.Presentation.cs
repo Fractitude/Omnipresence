@@ -19,6 +19,9 @@ public sealed partial class CuratedVehicle
 	private float tireVolume;
 	private GameObject hud;
 
+	private readonly List<(ModelRenderer Renderer, int Index)> windows = [];
+	private bool glassApplied;
+
 	private void SetupPresentation()
 	{
 		if ( Application.IsDedicatedServer ) return;
@@ -30,6 +33,11 @@ public sealed partial class CuratedVehicle
 			{
 				var original = renderer.Model.Materials[i];
 				var name = original.Name.ToLowerInvariant();
+				if ( IsWindow( original ) )
+				{
+					windows.Add( (renderer, i) );
+					continue;
+				}
 				if ( !name.Contains( "primary" ) && !name.Contains( "secondary" )
 					&& !name.Contains( "/headlight_" ) && !name.Contains( "/taillight_" ) ) continue;
 				var copy = original.CreateCopy();
@@ -39,6 +47,7 @@ public sealed partial class CuratedVehicle
 				else paints.Add( (copy, name.Contains( "secondary" )) );
 			}
 		}
+		ApplyClearGlass();
 		foreach ( var mount in HeadlightMounts ?? [] )
 		{
 			var go = new GameObject( GameObject, true, "Headlight beam" ) { NetworkMode = NetworkMode.Never };
@@ -82,11 +91,75 @@ public sealed partial class CuratedVehicle
 		foreach ( var material in headlights ) material.Set( "LampEmission", lampsOn ? 5f : 0 );
 		foreach ( var material in taillights ) material.Set( "LampEmission", Braking || Gear == -1 ? 8f : Lights ? 2f : 0 );
 		foreach ( var beam in beams ) if ( beam.IsValid() ) beam.Enabled = lampsOn;
+		// A car placed in the scene is set up in OnStart, before its model has loaded, so the window pass finds nothing
+		// then and has to be retried here until the model is there. Cars spawned at run time get it on the first frame.
+		if ( !glassApplied ) ApplyClearGlass();
 		UpdateSmoke( dt );
 		UpdateAudio( dt );
 		UpdateBackfire( dt );
 		// The speedometer is this game's own (Code/Vehicles/Hud), fed by the IVehicleGauges members in CuratedVehicle.cs.
 		VehicleHud.Update( this, ref hud );
+	}
+
+	/// <summary>
+	/// Which materials are the car's windows. crosschainer's window glass uses the drift_glass shader (cabin.vmat, and
+	/// windscreen_ok on the cars that split the screen off), but three of the cars — the Hokuto Boxer, the Takeda Ascend
+	/// and the Mizuno Rotary C — also draw a rear window with a plain opaque material, dark_cabin.vmat on the ordinary
+	/// complex shader. That one is a window like the rest wherever it appears: the drift_glass shader is only ever used
+	/// for glass, and nothing else in these models is called dark_cabin.
+	/// </summary>
+	private static bool IsWindow( Material material )
+	{
+		if ( (material.ShaderName ?? "").Contains( "drift_glass" ) ) return true;
+		return (material.Name ?? "").ToLowerInvariant().EndsWith( "/dark_cabin.vmat" );
+	}
+
+	/// <summary>
+	/// One glass for every car, and it is clear. crosschainer's own window material (cabin.vmat) is opaque near-black and
+	/// only looked see-through from the seat because the backface of a single-skin window mesh was culled; two of the cars
+	/// model their glass as a closed slab, so not even that happened. Every window slot is therefore put on a transparent
+	/// copy of the car's own lens glass. The lens shader is the only translucent one these models ship, but its material
+	/// carries the headlight lens' texture, which drew a fluted pattern across the window, so the copy is given a plain
+	/// white texture and a barely-there tint. A material override on this client only: the models and their own materials
+	/// are untouched, and every car ends up with the same glass.
+	/// </summary>
+	private void ApplyClearGlass()
+	{
+		if ( windows.Count == 0 ) CollectWindows();
+		if ( windows.Count == 0 ) return;
+		Material clear = null;
+		foreach ( var (renderer, _) in windows )
+		{
+			if ( !renderer.IsValid() ) continue;
+			var lens = renderer.Model.Materials.FirstOrDefault( m => (m.ShaderName ?? "").Contains( "drift_lens" ) );
+			if ( lens is null ) continue;
+			clear = lens.CreateCopy();
+			clear.Set( "g_tLens", Texture.Load( "materials/default/default_color.tga" ) );
+			clear.Set( "LensTint", new Color( 0.9f, 0.9f, 0.9f, 1f ) );
+			clear.Set( "LensOpacity", new Vector4( 0.05f, 0.05f, 0.05f, 0.05f ) );
+			break;
+		}
+		if ( clear is null ) return;
+		foreach ( var (renderer, index) in windows )
+		{
+			if ( !renderer.IsValid() ) continue;
+			renderer.Materials.SetOverride( index, clear );
+		}
+		glassApplied = true;
+	}
+
+	/// <summary>Find the window slots again — used when a car's model was not loaded yet the first time around.</summary>
+	private void CollectWindows()
+	{
+		windows.Clear();
+		foreach ( var renderer in GetComponentsInChildren<ModelRenderer>() )
+		{
+			if ( renderer.Model is null || renderer.Model.IsError ) continue;
+			for ( var i = 0; i < renderer.Model.Materials.Length; i++ )
+			{
+				if ( IsWindow( renderer.Model.Materials[i] ) ) windows.Add( (renderer, i) );
+			}
+		}
 	}
 
 	private void UpdateAudio( float dt )
