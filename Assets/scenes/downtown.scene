@@ -69,7 +69,7 @@
           "__version": 2,
           "Flags": 0,
           "Name": "Spawn Points",
-          "Position": "-4531,5909.02148,-16.9568138",
+          "Position": "-4853.42676,5994.08984,-16.9568138",
           "Rotation": "0,0,0,1",
           "Scale": "1,1,1",
           "Tags": "",
@@ -86,7 +86,7 @@
               "__version": 2,
               "Flags": 0,
               "Name": "Spawn point",
-              "Position": "-69.7084961,9.07861328,0",
+              "Position": "0.659179688,9.07861328,0",
               "Rotation": "0,0,0.707106769,0.707106769",
               "Scale": "1,1,1",
               "Tags": "",
@@ -104,7 +104,7 @@
               "__version": 2,
               "Flags": 0,
               "Name": "Spawn point (1)",
-              "Position": "52.340332,12.456543,0",
+              "Position": "66.2070312,12.456543,0",
               "Rotation": "0,0,0.707106829,0.707106769",
               "Scale": "1,1,1",
               "Tags": "",
@@ -988,7 +988,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "a7105cc4-d058-4e8b-a925-9bcf09f711ea",
+                    "Id": "c091f99f-a9d9-4000-bb9a-c0d8acda45d3",
                     "Path": "super_computer.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -1015,7 +1015,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "a7105cc4-d058-4e8b-a925-9bcf09f711ea",
+                    "Id": "c091f99f-a9d9-4000-bb9a-c0d8acda45d3",
                     "Path": "super_computer.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -1043,7 +1043,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "a7105cc4-d058-4e8b-a925-9bcf09f711ea",
+                    "Id": "c091f99f-a9d9-4000-bb9a-c0d8acda45d3",
                     "Path": "super_computer.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -1150,492 +1150,7 @@
           "NetworkTransmit": true,
           "OwnerTransfer": 1,
           "Components": [],
-          "Children": [
-            {
-              "__guid": "fa0b3ceb-2a05-48b6-b435-0c0d77ba0b78",
-              "__version": 2,
-              "Flags": 0,
-              "Name": "wooden_door_01d",
-              "Position": "0,0,0",
-              "Rotation": "0,0,0,1",
-              "Scale": "1,1,1",
-              "Tags": "",
-              "Enabled": true,
-              "NetworkMode": 2,
-              "NetworkFlags": 0,
-              "NetworkOrphaned": 0,
-              "NetworkTransmit": true,
-              "OwnerTransfer": 1,
-              "Components": [
-                {
-                  "__type": "Sandbox.Prop",
-                  "__guid": "6ab3efe6-b109-44d8-a6d4-67cfe8c616b2",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "BodyGroups": 18446744073709551615,
-                  "Health": 0,
-                  "IsStatic": true,
-                  "MaterialGroup": null,
-                  "Model": {
-                    "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnGibsCreated": null,
-                  "OnPropBreak": null,
-                  "OnPropTakeDamage": null,
-                  "StartAsleep": false,
-                  "Tint": "1,1,1,1"
-                },
-                {
-                  "__type": "Sandbox.Mapping.Door",
-                  "__guid": "46ffbf21-5c9f-4630-a0af-d6428bd464bb",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "AnimationCurve": [
-                    {
-                      "x": 0,
-                      "y": 0,
-                      "in": 0,
-                      "out": 0,
-                      "mode": "Mirrored"
-                    },
-                    {
-                      "x": 1,
-                      "y": 1,
-                      "in": 0,
-                      "out": 0,
-                      "mode": "Mirrored"
-                    }
-                  ],
-                  "AutoClose": true,
-                  "AutoCloseDelay": 4,
-                  "CloseFinishedSound": null,
-                  "CloseSound": null,
-                  "CloseTooltipDescription": "",
-                  "CloseTooltipIcon": "touch_app",
-                  "CloseTooltipTitle": "Close",
-                  "IsLocked": false,
-                  "IsUsable": true,
-                  "LinkedDoor": null,
-                  "LockedSound": null,
-                  "LockedTooltipDescription": "",
-                  "LockedTooltipIcon": "lock",
-                  "LockedTooltipTitle": "Locked",
-                  "Mode": "Rotating",
-                  "OnClose": null,
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnOpen": null,
-                  "OpenAwayFromPlayer": true,
-                  "OpenFinishedSound": null,
-                  "OpenSound": null,
-                  "OpenTooltipDescription": "",
-                  "OpenTooltipIcon": "touch_app",
-                  "OpenTooltipTitle": "Open",
-                  "Pivot": null,
-                  "SlideOffset": "0,0,100",
-                  "Speed": 100,
-                  "StartOpen": false,
-                  "TargetAngle": 90
-                },
-                {
-                  "__type": "Sandbox.ModelRenderer",
-                  "__guid": "93de9c67-3d72-4b69-9fa3-de796d485afd",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "BodyGroups": 18446744073709551615,
-                  "CreateAttachments": false,
-                  "LodOverride": null,
-                  "MaterialGroup": null,
-                  "MaterialOverride": null,
-                  "Materials": null,
-                  "Model": {
-                    "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "RenderOptions": {
-                    "GameLayer": true,
-                    "OverlayLayer": false,
-                    "BloomLayer": false,
-                    "AfterUILayer": false
-                  },
-                  "RenderType": "On",
-                  "Tint": "1,1,1,1"
-                },
-                {
-                  "__type": "Sandbox.ModelCollider",
-                  "__guid": "a04fef48-6d96-4835-a1e2-91df8f829b0d",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "ColliderFlags": 0,
-                  "Elasticity": null,
-                  "Friction": null,
-                  "IsTrigger": false,
-                  "Model": {
-                    "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnObjectTriggerEnter": null,
-                  "OnObjectTriggerExit": null,
-                  "OnTriggerEnter": null,
-                  "OnTriggerExit": null,
-                  "RollingResistance": null,
-                  "Static": true,
-                  "Surface": null,
-                  "SurfaceVelocity": "0,0,0"
-                }
-              ],
-              "Children": []
-            },
-            {
-              "__guid": "0712190d-97b5-45f0-be26-85bf0d1227cd",
-              "__version": 2,
-              "Flags": 0,
-              "Name": "wooden_door_01a",
-              "Position": "-2000.41504,-2265.91846,16",
-              "Rotation": "0,0,0.707106709,0.707106769",
-              "Scale": "1,1,1",
-              "Tags": "",
-              "Enabled": true,
-              "NetworkMode": 2,
-              "NetworkFlags": 0,
-              "NetworkOrphaned": 0,
-              "NetworkTransmit": true,
-              "OwnerTransfer": 1,
-              "Components": [
-                {
-                  "__type": "Sandbox.Prop",
-                  "__guid": "ae5f09bb-df78-4869-9b95-0e725cc7de46",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "BodyGroups": 18446744073709551615,
-                  "Health": 0,
-                  "IsStatic": true,
-                  "MaterialGroup": null,
-                  "Model": {
-                    "Id": "304376b8-4765-4b3d-8ba1-b0f5eb558418",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnGibsCreated": null,
-                  "OnPropBreak": null,
-                  "OnPropTakeDamage": null,
-                  "StartAsleep": false,
-                  "Tint": "1,1,1,1"
-                },
-                {
-                  "__type": "Sandbox.Mapping.Door",
-                  "__guid": "c8078c37-5d48-43d6-af64-b8cd30af7053",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "AnimationCurve": [
-                    {
-                      "x": 0,
-                      "y": 0,
-                      "in": 0,
-                      "out": 0,
-                      "mode": "Mirrored"
-                    },
-                    {
-                      "x": 1,
-                      "y": 1,
-                      "in": 0,
-                      "out": 0,
-                      "mode": "Mirrored"
-                    }
-                  ],
-                  "AutoClose": true,
-                  "AutoCloseDelay": 4,
-                  "CloseFinishedSound": null,
-                  "CloseSound": null,
-                  "CloseTooltipDescription": "",
-                  "CloseTooltipIcon": "touch_app",
-                  "CloseTooltipTitle": "Close",
-                  "IsLocked": false,
-                  "IsUsable": true,
-                  "LinkedDoor": {
-                    "_type": "component",
-                    "component_id": "89cecd8c-fea7-46fd-aabe-b8e784595a64",
-                    "go": "a978b53c-caa0-43a8-9fde-3bf71052699c",
-                    "component_type": "Door"
-                  },
-                  "LockedSound": null,
-                  "LockedTooltipDescription": "",
-                  "LockedTooltipIcon": "lock",
-                  "LockedTooltipTitle": "Locked",
-                  "Mode": "Rotating",
-                  "OnClose": null,
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnOpen": null,
-                  "OpenAwayFromPlayer": true,
-                  "OpenFinishedSound": null,
-                  "OpenSound": null,
-                  "OpenTooltipDescription": "",
-                  "OpenTooltipIcon": "touch_app",
-                  "OpenTooltipTitle": "Open",
-                  "Pivot": null,
-                  "SlideOffset": "0,0,100",
-                  "Speed": 100,
-                  "StartOpen": false,
-                  "TargetAngle": 90
-                },
-                {
-                  "__type": "Sandbox.ModelRenderer",
-                  "__guid": "9d3f5fec-ebbd-41a0-a910-dd6f9052dfc3",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "BodyGroups": 18446744073709551615,
-                  "CreateAttachments": false,
-                  "LodOverride": null,
-                  "MaterialGroup": null,
-                  "MaterialOverride": null,
-                  "Materials": null,
-                  "Model": {
-                    "Id": "304376b8-4765-4b3d-8ba1-b0f5eb558418",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "RenderOptions": {
-                    "GameLayer": true,
-                    "OverlayLayer": false,
-                    "BloomLayer": false,
-                    "AfterUILayer": false
-                  },
-                  "RenderType": "On",
-                  "Tint": "1,1,1,1"
-                },
-                {
-                  "__type": "Sandbox.ModelCollider",
-                  "__guid": "07e7de37-976c-492a-8bd7-d2212f534a9d",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "ColliderFlags": 0,
-                  "Elasticity": null,
-                  "Friction": null,
-                  "IsTrigger": false,
-                  "Model": {
-                    "Id": "304376b8-4765-4b3d-8ba1-b0f5eb558418",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnObjectTriggerEnter": null,
-                  "OnObjectTriggerExit": null,
-                  "OnTriggerEnter": null,
-                  "OnTriggerExit": null,
-                  "RollingResistance": null,
-                  "Static": true,
-                  "Surface": null,
-                  "SurfaceVelocity": "0,0,0"
-                }
-              ],
-              "Children": []
-            },
-            {
-              "__guid": "a978b53c-caa0-43a8-9fde-3bf71052699c",
-              "__version": 2,
-              "Flags": 0,
-              "Name": "wooden_door_01a",
-              "Position": "-1906.26477,-2264.52588,15.9999924",
-              "Rotation": "0,0,-0.707106769,0.707106769",
-              "Scale": "1,1,1",
-              "Tags": "",
-              "Enabled": true,
-              "NetworkMode": 2,
-              "NetworkFlags": 0,
-              "NetworkOrphaned": 0,
-              "NetworkTransmit": true,
-              "OwnerTransfer": 1,
-              "Components": [
-                {
-                  "__type": "Sandbox.Prop",
-                  "__guid": "42d7536c-8d89-4fd8-bcfc-25e837c0f210",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "BodyGroups": 18446744073709551615,
-                  "Health": 0,
-                  "IsStatic": true,
-                  "MaterialGroup": null,
-                  "Model": {
-                    "Id": "304376b8-4765-4b3d-8ba1-b0f5eb558418",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnGibsCreated": null,
-                  "OnPropBreak": null,
-                  "OnPropTakeDamage": null,
-                  "StartAsleep": false,
-                  "Tint": "1,1,1,1"
-                },
-                {
-                  "__type": "Sandbox.Mapping.Door",
-                  "__guid": "89cecd8c-fea7-46fd-aabe-b8e784595a64",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "AnimationCurve": [
-                    {
-                      "x": 0,
-                      "y": 0,
-                      "in": 0,
-                      "out": 0,
-                      "mode": "Mirrored"
-                    },
-                    {
-                      "x": 1,
-                      "y": 1,
-                      "in": 0,
-                      "out": 0,
-                      "mode": "Mirrored"
-                    }
-                  ],
-                  "AutoClose": true,
-                  "AutoCloseDelay": 4,
-                  "CloseFinishedSound": null,
-                  "CloseSound": null,
-                  "CloseTooltipDescription": "",
-                  "CloseTooltipIcon": "touch_app",
-                  "CloseTooltipTitle": "Close",
-                  "IsLocked": false,
-                  "IsUsable": true,
-                  "LinkedDoor": {
-                    "_type": "component",
-                    "component_id": "c8078c37-5d48-43d6-af64-b8cd30af7053",
-                    "go": "0712190d-97b5-45f0-be26-85bf0d1227cd",
-                    "component_type": "Door"
-                  },
-                  "LockedSound": null,
-                  "LockedTooltipDescription": "",
-                  "LockedTooltipIcon": "lock",
-                  "LockedTooltipTitle": "Locked",
-                  "Mode": "Rotating",
-                  "OnClose": null,
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnOpen": null,
-                  "OpenAwayFromPlayer": true,
-                  "OpenFinishedSound": null,
-                  "OpenSound": null,
-                  "OpenTooltipDescription": "",
-                  "OpenTooltipIcon": "touch_app",
-                  "OpenTooltipTitle": "Open",
-                  "Pivot": null,
-                  "SlideOffset": "0,0,100",
-                  "Speed": 100,
-                  "StartOpen": false,
-                  "TargetAngle": 90
-                },
-                {
-                  "__type": "Sandbox.ModelRenderer",
-                  "__guid": "f88b10b9-9d10-4b11-af34-a3c55dd900d0",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "BodyGroups": 18446744073709551615,
-                  "CreateAttachments": false,
-                  "LodOverride": null,
-                  "MaterialGroup": null,
-                  "MaterialOverride": null,
-                  "Materials": null,
-                  "Model": {
-                    "Id": "304376b8-4765-4b3d-8ba1-b0f5eb558418",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "RenderOptions": {
-                    "GameLayer": true,
-                    "OverlayLayer": false,
-                    "BloomLayer": false,
-                    "AfterUILayer": false
-                  },
-                  "RenderType": "On",
-                  "Tint": "1,1,1,1"
-                },
-                {
-                  "__type": "Sandbox.ModelCollider",
-                  "__guid": "486379fe-7493-420e-b3a2-4d121075baf0",
-                  "__enabled": true,
-                  "Flags": 0,
-                  "ColliderFlags": 0,
-                  "Elasticity": null,
-                  "Friction": null,
-                  "IsTrigger": false,
-                  "Model": {
-                    "Id": "304376b8-4765-4b3d-8ba1-b0f5eb558418",
-                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
-                  },
-                  "OnComponentDestroy": null,
-                  "OnComponentDisabled": null,
-                  "OnComponentEnabled": null,
-                  "OnComponentFixedUpdate": null,
-                  "OnComponentStart": null,
-                  "OnComponentUpdate": null,
-                  "OnObjectTriggerEnter": null,
-                  "OnObjectTriggerExit": null,
-                  "OnTriggerEnter": null,
-                  "OnTriggerExit": null,
-                  "RollingResistance": null,
-                  "Static": true,
-                  "Surface": null,
-                  "SurfaceVelocity": "0,0,0"
-                }
-              ],
-              "Children": []
-            }
-          ]
+          "Children": []
         },
         {
           "__guid": "056e04e7-28c1-4199-ab03-60de40a7dae7",
@@ -2057,6 +1572,26 @@
                     },
                     "Property": "Scale",
                     "Value": "3.34399199,0.360397726,0.5"
+                  },
+                  {
+                    "Target": {
+                      "Type": "Component",
+                      "IdValue": "0d40e868-5221-4746-960b-9889e8fab447"
+                    },
+                    "Property": "DefaultOwner",
+                    "Value": {
+                      "Kind": "Public",
+                      "SteamId": 0,
+                      "OrgId": "",
+                      "IsNobody": false,
+                      "IsPlayer": false,
+                      "IsOrganization": false,
+                      "IsPublic": true,
+                      "IsGovernment": false,
+                      "IsOwned": true,
+                      "Key": "public",
+                      "DisplayName": "The public"
+                    }
                   }
                 ],
                 "MovedObjects": []
@@ -2070,12 +1605,203 @@
                 "2d98cacf-a11a-437c-889e-671f6dcdec18": "67ec193b-9c42-442b-8270-453770eb4b0b",
                 "3e0a2045-fc51-47d5-8145-c0789bfc88fe": "9ca6e7d7-339a-4c17-8e1d-57ee1f40d87a",
                 "bcb8a7c5-8c28-4f6a-83c1-c977de7ce53a": "7140c197-d70b-4e29-92d3-027a49101e84",
-                "283748db-2586-4770-8714-936fd2470456": "a461a923-4a52-4e57-80f0-0a6385b28267",
-                "5263b739-fead-4ff3-bf28-c2cc044f2c38": "44190e05-2198-4c18-b550-df814374861f",
                 "79a405e4-5ea9-4c61-8b24-78e16db44883": "1c2e3eb3-e40e-45e6-bc7c-ff3f6e81b27c",
-                "65e4a5b2-bdd2-4af7-9b89-f12652630155": "85cf30c8-d7e1-44a4-98fe-ded4766bab2a",
+                "5263b739-fead-4ff3-bf28-c2cc044f2c38": "44190e05-2198-4c18-b550-df814374861f",
+                "f0939051-de68-43d3-9e68-6ce1fc497213": "31185b0e-b2f8-4cd7-9d4c-eae03897f263",
                 "34bf73ec-5c84-47a0-a28e-95ef5c11224b": "4634cd5f-3737-44f0-ace7-b3826081e7b7",
-                "f0939051-de68-43d3-9e68-6ce1fc497213": "31185b0e-b2f8-4cd7-9d4c-eae03897f263"
+                "65e4a5b2-bdd2-4af7-9b89-f12652630155": "85cf30c8-d7e1-44a4-98fe-ded4766bab2a",
+                "0d40e868-5221-4746-960b-9889e8fab447": "06627616-17e3-86dc-9c19-89ca3c7f80da",
+                "283748db-2586-4770-8714-936fd2470456": "a461a923-4a52-4e57-80f0-0a6385b28267"
+              }
+            },
+            {
+              "__guid": "6f6e16b6-594c-4fd7-9569-5675844ae3b3",
+              "__version": 2,
+              "__Prefab": {
+                "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+                "Path": "security/camera.prefab"
+              },
+              "__PrefabInstancePatch": {
+                "AddedObjects": [],
+                "RemovedObjects": [],
+                "PropertyOverrides": [
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Position",
+                    "Value": "-441.405426,154.793289,58.602684"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Rotation",
+                    "Value": "-0.0557155758,-0.118037567,0.42320174,-0.896584213"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Scale",
+                    "Value": "3.34399199,0.360397726,0.5"
+                  }
+                ],
+                "MovedObjects": []
+              },
+              "__PrefabIdToInstanceId": {
+                "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "6f6e16b6-594c-4fd7-9569-5675844ae3b3",
+                "c9567e43-d3fe-477e-a261-d921396c2d23": "a639f2aa-a83c-4cd9-93af-19be4dcc80c5",
+                "c4526fce-596e-4331-9816-32a671e4d93b": "659f93ab-5426-4070-9232-ac39923e7eb2",
+                "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "f63ef60f-1276-4d80-98a9-1646c2a44e50",
+                "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "d4dbc05d-77c2-4280-a6ea-aba29f1fa5ec",
+                "f42b025f-c24a-4d86-b543-1284c0989517": "8c99f90b-ed91-4f0d-b17f-ceea0b48e9f2",
+                "62263d32-fc91-43f5-9020-836ce7abedf9": "129144e0-ad39-4e1c-92bc-3d5e6c6d2e65",
+                "2cf02a53-c411-4032-8b2c-875bd43d433e": "a7c24bb8-325d-440d-84a4-56145842c657",
+                "cf2e3047-6914-4da4-9a5c-37b675792c80": "3385a394-25fa-4b57-b5a0-99b8878138eb",
+                "76156ece-a237-495c-9598-69a3c4c6a454": "26a3f704-a30b-444d-8790-26c096d75b68",
+                "b34b8f82-9907-4137-90f1-f49b8d6affa6": "1cab7121-fc80-41c5-992d-45c47e2f83a9",
+                "ad13592b-3687-4a7a-ac06-c3a68b073935": "35810473-60ff-49b6-beba-97252ef92281",
+                "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "a622d557-8f25-41ff-b333-3d23c3c63fe3",
+                "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "549ecc86-f164-4a4c-8416-fa321a6f5226",
+                "1d159a06-e23e-4af3-90d3-5a014345f915": "0624c330-ae9f-4d6d-94d9-7a6622e7fa3d",
+                "dc697170-e74a-4de8-8e02-e5365aff70e6": "8fe3be18-1b1a-4336-ad35-77d9447d3790",
+                "662b522c-e4ad-4cb5-be81-c1c608e599fb": "8a7e5f6d-384d-4b28-a04a-47e596885b47"
+              }
+            },
+            {
+              "__guid": "9cd195a9-5dd7-4b09-9df2-4425294edeee",
+              "__version": 2,
+              "__Prefab": {
+                "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+                "Path": "security/camera.prefab"
+              },
+              "__PrefabInstancePatch": {
+                "AddedObjects": [],
+                "RemovedObjects": [],
+                "PropertyOverrides": [
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Name",
+                    "Value": "camera (1)"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Position",
+                    "Value": "-2568.43579,154.450638,57.7889709"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Rotation",
+                    "Value": "-0.0669872761,-0.24999997,0.249999925,-0.933012605"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Scale",
+                    "Value": "3.34399199,0.360397726,0.5"
+                  }
+                ],
+                "MovedObjects": []
+              },
+              "__PrefabIdToInstanceId": {
+                "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "9cd195a9-5dd7-4b09-9df2-4425294edeee",
+                "c9567e43-d3fe-477e-a261-d921396c2d23": "eef1341a-0480-4486-8151-d919673c5a0d",
+                "c4526fce-596e-4331-9816-32a671e4d93b": "b3ea3130-9b45-48a4-9e74-13407da3da13",
+                "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "620c9f72-cbd8-4f9d-86fa-1afa729a03f3",
+                "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "5ac7a5b6-6fc6-41c1-a38f-add920a1eee3",
+                "f42b025f-c24a-4d86-b543-1284c0989517": "f6e66205-5036-4058-9d6c-1cdcd8bc3ccd",
+                "62263d32-fc91-43f5-9020-836ce7abedf9": "debfee26-274a-47ad-8d6e-c67f5ac2dd3c",
+                "2cf02a53-c411-4032-8b2c-875bd43d433e": "fa77639a-aea7-4ad5-97d3-c8b0e2c0c112",
+                "cf2e3047-6914-4da4-9a5c-37b675792c80": "2cd96728-41ab-4b1f-9013-0c209267c2b3",
+                "76156ece-a237-495c-9598-69a3c4c6a454": "bf3a5612-fa9b-4e00-adcc-be4904e1e887",
+                "b34b8f82-9907-4137-90f1-f49b8d6affa6": "c3475043-23f4-4bdf-b5fb-3d63fee179b0",
+                "ad13592b-3687-4a7a-ac06-c3a68b073935": "89900eb4-a29d-4bf4-a7af-8533e57cf6ea",
+                "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "e351d887-795d-4500-b737-41499d9105ab",
+                "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "50c98d81-1f00-4d08-9de7-6ed927759435",
+                "1d159a06-e23e-4af3-90d3-5a014345f915": "91445c31-40c7-437a-8fef-64ca36862e44",
+                "dc697170-e74a-4de8-8e02-e5365aff70e6": "63157da2-5e36-4648-960f-7e42b4e0cd7a",
+                "662b522c-e4ad-4cb5-be81-c1c608e599fb": "19e6cd50-ee45-4ef0-80e0-867c93b36c2f"
+              }
+            },
+            {
+              "__guid": "a05d72cf-0fc2-4445-87eb-4427a626e3c2",
+              "__version": 2,
+              "__Prefab": {
+                "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
+                "Path": "security/camera.prefab"
+              },
+              "__PrefabInstancePatch": {
+                "AddedObjects": [],
+                "RemovedObjects": [],
+                "PropertyOverrides": [
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Name",
+                    "Value": "camera (2)"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Position",
+                    "Value": "-2676.25171,-144.574585,58.8502808"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Rotation",
+                    "Value": "-0.11307089,0.0652079284,0.858858705,0.495302528"
+                  },
+                  {
+                    "Target": {
+                      "Type": "GameObject",
+                      "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
+                    },
+                    "Property": "Scale",
+                    "Value": "3.34399199,0.360397726,0.5"
+                  }
+                ],
+                "MovedObjects": []
+              },
+              "__PrefabIdToInstanceId": {
+                "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "a05d72cf-0fc2-4445-87eb-4427a626e3c2",
+                "c9567e43-d3fe-477e-a261-d921396c2d23": "2cb209ed-9bb7-4937-8f11-a97d6cbe70fd",
+                "c4526fce-596e-4331-9816-32a671e4d93b": "a7142224-a773-4645-91c5-b1e60ff1fb1c",
+                "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "d35a9d23-142e-4073-a7c4-fa538daa0af3",
+                "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "d4081552-987a-42cd-9aa5-d1e061fbbc36",
+                "f42b025f-c24a-4d86-b543-1284c0989517": "8e508826-77d1-43bf-9239-5965ed601d58",
+                "62263d32-fc91-43f5-9020-836ce7abedf9": "03160978-683b-4cbd-b83d-1a368f3aa087",
+                "2cf02a53-c411-4032-8b2c-875bd43d433e": "f2ec716a-2f04-4669-82d8-0427acfdb84f",
+                "cf2e3047-6914-4da4-9a5c-37b675792c80": "b2c50f1c-ab92-4503-8661-31b1b651ad73",
+                "76156ece-a237-495c-9598-69a3c4c6a454": "bbb4679d-2315-4942-87af-358b30ed643b",
+                "b34b8f82-9907-4137-90f1-f49b8d6affa6": "241dd483-30a8-4726-ab71-0e656f6b0eb1",
+                "ad13592b-3687-4a7a-ac06-c3a68b073935": "a56576ef-6d2e-46a1-8e42-09d822770ec6",
+                "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "4091c38c-24a0-4d02-8298-84e87a393d3d",
+                "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "2a8b0800-0544-420a-afaf-1c884b4c4036",
+                "1d159a06-e23e-4af3-90d3-5a014345f915": "ab6ebf0e-8b06-4df9-b4dd-19ff2c2eeb7e",
+                "dc697170-e74a-4de8-8e02-e5365aff70e6": "55bd52ac-99a5-4c76-a0cc-39c467445f95",
+                "662b522c-e4ad-4cb5-be81-c1c608e599fb": "6f869213-b1ad-432b-b1a1-a88b8f3e8d2d"
               }
             },
             {
@@ -2256,324 +1982,276 @@
                   }
                 }
               ]
+            },
+            {
+              "__guid": "9baa28af-2202-46b1-8020-6d0fbd9d2c8c",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Weapons",
+              "Position": "523.6073,80.4448929,17.735508",
+              "Rotation": "0,-0,-0.70710665,-0.707106709",
+              "Scale": "3.34399199,0.360397726,0.5",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": [
+                {
+                  "__guid": "5b12a9e8-b442-43d2-a084-974d1666c5c8",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "8a248cda-a98d-4a5d-b53f-2e07b8bb1833",
+                    "Path": "weapons/mp5/mp5.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "3c948bf4-5353-443a-bb65-8f28584fed1b"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0,0,0,0.99999994"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "558f08b2-be5c-411e-990a-9984fbea59ea"
+                        },
+                        "Property": "StartAsleep",
+                        "Value": true
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "3c948bf4-5353-443a-bb65-8f28584fed1b": "5b12a9e8-b442-43d2-a084-974d1666c5c8",
+                    "4c0e80fa-adda-4379-9f2c-57d9fddc85f1": "22b79350-44b0-4493-a7d8-0adbcd6ea3f0",
+                    "8a4c24de-e11e-87bd-d360-9b1d1112a9d5": "5e0c1b2c-9658-4062-896a-cc9e60e89de2",
+                    "9b5d35ef-f22f-98ce-e471-ac2e2223bae6": "84d297b9-8aae-4472-981d-2cc5dc21b0fd",
+                    "67b82163-0cee-4cd9-a778-f311348de612": "cf6d44b3-c99d-400b-b4b0-3b3850233a9b",
+                    "45dbfc9d-3b70-4986-994e-905d4f1670ba": "9e4f662b-87ac-4fe4-99a1-a4ffc462c87b",
+                    "7f3b13cd-d00d-76ac-c25f-8a0c000198c4": "54da9b51-3cdb-4e8b-8ad7-239f54b24147",
+                    "558f08b2-be5c-411e-990a-9984fbea59ea": "99658d8e-0877-41e0-b882-d8a21dadf0d6",
+                    "5d1f91ab-beeb-548a-a03d-68eaeed96a02": "5612c656-21d9-433c-a49a-083325412b2c",
+                    "6e2a02bc-cffc-659b-b14e-79fbfff07b13": "9cbd5acc-59fd-49c1-b7cb-61b26bc2867a",
+                    "f0122cf0-28a8-48b5-aee8-1815d729ce56": "b57ae550-eed2-4d90-a12e-dc86c3556399"
+                  }
+                },
+                {
+                  "__guid": "ce1b2b48-aa9b-41da-a228-dd06191f52ec",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "b5c2ba30-6a35-48c1-9fcd-3ee0cb1a6b73",
+                    "Path": "weapons/shotgun/shotgun.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "a1b2c3d4-1111-4aaa-b111-111111111111"
+                        },
+                        "Property": "Position",
+                        "Value": "1.77587938,0.25781244,16.4493828"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "a1b2c3d4-1111-4aaa-b111-111111111111"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0,0,-2.98023224E-08,1"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "a1b2c3d4-5557-4aaa-b557-555555555557"
+                        },
+                        "Property": "StartAsleep",
+                        "Value": true
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "a1b2c3d4-1111-4aaa-b111-111111111111": "ce1b2b48-aa9b-41da-a228-dd06191f52ec",
+                    "da725ca9-1b64-40ba-a2c2-fad3776e75be": "8c8962ab-7adc-4edd-bd6a-b154fdbf7d00",
+                    "1eb69aed-5fa8-84fe-e606-3eb7bbb03f00": "e74005f3-53bb-4d0d-9454-37645a8259fd",
+                    "2fc7abfe-6fb9-95af-f717-4fc8ccc140e1": "89f43e15-1948-48a1-94ac-3d850d946a6f",
+                    "7fb5830f-d122-4e4e-b3aa-794988afa49d": "3ef619cc-1a26-4f69-a9a5-291afddc6394",
+                    "a1b2c3d4-2222-4aaa-b222-222222222222": "df2baf8e-6c1e-4010-93eb-1a384d345de0",
+                    "0da58fdc-4e97-73ed-d5f5-2da6aaa92edf": "dc9a0b29-2a2d-4884-9157-cf09ccda6266",
+                    "a1b2c3d4-5557-4aaa-b557-555555555557": "25caa6ca-e92a-42c7-845e-4ddbb6fa32d9",
+                    "eb836dba-2c75-51cb-b3d3-0be488700cbd": "75546716-bac9-454c-9b9c-535017fb1dbf",
+                    "fc947ecb-3d86-62dc-c4e4-1cf599881dce": "22854808-277d-4ade-8023-e8fe6e6d0f55",
+                    "5ce09497-34e6-4c8c-bba2-5ab1647be462": "17f9d200-6636-4e51-b9fe-339f3860757b"
+                  }
+                },
+                {
+                  "__guid": "79202154-be13-4326-9cb3-85a97e5e06bf",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "f6bee006-4c77-471f-8d18-7e82ed4d8cba",
+                    "Path": "weapons/m4a1/m4a1.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "3c948bf4-5353-443a-bb65-8f28584fed1b"
+                        },
+                        "Property": "Position",
+                        "Value": "-2.08837938,0.11767602,35.4889603"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "3c948bf4-5353-443a-bb65-8f28584fed1b"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0,0,0,0.99999994"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "0fe8c7ca-9ef3-4636-838b-6ccbd0aafe5a"
+                        },
+                        "Property": "StartAsleep",
+                        "Value": true
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "3c948bf4-5353-443a-bb65-8f28584fed1b": "79202154-be13-4326-9cb3-85a97e5e06bf",
+                    "e7dc7a22-b5a7-41c9-9aa9-ed48c0a053e8": "f443e639-dea0-4cf6-aa93-4adeb7bcb404",
+                    "2b1abe66-f9eb-85ad-dded-2b8c04e497c2": "ea9f18c6-ec8b-43c1-8491-518ef082beda",
+                    "3c2bcf77-0afc-96be-eefe-3c9d15f5a8d3": "53dd21db-1a12-4b38-9bf6-9269e5cf110e",
+                    "447eeac7-fc8e-4b12-90ba-cdfca7ba03b6": "14a8e192-7ba0-43e5-b0f3-921b1a7a7942",
+                    "45dbfc9d-3b70-4986-994e-905d4f1670ba": "234a35ab-7c70-442d-8646-0f415272290e",
+                    "1a0fad55-e8da-74fc-ccdc-1a7bf3d386b1": "cdb8ff0b-6089-4cb8-936b-60079bbf383e",
+                    "0fe8c7ca-9ef3-4636-838b-6ccbd0aafe5a": "47051c96-ad9e-441d-aed4-b8b3fcab8f03",
+                    "f8ed8b33-c6b8-52da-aaba-fe59d1b164f9": "e76f4af4-263e-46f7-a188-37f85133afa5",
+                    "09fe9c44-d7c9-63eb-bbcb-0f6ae2c275a0": "15d177ed-a23c-4ba2-ab78-618530741039",
+                    "5561e234-96e4-41e5-8009-fbc43619a800": "acddddfc-08c3-4060-a5c9-2590b3ea2350"
+                  }
+                },
+                {
+                  "__guid": "26b25949-dd1c-4653-b1b5-41a0d55656d5",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "89040c57-e6ba-4f13-a0a3-1c15bdedd230",
+                    "Path": "weapons/glock/glock.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "3c948bf4-5353-443a-bb65-8f28584fed1b"
+                        },
+                        "Property": "Position",
+                        "Value": "61.8545074,32.0195351,-2.44749117"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "3c948bf4-5353-443a-bb65-8f28584fed1b"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0.701057315,-0.0922959447,-0.0922960043,0.701057434"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "2a84405e-f4db-4117-a46a-72baed362953"
+                        },
+                        "Property": "StartAsleep",
+                        "Value": true
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "3c948bf4-5353-443a-bb65-8f28584fed1b": "26b25949-dd1c-4653-b1b5-41a0d55656d5",
+                    "51cd1382-f0cf-4c2c-b0d4-1f70dd48e24f": "3d892713-0eee-4725-a3ff-b37338ce58bf",
+                    "d4e5f6a7-b8c9-0123-def0-234567890123": "9cf8f1d0-e55d-454b-82e2-32f7b0bf9956",
+                    "e5f6a7b8-c9d0-1234-ef01-345678901234": "a466fb0c-b821-4d27-a076-e26fe79c67d5",
+                    "3a5883df-a493-430a-b90b-24307cda87c2": "b9714658-9421-4af4-a691-ae0cd3c398ae",
+                    "45dbfc9d-3b70-4986-994e-905d4f1670ba": "d5e1ccc2-4246-4329-8ead-cf901b072667",
+                    "c3d4e5f6-a7b8-9012-cdef-123456789012": "80636761-600c-4297-9e1e-2b2ba1c951d2",
+                    "2a84405e-f4db-4117-a46a-72baed362953": "b8113f19-7dd3-4bb9-8897-f14f0c42bc8c",
+                    "a1b2c3d4-e5f6-7890-abcd-ef1234567890": "89786867-3d77-4ccb-a8a2-7aa74349170f",
+                    "b2c3d4e5-f6a7-8901-bcde-f12345678901": "d833d0a6-0354-4328-9eea-9517db4a35dc",
+                    "7486e699-37eb-4ac7-b5f5-8009ebef53e8": "42d3327f-fc84-4af9-b4fe-d5ad623ecf9c"
+                  }
+                }
+              ]
+            },
+            {
+              "__guid": "4c6a13f3-b641-4c4e-a538-38911df7c83c",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Weapons Holder",
+              "Position": "532.396729,81.1399918,28.2390137",
+              "Rotation": "0,0,-1,-4.37113883E-08",
+              "Scale": "0.146405444,0.360397726,0.631086767",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.ModelRenderer",
+                  "__guid": "bc12cbc6-aabf-4225-8831-866cdc041102",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "CreateAttachments": false,
+                  "LodOverride": null,
+                  "MaterialGroup": null,
+                  "MaterialOverride": null,
+                  "Materials": null,
+                  "Model": {
+                    "Id": "8a84e5a0-01f8-0000-f0db-b088f8010000",
+                    "Path": "models/dev/box.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "RenderType": "On",
+                  "Tint": "0.02326,0.02326,0.02326,1"
+                }
+              ],
+              "Children": []
             }
           ]
-        },
-        {
-          "__guid": "34d32165-5654-44f7-a5cb-74c2edf330e6",
-          "__version": 2,
-          "Flags": 0,
-          "Name": "wooden_door_01d",
-          "Position": "9563.74707,-12557.8027,-76",
-          "Rotation": "0,0,-1,-4.37113883E-08",
-          "Scale": "2,2,2",
-          "Tags": "",
-          "Enabled": true,
-          "NetworkMode": 2,
-          "NetworkFlags": 0,
-          "NetworkOrphaned": 0,
-          "NetworkTransmit": true,
-          "OwnerTransfer": 1,
-          "Components": [
-            {
-              "__type": "Sandbox.Prop",
-              "__guid": "a48a0eb4-7791-46fa-92e7-664ae20c07dd",
-              "__enabled": true,
-              "Flags": 0,
-              "BodyGroups": 18446744073709551615,
-              "Health": 0,
-              "IsStatic": true,
-              "MaterialGroup": null,
-              "Model": {
-                "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-              },
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "OnGibsCreated": null,
-              "OnPropBreak": null,
-              "OnPropTakeDamage": null,
-              "StartAsleep": false,
-              "Tint": "1,1,1,1"
-            },
-            {
-              "__type": "Sandbox.Mapping.Door",
-              "__guid": "b93f6d54-e3d4-4191-9c85-17d0d67f9d5b",
-              "__enabled": true,
-              "Flags": 0,
-              "AnimationCurve": [
-                {
-                  "x": 0,
-                  "y": 0,
-                  "in": 0,
-                  "out": 0,
-                  "mode": "Mirrored"
-                },
-                {
-                  "x": 1,
-                  "y": 1,
-                  "in": 0,
-                  "out": 0,
-                  "mode": "Mirrored"
-                }
-              ],
-              "AutoClose": true,
-              "AutoCloseDelay": 8,
-              "CloseFinishedSound": null,
-              "CloseSound": null,
-              "CloseTooltipDescription": "",
-              "CloseTooltipIcon": "touch_app",
-              "CloseTooltipTitle": "Close",
-              "IsLocked": false,
-              "IsUsable": true,
-              "LinkedDoor": null,
-              "LockedSound": null,
-              "LockedTooltipDescription": "",
-              "LockedTooltipIcon": "lock",
-              "LockedTooltipTitle": "Locked",
-              "Mode": "Rotating",
-              "OnClose": null,
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "OnOpen": null,
-              "OpenAwayFromPlayer": true,
-              "OpenFinishedSound": null,
-              "OpenSound": null,
-              "OpenTooltipDescription": "",
-              "OpenTooltipIcon": "touch_app",
-              "OpenTooltipTitle": "Open",
-              "Pivot": null,
-              "SlideOffset": "0,0,100",
-              "Speed": 100,
-              "StartOpen": false,
-              "TargetAngle": 90
-            },
-            {
-              "__type": "Sandbox.ModelRenderer",
-              "__guid": "5b981067-2acb-4f79-a7eb-e8a1a5e521f3",
-              "__enabled": true,
-              "Flags": 0,
-              "BodyGroups": 18446744073709551615,
-              "CreateAttachments": false,
-              "LodOverride": null,
-              "MaterialGroup": null,
-              "MaterialOverride": null,
-              "Materials": null,
-              "Model": {
-                "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-              },
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "RenderOptions": {
-                "GameLayer": true,
-                "OverlayLayer": false,
-                "BloomLayer": false,
-                "AfterUILayer": false
-              },
-              "RenderType": "On",
-              "Tint": "1,1,1,1"
-            },
-            {
-              "__type": "Sandbox.ModelCollider",
-              "__guid": "3f5cea3e-cbc7-4d9b-b520-1d4c52bd54ca",
-              "__enabled": true,
-              "Flags": 0,
-              "ColliderFlags": 0,
-              "Elasticity": null,
-              "Friction": null,
-              "IsTrigger": false,
-              "Model": {
-                "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-              },
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "OnObjectTriggerEnter": null,
-              "OnObjectTriggerExit": null,
-              "OnTriggerEnter": null,
-              "OnTriggerExit": null,
-              "RollingResistance": null,
-              "Static": true,
-              "Surface": null,
-              "SurfaceVelocity": "0,0,0"
-            }
-          ],
-          "Children": []
-        },
-        {
-          "__guid": "5f3cee46-5435-404c-ad21-3ca9bd457605",
-          "__version": 2,
-          "Flags": 0,
-          "Name": "wooden_door_01d (1)",
-          "Position": "9964.05078,-12558.0498,-76.0000076",
-          "Rotation": "0,0,-1,-4.37113883E-08",
-          "Scale": "2,2,2",
-          "Tags": "",
-          "Enabled": true,
-          "NetworkMode": 2,
-          "NetworkFlags": 0,
-          "NetworkOrphaned": 0,
-          "NetworkTransmit": true,
-          "OwnerTransfer": 1,
-          "Components": [
-            {
-              "__type": "Sandbox.Prop",
-              "__guid": "c7201e5f-3ec4-40d2-b0cc-cb8d64bed7de",
-              "__enabled": true,
-              "Flags": 0,
-              "BodyGroups": 18446744073709551615,
-              "Health": 0,
-              "IsStatic": true,
-              "MaterialGroup": null,
-              "Model": {
-                "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-              },
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "OnGibsCreated": null,
-              "OnPropBreak": null,
-              "OnPropTakeDamage": null,
-              "StartAsleep": false,
-              "Tint": "1,1,1,1"
-            },
-            {
-              "__type": "Sandbox.Mapping.Door",
-              "__guid": "599d2244-ff80-4d57-8a36-c3b60190cb42",
-              "__enabled": true,
-              "Flags": 0,
-              "AnimationCurve": [
-                {
-                  "x": 0,
-                  "y": 0,
-                  "in": 0,
-                  "out": 0,
-                  "mode": "Mirrored"
-                },
-                {
-                  "x": 1,
-                  "y": 1,
-                  "in": 0,
-                  "out": 0,
-                  "mode": "Mirrored"
-                }
-              ],
-              "AutoClose": true,
-              "AutoCloseDelay": 8,
-              "CloseFinishedSound": null,
-              "CloseSound": null,
-              "CloseTooltipDescription": "",
-              "CloseTooltipIcon": "touch_app",
-              "CloseTooltipTitle": "Close",
-              "IsLocked": false,
-              "IsUsable": true,
-              "LinkedDoor": null,
-              "LockedSound": null,
-              "LockedTooltipDescription": "",
-              "LockedTooltipIcon": "lock",
-              "LockedTooltipTitle": "Locked",
-              "Mode": "Rotating",
-              "OnClose": null,
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "OnOpen": null,
-              "OpenAwayFromPlayer": true,
-              "OpenFinishedSound": null,
-              "OpenSound": null,
-              "OpenTooltipDescription": "",
-              "OpenTooltipIcon": "touch_app",
-              "OpenTooltipTitle": "Open",
-              "Pivot": null,
-              "SlideOffset": "0,0,100",
-              "Speed": 100,
-              "StartOpen": false,
-              "TargetAngle": 90
-            },
-            {
-              "__type": "Sandbox.ModelRenderer",
-              "__guid": "5dc25aae-bba5-47ab-a12c-540aecef50e1",
-              "__enabled": true,
-              "Flags": 0,
-              "BodyGroups": 18446744073709551615,
-              "CreateAttachments": false,
-              "LodOverride": null,
-              "MaterialGroup": null,
-              "MaterialOverride": null,
-              "Materials": null,
-              "Model": {
-                "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-              },
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "RenderOptions": {
-                "GameLayer": true,
-                "OverlayLayer": false,
-                "BloomLayer": false,
-                "AfterUILayer": false
-              },
-              "RenderType": "On",
-              "Tint": "1,1,1,1"
-            },
-            {
-              "__type": "Sandbox.ModelCollider",
-              "__guid": "f4841d7e-66e5-4dff-bc8f-9bc39b9a85ad",
-              "__enabled": true,
-              "Flags": 0,
-              "ColliderFlags": 0,
-              "Elasticity": null,
-              "Friction": null,
-              "IsTrigger": false,
-              "Model": {
-                "Id": "6cc1657c-9196-4fad-af74-643718719b7c",
-                "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
-              },
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "OnObjectTriggerEnter": null,
-              "OnObjectTriggerExit": null,
-              "OnTriggerEnter": null,
-              "OnTriggerExit": null,
-              "RollingResistance": null,
-              "Static": true,
-              "Surface": null,
-              "SurfaceVelocity": "0,0,0"
-            }
-          ],
-          "Children": []
         },
         {
           "__guid": "0099e968-461b-4845-a097-6db0daa6c8a4",
@@ -2617,14 +2295,6 @@
                 },
                 "Property": "Rotation",
                 "Value": "0,0,0,1"
-              },
-              {
-                "Target": {
-                  "Type": "Component",
-                  "IdValue": "2d014317-8f4c-4f68-8e3b-e59b5aa18e74"
-                },
-                "Property": "CombineStacksOnSort",
-                "Value": false
               }
             ],
             "MovedObjects": []
@@ -2644,21 +2314,6 @@
             "ef402c0f-c5db-5aac-97df-c225d9d7b094": "1b112a86-26da-4d8c-a250-d4b0872fd0ec",
             "46c2b40b-9f16-5f90-a721-a3e08bdfadb5": "30dc5055-b049-4e04-ab1c-42b917b6d428",
             "92f79cd7-5f88-5491-b4ff-09f5186e505e": "1cf0c37d-5f9b-4525-b221-b4ff70625cce",
-            "f64a4d10-43f3-5c1c-be8c-84e55104feb7": "0e189271-a49a-422f-a4f3-c9b14a9a2e18",
-            "7486f6dc-e2b5-5bb7-b272-e72681588ae0": "9c27e783-2a6c-47c7-bc13-90a579a9326e",
-            "55626be2-71b1-5e41-8b58-2748a106bf8d": "dbc46f28-3e02-4d34-93ab-1e1336754318",
-            "55319e1a-5cf9-5e22-b924-98cb070d4cb5": "18a81a0f-01cb-4c36-8608-cf1983098635",
-            "2d014317-8f4c-4f68-8e3b-e59b5aa18e74": "a83a4597-ad89-4a9a-bc62-9c68c0077dbe",
-            "0e49b7fd-8d41-426c-a42c-fedd5a0c95f1": "72c60fa4-55c7-4dd9-af1e-2158177219d5",
-            "e89ef0d3-d1c8-4172-8825-40cb67b3f0b1": "401343c9-ba11-497d-bc6f-e5538875b74b",
-            "4ea7243b-3e97-5b81-9839-9c96078d69d3": "ce0cb5a2-794d-416f-9306-58863d98d752",
-            "57f61704-6257-5970-ae0f-d0bdb3652bcf": "852c5d2f-c155-4e07-b81e-a8d17ec7c605",
-            "4d663a5a-375d-5583-8cc0-f81d8b2a6f91": "dea976d2-1adf-410f-9b7a-06132dca1758",
-            "46524a25-1253-50cc-9a7b-9f8d21d1001a": "e4748217-bf21-4eba-bf37-d583b828d448",
-            "d20f643c-9002-574f-a1e3-a1f908e5018e": "43a9c639-6686-4151-975e-b9ca7d071fb4",
-            "4a44c9e8-098f-5477-875f-d0173757ad6e": "b116e43d-8b04-4f8c-98cc-f2fc261490c9",
-            "1f043509-896f-5cf1-97ef-cfd81e81f6b7": "e6d9ec58-b1fc-4fbc-929b-4cf466e2bca1",
-            "d1846d47-fe5f-507f-92de-f63ef46cd6d6": "8ea2c8e5-9b6f-4b44-98a8-dc38da41d674",
             "d837bb1c-4479-509d-a2df-8b72292f872a": "8ab20843-f5e8-4922-b904-49bf4be6ac1a",
             "d84af508-386e-5157-8a05-d2336ef4bdad": "93c0badf-f987-4482-b9e4-5fb1efe3c487",
             "107f5bda-eb98-5425-b896-f2498c403176": "44dcb2e0-9e81-4b45-91af-1be7548bfbb3",
@@ -2684,283 +2339,951 @@
             "71930d07-79ba-585e-bed2-7603dc6e5182": "44cd64d3-39d4-4475-9181-35f69eaeb487",
             "754dd3b4-3232-5c31-9305-65013391db31": "ea326449-edb2-46c8-9ede-2c6ff12f0fd7",
             "1ca363c5-195a-5c82-9054-509bd1b907bf": "c6428268-b2e1-4ed0-b4b5-1d569fdddf41",
-            "092830e1-e86a-51dc-b78a-d6e95c1ed065": "baffc46a-a8ab-456d-b187-8756a8e08334"
+            "092830e1-e86a-51dc-b78a-d6e95c1ed065": "baffc46a-a8ab-456d-b187-8756a8e08334",
+            "f64a4d10-43f3-5c1c-be8c-84e55104feb7": "0e189271-a49a-422f-a4f3-c9b14a9a2e18",
+            "7486f6dc-e2b5-5bb7-b272-e72681588ae0": "9c27e783-2a6c-47c7-bc13-90a579a9326e",
+            "55626be2-71b1-5e41-8b58-2748a106bf8d": "dbc46f28-3e02-4d34-93ab-1e1336754318",
+            "55319e1a-5cf9-5e22-b924-98cb070d4cb5": "18a81a0f-01cb-4c36-8608-cf1983098635",
+            "2d014317-8f4c-4f68-8e3b-e59b5aa18e74": "a83a4597-ad89-4a9a-bc62-9c68c0077dbe",
+            "0e49b7fd-8d41-426c-a42c-fedd5a0c95f1": "72c60fa4-55c7-4dd9-af1e-2158177219d5",
+            "e89ef0d3-d1c8-4172-8825-40cb67b3f0b1": "401343c9-ba11-497d-bc6f-e5538875b74b",
+            "4ea7243b-3e97-5b81-9839-9c96078d69d3": "ce0cb5a2-794d-416f-9306-58863d98d752",
+            "57f61704-6257-5970-ae0f-d0bdb3652bcf": "852c5d2f-c155-4e07-b81e-a8d17ec7c605",
+            "4d663a5a-375d-5583-8cc0-f81d8b2a6f91": "dea976d2-1adf-410f-9b7a-06132dca1758",
+            "46524a25-1253-50cc-9a7b-9f8d21d1001a": "e4748217-bf21-4eba-bf37-d583b828d448",
+            "d20f643c-9002-574f-a1e3-a1f908e5018e": "43a9c639-6686-4151-975e-b9ca7d071fb4",
+            "4a44c9e8-098f-5477-875f-d0173757ad6e": "b116e43d-8b04-4f8c-98cc-f2fc261490c9",
+            "1f043509-896f-5cf1-97ef-cfd81e81f6b7": "e6d9ec58-b1fc-4fbc-929b-4cf466e2bca1",
+            "d1846d47-fe5f-507f-92de-f63ef46cd6d6": "8ea2c8e5-9b6f-4b44-98a8-dc38da41d674"
           }
+        },
+        {
+          "__guid": "19705b4b-52f6-4a26-813e-48dcfbefc505",
+          "__version": 2,
+          "__Prefab": {
+            "Id": "b2c4d595-40a7-46c0-a8ee-6ca1ffd1e8f2",
+            "Path": "sents/crosschainer/mizuno_rotary_c/mizuno_rotary_c.prefab"
+          },
+          "__PrefabInstancePatch": {
+            "AddedObjects": [],
+            "RemovedObjects": [],
+            "PropertyOverrides": [
+              {
+                "Target": {
+                  "Type": "GameObject",
+                  "IdValue": "f26bbd73-b526-5d6f-9d15-0c1901cbbe11"
+                },
+                "Property": "Position",
+                "Value": "9261.32324,-12330.916,-62.2241745"
+              },
+              {
+                "Target": {
+                  "Type": "GameObject",
+                  "IdValue": "f26bbd73-b526-5d6f-9d15-0c1901cbbe11"
+                },
+                "Property": "Rotation",
+                "Value": "0,0,-0.707106769,0.70710665"
+              },
+              {
+                "Target": {
+                  "Type": "GameObject",
+                  "IdValue": "f26bbd73-b526-5d6f-9d15-0c1901cbbe11"
+                },
+                "Property": "Scale",
+                "Value": "2,2,2"
+              },
+              {
+                "Target": {
+                  "Type": "GameObject",
+                  "IdValue": "29113406-a8ae-428b-9849-78940eb684ab"
+                },
+                "Property": "Rotation",
+                "Value": "0,0,0,1"
+              }
+            ],
+            "MovedObjects": []
+          },
+          "__PrefabIdToInstanceId": {
+            "f26bbd73-b526-5d6f-9d15-0c1901cbbe11": "19705b4b-52f6-4a26-813e-48dcfbefc505",
+            "29113406-a8ae-428b-9849-78940eb684ab": "dac4b0dc-0bf4-4d1b-836c-b6da04801e43",
+            "7d3fe002-4d8c-5f48-962c-b78e13e35f17": "3b05c4db-6089-4a5f-a77f-7dfa5954f094",
+            "70e8cb21-023b-5c16-adcd-16bc86b98677": "b991008c-f4ed-4428-ad5a-9d896f7a5e3d",
+            "e3371d1f-1cd3-5a9d-a85e-67ab13d5a2bf": "1fae20d5-b877-48e7-a2dc-53f0eb11a3b5",
+            "02736f28-e96e-513e-8399-cd299f1ef9f5": "c0a8d5f6-a291-49c6-93da-ea0847cadf81",
+            "dfa2fb3a-62c3-539e-85e6-cf4b63e679f6": "ec4f6ac9-070f-4271-bcd1-c78057d1ca07",
+            "64943d27-6417-594b-bc92-d0a5b97ac65d": "27311d0a-c11e-4c62-84ae-af901b4b9f45",
+            "f700033d-51c7-501c-923e-eaaaba70ae5a": "1101d3c5-2870-4a34-bd43-9d1ce83398a4",
+            "047c0556-c513-5c3e-bc0e-86f11e823d92": "5b5e9f41-e070-4657-b473-a7daec4aa918",
+            "9d548679-24d2-5d45-b439-0ea246795f72": "ca6cf681-fd2d-48c4-8646-d36dbcb26171",
+            "bdd9553d-3d8c-53ec-bfa2-737d929728e9": "342c3f07-4859-4091-ba4b-999e50655123",
+            "ec85fcb3-0aa6-5854-abb4-0582624a4344": "cd3c0f44-fdce-4c10-8e73-fd7d2eaea160",
+            "536af0d8-f096-5068-9e6c-b01f6cfad4af": "d44a830a-5f98-4606-85dd-9364bab32eb2",
+            "72575d87-8b3b-594a-9079-be8abfbca378": "123d08ad-82d5-4d29-be68-d62e0dc6ccb8",
+            "35450ca6-77f6-52ea-9ea6-9ec35d021a8c": "671eb2b8-84db-4523-9c2a-4a0245b7a58a",
+            "2e0bda7a-01e0-5d9e-9ca6-bf9208b7aa8b": "19f8d62e-fe0a-4549-bf73-d1cf08d2b5b9",
+            "7941c6d6-001c-51b7-be20-ff5b933e6ea4": "e8ac302d-9313-43f8-8b4f-4702a7615bfd",
+            "e02f78dd-e651-5244-a82a-bb6be805369d": "1a424a19-70da-4464-91bf-020fb7a40c35",
+            "e3afecfc-331b-5d2b-8ea9-e9337f419a47": "6990a092-4c92-48d8-9124-1bf35737d9ac",
+            "97fde860-ee32-59a1-84aa-e823841c8e79": "c3e8627a-442b-4143-b25c-173e232c7090",
+            "7b1d6725-8120-58a8-9eaf-56ff7e7db7d0": "1b545ae5-e9b9-4810-aed3-384d01e81404",
+            "c3e6bb1c-3565-5096-9f79-8e39afc3e5ff": "d735dcdb-b7be-41ab-9d8b-dc777859561e",
+            "eec88775-2e1a-5e4f-af6b-e23b3661b9c9": "07f646c2-42c7-472d-ba0a-5df90e9b349d",
+            "f8a5b9e9-995b-5ae6-b2a0-e220984e121c": "9a6e57a0-41b0-4a82-a054-d42ed3a6d828",
+            "255ec1a0-dde8-582b-99c2-d31d3907f0bd": "2a3d67bf-907b-4a03-b642-1507ff5f77f1",
+            "c9ecc716-4092-5fee-ac58-7f50528b4451": "6f2deb0c-e03f-457c-bc7d-7468e0473cfb",
+            "9ce08413-8104-5f56-b3b9-98b75abc30d1": "d3e811b4-e1bc-4b92-83fa-41a003252351",
+            "51a1adcc-ac65-5f47-a26c-9992a4982ab9": "eacb4708-ce43-4a4d-9ecc-45ba2f8480d4",
+            "eadddaca-2e58-5239-b308-54f36d5c0065": "65936c2d-6b17-4742-87d4-c0e62521fa73",
+            "c629d3db-11a8-582a-b60b-1cc0991b763d": "8e07b7f0-1ad0-4e71-b8fb-52085d2ebf5b",
+            "1c34ee73-7ae5-5e5b-a582-0c3cca221283": "695a8dea-4103-44cd-a4d5-fb2840a4ecab",
+            "04f4ceda-80aa-52c9-98fc-e7f1bf14dda7": "ac5bcb22-7a93-4a45-b67d-df77f6c2e1e6",
+            "c44d6234-f8e2-5be0-8381-f60bb468032f": "0bf048de-983a-4e06-a039-c506aff50a5a",
+            "e8d0169e-df28-5af4-9898-b8ad1562060b": "e4014619-3e92-40f7-aaab-40f110f1aeef",
+            "5a493eb4-0c58-559c-a6e2-492852a077b4": "75c32e19-ae1f-45ae-8c20-35ce6f46b6d5",
+            "412ce392-d34b-5b75-8591-1f74fd2cedd9": "f6f46a1a-76e4-4b6d-87fa-fb39f77d3da9",
+            "82be9ccb-38c9-5f0c-8f90-4560af873b51": "06d3a7cd-7719-41be-8d0b-611875633f68",
+            "fbb7192a-da6a-5ada-8450-21cf35804c60": "abcaa66c-cc76-45fb-89ea-8cc40d5b301a",
+            "843a2ab8-b83f-5485-adf9-66c182631a42": "29c464e9-22a4-4a2d-b843-5faf1e491adc",
+            "157cafa6-687a-50a8-b8d2-4034a2b37e92": "35a15cc7-cbd0-4668-a0c1-8f256b41a44d",
+            "195c5767-bd30-50ac-85f8-08d943aa2894": "ec4330ac-cc2e-4c4b-8910-7c389fb0c7c3",
+            "4e49f97b-fd18-4661-a2c9-5671840ea329": "903ca834-1336-4502-a9fb-c9f8de810fae",
+            "ef5552e5-36cf-41f0-9830-f06584202559": "1bbd0fdb-2194-499c-9a82-84d6609a79e3",
+            "39df13f2-9942-4d91-b367-5aff967afa69": "22bbcc39-661d-4545-9328-a1be47aee3c2",
+            "313d3a96-2a5e-5e3c-a84c-be16d79d0834": "ed2d8fb7-fbb5-4a72-bad6-e959ba2e4840",
+            "4857ce86-395e-5fae-b7ea-8db6654135a5": "2a0a359b-0796-4b45-963b-907073fcc992",
+            "7a92dc20-065a-56dd-8999-daebce7b9228": "b99cfea8-b2c5-4142-95a0-0807f7e0fe29",
+            "aad22196-c98e-5713-9450-b033ccff604c": "43d5017c-c133-41da-b62d-4204dfbad173",
+            "ce926e14-57cd-5044-bba9-d9754b6ddce1": "44a7f105-035d-47a7-9974-26a21162a1a2",
+            "aa7b1c61-9011-5405-9d32-9ce53419d17b": "b051c79d-f556-4518-9326-26960d8f744a",
+            "06b33ecf-f46f-5972-81b5-6f2291afc530": "e4443102-1071-4dde-b77e-f544ebdc7b6d",
+            "8f274719-c45f-5791-aad8-dcf112d42258": "e2fa8d65-8b77-4414-85a5-d3f1bf3845a7",
+            "a90b4287-a97c-5fa5-9b82-1211944ebe80": "15400c1d-082b-494c-93c6-d238894183fe",
+            "0b6ae691-3c10-53e6-aa55-6fb5bad8bb9d": "6232ca5a-19a7-483a-9501-2b6da60470d9",
+            "ae8de0ec-cf7d-5876-8aac-4e1fdc148b97": "48780316-4546-4b99-a0cf-cf63d2e03353",
+            "e73a5172-f3d0-577f-87e2-0f916438c9d3": "2d5969b4-cc69-410f-9fa0-c2752850f4c8",
+            "38bac566-a784-5aa2-b29d-0ec517b5181a": "b834de3f-ca05-4db9-b9c6-8ee78dc5dca4"
+          }
+        },
+        {
+          "__guid": "3809b2fa-c68d-4534-9f3b-82da52399a6d",
+          "__version": 2,
+          "Flags": 0,
+          "Name": "Doors (world space)",
+          "Position": "99.9999924,-8.7422768E-06,-108",
+          "Rotation": "0,0,-1,-4.37113883E-08",
+          "Scale": "2,2,2",
+          "Tags": "",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "NetworkFlags": 0,
+          "NetworkOrphaned": 0,
+          "NetworkTransmit": true,
+          "OwnerTransfer": 1,
+          "Components": [],
+          "Children": [
+            {
+              "__guid": "fa0b3ceb-2a05-48b6-b435-0c0d77ba0b78",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "wooden_door_01d",
+              "Position": "1089.35938,1046.7887,0",
+              "Rotation": "0,0,0,1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 1,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 1,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.Prop",
+                  "__guid": "6ab3efe6-b109-44d8-a6d4-67cfe8c616b2",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "Health": 0,
+                  "IsStatic": true,
+                  "MaterialGroup": null,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnGibsCreated": null,
+                  "OnPropBreak": null,
+                  "OnPropTakeDamage": null,
+                  "StartAsleep": false,
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.Mapping.Door",
+                  "__guid": "46ffbf21-5c9f-4630-a0af-d6428bd464bb",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "AnimationCurve": [
+                    {
+                      "x": 0,
+                      "y": 0,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    },
+                    {
+                      "x": 1,
+                      "y": 1,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    }
+                  ],
+                  "AutoClose": true,
+                  "AutoCloseDelay": 4,
+                  "CloseFinishedSound": null,
+                  "CloseSound": null,
+                  "CloseTooltipDescription": "",
+                  "CloseTooltipIcon": "touch_app",
+                  "CloseTooltipTitle": "Close",
+                  "IsLocked": false,
+                  "IsUsable": true,
+                  "LinkedDoor": null,
+                  "LockedSound": null,
+                  "LockedTooltipDescription": "",
+                  "LockedTooltipIcon": "lock",
+                  "LockedTooltipTitle": "Locked",
+                  "Mode": "Rotating",
+                  "OnClose": null,
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnOpen": null,
+                  "OpenAwayFromPlayer": true,
+                  "OpenFinishedSound": null,
+                  "OpenSound": null,
+                  "OpenTooltipDescription": "",
+                  "OpenTooltipIcon": "touch_app",
+                  "OpenTooltipTitle": "Open",
+                  "Pivot": null,
+                  "SlideOffset": "0,0,100",
+                  "Speed": 100,
+                  "StartOpen": false,
+                  "TargetAngle": 90
+                },
+                {
+                  "__type": "Sandbox.ModelRenderer",
+                  "__guid": "93de9c67-3d72-4b69-9fa3-de796d485afd",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "CreateAttachments": false,
+                  "LodOverride": null,
+                  "MaterialGroup": null,
+                  "MaterialOverride": null,
+                  "Materials": null,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "RenderType": "On",
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.ModelCollider",
+                  "__guid": "a04fef48-6d96-4835-a1e2-91df8f829b0d",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "0712190d-97b5-45f0-be26-85bf0d1227cd",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "wooden_door_01a",
+              "Position": "-911.055664,-1219.12976,16",
+              "Rotation": "0,0,0.707106709,0.707106769",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 1,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 1,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.Prop",
+                  "__guid": "ae5f09bb-df78-4869-9b95-0e725cc7de46",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "Health": 0,
+                  "IsStatic": true,
+                  "MaterialGroup": null,
+                  "Model": {
+                    "Id": "a83a6db9-32c0-4058-9e26-6a82904aa346",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnGibsCreated": null,
+                  "OnPropBreak": null,
+                  "OnPropTakeDamage": null,
+                  "StartAsleep": false,
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.Mapping.Door",
+                  "__guid": "c8078c37-5d48-43d6-af64-b8cd30af7053",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "AnimationCurve": [
+                    {
+                      "x": 0,
+                      "y": 0,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    },
+                    {
+                      "x": 1,
+                      "y": 1,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    }
+                  ],
+                  "AutoClose": true,
+                  "AutoCloseDelay": 4,
+                  "CloseFinishedSound": null,
+                  "CloseSound": null,
+                  "CloseTooltipDescription": "",
+                  "CloseTooltipIcon": "touch_app",
+                  "CloseTooltipTitle": "Close",
+                  "IsLocked": false,
+                  "IsUsable": true,
+                  "LinkedDoor": {
+                    "_type": "component",
+                    "component_id": "89cecd8c-fea7-46fd-aabe-b8e784595a64",
+                    "go": "a978b53c-caa0-43a8-9fde-3bf71052699c",
+                    "component_type": "Door"
+                  },
+                  "LockedSound": null,
+                  "LockedTooltipDescription": "",
+                  "LockedTooltipIcon": "lock",
+                  "LockedTooltipTitle": "Locked",
+                  "Mode": "Rotating",
+                  "OnClose": null,
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnOpen": null,
+                  "OpenAwayFromPlayer": true,
+                  "OpenFinishedSound": null,
+                  "OpenSound": null,
+                  "OpenTooltipDescription": "",
+                  "OpenTooltipIcon": "touch_app",
+                  "OpenTooltipTitle": "Open",
+                  "Pivot": null,
+                  "SlideOffset": "0,0,100",
+                  "Speed": 100,
+                  "StartOpen": false,
+                  "TargetAngle": 90
+                },
+                {
+                  "__type": "Sandbox.ModelRenderer",
+                  "__guid": "9d3f5fec-ebbd-41a0-a910-dd6f9052dfc3",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "CreateAttachments": false,
+                  "LodOverride": null,
+                  "MaterialGroup": null,
+                  "MaterialOverride": null,
+                  "Materials": null,
+                  "Model": {
+                    "Id": "a83a6db9-32c0-4058-9e26-6a82904aa346",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "RenderType": "On",
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.ModelCollider",
+                  "__guid": "07e7de37-976c-492a-8bd7-d2212f534a9d",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Model": {
+                    "Id": "a83a6db9-32c0-4058-9e26-6a82904aa346",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "a978b53c-caa0-43a8-9fde-3bf71052699c",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "wooden_door_01a",
+              "Position": "-816.905396,-1217.73718,15.9999924",
+              "Rotation": "0,0,-0.707106769,0.707106769",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 1,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 1,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.Prop",
+                  "__guid": "42d7536c-8d89-4fd8-bcfc-25e837c0f210",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "Health": 0,
+                  "IsStatic": true,
+                  "MaterialGroup": null,
+                  "Model": {
+                    "Id": "a83a6db9-32c0-4058-9e26-6a82904aa346",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnGibsCreated": null,
+                  "OnPropBreak": null,
+                  "OnPropTakeDamage": null,
+                  "StartAsleep": false,
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.Mapping.Door",
+                  "__guid": "89cecd8c-fea7-46fd-aabe-b8e784595a64",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "AnimationCurve": [
+                    {
+                      "x": 0,
+                      "y": 0,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    },
+                    {
+                      "x": 1,
+                      "y": 1,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    }
+                  ],
+                  "AutoClose": true,
+                  "AutoCloseDelay": 4,
+                  "CloseFinishedSound": null,
+                  "CloseSound": null,
+                  "CloseTooltipDescription": "",
+                  "CloseTooltipIcon": "touch_app",
+                  "CloseTooltipTitle": "Close",
+                  "IsLocked": false,
+                  "IsUsable": true,
+                  "LinkedDoor": {
+                    "_type": "component",
+                    "component_id": "c8078c37-5d48-43d6-af64-b8cd30af7053",
+                    "go": "0712190d-97b5-45f0-be26-85bf0d1227cd",
+                    "component_type": "Door"
+                  },
+                  "LockedSound": null,
+                  "LockedTooltipDescription": "",
+                  "LockedTooltipIcon": "lock",
+                  "LockedTooltipTitle": "Locked",
+                  "Mode": "Rotating",
+                  "OnClose": null,
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnOpen": null,
+                  "OpenAwayFromPlayer": true,
+                  "OpenFinishedSound": null,
+                  "OpenSound": null,
+                  "OpenTooltipDescription": "",
+                  "OpenTooltipIcon": "touch_app",
+                  "OpenTooltipTitle": "Open",
+                  "Pivot": null,
+                  "SlideOffset": "0,0,100",
+                  "Speed": 100,
+                  "StartOpen": false,
+                  "TargetAngle": 90
+                },
+                {
+                  "__type": "Sandbox.ModelRenderer",
+                  "__guid": "f88b10b9-9d10-4b11-af34-a3c55dd900d0",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "CreateAttachments": false,
+                  "LodOverride": null,
+                  "MaterialGroup": null,
+                  "MaterialOverride": null,
+                  "Materials": null,
+                  "Model": {
+                    "Id": "a83a6db9-32c0-4058-9e26-6a82904aa346",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "RenderType": "On",
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.ModelCollider",
+                  "__guid": "486379fe-7493-420e-b3a2-4d121075baf0",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Model": {
+                    "Id": "a83a6db9-32c0-4058-9e26-6a82904aa346",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "5f3cee46-5435-404c-ad21-3ca9bd457605",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "wooden_door_01d (1)",
+              "Position": "-4932.02637,6279.0249,15.9999962",
+              "Rotation": "0,0,8.74227766E-08,-1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 1,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 1,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.Prop",
+                  "__guid": "c7201e5f-3ec4-40d2-b0cc-cb8d64bed7de",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "Health": 0,
+                  "IsStatic": true,
+                  "MaterialGroup": null,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnGibsCreated": null,
+                  "OnPropBreak": null,
+                  "OnPropTakeDamage": null,
+                  "StartAsleep": false,
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.Mapping.Door",
+                  "__guid": "599d2244-ff80-4d57-8a36-c3b60190cb42",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "AnimationCurve": [
+                    {
+                      "x": 0,
+                      "y": 0,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    },
+                    {
+                      "x": 1,
+                      "y": 1,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    }
+                  ],
+                  "AutoClose": true,
+                  "AutoCloseDelay": 8,
+                  "CloseFinishedSound": null,
+                  "CloseSound": null,
+                  "CloseTooltipDescription": "",
+                  "CloseTooltipIcon": "touch_app",
+                  "CloseTooltipTitle": "Close",
+                  "IsLocked": false,
+                  "IsUsable": true,
+                  "LinkedDoor": null,
+                  "LockedSound": null,
+                  "LockedTooltipDescription": "",
+                  "LockedTooltipIcon": "lock",
+                  "LockedTooltipTitle": "Locked",
+                  "Mode": "Rotating",
+                  "OnClose": null,
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnOpen": null,
+                  "OpenAwayFromPlayer": true,
+                  "OpenFinishedSound": null,
+                  "OpenSound": null,
+                  "OpenTooltipDescription": "",
+                  "OpenTooltipIcon": "touch_app",
+                  "OpenTooltipTitle": "Open",
+                  "Pivot": null,
+                  "SlideOffset": "0,0,100",
+                  "Speed": 100,
+                  "StartOpen": false,
+                  "TargetAngle": 90
+                },
+                {
+                  "__type": "Sandbox.ModelRenderer",
+                  "__guid": "5dc25aae-bba5-47ab-a12c-540aecef50e1",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "CreateAttachments": false,
+                  "LodOverride": null,
+                  "MaterialGroup": null,
+                  "MaterialOverride": null,
+                  "Materials": null,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "RenderType": "On",
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.ModelCollider",
+                  "__guid": "f4841d7e-66e5-4dff-bc8f-9bc39b9a85ad",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "34d32165-5654-44f7-a5cb-74c2edf330e6",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "wooden_door_01d",
+              "Position": "-4731.87451,6278.90137,16",
+              "Rotation": "0,0,8.74227766E-08,-1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 1,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 1,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.Prop",
+                  "__guid": "a48a0eb4-7791-46fa-92e7-664ae20c07dd",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "Health": 0,
+                  "IsStatic": true,
+                  "MaterialGroup": null,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnGibsCreated": null,
+                  "OnPropBreak": null,
+                  "OnPropTakeDamage": null,
+                  "StartAsleep": false,
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.Mapping.Door",
+                  "__guid": "b93f6d54-e3d4-4191-9c85-17d0d67f9d5b",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "AnimationCurve": [
+                    {
+                      "x": 0,
+                      "y": 0,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    },
+                    {
+                      "x": 1,
+                      "y": 1,
+                      "in": 0,
+                      "out": 0,
+                      "mode": "Mirrored"
+                    }
+                  ],
+                  "AutoClose": true,
+                  "AutoCloseDelay": 8,
+                  "CloseFinishedSound": null,
+                  "CloseSound": null,
+                  "CloseTooltipDescription": "",
+                  "CloseTooltipIcon": "touch_app",
+                  "CloseTooltipTitle": "Close",
+                  "IsLocked": false,
+                  "IsUsable": true,
+                  "LinkedDoor": null,
+                  "LockedSound": null,
+                  "LockedTooltipDescription": "",
+                  "LockedTooltipIcon": "lock",
+                  "LockedTooltipTitle": "Locked",
+                  "Mode": "Rotating",
+                  "OnClose": null,
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnOpen": null,
+                  "OpenAwayFromPlayer": true,
+                  "OpenFinishedSound": null,
+                  "OpenSound": null,
+                  "OpenTooltipDescription": "",
+                  "OpenTooltipIcon": "touch_app",
+                  "OpenTooltipTitle": "Open",
+                  "Pivot": null,
+                  "SlideOffset": "0,0,100",
+                  "Speed": 100,
+                  "StartOpen": false,
+                  "TargetAngle": 90
+                },
+                {
+                  "__type": "Sandbox.ModelRenderer",
+                  "__guid": "5b981067-2acb-4f79-a7eb-e8a1a5e521f3",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "BodyGroups": 18446744073709551615,
+                  "CreateAttachments": false,
+                  "LodOverride": null,
+                  "MaterialGroup": null,
+                  "MaterialOverride": null,
+                  "Materials": null,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "RenderType": "On",
+                  "Tint": "1,1,1,1"
+                },
+                {
+                  "__type": "Sandbox.ModelCollider",
+                  "__guid": "3f5cea3e-cbc7-4d9b-b520-1d4c52bd54ca",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Model": {
+                    "Id": "e27efa1d-ca7e-480c-8454-359ed8e88ca1",
+                    "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
+                  },
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            }
+          ]
         }
       ]
-    },
-    {
-      "__guid": "19705b4b-52f6-4a26-813e-48dcfbefc505",
-      "__version": 2,
-      "__Prefab": {
-        "Id": "b2c4d595-40a7-46c0-a8ee-6ca1ffd1e8f2",
-        "Path": "sents/crosschainer/mizuno_rotary_c/mizuno_rotary_c.prefab"
-      },
-      "__PrefabInstancePatch": {
-        "AddedObjects": [],
-        "RemovedObjects": [],
-        "PropertyOverrides": [
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "f26bbd73-b526-5d6f-9d15-0c1901cbbe11"
-            },
-            "Property": "Position",
-            "Value": "-4580.6626,6165.45801,22.8879128"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "f26bbd73-b526-5d6f-9d15-0c1901cbbe11"
-            },
-            "Property": "Rotation",
-            "Value": "0,0,0.707106709,0.707106709"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "29113406-a8ae-428b-9849-78940eb684ab"
-            },
-            "Property": "Rotation",
-            "Value": "0,0,0,1"
-          },
-          {
-            "Target": {
-              "Type": "Component",
-              "IdValue": "4e49f97b-fd18-4661-a2c9-5671840ea329"
-            },
-            "Property": "CombineStacksOnSort",
-            "Value": false
-          }
-        ],
-        "MovedObjects": []
-      },
-      "__PrefabIdToInstanceId": {
-        "f26bbd73-b526-5d6f-9d15-0c1901cbbe11": "19705b4b-52f6-4a26-813e-48dcfbefc505",
-        "29113406-a8ae-428b-9849-78940eb684ab": "dac4b0dc-0bf4-4d1b-836c-b6da04801e43",
-        "7d3fe002-4d8c-5f48-962c-b78e13e35f17": "3b05c4db-6089-4a5f-a77f-7dfa5954f094",
-        "70e8cb21-023b-5c16-adcd-16bc86b98677": "b991008c-f4ed-4428-ad5a-9d896f7a5e3d",
-        "e3371d1f-1cd3-5a9d-a85e-67ab13d5a2bf": "1fae20d5-b877-48e7-a2dc-53f0eb11a3b5",
-        "02736f28-e96e-513e-8399-cd299f1ef9f5": "c0a8d5f6-a291-49c6-93da-ea0847cadf81",
-        "dfa2fb3a-62c3-539e-85e6-cf4b63e679f6": "ec4f6ac9-070f-4271-bcd1-c78057d1ca07",
-        "64943d27-6417-594b-bc92-d0a5b97ac65d": "27311d0a-c11e-4c62-84ae-af901b4b9f45",
-        "f700033d-51c7-501c-923e-eaaaba70ae5a": "1101d3c5-2870-4a34-bd43-9d1ce83398a4",
-        "047c0556-c513-5c3e-bc0e-86f11e823d92": "5b5e9f41-e070-4657-b473-a7daec4aa918",
-        "9d548679-24d2-5d45-b439-0ea246795f72": "ca6cf681-fd2d-48c4-8646-d36dbcb26171",
-        "bdd9553d-3d8c-53ec-bfa2-737d929728e9": "342c3f07-4859-4091-ba4b-999e50655123",
-        "ec85fcb3-0aa6-5854-abb4-0582624a4344": "cd3c0f44-fdce-4c10-8e73-fd7d2eaea160",
-        "536af0d8-f096-5068-9e6c-b01f6cfad4af": "d44a830a-5f98-4606-85dd-9364bab32eb2",
-        "72575d87-8b3b-594a-9079-be8abfbca378": "123d08ad-82d5-4d29-be68-d62e0dc6ccb8",
-        "35450ca6-77f6-52ea-9ea6-9ec35d021a8c": "671eb2b8-84db-4523-9c2a-4a0245b7a58a",
-        "2e0bda7a-01e0-5d9e-9ca6-bf9208b7aa8b": "19f8d62e-fe0a-4549-bf73-d1cf08d2b5b9",
-        "7941c6d6-001c-51b7-be20-ff5b933e6ea4": "e8ac302d-9313-43f8-8b4f-4702a7615bfd",
-        "e02f78dd-e651-5244-a82a-bb6be805369d": "1a424a19-70da-4464-91bf-020fb7a40c35",
-        "1c34ee73-7ae5-5e5b-a582-0c3cca221283": "695a8dea-4103-44cd-a4d5-fb2840a4ecab",
-        "04f4ceda-80aa-52c9-98fc-e7f1bf14dda7": "ac5bcb22-7a93-4a45-b67d-df77f6c2e1e6",
-        "c44d6234-f8e2-5be0-8381-f60bb468032f": "0bf048de-983a-4e06-a039-c506aff50a5a",
-        "e8d0169e-df28-5af4-9898-b8ad1562060b": "e4014619-3e92-40f7-aaab-40f110f1aeef",
-        "5a493eb4-0c58-559c-a6e2-492852a077b4": "75c32e19-ae1f-45ae-8c20-35ce6f46b6d5",
-        "412ce392-d34b-5b75-8591-1f74fd2cedd9": "f6f46a1a-76e4-4b6d-87fa-fb39f77d3da9",
-        "82be9ccb-38c9-5f0c-8f90-4560af873b51": "06d3a7cd-7719-41be-8d0b-611875633f68",
-        "fbb7192a-da6a-5ada-8450-21cf35804c60": "abcaa66c-cc76-45fb-89ea-8cc40d5b301a",
-        "843a2ab8-b83f-5485-adf9-66c182631a42": "29c464e9-22a4-4a2d-b843-5faf1e491adc",
-        "157cafa6-687a-50a8-b8d2-4034a2b37e92": "35a15cc7-cbd0-4668-a0c1-8f256b41a44d",
-        "195c5767-bd30-50ac-85f8-08d943aa2894": "ec4330ac-cc2e-4c4b-8910-7c389fb0c7c3",
-        "4e49f97b-fd18-4661-a2c9-5671840ea329": "903ca834-1336-4502-a9fb-c9f8de810fae",
-        "ef5552e5-36cf-41f0-9830-f06584202559": "1bbd0fdb-2194-499c-9a82-84d6609a79e3",
-        "39df13f2-9942-4d91-b367-5aff967afa69": "22bbcc39-661d-4545-9328-a1be47aee3c2",
-        "313d3a96-2a5e-5e3c-a84c-be16d79d0834": "ed2d8fb7-fbb5-4a72-bad6-e959ba2e4840",
-        "4857ce86-395e-5fae-b7ea-8db6654135a5": "2a0a359b-0796-4b45-963b-907073fcc992",
-        "7a92dc20-065a-56dd-8999-daebce7b9228": "b99cfea8-b2c5-4142-95a0-0807f7e0fe29",
-        "aad22196-c98e-5713-9450-b033ccff604c": "43d5017c-c133-41da-b62d-4204dfbad173",
-        "ce926e14-57cd-5044-bba9-d9754b6ddce1": "44a7f105-035d-47a7-9974-26a21162a1a2",
-        "aa7b1c61-9011-5405-9d32-9ce53419d17b": "b051c79d-f556-4518-9326-26960d8f744a",
-        "06b33ecf-f46f-5972-81b5-6f2291afc530": "e4443102-1071-4dde-b77e-f544ebdc7b6d",
-        "8f274719-c45f-5791-aad8-dcf112d42258": "e2fa8d65-8b77-4414-85a5-d3f1bf3845a7",
-        "a90b4287-a97c-5fa5-9b82-1211944ebe80": "15400c1d-082b-494c-93c6-d238894183fe",
-        "0b6ae691-3c10-53e6-aa55-6fb5bad8bb9d": "6232ca5a-19a7-483a-9501-2b6da60470d9",
-        "ae8de0ec-cf7d-5876-8aac-4e1fdc148b97": "48780316-4546-4b99-a0cf-cf63d2e03353",
-        "e73a5172-f3d0-577f-87e2-0f916438c9d3": "2d5969b4-cc69-410f-9fa0-c2752850f4c8",
-        "38bac566-a784-5aa2-b29d-0ec517b5181a": "b834de3f-ca05-4db9-b9c6-8ee78dc5dca4",
-        "e3afecfc-331b-5d2b-8ea9-e9337f419a47": "6990a092-4c92-48d8-9124-1bf35737d9ac",
-        "97fde860-ee32-59a1-84aa-e823841c8e79": "c3e8627a-442b-4143-b25c-173e232c7090",
-        "7b1d6725-8120-58a8-9eaf-56ff7e7db7d0": "1b545ae5-e9b9-4810-aed3-384d01e81404",
-        "c3e6bb1c-3565-5096-9f79-8e39afc3e5ff": "d735dcdb-b7be-41ab-9d8b-dc777859561e",
-        "eec88775-2e1a-5e4f-af6b-e23b3661b9c9": "07f646c2-42c7-472d-ba0a-5df90e9b349d",
-        "f8a5b9e9-995b-5ae6-b2a0-e220984e121c": "9a6e57a0-41b0-4a82-a054-d42ed3a6d828",
-        "255ec1a0-dde8-582b-99c2-d31d3907f0bd": "2a3d67bf-907b-4a03-b642-1507ff5f77f1",
-        "eadddaca-2e58-5239-b308-54f36d5c0065": "65936c2d-6b17-4742-87d4-c0e62521fa73",
-        "c629d3db-11a8-582a-b60b-1cc0991b763d": "8e07b7f0-1ad0-4e71-b8fb-52085d2ebf5b",
-        "c9ecc716-4092-5fee-ac58-7f50528b4451": "6f2deb0c-e03f-457c-bc7d-7468e0473cfb",
-        "9ce08413-8104-5f56-b3b9-98b75abc30d1": "d3e811b4-e1bc-4b92-83fa-41a003252351",
-        "51a1adcc-ac65-5f47-a26c-9992a4982ab9": "eacb4708-ce43-4a4d-9ecc-45ba2f8480d4"
-      }
-    },
-    {
-      "__guid": "6f6e16b6-594c-4fd7-9569-5675844ae3b3",
-      "__version": 2,
-      "__Prefab": {
-        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
-        "Path": "security/camera.prefab"
-      },
-      "__PrefabInstancePatch": {
-        "AddedObjects": [],
-        "RemovedObjects": [],
-        "PropertyOverrides": [
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Position",
-            "Value": "-4947.7124,6066.58252,133.205368"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Rotation",
-            "Value": "-0.118037567,0.0557155795,0.896584213,0.42320177"
-          }
-        ],
-        "MovedObjects": []
-      },
-      "__PrefabIdToInstanceId": {
-        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "6f6e16b6-594c-4fd7-9569-5675844ae3b3",
-        "c9567e43-d3fe-477e-a261-d921396c2d23": "a639f2aa-a83c-4cd9-93af-19be4dcc80c5",
-        "c4526fce-596e-4331-9816-32a671e4d93b": "659f93ab-5426-4070-9232-ac39923e7eb2",
-        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "f63ef60f-1276-4d80-98a9-1646c2a44e50",
-        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "d4dbc05d-77c2-4280-a6ea-aba29f1fa5ec",
-        "f42b025f-c24a-4d86-b543-1284c0989517": "8c99f90b-ed91-4f0d-b17f-ceea0b48e9f2",
-        "62263d32-fc91-43f5-9020-836ce7abedf9": "129144e0-ad39-4e1c-92bc-3d5e6c6d2e65",
-        "2cf02a53-c411-4032-8b2c-875bd43d433e": "a7c24bb8-325d-440d-84a4-56145842c657",
-        "cf2e3047-6914-4da4-9a5c-37b675792c80": "3385a394-25fa-4b57-b5a0-99b8878138eb",
-        "76156ece-a237-495c-9598-69a3c4c6a454": "26a3f704-a30b-444d-8790-26c096d75b68",
-        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "1cab7121-fc80-41c5-992d-45c47e2f83a9",
-        "ad13592b-3687-4a7a-ac06-c3a68b073935": "35810473-60ff-49b6-beba-97252ef92281",
-        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "a622d557-8f25-41ff-b333-3d23c3c63fe3",
-        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "549ecc86-f164-4a4c-8416-fa321a6f5226",
-        "1d159a06-e23e-4af3-90d3-5a014345f915": "0624c330-ae9f-4d6d-94d9-7a6622e7fa3d",
-        "dc697170-e74a-4de8-8e02-e5365aff70e6": "8fe3be18-1b1a-4336-ad35-77d9447d3790",
-        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "8a7e5f6d-384d-4b28-a04a-47e596885b47"
-      }
-    },
-    {
-      "__guid": "9cd195a9-5dd7-4b09-9df2-4425294edeee",
-      "__version": 2,
-      "__Prefab": {
-        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
-        "Path": "security/camera.prefab"
-      },
-      "__PrefabInstancePatch": {
-        "AddedObjects": [],
-        "RemovedObjects": [],
-        "PropertyOverrides": [
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Name",
-            "Value": "camera (1)"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Position",
-            "Value": "-4311.63721,6067.5332,131.577942"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Rotation",
-            "Value": "-0.24999997,0.0669872835,0.933012605,0.24999997"
-          }
-        ],
-        "MovedObjects": []
-      },
-      "__PrefabIdToInstanceId": {
-        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "9cd195a9-5dd7-4b09-9df2-4425294edeee",
-        "c9567e43-d3fe-477e-a261-d921396c2d23": "eef1341a-0480-4486-8151-d919673c5a0d",
-        "c4526fce-596e-4331-9816-32a671e4d93b": "b3ea3130-9b45-48a4-9e74-13407da3da13",
-        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "620c9f72-cbd8-4f9d-86fa-1afa729a03f3",
-        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "5ac7a5b6-6fc6-41c1-a38f-add920a1eee3",
-        "f42b025f-c24a-4d86-b543-1284c0989517": "f6e66205-5036-4058-9d6c-1cdcd8bc3ccd",
-        "62263d32-fc91-43f5-9020-836ce7abedf9": "debfee26-274a-47ad-8d6e-c67f5ac2dd3c",
-        "2cf02a53-c411-4032-8b2c-875bd43d433e": "fa77639a-aea7-4ad5-97d3-c8b0e2c0c112",
-        "cf2e3047-6914-4da4-9a5c-37b675792c80": "2cd96728-41ab-4b1f-9013-0c209267c2b3",
-        "76156ece-a237-495c-9598-69a3c4c6a454": "bf3a5612-fa9b-4e00-adcc-be4904e1e887",
-        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "c3475043-23f4-4bdf-b5fb-3d63fee179b0",
-        "ad13592b-3687-4a7a-ac06-c3a68b073935": "89900eb4-a29d-4bf4-a7af-8533e57cf6ea",
-        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "e351d887-795d-4500-b737-41499d9105ab",
-        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "50c98d81-1f00-4d08-9de7-6ed927759435",
-        "1d159a06-e23e-4af3-90d3-5a014345f915": "91445c31-40c7-437a-8fef-64ca36862e44",
-        "dc697170-e74a-4de8-8e02-e5365aff70e6": "63157da2-5e36-4648-960f-7e42b4e0cd7a",
-        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "19e6cd50-ee45-4ef0-80e0-867c93b36c2f"
-      }
-    },
-    {
-      "__guid": "a05d72cf-0fc2-4445-87eb-4427a626e3c2",
-      "__version": 2,
-      "__Prefab": {
-        "Id": "2d816b9a-fe0a-48ad-89a9-fdc248df58e3",
-        "Path": "security/camera.prefab"
-      },
-      "__PrefabInstancePatch": {
-        "AddedObjects": [],
-        "RemovedObjects": [],
-        "PropertyOverrides": [
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Name",
-            "Value": "camera (2)"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Position",
-            "Value": "-4279.39551,6897.24219,133.700562"
-          },
-          {
-            "Target": {
-              "Type": "GameObject",
-              "IdValue": "cea97d0a-8b8a-4080-8a77-20eb1eba4271"
-            },
-            "Property": "Rotation",
-            "Value": "0.0652079359,0.11307089,-0.495302558,0.858858705"
-          }
-        ],
-        "MovedObjects": []
-      },
-      "__PrefabIdToInstanceId": {
-        "cea97d0a-8b8a-4080-8a77-20eb1eba4271": "a05d72cf-0fc2-4445-87eb-4427a626e3c2",
-        "c9567e43-d3fe-477e-a261-d921396c2d23": "2cb209ed-9bb7-4937-8f11-a97d6cbe70fd",
-        "c4526fce-596e-4331-9816-32a671e4d93b": "a7142224-a773-4645-91c5-b1e60ff1fb1c",
-        "4818f681-d3d8-4a61-a5e2-0d5eff01d0f8": "d35a9d23-142e-4073-a7c4-fa538daa0af3",
-        "a8c09fd8-cc9a-47f4-9cae-7c328d0eca20": "d4081552-987a-42cd-9aa5-d1e061fbbc36",
-        "f42b025f-c24a-4d86-b543-1284c0989517": "8e508826-77d1-43bf-9239-5965ed601d58",
-        "62263d32-fc91-43f5-9020-836ce7abedf9": "03160978-683b-4cbd-b83d-1a368f3aa087",
-        "2cf02a53-c411-4032-8b2c-875bd43d433e": "f2ec716a-2f04-4669-82d8-0427acfdb84f",
-        "cf2e3047-6914-4da4-9a5c-37b675792c80": "b2c50f1c-ab92-4503-8661-31b1b651ad73",
-        "76156ece-a237-495c-9598-69a3c4c6a454": "bbb4679d-2315-4942-87af-358b30ed643b",
-        "b34b8f82-9907-4137-90f1-f49b8d6affa6": "241dd483-30a8-4726-ab71-0e656f6b0eb1",
-        "ad13592b-3687-4a7a-ac06-c3a68b073935": "a56576ef-6d2e-46a1-8e42-09d822770ec6",
-        "4bdcb4c1-85e5-407a-b1e1-496c9ee59cca": "4091c38c-24a0-4d02-8298-84e87a393d3d",
-        "3d7bb95a-c2bf-4e22-8055-b0e04d4fab6f": "2a8b0800-0544-420a-afaf-1c884b4c4036",
-        "1d159a06-e23e-4af3-90d3-5a014345f915": "ab6ebf0e-8b06-4df9-b4dd-19ff2c2eeb7e",
-        "dc697170-e74a-4de8-8e02-e5365aff70e6": "55bd52ac-99a5-4c76-a0cc-39c467445f95",
-        "662b522c-e4ad-4cb5-be81-c1c608e599fb": "6f869213-b1ad-432b-b1a1-a88b8f3e8d2d"
-      }
     }
   ],
   "SceneProperties": {
