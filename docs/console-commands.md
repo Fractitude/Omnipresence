@@ -102,6 +102,7 @@ Code: `Code/Health/`.
 | `omni.noclip 0|1` | Let every player fly through the world with the Noclip key (N); the host always may. Default 0. Saved. |
 | `omni.carry 0|1` | Players can pick up light props with Use (attack throws, aim lets go, holding Use turns it). Default 1. Saved. |
 | `omni.carry.maxmass <kg>` | The heaviest prop that can be picked up. Default 80. Saved. |
+| `omni.step_height <units>` | How high a step the player walks up: a kerb, a stair, a low ledge. Default 16. Saved. The engine's own step up is off (`MoveModeWalk.StepUpHeight` is 0 on `Assets/Player.prefab`) so that every step goes through `StepAssist`'s checks, which refuse anything the player is not walking into and any ledge hanging over a recess (a window sill, a rail, an awning). |
 
 ## Weapons
 

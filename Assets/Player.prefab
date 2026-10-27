@@ -180,7 +180,7 @@
         "OnComponentUpdate": null,
         "Priority": 0,
         "StepDownHeight": 18,
-        "StepUpHeight": 30
+        "StepUpHeight": 0
       },
       {
         "__type": "Sandbox.Movement.MoveModeSwim",
