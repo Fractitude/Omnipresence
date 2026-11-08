@@ -82,7 +82,7 @@ before it exists (AGENTS.md, "UI pitfalls"). The car in it is a copy of the pref
 `CarLook( Paint, Secondary, Glass )` is the three together (`CarPaint.Look`, `SetLook`), with `Format`/`Parse` for the
 `r,g,b,a` string the app sends. The tint is set once when the car starts and again when a colour changes, never every frame: a
 change from the host arrives through a `[Change]` handler, and one made on this machine goes through `SetLook` (a local set does
-not reach the handler). It looks again for up to 3 seconds if the model was not loaded at start. It runs in the editor too, so a
+not reach the handler). It looks again for up to 3 seconds if the model was not loaded at start. **A `ScenePanel` draws its scene but does not tick it**, so the dealership's picture never runs `OnUpdate`: `CarPreviewScene.Update` calls `CarPaint.Refresh()` each frame until the materials are found (without it the preview stayed unpainted, as the model is not loaded at the first frame). It runs in the editor too, so a
 prefab shows its colours and the inspector edits them live (compared each frame there only); the overrides it makes are saved
 with the prefab as entries naming the stock materials: the same look, but a diff.
 

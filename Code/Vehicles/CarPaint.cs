@@ -102,6 +102,16 @@ public sealed class CarPaint : Component, Component.ExecuteInEditor
 			Apply();
 	}
 
+	/// <summary>
+	/// Look for the car's materials again if its model was not loaded when it started. The game does this itself every
+	/// frame (<see cref="OnUpdate"/>); a scene nobody ticks, like the dealership's picture, calls it instead.
+	/// </summary>
+	public void Refresh()
+	{
+		if ( !found )
+			Collect();
+	}
+
 	/// <summary>Another machine's change arrives here. A change made on this machine does not, so use <see cref="SetLook"/>.</summary>
 	void OnColorsChanged( Color oldValue, Color newValue ) => Apply();
 

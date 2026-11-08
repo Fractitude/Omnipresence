@@ -134,6 +134,10 @@ public sealed class CarPreviewScene
 	{
 		Elevation = System.Math.Clamp( Elevation, MinElevation, MaxElevation );
 
+		// A ScenePanel draws this scene but does not tick it, so the car's paint is asked to look for its materials here
+		// (they are not there at the first frame, the model loads a little later).
+		shownPaint?.Refresh();
+
 		pivot.WorldRotation = Rotation.FromYaw( Yaw );
 
 		var angle = Elevation.DegreeToRadian();
