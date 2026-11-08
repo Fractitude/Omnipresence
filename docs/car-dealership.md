@@ -19,7 +19,7 @@ is made at a free **delivery point** near the computer, on the ground, facing th
    `CarDealer` to sell) on a computer without it.
 2. Put the app on the computer: list `navi/shop/cardealership.napp` in `InstalledApps` (or, for a kiosk, in `OnlyApps` and
    `OpenApp`; see "Kiosk computers" in `Libraries/navi/README.md`).
-3. Tag one or more objects **`delivery_point`**, each with a `BoxCollider` the size of a bay, within **100 units** of the
+3. Tag one or more objects **`delivery_point`**, each with a `BoxCollider` the size of a bay, within **300 units** of the
    computer (`CarDelivery.Range`, measured from the computer's origin to the point's origin). The Depot's store pickup uses the
    same tag (`DeliverySpot.Tag`), so a bay that is near both a Depot computer and the dealership serves both.
 

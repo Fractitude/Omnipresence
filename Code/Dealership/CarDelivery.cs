@@ -11,7 +11,7 @@ public static class CarDelivery
 	public const string Tag = DeliverySpot.Tag;
 
 	/// <summary>How near a delivery point has to be to the computer to be the dealership's, in units.</summary>
-	public const float Range = 100f;
+	public const float Range = 300f;
 
 	/// <summary>The bottom of a bay is left out of the search by this much, so the ground under it is not "something in it".</summary>
 	const float FloorMargin = 6f;
