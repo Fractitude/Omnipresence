@@ -71,9 +71,9 @@ before it exists (AGENTS.md, "UI pitfalls"). The car in it is a copy of the pref
 
 `CarPaint` (`Code/Vehicles/CarPaint.cs`, "Car Paint" in the component list) is on every crosschainer car prefab, after
 `CuratedVehicle`. It copies the car's `primary` materials once, when the car starts, and sets their `g_vColorTint` to `Paint`;
-the `secondary` ones get `Secondary` (dark grey). It does it again only when `Paint` changes (a `[Change]` handler), never every
-frame, and it looks again for up to 3 seconds if the model was not loaded at start. It does not run in the editor, since an
-override made there would be saved into the prefab.
+the `secondary` ones get `Secondary` (dark grey). It does it again only when `Paint` changes (a `[Change]` handler for a synced change, `SetPaint` for one made on this machine, since a local set does not reach the handler), never every
+frame, and it looks again for up to 3 seconds if the model was not loaded at start. It runs in the editor too, so a prefab shows its colour and the inspector edits it live (compared each frame there only). The
+overrides it makes are saved with the prefab as entries naming the stock materials: the same look, but a diff.
 
 - **The stock colour is `Paint` on the prefab**, set in the inspector (`CarCatalog.StockPaint` reads it). A car whose prefab has
   no `CarPaint` (the buggy) cannot be painted, and the app shows no swatches for it.

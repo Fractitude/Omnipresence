@@ -122,7 +122,7 @@ public sealed class CarPreviewScene
 	void Paint( Color? paint )
 	{
 		if ( paint is { } color && shownPaint.IsValid() && shownPaint.Paint != color )
-			shownPaint.Paint = color;
+			shownPaint.SetPaint( color );
 	}
 
 	/// <summary>Zoom by wheel notches (positive is away).</summary>

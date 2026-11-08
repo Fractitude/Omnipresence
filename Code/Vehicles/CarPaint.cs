@@ -8,12 +8,12 @@ namespace Sandbox;
 /// the prefab and the car in the world are painted by the same code.
 /// </summary>
 /// <remarks>
-/// The tint is set once when the car starts and again when <see cref="Paint"/> changes, never every frame. It works on
+/// The tint is set once when the car starts and again when the colour changes (<see cref="SetPaint"/>, or a synced change from the host), never every frame. It works on
 /// copies of the materials, put on the renderers as overrides on this machine only, so the models' own materials are
-/// untouched. It does not run in the editor: an override made there would be saved into the prefab.
+/// untouched. It runs in the editor too, so the prefab shows its colour and the inspector edits it live. The overrides it makes there are saved with the prefab as entries naming the stock materials (the same look), so a prefab saved from the editor shows those as a diff; they are harmless.
 /// </remarks>
 [Title( "Car Paint" ), Category( "Vehicles" ), Icon( "format_color_fill" )]
-public sealed class CarPaint : Component
+public sealed class CarPaint : Component, Component.ExecuteInEditor
 {
 	/// <summary>How long a car whose model is not loaded yet is looked at again, in seconds.</summary>
 	const float RetryTime = 3f;
@@ -29,6 +29,8 @@ public sealed class CarPaint : Component
 	readonly List<(Material Material, bool Secondary)> materials = [];
 	TimeSince sinceStart;
 	bool found;
+	Color appliedPaint;
+	Color appliedSecondary;
 
 	/// <summary>Whether the car has any painted material. False until its model is loaded.</summary>
 	public bool HasPaintedMaterials => materials.Count > 0;
@@ -42,11 +44,24 @@ public sealed class CarPaint : Component
 	protected override void OnUpdate()
 	{
 		// A car placed in the scene starts before its model has loaded, so it finds nothing then. Look again until it does.
-		if ( !found && sinceStart < RetryTime )
+		if ( !found && (sinceStart < RetryTime || Scene.IsEditor) )
 			Collect();
+
+		// In the editor the colours are edited in the inspector, which does not come through a change handler, so the
+		// two are compared here. The game never does this.
+		if ( Scene.IsEditor && found && (appliedPaint != Paint || appliedSecondary != Secondary) )
+			Apply();
 	}
 
+	/// <summary>Another machine's change arrives here. A change made on this machine does not, so use <see cref="SetPaint"/>.</summary>
 	void OnPaintChanged( Color oldValue, Color newValue ) => Apply();
+
+	/// <summary>Paint the car now. Sets <see cref="Paint"/> (synced if this is the host) and tints this machine's copy.</summary>
+	public void SetPaint( Color color )
+	{
+		Paint = color;
+		Apply();
+	}
 
 	/// <summary>Make copies of the car's paint materials and tint them.</summary>
 	void Collect()
@@ -85,6 +100,9 @@ public sealed class CarPaint : Component
 
 	void Apply()
 	{
+		appliedPaint = Paint;
+		appliedSecondary = Secondary;
+
 		foreach ( var (material, secondary) in materials )
 			material.Set( "g_vColorTint", secondary ? Secondary : Paint );
 	}
