@@ -2,8 +2,9 @@
 @inherits NaviApp
 @namespace OmnipresenceApps
 
-@* The game's own app for the store's computer. Not a system app: the computer has a StoreTerminal, which makes it a *@
-@* kiosk with only this app, and the app refuses to work on any other computer. Described by *@
+@* The game's own app for the store's computer. Not a system app: the computer has the tag `hardware-store` (the *@
+@* manifest lists it too), and the app refuses to work on any other computer. Whether it is also a kiosk is the computer's own *@
+@* Kiosk mode settings in the Inspector. Described by *@
 @* Assets/navi/shop/hardwarestore.napp. *@
 @* It is shared: the host's copy takes the money, places the orders and runs the staff login puzzle (Level 1: a word *@
 @* to guess from a clue), and everyone *@
@@ -220,7 +221,11 @@
 
 	void WordEntered( string word ) => Navi.Act( HardwareStoreViewModel.WordAction, word );
 
-	bool AtStoreTerminal() => StoreTerminal.IsStore( GameAppSeat.ComputerOf( this ) );
+	/// <summary>The computer the app runs on has the tag the manifest lists, so it is the store's.</summary>
+	bool AtStoreTerminal() =>
+		GameAppSeat.ComputerOf( this )?.ComputerTags?.Any( x => string.Equals( x?.Trim(), StoreTag, System.StringComparison.OrdinalIgnoreCase ) ) == true;
+
+	const string StoreTag = "hardware-store";
 
 	Connection GetSeat() => GameAppSeat.UserOf( this );
 
