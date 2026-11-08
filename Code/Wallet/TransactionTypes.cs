@@ -56,6 +56,9 @@ public enum TxKind
 
 	/// <summary>Dollars a player put on the ground (<see cref="CashDrops"/>). They are picked up without a transaction.</summary>
 	DropCash,
+
+	/// <summary>A car bought at the car dealership.</summary>
+	CarPurchase,
 }
 
 /// <summary>
@@ -135,6 +138,9 @@ public static class Parties
 	/// <summary>The Depot.</summary>
 	public const string Depot = "depot";
 
+	/// <summary>The car dealership.</summary>
+	public const string CarDealership = "car-dealership";
+
 	/// <summary>Both exchanges: what they keep as the fee stays with them.</summary>
 	public const string Exchange = "exchange";
 
@@ -152,6 +158,7 @@ public static class Parties
 		[HushShop] = "Hush shop",
 		[HardwareStore] = "Hardware Store",
 		[Depot] = "Depot",
+		[CarDealership] = "Car Dealership",
 		[Exchange] = "Exchange",
 		[Government] = "Government",
 		[Market] = "Market",

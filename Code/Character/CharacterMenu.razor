@@ -80,7 +80,8 @@
 	/// Whether the scene only draws a preview (the character here or in the customizer, or an item icon). Game systems
 	/// must not put a HUD in it.
 	/// </summary>
-	public static bool IsPreview( Scene scene ) => ItemIcons.IsIconScene( scene ) || AvatarPreview.IsPreviewScene( scene );
+	public static bool IsPreview( Scene scene ) =>
+		ItemIcons.IsIconScene( scene ) || AvatarPreview.IsPreviewScene( scene ) || CarPreviewScene.IsPreviewScene( scene );
 
 	protected override void OnUpdate()
 	{

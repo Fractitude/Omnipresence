@@ -1,0 +1,189 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own app for the car dealership's computer, described by Assets/navi/shop/cardealership.napp. Not a system *@
+@* app: the computer needs the tag `car-dealership` (the manifest lists it too), and the app refuses to work on any other. *@
+@* It is shared: the host's copy takes the money and makes the car at a free delivery point, and everyone near the screen *@
+@* watches. The 3D picture (CarPreviewScene) is each client's own view: the car shown is shared, but turning and zooming *@
+@* it is not. See docs/car-dealership.md. *@
+
+<root>
+	@if ( !UiState.HasAccess )
+	{
+		<div class="message">@UiState.Message</div>
+	}
+	else
+	{
+		<div class="top">
+			<div class="dealer-title">Car Dealership</div>
+			<div class="dealer-balance">@UiState.Balance</div>
+		</div>
+
+		<div class="body">
+			<div class="garage">
+				@foreach ( var car in UiState.Cars )
+				{
+					var id = car.Id;
+
+					<div @key=@id class="car @( id == UiState.SelectedId ? "selected" : "" )"
+					     @onclick=@( () => Navi.Act( CarDealershipViewModel.SelectAction, id ) )>
+						<div class="car-name">@car.Name</div>
+						<div class="car-price @( car.CanAfford ? "" : "short" )">@car.Price</div>
+					</div>
+				}
+			</div>
+
+			<div class="showroom">
+				<ScenePanel @ref="View" class="view"/>
+				<div class="view-hint">Drag to turn, scroll to zoom</div>
+
+				@if ( UiState.Selected is { } selected )
+				{
+					<div class="details">
+						<div class="details-top">
+							<div class="details-name">@selected.Name</div>
+							<div class="details-price">@selected.Price</div>
+						</div>
+						<div class="details-description">@selected.Description</div>
+
+						@if ( UiState.Notice != "" )
+						{
+							<div class="notice @( UiState.NoticeIsError ? "error" : "" )">@UiState.Notice</div>
+						}
+
+						<div class="buy-row">
+							<div class="button @( selected.CanAfford && !UiState.Busy ? "" : "disabled" )"
+							     @onclick=@( () => Navi.Act( CarDealershipViewModel.BuyAction, selected.Id ) )>
+								@( UiState.Busy ? "Please wait..." : $"Buy for {selected.Price}" )
+							</div>
+							<div class="bays">@UiState.Bays</div>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	CarDealershipViewModel ViewModel => field ??= new( GetSeat, GetComputer );
+
+	CarDealershipUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<CarDealershipUiState>() ?? CarDealershipUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	ScenePanel View { get; set; }
+
+	/// <summary>Degrees the car turns per pixel the mouse is dragged, across and up.</summary>
+	const float DragDegrees = 0.5f;
+
+	/// <summary>Seconds without a touch before the car turns by itself, and how fast.</summary>
+	const float IdleBeforeSpin = 3f;
+	const float SpinSpeed = 18f;
+
+	// This client's own view of the car: the scene is view plumbing, rebuilt from the state, and holds no app state.
+	CarPreviewScene preview;
+
+	bool dragging;
+	Vector2 lastMouse;
+	RealTimeSince sinceTouched;
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( !Navi.IsViewer )
+		{
+			ViewModel.Tick();
+			Navi.Publish( ViewModel.UiState );
+		}
+
+		UpdatePreview();
+	}
+
+	void UpdatePreview()
+	{
+		if ( View is not { IsValid: true } || !UiState.HasAccess )
+			return;
+
+		preview ??= new CarPreviewScene();
+
+		// A hot reload rebuilds the panel tree, which gives this panel a new, empty ScenePanel while the scene above
+		// survives in the field. Point the view at the scene again.
+		if ( View.RenderScene != preview.Scene )
+			View.RenderScene = preview.Scene;
+
+		preview.Show( CarCatalog.Find( UiState.SelectedId ) );
+		UpdateDrag();
+
+		if ( !dragging && sinceTouched > IdleBeforeSpin )
+			preview.Yaw += SpinSpeed * Time.Delta;
+
+		preview.Update();
+	}
+
+	/// <summary>
+	/// While the mouse is held on the 3D view, turn the car with it: across turns it, up and down tilts the view.
+	/// </summary>
+	void UpdateDrag()
+	{
+		var pressed = View.HasActive;
+		var mouse = View.MousePosition * View.ScaleFromScreen;
+
+		if ( pressed && !dragging )
+		{
+			dragging = true;
+			lastMouse = mouse;
+		}
+		else if ( pressed )
+		{
+			var delta = mouse - lastMouse;
+			lastMouse = mouse;
+
+			preview.Yaw += delta.x * DragDegrees;
+			preview.Elevation += delta.y * DragDegrees;
+			sinceTouched = 0;
+		}
+		else
+		{
+			dragging = false;
+		}
+	}
+
+	/// <summary>
+	/// Zoom with the wheel while the mouse is over the 3D view. Anywhere else the wheel does what it did before.
+	/// </summary>
+	public override void OnMouseWheel( Vector2 value )
+	{
+		if ( preview is null || View is not { IsValid: true, HasHovered: true } || value.y == 0 )
+		{
+			base.OnMouseWheel( value );
+			return;
+		}
+
+		// Scrolling down moves the camera away.
+		preview.ZoomBy( value.y );
+		sinceTouched = 0;
+	}
+
+	public override void OnDeleted()
+	{
+		base.OnDeleted();
+
+		preview?.Destroy();
+		preview = null;
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}

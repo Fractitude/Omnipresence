@@ -11,7 +11,7 @@ player; see [currency.md](currency.md)).
 | `TxLeg` | `TransactionTypes.cs` | One movement: a `Party` to a `Party`, a `TransactionCurrency` (`Cash`, `Crypto`), an amount, a `TxKind`, a note and a ref (an order or item id). |
 | `Party` | `TransactionTypes.cs` | A player (`Party.Player( steamId )`) or a system party (`Party.System( id )`). |
 | `Parties` | `TransactionTypes.cs` | The system parties and their labels (below). |
-| `TxKind` | `TransactionTypes.cs` | Why: `OrderPayout`, `OrgShare`, `ShopPurchase`, `DepotPurchase`, `ExchangeSell`, `ExchangeBuy`, `CashOut`, `PlayerPayment`, `Fee`, `RegistrationFee`, `Refund`, `Other`. |
+| `TxKind` | `TransactionTypes.cs` | Why: `OrderPayout`, `OrgShare`, `ShopPurchase`, `DepotPurchase`, `CarPurchase`, `ExchangeSell`, `ExchangeBuy`, `CashOut`, `PlayerPayment`, `Fee`, `RegistrationFee`, `Refund`, `Other`. |
 | `TxResult` | `TransactionTypes.cs` | `Ok`, a `TxFailure` reason, a message for the player, the group id and what each leg moved. `ToCrimeResult()` turns it into a panel answer. |
 | `TransactionRules` | `TransactionRules.cs` | The pure part: `Validate` a leg, `Plan` a batch against the records, `Apply` it. Works on `ProgressRecord`s only. |
 | `Transactions` | `Transactions.cs` | The host part: finds the records, runs the rules, writes the history, the ledger and the stats log, tells the wallet. |
@@ -31,6 +31,7 @@ players' balances change by exactly the opposite of the sum over every system pa
 | `hush-shop` | Hush shop | Crypto spent in the Hush shop. |
 | `hardware-store` | Hardware Store | Dollars spent on hardware. |
 | `depot` | Depot | Dollars spent in the Depot. |
+| `car-dealership` | Car Dealership | Dollars spent on a car, and the refund if the car could not be delivered. |
 | `exchange` | Exchange | Both exchanges: the crypto taken, the dollars paid, and the fee it keeps. |
 | `government` | Government | Organization registration and its refund. |
 | `market` | Market | Reserved for the market. |
@@ -100,6 +101,7 @@ the next lines go to the next `n`. Host only. The stats log ([stats.md](stats.md
 | Hush shop | `Pay` to `hush-shop` |
 | Hardware store | `Pay` to `hardware-store` |
 | Depot | `Pay` to `depot` |
+| Car dealership | `Pay` to `car-dealership`, `Receive` from it as a `Refund` when the car can't be made (`CarDealer.Buy`) |
 | Organization registration fee and refund | `Pay` / `Receive` with `government` |
 | Payments app | `Transfer` player to player |
 

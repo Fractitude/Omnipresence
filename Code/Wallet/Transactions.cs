@@ -256,7 +256,7 @@ public static class Transactions
 	{
 		TxKind.PlayerPayment => StatMechanic.Payment,
 		TxKind.OrderPayout or TxKind.OrgShare => StatMechanic.OrgPayout,
-		TxKind.ShopPurchase or TxKind.DepotPurchase => StatMechanic.Shop,
+		TxKind.ShopPurchase or TxKind.DepotPurchase or TxKind.CarPurchase => StatMechanic.Shop,
 		TxKind.ExchangeSell or TxKind.ExchangeBuy or TxKind.CashOut => StatMechanic.Exchange,
 		TxKind.Fee or TxKind.RegistrationFee => StatMechanic.Fee,
 		TxKind.Refund => StatMechanic.Refund,

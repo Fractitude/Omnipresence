@@ -1,0 +1,213 @@
+CarDealership
+{
+	width: 620px;
+	height: 420px;
+	flex-direction: column;
+	padding: 12px;
+	gap: 8px;
+	background-color: #0f1318;
+	color: #dfe6ee;
+	font-size: 12px;
+
+	.message
+	{
+		color: #7d8794;
+		padding: 6px 2px;
+	}
+
+	.top
+	{
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		flex-shrink: 0;
+
+		.dealer-title
+		{
+			font-size: 14px;
+			font-weight: 700;
+		}
+
+		.dealer-balance
+		{
+			flex-shrink: 0;
+			white-space: nowrap;
+			color: #3dd68c;
+			font-weight: 700;
+		}
+	}
+
+	.body
+	{
+		flex-direction: row;
+		flex-grow: 1;
+		min-height: 0;
+		gap: 10px;
+	}
+
+	.garage
+	{
+		flex-direction: column;
+		flex-shrink: 0;
+		width: 190px;
+		gap: 4px;
+		overflow-y: scroll;
+
+		.car
+		{
+			flex-direction: row;
+			flex-shrink: 0;
+			justify-content: space-between;
+			align-items: center;
+			gap: 8px;
+			padding: 7px 9px;
+			border-radius: 6px;
+			background-color: #151b23;
+			border: 1px solid #222b37;
+			cursor: pointer;
+
+			&:hover
+			{
+				background-color: #1b2430;
+			}
+
+			&.selected
+			{
+				background-color: #1d3a5c;
+				border-color: #2b6cb0;
+			}
+
+			.car-name
+			{
+				font-weight: 700;
+			}
+
+			.car-price
+			{
+				flex-shrink: 0;
+				white-space: nowrap;
+				color: #3dd68c;
+
+				&.short
+				{
+					color: #7d8794;
+				}
+			}
+		}
+	}
+
+	.showroom
+	{
+		flex-direction: column;
+		flex-grow: 1;
+		min-width: 0;
+		gap: 6px;
+
+		.view
+		{
+			pointer-events: all;
+			flex-grow: 1;
+			flex-shrink: 1;
+			flex-basis: 150px;
+			min-height: 80px;
+			border-radius: 8px;
+			border: 1px solid #222b37;
+		}
+
+		.view-hint
+		{
+			flex-shrink: 0;
+			color: #5c6673;
+			font-size: 11px;
+		}
+
+		.details
+		{
+			flex-direction: column;
+			flex-shrink: 0;
+			gap: 4px;
+			padding: 10px;
+			border-radius: 8px;
+			background-color: #151b23;
+			border: 1px solid #222b37;
+
+			.details-top
+			{
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.details-name
+			{
+				font-size: 14px;
+				font-weight: 700;
+			}
+
+			.details-price
+			{
+				flex-shrink: 0;
+				color: #3dd68c;
+				font-weight: 700;
+			}
+
+			.details-description
+			{
+				color: #9aa5b3;
+			}
+
+			.notice
+			{
+				padding: 6px 8px;
+				border-radius: 6px;
+				background-color: #12281d;
+				color: #3dd68c;
+
+				&.error
+				{
+					background-color: #2a1414;
+					color: #ff8a80;
+				}
+			}
+
+			.buy-row
+			{
+				flex-direction: row;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+				margin-top: 4px;
+			}
+
+			.button
+			{
+				padding: 6px 12px;
+				border-radius: 6px;
+				background-color: #2f8f5b;
+				color: white;
+				font-weight: 700;
+				cursor: pointer;
+
+				&:hover
+				{
+					background-color: #3aa86c;
+				}
+
+				&.disabled
+				{
+					background-color: #222b37;
+					color: #7d8794;
+					cursor: default;
+				}
+			}
+
+			.bays
+			{
+				color: #7d8794;
+				font-size: 11px;
+				text-align: right;
+			}
+		}
+	}
+}

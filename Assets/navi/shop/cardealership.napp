@@ -1,0 +1,18 @@
+{
+  "Title": "Car Dealership",
+  "Description": "Browse the cars, look them over in 3D and buy one. It is delivered to the lot.",
+  "Icon": "directions_car",
+  "Color": "#b8472f",
+  "PanelType": "OmnipresenceApps.CarDealership",
+  "CanMinimize": true,
+  "CanMaximize": false,
+  "CanResize": false,
+  "Shared": true,
+  "Permissions": [],
+  "ComputerTags": [
+    "car-dealership"
+  ],
+  "IsSystem": false,
+  "__references": [],
+  "__version": 0
+}

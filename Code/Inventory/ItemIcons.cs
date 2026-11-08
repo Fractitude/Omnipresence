@@ -153,7 +153,7 @@ public static class ItemIcons
 	/// colliders, physics, network) are removed, so it is a picture and does nothing. Returns the bounds of what is
 	/// drawn, or null if the prefab doesn't load or draws nothing.
 	/// </summary>
-	static BBox? CreatePrefabContent( GameObject pivot, string prefabPath )
+	internal static BBox? CreatePrefabContent( GameObject pivot, string prefabPath )
 	{
 		if ( !ResourceLibrary.TryGet<PrefabFile>( prefabPath, out var file ) )
 			return null;
