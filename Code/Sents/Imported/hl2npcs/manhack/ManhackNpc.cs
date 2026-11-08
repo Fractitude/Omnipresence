@@ -47,7 +47,6 @@ public sealed partial class ManhackNpc : Npc, Component.ICollisionListener
 	/// <summary>How far from where it was spawned it drifts about with no one to chase.</summary>
 	[Property, Group( "Flight" )] public float WanderRadius { get; set; } = 400f;
 
-	[Property, Group( "Effects" )] public SkinnedModelRenderer Renderer { get; set; }
 	/// <summary>HL2's six pieces it breaks into (models/gibs/manhack_gib01-06). Listed here so they ship with it.</summary>
 	[Property, Group( "Effects" )] public List<Model> Gibs { get; set; } = new();
 	[Property, Group( "Sounds" )] public SoundEvent EngineSound { get; set; }
@@ -1104,7 +1103,7 @@ public sealed partial class ManhackNpc : Npc, Component.ICollisionListener
 			if ( bone is null ) continue;
 			var local = bone.LocalTransform;
 			local = local.WithRotation( local.Rotation * Rotation.FromAxis( Vector3.Forward, sign * 70f * _panels ) );
-			model.SetBoneOverride( bone.Index, ref local );
+			model.SetBoneOverride( bone.Index, in local );
 		}
 	}
 
