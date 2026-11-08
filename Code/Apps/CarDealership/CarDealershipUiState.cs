@@ -17,7 +17,17 @@ public sealed record CarDealershipUiState
 	/// <summary>Shown instead of the dealership when there is no access.</summary>
 	public string Message { get; init; } = "";
 
+	/// <summary>The seated player's cash. Empty with nobody seated: the rest of the screen is the same for everyone.</summary>
 	public string Balance { get; init; } = "";
+
+	/// <summary>A player is seated and their account is loaded, so a car can be bought.</summary>
+	public bool Seated { get; init; }
+
+	/// <summary>
+	/// How the picture is turned, shared so every screen shows the car the same way. Sent without a new
+	/// <see cref="Revision"/>: only the picture follows it, the panel is not drawn again.
+	/// </summary>
+	public CarView View { get; init; } = CarView.Default;
 
 	/// <summary>The car in the showroom, shared with everyone watching the screen. Empty before the first is picked.</summary>
 	public string SelectedId { get; init; } = "";

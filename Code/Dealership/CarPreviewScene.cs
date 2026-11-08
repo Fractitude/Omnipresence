@@ -15,12 +15,12 @@ public sealed class CarPreviewScene
 	/// <summary>Distance, in car sizes, at which the camera starts.</summary>
 	const float FitDistance = 1.6f;
 
-	const float MinZoom = 0.4f;
-	const float MaxZoom = 1.6f;
-	const float WheelZoom = 1.1f;
+	public const float MinZoom = 0.4f;
+	public const float MaxZoom = 1.6f;
+	public const float WheelZoom = 1.1f;
 
-	const float MinElevation = 2f;
-	const float MaxElevation = 60f;
+	public const float MinElevation = 2f;
+	public const float MaxElevation = 60f;
 
 	// Not readonly: a hot reload would reset these (AGENTS.md, "Static state and hot reload").
 	static HashSet<Scene> scenes = new();

@@ -11,7 +11,7 @@ is made at a free **delivery point** near the computer, on the ground, facing th
 | **The place** | `Code/Dealership/CarDelivery.cs` | Finds the delivery points, tells if one is free, and works out where the car stands. |
 | **The picture** | `Code/Dealership/CarPreviewScene.cs` | The 3D scene the panel draws. |
 | **The paint** | `Code/Vehicles/CarPaint.cs` | A component on the car prefab that tints its body. See "Paint". |
-| **The app** | `Code/Apps/CarDealership/` | `CarDealershipViewModel` (the logic, host only), `CarDealershipUiState` (what is drawn), `CarDealership.razor` (the panel). Shared like the Hardware Store. |
+| **The app** | `Code/Apps/CarDealership/` | `CarDealershipViewModel` (the logic, host only), `CarShowroom` (what is on show, per computer), `CarDealershipUiState` (what is drawn), `CarDealership.razor` (the panel). Shared like the Hardware Store. |
 
 ## Setting a lot up
 
@@ -52,6 +52,19 @@ The car is made like any sent (`GameObject.Clone` of its prefab, then `NetworkSp
 `DefaultOwner` is the buyer ([ownership.md](ownership.md)). The title is written under the car's object id, which changes every
 session, and a bought car is not saved, so the record outlives the car; there is no car saving yet.
 
+## What is on show is the computer's
+
+The screen is the same for everyone and is never "locked": with nobody seated it still shows the cars, the colours and the turning
+car (the old "Sit down to use the terminal." is gone). The only thing that is the seated player's is the wallet (`Balance`, the
+prices that are too much, and the Buy button, which says "Sit down to buy" without a seat). What is on show lives in a
+`CarShowroom` (`Code/Apps/CarDealership/CarShowroom.cs`), one per computer in a static dictionary keyed by the computer's object id,
+and not in the view model, so:
+
+- whoever sits down finds the car, the colours and the turning as the last person left them, and a window closed and opened again
+  does too (a hot reload does not clear it either);
+- **each car keeps its own colours** (`CarShowroom.PicksOf( carId )`): going to another car and back finds them as they were left,
+  nothing is reset when the car changes. "Stock" puts back only the car on show.
+
 ## The 3D picture
 
 `CarPreviewScene` is a small scene of its own (a pivot, a light and a camera) drawn by a `ScenePanel` that is given the scene
@@ -60,9 +73,14 @@ before it exists (AGENTS.md, "UI pitfalls"). The car in it is a copy of the pref
 `CharacterMenu.IsPreview` asks, so `Hud.Applies` and the Wired system keep out of it.
 
 - **Which car is shown is shared** (`CarDealershipUiState.SelectedId`): everyone near the screen sees the car the player picked.
-- **Turning is not.** Dragging on the picture turns the car (across) and tilts the view (up and down), the wheel zooms, and the car
-  turns by itself after 3 seconds untouched. All of it is that client's own, like a scroll position: a player watching the
-  screen sees the car they would see, not where the seated player has turned it.
+- **Turning is shared too.** Dragging on the picture turns the car (across) and tilts the view (up and down), the wheel zooms,
+  and the car turns by itself after 3 seconds untouched, and every screen shows the same. The host owns it
+  (`CarShowroom.Yaw/Elevation/Zoom`, and `CarDealershipViewModel.TickView` turns the car by itself, whoever is watching). A
+  client that turns it draws its own turning at once and sends it (`view` action, yaw, elevation and zoom, at most every
+  0.06 s, clamped on the host), then goes back to following the shared view 0.5 s after its last touch. The host sends the view
+  in `CarDealershipUiState.View` without a new `Revision` (the panel is not drawn again, only the picture moves): 16 times a
+  second while someone turns it and 4 a second while it turns by itself, and a screen carries on turning it at the same speed
+  between two and eases to each one, so it looks smooth.
 - A sent's assets are mounted on each client the first time its car is shown; the car appears when they are there.
 - The picture keeps the car's `CarPaint` (`ItemIcons.CreatePrefabContent( …, keepPaint: true )`), so it is painted by the same code as the car in the world, and `CarPreviewScene.Show( car, paint )` sets the colour on it.
 - The wheels of a car posed by its code (the buggy's bones) are shown as the prefab has them.
@@ -91,8 +109,8 @@ with the prefab as entries naming the stock materials: the same look, but a diff
   (`CarPaint.HasTrimIn`) and the app shows no Trim swatch for the rest; the host also ignores a trim pick for them.
 - **The stock look is the prefab's** (`CarCatalog.StockLook` reads it). A car whose prefab has no `CarPaint` (the buggy) cannot be
   painted, and the app shows no colour controls for it.
-- **The player picks in the app** (`paint` action: the part, `body`, `trim` or `glass`, and a colour or `stock`), kept by the
-  host's view model per selected car (picking another car goes back to its own look) and published in `CarDealershipUiState`,
+- **Anyone at the screen picks in the app** (`paint` action: the part, `body`, `trim` or `glass`, and a colour or `stock`), kept by the
+  host per car, in the computer's `CarShowroom` (picking another car keeps the colours of both) and published in `CarDealershipUiState`,
   so the preview and everyone watching show it. Body and trim are made opaque on the host.
   - **Body and trim use the engine's `ColorPickerControl`**: clicking a swatch opens it over the picture. It edits a
     `CarColorHolder` (the control needs a serialized property), and the panel sends what is picked to the host while it is

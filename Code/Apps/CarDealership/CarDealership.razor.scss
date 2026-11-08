@@ -34,6 +34,12 @@ CarDealership
 			white-space: nowrap;
 			color: #3dd68c;
 			font-weight: 700;
+
+			&.idle
+			{
+				color: #7d8794;
+				font-weight: 400;
+			}
 		}
 	}
 

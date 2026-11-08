@@ -5,8 +5,9 @@
 @* The game's own app for the car dealership's computer, described by Assets/navi/shop/cardealership.napp. Not a system *@
 @* app: the computer needs the tag `store` (the manifest lists it too), and the app refuses to work on any other. *@
 @* It is shared: the host's copy takes the money and makes the car at a free delivery point, and everyone near the screen *@
-@* watches. The 3D picture (CarPreviewScene) is each client's own view: the car shown is shared, but turning and zooming *@
-@* it is not. See docs/car-dealership.md. *@
+@* watches. What is on show is the computer's, not the player's (CarShowroom): the car, the colours picked for each car, and *@
+@* how the 3D picture (CarPreviewScene) is turned and zoomed, which includes the car turning by itself. Only the wallet is *@
+@* the seated player's, so with nobody seated the screen is the same. See docs/car-dealership.md. *@
 
 <root>
 	@if ( !UiState.HasAccess )
@@ -17,7 +18,7 @@
 	{
 		<div class="top">
 			<div class="dealer-title">Car Dealership</div>
-			<div class="dealer-balance">@UiState.Balance</div>
+			<div class="dealer-balance @( UiState.Seated ? "" : "idle" )">@( UiState.Balance != "" ? UiState.Balance : "Sit down to buy" )</div>
 		</div>
 
 		<div class="body">
@@ -102,9 +103,9 @@
 						}
 
 						<div class="buy-row">
-							<div class="button @( selected.CanAfford && !UiState.Busy ? "" : "disabled" )"
+							<div class="button @( selected.CanAfford && UiState.Seated && !UiState.Busy ? "" : "disabled" )"
 							     @onclick=@( () => Navi.Act( CarDealershipViewModel.BuyAction, selected.Id ) )>
-								@( UiState.Busy ? "Please wait..." : $"Buy for {selected.Price}" )
+								@( !UiState.Seated ? "Sit down to buy" : UiState.Busy ? "Please wait..." : $"Buy for {selected.Price}" )
 							</div>
 							<div class="bays">@UiState.Bays</div>
 						</div>
@@ -228,16 +229,32 @@
 	/// <summary>Degrees the car turns per pixel the mouse is dragged, across and up.</summary>
 	const float DragDegrees = 0.5f;
 
-	/// <summary>Seconds without a touch before the car turns by itself, and how fast.</summary>
-	const float IdleBeforeSpin = 3f;
-	const float SpinSpeed = 18f;
+	/// <summary>Seconds after this client last turned or zoomed the car during which its own view is drawn.</summary>
+	const float LocalHold = 0.5f;
 
-	// This client's own view of the car: the scene is view plumbing, rebuilt from the state, and holds no app state.
+	/// <summary>How often this client's turning is sent to the host while it changes, in seconds.</summary>
+	const float ViewSendInterval = 0.06f;
+
+	/// <summary>How fast the picture eases to the shared view, per second.</summary>
+	const float Follow = 12f;
+
+	// This client's own copy of the 3D picture: the scene is view plumbing, rebuilt from the state, and holds no app state.
 	CarPreviewScene preview;
 
 	bool dragging;
 	Vector2 lastMouse;
-	RealTimeSince sinceTouched;
+
+	// What this client is turning it to while someone here is doing it, and when that last changed.
+	float localYaw, localElevation, localZoom = 1f;
+	RealTimeSince sinceLocal = 1000;
+	RealTimeSince sinceViewSent = 1000;
+	bool localUnsent;
+
+	// What is drawn: it eases toward the shared view (the host's), so a screen that is a little late doesn't jump.
+	float shownYaw = 210f, shownElevation = 18f, shownZoom = 1f;
+	bool shownKnown;
+	CarDealershipUiState lastState;
+	RealTimeSince sinceArrived;
 
 	public override void Tick()
 	{
@@ -266,12 +283,105 @@
 			View.RenderScene = preview.Scene;
 
 		preview.Show( CarCatalog.Find( UiState.SelectedId ), ShownLook() );
+		UpdateView();
+
+		preview.Yaw = shownYaw;
+		preview.Elevation = shownElevation;
+		preview.Zoom = shownZoom;
+		preview.Update();
+	}
+
+	/// <summary>
+	/// Work out how the picture is turned. The shared view is the host's (the car turns by itself there too); this client's
+	/// own turning is drawn at once while it is being done and sent to the host, and then the shared one takes over again.
+	/// </summary>
+	void UpdateView()
+	{
 		UpdateDrag();
 
-		if ( !dragging && sinceTouched > IdleBeforeSpin )
-			preview.Yaw += SpinSpeed * Time.Delta;
+		if ( sinceLocal < LocalHold )
+		{
+			shownYaw = localYaw;
+			shownElevation = localElevation;
+			shownZoom = localZoom;
+		}
+		else
+		{
+			var yaw = 0f;
+			CarView shared;
 
-		preview.Update();
+			if ( Navi.IsViewer )
+			{
+				var state = UiState;
+
+				if ( !ReferenceEquals( state, lastState ) )
+				{
+					lastState = state;
+					sinceArrived = 0;
+				}
+
+				shared = state.View ?? CarView.Default;
+
+				// Between two updates the car carries on turning by itself, as it does on the host.
+				yaw = shared.Yaw + (shared.Spinning ? CarDealershipViewModel.SpinSpeed * sinceArrived : 0f);
+			}
+			else
+			{
+				shared = ViewModel.LiveView;
+				yaw = shared.Yaw;
+			}
+
+			if ( !shownKnown || !Navi.IsViewer )
+			{
+				shownYaw = yaw;
+				shownElevation = shared.Elevation;
+				shownZoom = shared.Zoom;
+				shownKnown = true;
+			}
+			else
+			{
+				var t = 1f - System.MathF.Exp( -Follow * Time.Delta );
+
+				shownYaw += AngleDelta( shownYaw, yaw ) * t;
+				shownElevation += (shared.Elevation - shownElevation) * t;
+				shownZoom += (shared.Zoom - shownZoom) * t;
+			}
+
+			shownYaw %= 360f;
+		}
+
+		if ( localUnsent && sinceViewSent > ViewSendInterval )
+		{
+			localUnsent = false;
+			sinceViewSent = 0;
+			Navi.Act( CarDealershipViewModel.ViewAction, Number( localYaw ), Number( localElevation ), Number( localZoom ) );
+		}
+	}
+
+	static string Number( float value ) => value.ToString( "0.###", System.Globalization.CultureInfo.InvariantCulture );
+
+	/// <summary>The way round, in degrees, from one angle to another.</summary>
+	static float AngleDelta( float from, float to )
+	{
+		var delta = (to - from) % 360f;
+
+		if ( delta > 180f )
+			delta -= 360f;
+		else if ( delta < -180f )
+			delta += 360f;
+
+		return delta;
+	}
+
+	/// <summary>This client starts turning it: from what is drawn, so nothing jumps.</summary>
+	void BeginLocal()
+	{
+		if ( sinceLocal < LocalHold )
+			return;
+
+		localYaw = shownYaw;
+		localElevation = shownElevation;
+		localZoom = shownZoom;
 	}
 
 	/// <summary>
@@ -286,20 +396,28 @@
 		{
 			dragging = true;
 			lastMouse = mouse;
+			BeginLocal();
 		}
 		else if ( pressed )
 		{
 			var delta = mouse - lastMouse;
 			lastMouse = mouse;
 
-			preview.Yaw += delta.x * DragDegrees;
-			preview.Elevation += delta.y * DragDegrees;
-			sinceTouched = 0;
+			localYaw += delta.x * DragDegrees;
+			localElevation = System.Math.Clamp( localElevation + delta.y * DragDegrees, CarPreviewScene.MinElevation,
+				CarPreviewScene.MaxElevation );
+			Touched();
 		}
 		else
 		{
 			dragging = false;
 		}
+	}
+
+	void Touched()
+	{
+		sinceLocal = 0;
+		localUnsent = true;
 	}
 
 	/// <summary>
@@ -314,8 +432,10 @@
 		}
 
 		// Scrolling down moves the camera away.
-		preview.ZoomBy( value.y );
-		sinceTouched = 0;
+		BeginLocal();
+		localZoom = System.Math.Clamp( localZoom * System.MathF.Pow( CarPreviewScene.WheelZoom, value.y ),
+			CarPreviewScene.MinZoom, CarPreviewScene.MaxZoom );
+		Touched();
 	}
 
 	public override void OnDeleted()
