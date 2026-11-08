@@ -97,6 +97,9 @@ public sealed class DepotViewModel
 		if ( where == Store && !StoreNear( seat ) )
 			return;
 
+		if ( where == Home && !HasMailbox( seat ) )
+			return;
+
 		destination = where;
 	}
 
@@ -119,6 +122,10 @@ public sealed class DepotViewModel
 	bool StoreNear( Connection seat ) =>
 		CanWork( seat ) && Terminal() is { } place && DeliverySpot.HasPointNear( place.Scene, place.At );
 
+	/// <summary>Whether the seated player owns a mailbox, which a home delivery needs.</summary>
+	bool HasMailbox( Connection seat ) =>
+		seat is not null && Terminal() is { } place && DeliverySpot.OwnsMailbox( place.Scene, (ulong)seat.SteamId );
+
 	/// <summary>
 	/// Where the next order goes: the store when that is what was chosen and a bay is in reach, home otherwise.
 	/// Collecting at the store is the default, so a computer with no bay near it mails orders without the player having
@@ -134,6 +141,7 @@ public sealed class DepotViewModel
 			seat is null ? default : WiredTravel.PlaceOf( seat ),
 			notice,
 			destination,
+			seat is not null && HasMailbox( seat ),
 			// Countdowns redraw once a second, while something is on its way.
 			seat is not null && PlacedObjectRegistry.OnTheWay( (ulong)seat.SteamId ).Count > 0 ? WorldClock.Now : 0,
 			PlacedObjectRegistry.Data.Deliveries.Count ).ToString();
@@ -169,6 +177,7 @@ public sealed class DepotViewModel
 			: new List<DeliverySpot.DeliveryPlace>();
 
 		var store = WhereNow( bays.Count > 0 ) == Store;
+		var mailbox = HasMailbox( seat );
 
 		return state with
 		{
@@ -179,10 +188,13 @@ public sealed class DepotViewModel
 			StoreDetail = bays.Count == 0
 				? "There is no delivery point near this computer."
 				: "Handed over now.",
-			HomeDetail = $"Mailed to your mailbox in "
-			             + $"{Minutes( PlaceableCatalog.All.Min( x => x.DeliverSeconds ))}-"
-			             + $"{Minutes( PlaceableCatalog.All.Max( x => x.DeliverSeconds ))} mins.",
-			Shop = PlaceableCatalog.All.Select( x => BuildRow( seat, x, store ) ).ToList(),
+			HomeAvailable = mailbox,
+			HomeDetail = !mailbox
+				? "You don't own a mailbox."
+				: $"Mailed to your mailbox in "
+				  + $"{Minutes( PlaceableCatalog.All.Min( x => x.DeliverSeconds ))}-"
+				  + $"{Minutes( PlaceableCatalog.All.Max( x => x.DeliverSeconds ))} mins.",
+			Shop = PlaceableCatalog.All.Select( x => BuildRow( seat, x, store, mailbox ) ).ToList(),
 			Incoming = PlacedObjectRegistry.OnTheWay( (ulong)seat.SteamId )
 				.Select( x => new DepotIncomingRow(
 					PlaceableCatalog.Find( x.Placeable )?.Name ?? "Order",
@@ -192,9 +204,12 @@ public sealed class DepotViewModel
 		};
 	}
 
-	static DepotRow BuildRow( Connection seat, Placeable item, bool store )
+	static DepotRow BuildRow( Connection seat, Placeable item, bool store, bool mailbox )
 	{
 		var reason = PlaceableShop.WhyNot( seat, item ) ?? "";
+
+		if ( !store && !mailbox )
+			reason = "You have no mailbox to deliver to.";
 		var delivery = store
 			? "At the delivery point, now"
 			: $"Mailed, in {InteractionSetup.Countdown( item.DeliverSeconds )}";

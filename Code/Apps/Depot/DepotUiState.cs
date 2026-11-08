@@ -37,6 +37,9 @@ public sealed record DepotUiState
 	/// <summary>How store pickup works here, worded for the panel, or why it is not offered.</summary>
 	public string StoreDetail { get; init; } = "";
 
+	/// <summary>True when the player owns a mailbox, so an order can be mailed home.</summary>
+	public bool HomeAvailable { get; init; }
+
 	/// <summary>How a home delivery works, worded for the panel.</summary>
 	public string HomeDetail { get; init; } = "";
 

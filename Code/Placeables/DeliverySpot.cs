@@ -93,6 +93,10 @@ public static class DeliverySpot
 		scene.IsValid() && scene.GetAllObjects( true ).Any(
 			x => x.Tags.Has( Tag ) && x.WorldPosition.Distance( around ) <= range );
 
+	/// <summary>Whether this player (or their organization) owns a mailbox, which a home delivery needs.</summary>
+	public static bool OwnsMailbox( Scene scene, ulong owner ) =>
+		scene.IsValid() && scene.GetAll<MailBox>().Any( x => x.IsTheirs( owner ) );
+
 	/// <summary>The delivery points within range of a terminal, nearest first: the store's bays.</summary>
 	public static List<DeliveryPlace> StorePlaces( Scene scene, Vector3 around, float range = Range )
 	{

@@ -47,6 +47,9 @@ public static class PlaceableShop
 		if ( store && (around is null || !DeliverySpot.HasPointNear( scene, at )) )
 			return CrimeResult.Fail( "There is no delivery point near this computer." );
 
+		if ( !store && !DeliverySpot.OwnsMailbox( scene, (ulong)buyer.SteamId ) )
+			return CrimeResult.Fail( "You have no mailbox to deliver to." );
+
 		if ( WhyNot( buyer, item ) is { } reason )
 			return CrimeResult.Fail( reason );
 

@@ -47,7 +47,7 @@
 					<div class="place-title"><i>storefront</i>Collect at the store</div>
 					<div class="place-note">@UiState.StoreDetail</div>
 				</div>
-				<div class="place @( UiState.StoreChosen ? "" : "chosen" )"
+				<div class="place @( UiState.StoreChosen ? "" : "chosen" ) @( UiState.HomeAvailable ? "" : "disabled" )"
 				     @onclick=@( () => Navi.Act( DepotViewModel.DeliverAction, DepotViewModel.Home ) )>
 					<div class="place-title"><i>home</i>Deliver home</div>
 					<div class="place-note">@UiState.HomeDetail</div>
