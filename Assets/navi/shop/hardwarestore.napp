@@ -10,6 +10,9 @@
   "MinSize": "360,300",
   "Shared": true,
   "Permissions": [],
+  "ComputerTags": [
+    "store"
+  ],
   "IsSystem": false,
   "__references": [],
   "__version": 0

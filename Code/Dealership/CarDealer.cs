@@ -17,7 +17,7 @@ public static class CarDealer
 	public const string NoPoint = "There is no delivery point near this computer.";
 
 	/// <summary>The tag the dealership's computer has, and the app's manifest lists as its <c>ComputerTags</c>.</summary>
-	public const string ComputerTag = "car-dealership";
+	public const string ComputerTag = "store";
 
 	/// <summary>Does this computer carry the tag? The app only works on one that does.</summary>
 	public static bool IsDealership( NaviComputer computer ) =>

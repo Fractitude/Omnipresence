@@ -49,9 +49,9 @@ Part ids are saved in player progress, so never rename one.
 
 ## Computer Shop (the app `Code/Apps/HardwareStore`)
 
-A Navi computer in the store, with the tag `hardware-store` in its `ComputerTags` (and the app in its installed apps or `OnlyApps`). `home.scene` has one named "Hardware Store Computer" as a placeholder. Move it into the real store.
+A Navi computer in the store, with the tag `store` in its `ComputerTags` (and the app in its installed apps or `OnlyApps`). `home.scene` has one named "Hardware Store Computer" as a placeholder. Move it into the real store.
 
-- **Tag.** The computer has the tag `hardware-store` (set it on the computer's `ComputerTags`, in the Apps section of the Inspector). The app's manifest lists the same tag in `ComputerTags`, so Packages doesn't offer it and `Install` refuses it on any computer without the tag. See "Computer tags" in `Libraries/navi/README.md`.
+- **Tag.** Every store app (Computer Shop, Hardware Store, Car Dealership) requires the same `store` tag. The computer has the tag `store` (set it on the computer's `ComputerTags`, in the Apps section of the Inspector). The app's manifest lists the same tag in `ComputerTags`, so Packages doesn't offer it and `Install` refuses it on any computer without the tag. See "Computer tags" in `Libraries/navi/README.md`.
 - **Kiosk.** Set in the computer's "Kiosk mode" section of the Inspector, not by code: `KioskMode` and `HideTaskbar` on, `OnlyApps` just the store app (`navi/shop/computershop.napp`, no other apps, not even Settings or Packages) and `OpenApp` the same, so it opens maximized at start and can't be closed. This is a Navi feature, see "Kiosk computers" in `Libraries/navi/README.md`. The app also refuses to work on a computer without the tag: tags only limit installing, and a scene can still list the app on another computer.
 - **Shop tab.** Lists in-stock parts and special orders. Buy takes the dollars and puts a package on its way.
 - **Orders tab.** Your packages on their way, with a countdown.

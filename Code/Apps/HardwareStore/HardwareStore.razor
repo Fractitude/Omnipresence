@@ -2,7 +2,7 @@
 @inherits NaviApp
 @namespace OmnipresenceApps
 
-@* The game's own app for the store's computer. Not a system app: the computer has the tag `hardware-store` (the *@
+@* The game's own app for the store's computer. Not a system app: the computer has the tag `store` (the *@
 @* manifest lists it too), and the app refuses to work on any other computer. Whether it is also a kiosk is the computer's own *@
 @* Kiosk mode settings in the Inspector. Described by *@
 @* Assets/navi/shop/computershop.napp (the Computer Shop). *@
@@ -225,7 +225,7 @@
 	bool AtStoreTerminal() =>
 		GameAppSeat.ComputerOf( this )?.ComputerTags?.Any( x => string.Equals( x?.Trim(), StoreTag, System.StringComparison.OrdinalIgnoreCase ) ) == true;
 
-	const string StoreTag = "hardware-store";
+	const string StoreTag = "store";
 
 	Connection GetSeat() => GameAppSeat.UserOf( this );
 

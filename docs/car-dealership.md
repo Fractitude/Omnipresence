@@ -14,7 +14,7 @@ is made at a free **delivery point** near the computer, on the ground, facing th
 
 ## Setting a lot up
 
-1. Give the computer the **computer tag** `car-dealership` (Inspector, Apps section, `ComputerTags`). The manifest lists the same
+1. Give the computer the **computer tag** `store` (Inspector, Apps section, `ComputerTags`). The manifest lists the same
    tag, so Packages doesn't offer the app and `Install` refuses it on any other computer, and the app itself refuses to work (and
    `CarDealer` to sell) on a computer without it.
 2. Put the app on the computer: list `navi/shop/cardealership.napp` in `InstalledApps` (or, for a kiosk, in `OnlyApps` and
