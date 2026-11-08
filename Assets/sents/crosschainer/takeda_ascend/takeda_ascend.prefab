@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.88235,0.73333,0.27451,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 470,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 12.493441
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "49efdc77-b4f9-50bd-8619-a25b83b24a8d",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.88235,0.73333,0.27451,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1800,7 +1813,22 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "9": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                },
+                "27": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                },
+                "59": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "e5288f4b-6c9c-434f-bfd5-93bd44ed9aec",
               "Path": "drift_district/project/toyota_altezza/body.vmdl"

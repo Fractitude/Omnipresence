@@ -48,7 +48,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.70588,0.22745,0.25098,1",
         "PopupAngle": 45,
         "PopupLights": {
           "_type": "gameobject",
@@ -80,6 +79,20 @@
           }
         ],
         "WheelRadius": 12.112453
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "e24aaf3d-cfa6-5557-b38a-8daa79fbf381",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.70588,0.22745,0.25098,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1414,7 +1427,18 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "22": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                },
+                "25": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "8aa7dfab-9f28-4ad4-a45b-9d57de90ab2d",
               "Path": "drift_district/project/mazda_rx7_fc/body.vmdl"

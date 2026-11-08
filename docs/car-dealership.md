@@ -10,6 +10,7 @@ is made at a free **delivery point** near the computer, on the ground, facing th
 | **The sale** | `Code/Dealership/CarDealer.cs` | `CarDealer.Buy( buyer, car, around )`, host only: cash is checked, a free point is found, the money is taken (`Transactions.Pay` to `car-dealership`, kind `CarPurchase`), the car is made and the buyer gets the title. If the car can't be made the money is paid back (`Receive`, kind `Refund`). Logged as a `purchase` of kind `car` in the stats log. |
 | **The place** | `Code/Dealership/CarDelivery.cs` | Finds the delivery points, tells if one is free, and works out where the car stands. |
 | **The picture** | `Code/Dealership/CarPreviewScene.cs` | The 3D scene the panel draws. |
+| **The paint** | `Code/Vehicles/CarPaint.cs` | A component on the car prefab that tints its body. See "Paint". |
 | **The app** | `Code/Apps/CarDealership/` | `CarDealershipViewModel` (the logic, host only), `CarDealershipUiState` (what is drawn), `CarDealership.razor` (the panel). Shared like the Hardware Store. |
 
 ## Setting a lot up
@@ -63,9 +64,30 @@ before it exists (AGENTS.md, "UI pitfalls"). The car in it is a copy of the pref
   turns by itself after 3 seconds untouched. All of it is that client's own, like a scroll position: a player watching the
   screen sees the car they would see, not where the seated player has turned it.
 - A sent's assets are mounted on each client the first time its car is shown; the car appears when they are there.
+- The picture keeps the car's `CarPaint` (`ItemIcons.CreatePrefabContent( …, keepPaint: true )`), so it is painted by the same code as the car in the world, and `CarPreviewScene.Show( car, paint )` sets the colour on it.
 - The wheels of a car posed by its code (the buggy's bones) are shown as the prefab has them.
+
+## Paint
+
+`CarPaint` (`Code/Vehicles/CarPaint.cs`, "Car Paint" in the component list) is on every crosschainer car prefab, after
+`CuratedVehicle`. It copies the car's `primary` materials once, when the car starts, and sets their `g_vColorTint` to `Paint`;
+the `secondary` ones get `Secondary` (dark grey). It does it again only when `Paint` changes (a `[Change]` handler), never every
+frame, and it looks again for up to 3 seconds if the model was not loaded at start. It does not run in the editor, since an
+override made there would be saved into the prefab.
+
+- **The stock colour is `Paint` on the prefab**, set in the inspector (`CarCatalog.StockPaint` reads it). A car whose prefab has
+  no `CarPaint` (the buggy) cannot be painted, and the app shows no swatches for it.
+- **The player picks in the app** (`paint` action, one `#rrggbb` argument or `stock`), kept by the host's view model per selected
+  car (picking another car goes back to its own colour) and published as `CarDealershipUiState.Paint`, so the preview and
+  everyone watching show it. The buy takes the colour on the screen when the button was pressed.
+- **A bought car gets it** through `CarDealer.Buy( …, paint )`, set on the cloned `CarPaint` before `NetworkSpawn`, so it is
+  synced (`Sync( FromHost )`) with the car.
+- **The windows are clear in the prefab**, not in code: each window slot of a car's body renderer has `vehicles/shared/clear_glass.vmat`
+  (the `drift_lens` shader, near transparent) as a material override. A new car needs the same on its window slots (the slots whose
+  material uses `drift_glass`, or is `dark_cabin.vmat`); copy it from an existing prefab.
+- `CuratedVehicle` only does the lamps now (headlight and taillight emission, set when it changes).
 
 ## Security
 
-The panel sends only a car id (`select`, `buy`). The price, the cash, the tag and the room are all checked on the host, and the
+The panel sends only a car id (`select`, `buy`) and a colour (`paint`, parsed as a colour and made opaque). The price, the cash, the tag and the room are all checked on the host, and the
 buyer is always the player in the computer's seat. No car, bay or price comes from a client.

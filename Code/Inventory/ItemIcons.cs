@@ -151,9 +151,10 @@ public static class ItemIcons
 	/// <summary>
 	/// Put a copy of a prefab on the pivot, centred on it, with only what is drawn kept: its game components (pickup,
 	/// colliders, physics, network) are removed, so it is a picture and does nothing. Returns the bounds of what is
-	/// drawn, or null if the prefab doesn't load or draws nothing.
+	/// drawn, or null if the prefab doesn't load or draws nothing. <paramref name="keepPaint"/> keeps a car's
+	/// <see cref="CarPaint"/> too.
 	/// </summary>
-	internal static BBox? CreatePrefabContent( GameObject pivot, string prefabPath )
+	internal static BBox? CreatePrefabContent( GameObject pivot, string prefabPath, bool keepPaint = false )
 	{
 		if ( !ResourceLibrary.TryGet<PrefabFile>( prefabPath, out var file ) )
 			return null;
@@ -167,7 +168,8 @@ public static class ItemIcons
 
 		foreach ( var component in clone.Components.GetAll( FindMode.EverythingInSelfAndDescendants ).ToList() )
 		{
-			if ( component is not Renderer )
+			// A car's paint is part of how it is drawn (CarPaint), so the dealership's picture keeps it.
+			if ( component is not Renderer && !(keepPaint && component is CarPaint) )
 				component.Destroy();
 		}
 

@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.83529,0.41961,0.14118,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 380,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 13.030633
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "7c2162f3-2b6d-518a-a167-27a56b633760",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.83529,0.41961,0.14118,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1148,7 +1161,14 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "6": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "8220cdbf-edfe-4ea1-857a-612ee3b51028",
               "Path": "drift_district/project/nissan_datsun_240z/body.vmdl"

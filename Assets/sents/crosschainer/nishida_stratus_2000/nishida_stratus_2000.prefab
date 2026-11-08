@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.68235,0.72941,0.76863,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 390,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 13.240232
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "048fc796-6809-5d50-aa9c-a73461441cfa",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.68235,0.72941,0.76863,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1409,7 +1422,14 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "3": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "85a45d12-302a-43c4-8dde-ed8202f4cf69",
               "Path": "drift_district/project/nissan_skyline2000/body.vmdl"

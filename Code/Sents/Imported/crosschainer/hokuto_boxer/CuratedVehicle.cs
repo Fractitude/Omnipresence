@@ -24,7 +24,6 @@ public sealed partial class CuratedVehicle : Component, IVehicleGauges
 	[Property] public string EngineSound { get; set; }
 	[Property] public Vector3[] ExhaustOutlets { get; set; }
 	[Property] public Vector3[] ExhaustDirections { get; set; }
-	[Property, Sync( SyncFlags.FromHost )] public Color Paint { get; set; } = Color.Red;
 	[Sync( SyncFlags.FromHost )] public float Rpm { get; set; } = 1000;
 	[Sync( SyncFlags.FromHost )] public int Gear { get; set; } = 1;
 	[Sync( SyncFlags.FromHost )] public int Mode { get; set; } = 1;

@@ -47,6 +47,28 @@
 						</div>
 						<div class="details-description">@selected.Description</div>
 
+						@if ( UiState.CanPaint )
+						{
+							<div class="paint-row">
+								<div class="paint-label">Paint</div>
+								<div class="swatch @( UiState.Paint == UiState.StockPaint ? "selected" : "" )"
+								     style="background-color: @UiState.StockPaint"
+								     @onclick=@( () => Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.StockArg ) )>
+								</div>
+
+								@foreach ( var hex in PaintColors )
+								{
+									var color = hex;
+
+									<div @key=@color
+									     class="swatch @( string.Equals( UiState.Paint, color, System.StringComparison.OrdinalIgnoreCase ) ? "selected" : "" )"
+									     style="background-color: @color"
+									     @onclick=@( () => Navi.Act( CarDealershipViewModel.PaintAction, color ) )>
+									</div>
+								}
+							</div>
+						}
+
 						@if ( UiState.Notice != "" )
 						{
 							<div class="notice @( UiState.NoticeIsError ? "error" : "" )">@UiState.Notice</div>
@@ -82,6 +104,13 @@
 	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
 
 	ScenePanel View { get; set; }
+
+	/// <summary>The colours on offer besides the car's own, as <c>#rrggbb</c>.</summary>
+	static readonly string[] PaintColors =
+	[
+		"#d62d2d", "#e8742a", "#e6c229", "#3aa655", "#1fa6a0", "#2b6cb0", "#5b4bc4", "#c24bb0",
+		"#f2f2f2", "#8a929c", "#2a2e35", "#6b4a2f",
+	];
 
 	/// <summary>Degrees the car turns per pixel the mouse is dragged, across and up.</summary>
 	const float DragDegrees = 0.5f;
@@ -122,7 +151,7 @@
 		if ( View.RenderScene != preview.Scene )
 			View.RenderScene = preview.Scene;
 
-		preview.Show( CarCatalog.Find( UiState.SelectedId ) );
+		preview.Show( CarCatalog.Find( UiState.SelectedId ), UiState.CanPaint ? Color.Parse( UiState.Paint ) : null );
 		UpdateDrag();
 
 		if ( !dragging && sinceTouched > IdleBeforeSpin )

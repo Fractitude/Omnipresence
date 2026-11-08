@@ -17,6 +17,11 @@ public sealed class CarDealershipViewModel
 	public const string SelectAction = "select";
 	public const string BuyAction = "buy";
 
+	/// <summary>Pick a body colour: one argument, <c>#rrggbb</c>, or <see cref="StockArg"/> for the car's own.</summary>
+	public const string PaintAction = "paint";
+
+	public const string StockArg = "stock";
+
 	/// <summary>How often the free bays are counted again, in seconds.</summary>
 	const float BayInterval = 0.5f;
 
@@ -24,6 +29,9 @@ public sealed class CarDealershipViewModel
 	readonly Func<NaviComputer> getComputer;
 
 	string selectedId = CarCatalog.All.FirstOrDefault()?.Id ?? "";
+
+	// The colour picked for the selected car; null is the car's own. Back to the car's own when another is selected.
+	Color? paint;
 	string notice = "";
 	bool noticeIsError;
 	bool busy;
@@ -73,9 +81,17 @@ public sealed class CarDealershipViewModel
 			switch ( action )
 			{
 				case SelectAction when CarCatalog.Find( args[0] ) is { } car:
+					if ( selectedId != car.Id )
+						paint = null;
+
 					selectedId = car.Id;
 					notice = "";
 					noticeIsError = false;
+					break;
+
+				// Typed by the seated player's click, so it is only ever parsed as a colour.
+				case PaintAction:
+					paint = args[0] == StockArg ? null : Color.Parse( args[0] ) is { } picked ? picked.WithAlpha( 1 ) : paint;
 					break;
 
 				case BuyAction:
@@ -97,6 +113,9 @@ public sealed class CarDealershipViewModel
 		var seat = getSeat();
 		var computer = getComputer();
 
+		// The colour on the screen when the button was pressed, not whatever it is when the assets are done loading.
+		var chosen = selectedId == id ? paint : null;
+
 		if ( busy || car is null || seat is null || !CarDealer.IsDealership( computer ) )
 			return;
 
@@ -112,7 +131,7 @@ public sealed class CarDealershipViewModel
 			if ( getSeat()?.Id != seat.Id || !computer.IsValid() )
 				return;
 
-			var result = CarDealer.Buy( seat, car, computer.WorldPosition );
+			var result = CarDealer.Buy( seat, car, computer.WorldPosition, paint: chosen );
 
 			notice = result.Message;
 			noticeIsError = !result.Ok;
@@ -138,7 +157,7 @@ public sealed class CarDealershipViewModel
 			PlayerWallet.For( seat )?.Version,
 			PlayerProgress.For( seat )?.Version,
 			CarDealer.IsDealership( getComputer() ),
-			selectedId,
+			(selectedId, paint),
 			notice,
 			busy,
 			bays ).ToString();
@@ -175,10 +194,13 @@ public sealed class CarDealershipViewModel
 			return state with { Message = "Loading your account..." };
 
 		var cash = PlayerWallet.For( seat )?.Cash ?? 0;
+		var stock = CarCatalog.StockPaint( CarCatalog.Find( selectedId ) );
 
 		return state with
 		{
 			HasAccess = true,
+			StockPaint = stock is { } own ? own.Hex : "",
+			Paint = stock is null ? "" : (paint ?? stock.Value).Hex,
 			Balance = $"${cash:N0}",
 			Bays = bays,
 			Cars = CarCatalog.All

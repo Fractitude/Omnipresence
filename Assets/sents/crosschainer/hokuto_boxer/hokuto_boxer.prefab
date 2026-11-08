@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.15686,0.35686,0.76078,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 560,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 13.930232
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "20cfa3ba-5cd8-5d45-bdb4-a11d41189a8a",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.15686,0.35686,0.76078,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1863,7 +1876,18 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "31": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                },
+                "43": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "b374a434-b384-4b89-819b-0d586e475858",
               "Path": "drift_district/project/subaru_impreza/body.vmdl"

@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.23529,0.44314,0.6,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 490,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 13.357401
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "ed7dcafb-e883-523b-aea8-42ab78abe0cb",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.23529,0.44314,0.6,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -2121,7 +2134,14 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "4": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "68c82eb0-d8b7-4a8a-a620-3cd84ecb7740",
               "Path": "drift_district/project/nissan_silvia_s14/body.vmdl"

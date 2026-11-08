@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.90588,0.89412,0.85098,1",
         "PopupAngle": 69,
         "PopupLights": {
           "_type": "gameobject",
@@ -78,6 +77,20 @@
           }
         ],
         "WheelRadius": 11.85221
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "1e5f50e8-f93d-51eb-a022-fe92681b5ade",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.90588,0.89412,0.85098,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1153,7 +1166,14 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "1": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "2e33b958-857a-4b90-af93-04195ec5f486",
               "Path": "drift_district/project/toyota_ae86/body.vmdl"

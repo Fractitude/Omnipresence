@@ -35,6 +35,7 @@ public sealed class CarPreviewScene
 	readonly CameraComponent camera;
 
 	string shownId;
+	CarPaint shownPaint;
 	float fitDistance = 1;
 
 	/// <summary>Degrees the car has turned.</summary>
@@ -77,7 +78,7 @@ public sealed class CarPreviewScene
 	/// Show this car (null shows nothing). Cheap when it is already shown. A sent's assets are mounted first; the car
 	/// appears when they are there.
 	/// </summary>
-	public void Show( CarModel car )
+	public void Show( CarModel car, Color? paint = null )
 	{
 		if ( car is null )
 		{
@@ -92,7 +93,10 @@ public sealed class CarPreviewScene
 		}
 
 		if ( shownId == car.Id )
+		{
+			Paint( paint );
 			return;
+		}
 
 		Clear();
 		shownId = car.Id;
@@ -102,13 +106,23 @@ public sealed class CarPreviewScene
 			// The car is centred in world space, so the pivot must not be turned while it is made; Update turns it.
 			pivot.WorldRotation = Rotation.Identity;
 
-			if ( ItemIcons.CreatePrefabContent( pivot, car.Prefab ) is not { } bounds )
+			if ( ItemIcons.CreatePrefabContent( pivot, car.Prefab, keepPaint: true ) is not { } bounds )
 				return;
 
 			fitDistance = bounds.Size.Length * FitDistance;
 			camera.ZNear = fitDistance * 0.02f;
 			camera.ZFar = fitDistance * 6f;
 		}
+
+		shownPaint = pivot.GetComponentInChildren<CarPaint>( true );
+		Paint( paint );
+	}
+
+	/// <summary>Paint the car shown. Null leaves the colour its prefab gives it. Only sets it when it changed.</summary>
+	void Paint( Color? paint )
+	{
+		if ( paint is { } color && shownPaint.IsValid() && shownPaint.Paint != color )
+			shownPaint.Paint = color;
 	}
 
 	/// <summary>Zoom by wheel notches (positive is away).</summary>
@@ -139,6 +153,7 @@ public sealed class CarPreviewScene
 	void Clear()
 	{
 		shownId = null;
+		shownPaint = null;
 
 		foreach ( var child in pivot.Children.ToList() )
 			child.Destroy();

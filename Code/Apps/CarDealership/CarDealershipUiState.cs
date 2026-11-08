@@ -22,6 +22,17 @@ public sealed record CarDealershipUiState
 	/// <summary>The car in the showroom, shared with everyone watching the screen. Empty before the first is picked.</summary>
 	public string SelectedId { get; init; } = "";
 
+	/// <summary>
+	/// The body colour picked for the selected car, as <c>#rrggbb</c>, shared like the selection so every viewer's
+	/// picture is painted the same. Empty when the car can't be painted.
+	/// </summary>
+	public string Paint { get; init; } = "";
+
+	/// <summary>The selected car's own colour (<see cref="CarCatalog.StockPaint"/>), as <c>#rrggbb</c>. Empty when it can't be painted.</summary>
+	public string StockPaint { get; init; } = "";
+
+	public bool CanPaint => Paint != "";
+
 	public IReadOnlyList<CarRow> Cars { get; init; } = [];
 
 	/// <summary>The selected car, or null.</summary>

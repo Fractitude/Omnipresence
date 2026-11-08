@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.72549,0.17647,0.15686,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 420,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 11.832419
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "1fc140f1-5bbc-5f55-94a8-36b251e2dcb6",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.72549,0.17647,0.15686,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1410,7 +1423,14 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "32": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "a6479030-639f-4d87-aa7b-4671b33811fd",
               "Path": "drift_district/project/bmw_e30/body.vmdl"

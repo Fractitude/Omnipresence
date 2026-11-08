@@ -157,6 +157,42 @@ CarDealership
 				color: #9aa5b3;
 			}
 
+			.paint-row
+			{
+				flex-direction: row;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 4px;
+
+				.paint-label
+				{
+					flex-shrink: 0;
+					margin-right: 4px;
+					color: #7d8794;
+					font-size: 11px;
+				}
+
+				.swatch
+				{
+					flex-shrink: 0;
+					width: 18px;
+					height: 18px;
+					border-radius: 9px;
+					border: 2px solid #222b37;
+					cursor: pointer;
+
+					&:hover
+					{
+						border-color: #5c6673;
+					}
+
+					&.selected
+					{
+						border-color: #dfe6ee;
+					}
+				}
+			}
+
 			.notice
 			{
 				padding: 6px 8px;

@@ -46,7 +46,6 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "Paint": "0.54902,0.29412,0.63137,1",
         "PopupAngle": 0,
         "PopupLights": null,
         "Torque": 550,
@@ -75,6 +74,20 @@
           }
         ],
         "WheelRadius": 13.81729
+      },
+      {
+        "__type": "Sandbox.CarPaint",
+        "__guid": "b9a2dc8b-7db9-58a4-bd0d-0e56eae80eb3",
+        "__enabled": true,
+        "Flags": 0,
+        "Paint": "0.54902,0.29412,0.63137,1",
+        "Secondary": "0.098,0.11,0.125,1",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
       },
       {
         "__type": "CuratedVehicles.VehicleOccupantVisibility",
@@ -1605,7 +1618,18 @@
             "LodOverride": null,
             "MaterialGroup": null,
             "MaterialOverride": null,
-            "Materials": null,
+            "Materials": {
+              "indexed": {
+                "46": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                },
+                "55": {
+                  "Id": "86214ba7-fa88-4a55-8f1c-96f348f6b400",
+                  "Path": "vehicles/shared/clear_glass.vmat"
+                }
+              }
+            },
             "Model": {
               "Id": "55790b69-745e-4ee3-b2c8-a75918bafaa3",
               "Path": "drift_district/project/nissan_skyline_er34/body.vmdl"

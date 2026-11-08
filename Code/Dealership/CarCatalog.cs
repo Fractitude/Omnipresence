@@ -33,6 +33,29 @@ public static class CarCatalog
 
 	public static CarModel Find( string id ) => cars.FirstOrDefault( x => x.Id == id );
 
+	// Not readonly: filled at run time (AGENTS.md, "Static state and hot reload").
+	static Dictionary<string, Color?> stockPaints = new();
+
+	/// <summary>
+	/// The colour a car comes in: the <see cref="CarPaint.Paint"/> on its prefab, set in the inspector. Null for a car
+	/// whose prefab has no <see cref="CarPaint"/>, which cannot be painted.
+	/// </summary>
+	public static Color? StockPaint( CarModel car )
+	{
+		if ( car is null )
+			return null;
+
+		if ( stockPaints.TryGetValue( car.Id, out var known ) )
+			return known;
+
+		if ( !ResourceLibrary.TryGet<PrefabFile>( car.Prefab, out var prefab ) )
+			return null;
+
+		Color? paint = SceneUtility.GetPrefabScene( prefab ).GetComponentInChildren<CarPaint>( true )?.Paint;
+		stockPaints[car.Id] = paint;
+		return paint;
+	}
+
 	/// <summary>
 	/// An integrated crosschainer sent (<c>Assets/sents/crosschainer/&lt;package&gt;/</c>, docs/sents.md).
 	/// </summary>
