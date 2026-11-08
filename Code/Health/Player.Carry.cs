@@ -90,10 +90,19 @@ public sealed partial class Player
 	const float MaxReach = 256.0f;
 
 	/// <summary>
+	/// Carrying is off. Set to true to bring back picking up light props with Use.
+	/// </summary>
+	static bool CarryEnabled = false;
+
+	/// <summary>
 	/// Called by <see cref="WeaponInventory"/> on the player's own machine every frame, before the weapon reads input.
 	/// </summary>
 	internal void ControlCarry()
 	{
+		// Switched off: unused, and it conflicts with other systems that own the controls.
+		if ( !CarryEnabled )
+			return;
+
 		if ( IsProxy || !Controller.IsValid() )
 			return;
 
