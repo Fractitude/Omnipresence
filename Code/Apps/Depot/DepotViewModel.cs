@@ -135,12 +135,13 @@ public sealed class DepotViewModel
 
 	string Signature( Connection seat ) =>
 		HashCode.Combine(
-			seat?.Id,
-			PlayerWallet.For( seat )?.Version,
-			GameAppNetwork.IsOnline( getComputer() ),
-			seat is null ? default : WiredTravel.PlaceOf( seat ),
-			notice,
-			destination,
+			HashCode.Combine(
+				seat?.Id,
+				PlayerWallet.For( seat )?.Version,
+				GameAppNetwork.IsOnline( getComputer() ),
+				seat is null ? default : WiredTravel.PlaceOf( seat ),
+				notice,
+				destination ),
 			seat is not null && HasMailbox( seat ),
 			// Countdowns redraw once a second, while something is on its way.
 			seat is not null && PlacedObjectRegistry.OnTheWay( (ulong)seat.SteamId ).Count > 0 ? WorldClock.Now : 0,
