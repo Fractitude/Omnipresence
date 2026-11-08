@@ -14,6 +14,12 @@ public sealed class GunPreviewScene
 	/// <summary>Distance, in object sizes, at which the camera starts.</summary>
 	const float FitDistance = 1.5f;
 
+	/// <summary>Zoom limits, as a factor of the fitting distance. The closest view is what used to be the farthest.</summary>
+	public const float MinZoom = 1.6f;
+
+	public const float MaxZoom = 2.6f;
+	public const float WheelZoom = 1.1f;
+
 	// Not readonly: a hot reload would reset this (AGENTS.md, "Static state and hot reload").
 	static HashSet<Scene> scenes = new();
 
@@ -34,7 +40,7 @@ public sealed class GunPreviewScene
 	public float Elevation { get; set; } = 18f;
 
 	/// <summary>Distance as a factor of the fitting distance: below 1 is closer.</summary>
-	public float Zoom { get; set; } = 1f;
+	public float Zoom { get; set; } = MinZoom;
 
 	public GunPreviewScene()
 	{
@@ -116,6 +122,8 @@ public sealed class GunPreviewScene
 	public void Update()
 	{
 		Elevation = System.Math.Clamp( Elevation, CarPreviewScene.MinElevation, CarPreviewScene.MaxElevation );
+
+		Zoom = System.Math.Clamp( Zoom, MinZoom, MaxZoom );
 
 		pivot.WorldRotation = Rotation.FromYaw( Yaw );
 

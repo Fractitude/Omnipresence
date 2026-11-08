@@ -49,7 +49,7 @@ public sealed class GunShelf
 	public float Elevation = 18f;
 
 	/// <summary>Distance as a factor of the fitting distance: below 1 is closer.</summary>
-	public float Zoom = 1f;
+	public float Zoom = GunPreviewScene.MinZoom;
 
 	/// <summary>When someone last turned or zoomed it, on the host's clock. The item turns by itself after a while.</summary>
 	public RealTimeSince SinceTouched = 1000;

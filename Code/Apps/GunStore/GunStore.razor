@@ -131,13 +131,13 @@
 	Vector2 lastMouse;
 
 	// What this client is turning it to while someone here is doing it, and when that last changed.
-	float localYaw, localElevation, localZoom = 1f;
+	float localYaw, localElevation, localZoom = GunPreviewScene.MinZoom;
 	RealTimeSince sinceLocal = 1000;
 	RealTimeSince sinceViewSent = 1000;
 	bool localUnsent;
 
 	// What is drawn: it eases toward the shared view (the host's), so a screen that is a little late doesn't jump.
-	float shownYaw = 210f, shownElevation = 18f, shownZoom = 1f;
+	float shownYaw = 210f, shownElevation = 18f, shownZoom = GunPreviewScene.MinZoom;
 	bool shownKnown;
 	GunStoreUiState lastState;
 	RealTimeSince sinceArrived;
@@ -315,8 +315,8 @@
 
 		// Scrolling down moves the camera away.
 		BeginLocal();
-		localZoom = System.Math.Clamp( localZoom * System.MathF.Pow( CarPreviewScene.WheelZoom, value.y ),
-			CarPreviewScene.MinZoom, CarPreviewScene.MaxZoom );
+		localZoom = System.Math.Clamp( localZoom * System.MathF.Pow( GunPreviewScene.WheelZoom, value.y ),
+			GunPreviewScene.MinZoom, GunPreviewScene.MaxZoom );
 		Touched();
 	}
 

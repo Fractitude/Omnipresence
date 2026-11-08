@@ -163,7 +163,7 @@ public sealed class GunStoreViewModel
 
 		shelf.Yaw = ((y % 360f) + 360f) % 360f;
 		shelf.Elevation = Math.Clamp( e, CarPreviewScene.MinElevation, CarPreviewScene.MaxElevation );
-		shelf.Zoom = Math.Clamp( z, CarPreviewScene.MinZoom, CarPreviewScene.MaxZoom );
+		shelf.Zoom = Math.Clamp( z, GunPreviewScene.MinZoom, GunPreviewScene.MaxZoom );
 		shelf.SinceTouched = 0;
 		viewDirty = true;
 	}
