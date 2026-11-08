@@ -139,7 +139,7 @@ public sealed class HardwareStoreViewModel
 	/// XP is paid the first time only; the access is every time.
 	/// </summary>
 	static IntrusionServer StaffPanel =>
-		new( "store-admin", "Hardware Store Staff Panel", "13.0.55", "Local", "Easy",
+		new( "store-admin", "Computer Shop Staff Panel", "13.0.55", "Local", "Easy",
 			"The shop's back office.", 6, 0, 6, 0, 50, 0, "", 1 );
 
 	void Login()

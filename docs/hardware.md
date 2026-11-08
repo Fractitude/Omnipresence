@@ -20,7 +20,7 @@ Wired: every terminal gives more attempts and removes wrong words
 | App | Where | Kind | What it does |
 | --- | --- | --- | --- |
 | **Intrusion** | Home computer, the Wired | Normal app | Cracks dead servers: a word puzzle that pays hacking XP, credits and blueprints. Its Operations tab holds the heists, see [hacking.md](hacking.md). |
-| **Hardware Store** | The store's computer only | Normal app | Sells parts for dollars. Has the staff login hack. |
+| **Computer Shop** | The store's computer only | Normal app | Sells parts for dollars. Has the staff login hack. |
 | **Workbench** | Home computer | Normal app | Installs and removes parts. Sells nothing. |
 
 Code: `Code/Apps/Intrusion`, `Code/Apps/HardwareStore`, `Code/Apps/Workbench`. Each is a shared Navi app split into a view model, a UI state and a stateless panel (see `Libraries/navi/docs/app-architecture.md`). Manifests are in `Assets/navi/game/` (Intrusion, Workbench) and `Assets/navi/shop/` (Hardware Store). None of them is part of the OS: the player installs Intrusion and Workbench from Packages, and the store's computer is a kiosk with the Hardware Store as its only app.
@@ -47,12 +47,12 @@ Kinds of stock:
 
 Part ids are saved in player progress, so never rename one.
 
-## Hardware Store
+## Computer Shop (the app `Code/Apps/HardwareStore`)
 
 A Navi computer in the store, with the tag `hardware-store` in its `ComputerTags` (and the app in its installed apps or `OnlyApps`). `home.scene` has one named "Hardware Store Computer" as a placeholder. Move it into the real store.
 
 - **Tag.** The computer has the tag `hardware-store` (set it on the computer's `ComputerTags`, in the Apps section of the Inspector). The app's manifest lists the same tag in `ComputerTags`, so Packages doesn't offer it and `Install` refuses it on any computer without the tag. See "Computer tags" in `Libraries/navi/README.md`.
-- **Kiosk.** Set in the computer's "Kiosk mode" section of the Inspector, not by code: `KioskMode` and `HideTaskbar` on, `OnlyApps` just the store app (`navi/shop/hardwarestore.napp`, no other apps, not even Settings or Packages) and `OpenApp` the same, so it opens maximized at start and can't be closed. This is a Navi feature, see "Kiosk computers" in `Libraries/navi/README.md`. The app also refuses to work on a computer without the tag: tags only limit installing, and a scene can still list the app on another computer.
+- **Kiosk.** Set in the computer's "Kiosk mode" section of the Inspector, not by code: `KioskMode` and `HideTaskbar` on, `OnlyApps` just the store app (`navi/shop/computershop.napp`, no other apps, not even Settings or Packages) and `OpenApp` the same, so it opens maximized at start and can't be closed. This is a Navi feature, see "Kiosk computers" in `Libraries/navi/README.md`. The app also refuses to work on a computer without the tag: tags only limit installing, and a scene can still list the app on another computer.
 - **Shop tab.** Lists in-stock parts and special orders. Buy takes the dollars and puts a package on its way.
 - **Orders tab.** Your packages on their way, with a countdown.
 - **Delivery.** A package arrives at home after `OrderDeliverySeconds` (60 s, short for testing). Arrival is checked on the host once a second and on load, so time spent offline counts. Real mail should be slower: tune the constant.
@@ -90,7 +90,7 @@ Every terminal has a **security level**, which decides the puzzle (`IntrusionSer
 - **Level 1: word guess** (`WordGuessPuzzle`, drawn by `WordGuessBoard`). Wordle-style. The terminal gives a clue to the password and shows its length. Type a word of that length: each letter turns green (right place), yellow (in the word, another place) or dark (not in it). Any letters count, there is no dictionary check; a wrong-length or repeated word costs nothing. The length is the server's `WordLength`, 4 to 6 (clamped); the clues are in `IntrusionCatalog.Hints`, the words in `IntrusionCatalog.Words`. Installed hardware's "wrong words removed" shows that many letters up front instead.
 - **Level 2: memory dump** (`IntrusionPuzzle`). Click a word to try it as the password; the terminal says how many letters are in the right place. Yellow brackets are tricks that remove a wrong word or give the attempts back.
 
-The dead servers below are all Level 2. The Hardware Store's staff login is Level 1 (6 letters, 6 attempts).
+The dead servers below are all Level 2. The Computer Shop's staff login is Level 1 (6 letters, 6 attempts).
 
 | Server | Difficulty | Reward (first clear only) |
 | --- | --- | --- |

@@ -1,17 +1,15 @@
 {
   "Title": "Hardware Store",
-  "Description": "Order computer parts for pickup at home.",
-  "Icon": "storefront",
-  "Color": "#2b6cb0",
-  "PanelType": "OmnipresenceApps.HardwareStore",
+  "Description": "Furniture and equipment, delivered to your door. Storage boxes, grow trays, benches.",
+  "Icon": "warehouse",
+  "Color": "#b8741a",
+  "PanelType": "OmnipresenceApps.Depot",
   "CanMinimize": true,
-  "CanMaximize": false,
-  "CanResize": false,
+  "CanMaximize": true,
+  "CanResize": true,
+  "MinSize": "360,300",
   "Shared": true,
   "Permissions": [],
-  "ComputerTags": [
-    "hardware-store"
-  ],
   "IsSystem": false,
   "__references": [],
   "__version": 0
