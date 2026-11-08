@@ -49,7 +49,11 @@ public sealed partial class NaviComputerInspector : ComponentEditorWidget
 		Add( "Apps", "apps", false, () => Sheet( computerObject,
 			nameof( NaviComputer.InstalledApps ), nameof( NaviComputer.InstalledPackages ),
 			nameof( NaviComputer.PinnedApps ), nameof( NaviComputer.StartFavorites ), nameof( NaviComputer.ComputerTags ),
-			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.SystemAppFolders ) ) );
+			nameof( NaviComputer.SystemAppFolders ) ) );
+
+		Add( "Kiosk mode", "storefront", false, () => Sheet( computerObject,
+			nameof( NaviComputer.KioskMode ), nameof( NaviComputer.HideTaskbar ),
+			nameof( NaviComputer.OnlyApps ), nameof( NaviComputer.OpenApp ) ) );
 
 		Add( "Permissions", "shield", false, () => Sheet( computerObject,
 			nameof( NaviComputer.GrantedPermissions ), nameof( NaviComputer.RootApps ),

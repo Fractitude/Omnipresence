@@ -2,7 +2,7 @@ namespace Sandbox;
 
 /// <summary>
 /// Marks a Navi computer as the one in the Hardware Store, and makes it a kiosk: the Hardware Store app is the only app it
-/// has. The computer gets the <see cref="StoreTag"/> tag, which the app's manifest lists, so the app can't be installed on
+/// has, it opens by itself and can't be closed, and the taskbar is hidden. The computer gets the <see cref="StoreTag"/> tag, which the app's manifest lists, so the app can't be installed on
 /// any other computer. The app also refuses to work on a computer without this component. Put it on the computer's
 /// GameObject, beside its <c>NaviComputer</c>.
 /// </summary>
@@ -29,7 +29,10 @@ public sealed class StoreTerminal : Component
 		if ( GetComponent<NaviComputer>() is not { } computer )
 			return;
 
+		computer.KioskMode = true;
+		computer.HideTaskbar = true;
 		computer.OnlyApps = [StoreAppId];
+		computer.OpenApp = StoreAppId;
 
 		if ( !computer.ComputerTags.Contains( StoreTag ) )
 			computer.ComputerTags = [.. computer.ComputerTags, StoreTag];
