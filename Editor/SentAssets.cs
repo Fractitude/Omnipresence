@@ -148,12 +148,20 @@ public static class SentAssets
 		{
 			var target = Path.Combine( assets, name.Replace( '/', Path.DirectorySeparatorChar ) );
 
-			if ( File.Exists( target ) && new FileInfo( target ).Length == bytes.Length )
+			var shader = name.EndsWith( ".shader_c", StringComparison.OrdinalIgnoreCase );
+
+			// A shader is upgraded after it is copied, so its size is no longer the package's: what matters is that it loads.
+			if ( File.Exists( target ) && (shader ? ShaderUpgrades.IsCurrent( target ) : new FileInfo( target ).Length == bytes.Length) )
 				continue;
 
 			Directory.CreateDirectory( Path.GetDirectoryName( target ) );
 			File.WriteAllBytes( target, bytes );
 			written++;
+
+			// A shader an older engine compiled won't load (a red checker): the engine upgrades the ones of a package it
+			// installs, but these are files of the project, so it is done here.
+			if ( shader )
+				await ShaderUpgrades.UpgradeAsync( target, name );
 		}
 
 		// *_c is git-ignored (compiled assets); these are not the editor's output, so they are kept.
