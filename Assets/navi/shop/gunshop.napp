@@ -1,0 +1,18 @@
+{
+  "Title": "Gun Store",
+  "Description": "Browse the weapons and ammunition, look them over in 3D and buy them.",
+  "Icon": "target",
+  "Color": "#8a3a2a",
+  "PanelType": "OmnipresenceApps.GunStore",
+  "CanMinimize": true,
+  "CanMaximize": false,
+  "CanResize": false,
+  "Shared": true,
+  "Permissions": [],
+  "ComputerTags": [
+    "store"
+  ],
+  "IsSystem": false,
+  "__references": [],
+  "__version": 0
+}

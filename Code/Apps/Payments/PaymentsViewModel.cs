@@ -628,7 +628,7 @@ public sealed class PaymentsViewModel
 			nameof(TxKind.PlayerPayment) => "Payment",
 			nameof(TxKind.OrderPayout) => "Order payout",
 			nameof(TxKind.OrgShare) => "Organization share",
-			nameof(TxKind.ShopPurchase) or nameof(TxKind.DepotPurchase) or nameof(TxKind.CarPurchase) => "Purchase",
+			nameof(TxKind.ShopPurchase) or nameof(TxKind.DepotPurchase) or nameof(TxKind.CarPurchase) or nameof(TxKind.GunPurchase) => "Purchase",
 			nameof(TxKind.ExchangeSell) or nameof(TxKind.ExchangeBuy) => "Exchange",
 			nameof(TxKind.CashOut) => "Cash-out",
 			nameof(TxKind.RegistrationFee) => "Registration",

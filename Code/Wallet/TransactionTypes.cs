@@ -59,6 +59,9 @@ public enum TxKind
 
 	/// <summary>A car bought at the car dealership.</summary>
 	CarPurchase,
+
+	/// <summary>A weapon or ammunition bought at the gun store.</summary>
+	GunPurchase,
 }
 
 /// <summary>
@@ -141,6 +144,9 @@ public static class Parties
 	/// <summary>The car dealership.</summary>
 	public const string CarDealership = "car-dealership";
 
+	/// <summary>The gun store.</summary>
+	public const string GunStore = "gun-store";
+
 	/// <summary>Both exchanges: what they keep as the fee stays with them.</summary>
 	public const string Exchange = "exchange";
 
@@ -159,6 +165,7 @@ public static class Parties
 		[HardwareStore] = "Hardware Store",
 		[Depot] = "Depot",
 		[CarDealership] = "Car Dealership",
+		[GunStore] = "Gun Store",
 		[Exchange] = "Exchange",
 		[Government] = "Government",
 		[Market] = "Market",

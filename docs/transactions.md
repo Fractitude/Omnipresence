@@ -11,7 +11,7 @@ player; see [currency.md](currency.md)).
 | `TxLeg` | `TransactionTypes.cs` | One movement: a `Party` to a `Party`, a `TransactionCurrency` (`Cash`, `Crypto`), an amount, a `TxKind`, a note and a ref (an order or item id). |
 | `Party` | `TransactionTypes.cs` | A player (`Party.Player( steamId )`) or a system party (`Party.System( id )`). |
 | `Parties` | `TransactionTypes.cs` | The system parties and their labels (below). |
-| `TxKind` | `TransactionTypes.cs` | Why: `OrderPayout`, `OrgShare`, `ShopPurchase`, `DepotPurchase`, `CarPurchase`, `ExchangeSell`, `ExchangeBuy`, `CashOut`, `PlayerPayment`, `Fee`, `RegistrationFee`, `Refund`, `Other`. |
+| `TxKind` | `TransactionTypes.cs` | Why: `OrderPayout`, `OrgShare`, `ShopPurchase`, `DepotPurchase`, `CarPurchase`, `GunPurchase`, `ExchangeSell`, `ExchangeBuy`, `CashOut`, `PlayerPayment`, `Fee`, `RegistrationFee`, `Refund`, `Other`. |
 | `TxResult` | `TransactionTypes.cs` | `Ok`, a `TxFailure` reason, a message for the player, the group id and what each leg moved. `ToCrimeResult()` turns it into a panel answer. |
 | `TransactionRules` | `TransactionRules.cs` | The pure part: `Validate` a leg, `Plan` a batch against the records, `Apply` it. Works on `ProgressRecord`s only. |
 | `Transactions` | `Transactions.cs` | The host part: finds the records, runs the rules, writes the history, the ledger and the stats log, tells the wallet. |

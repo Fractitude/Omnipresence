@@ -1,0 +1,334 @@
+@using Sandbox.UI
+@inherits NaviApp
+@namespace OmnipresenceApps
+
+@* The game's own app for the gun store's computer, described by Assets/navi/shop/gunstore.napp. Not a system app: the *@
+@* computer needs the tag `store` (the manifest lists it too), and the app refuses to work on any other. It is meant as a *@
+@* kiosk (configured by hand on the computer). It is shared: the host's copy takes the money and hands over the goods, and *@
+@* everyone near the screen watches, so with nobody seated it still shows the shelves and the turning item. What is on *@
+@* show is the computer's, not the player's (GunShelf): the tab, the item on each tab, and how the 3D picture *@
+@* (GunPreviewScene) is turned and zoomed. Only the wallet and what the buyer carries are the seated player's. *@
+@* See docs/gun-store.md. *@
+
+<root>
+	@if ( !UiState.HasAccess )
+	{
+		<div class="message">@UiState.Message</div>
+	}
+	else
+	{
+		<div class="top">
+			<div class="store-title">Gun Store</div>
+			<div class="store-balance @( UiState.Seated ? "" : "idle" )">@( UiState.Balance != "" ? UiState.Balance : "Sit down to buy" )</div>
+		</div>
+
+		<div class="tabs">
+			<div class="tab @( UiState.Tab == GunItemKind.Weapon ? "selected" : "" )"
+			     @onclick=@( () => Navi.Act( GunStoreViewModel.TabAction, GunStoreViewModel.WeaponsTab ) )>
+				Weapons
+			</div>
+			<div class="tab @( UiState.Tab == GunItemKind.Ammo ? "selected" : "" )"
+			     @onclick=@( () => Navi.Act( GunStoreViewModel.TabAction, GunStoreViewModel.AmmoTab ) )>
+				Ammunition
+			</div>
+		</div>
+
+		<div class="body">
+			<div class="shelf">
+				@foreach ( var item in UiState.Items )
+				{
+					var id = item.Id;
+
+					<div @key=@($"{UiState.Tab}/{id}") class="entry @( id == UiState.SelectedId ? "selected" : "" )"
+					     @onclick=@( () => Navi.Act( GunStoreViewModel.SelectAction, id ) )>
+						<div class="entry-name">@item.Name</div>
+						<div class="entry-price @( item.CanAfford ? "" : "short" )">@item.Price</div>
+					</div>
+				}
+			</div>
+
+			<div class="showroom">
+				<ScenePanel @ref="View" class="view"/>
+				<div class="view-hint">Drag to turn, scroll to zoom</div>
+
+				@if ( UiState.Selected is { } selected )
+				{
+					<div class="details">
+						<div class="details-top">
+							<div class="details-name">@selected.Name</div>
+							<div class="details-price">@selected.Price</div>
+						</div>
+						<div class="details-description">@selected.Description</div>
+						<div class="details-stats">@selected.Stats</div>
+
+						@if ( selected.Status != "" )
+						{
+							<div class="details-status">@selected.Status</div>
+						}
+
+						@if ( UiState.Notice != "" )
+						{
+							<div class="notice @( UiState.NoticeIsError ? "error" : "" )">@UiState.Notice</div>
+						}
+
+						<div class="buy-row">
+							<div class="button @( selected.CanAfford && selected.CanBuy && UiState.Seated ? "" : "disabled" )"
+							     @onclick=@( () => Navi.Act( GunStoreViewModel.BuyAction, selected.Id ) )>
+								@BuyLabel( selected )
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+</root>
+
+@code
+{
+	/// <summary>
+	/// The app's logic and its state, in the host's copy only. The seat is the computer's user, found through the window
+	/// this panel is in.
+	/// </summary>
+	GunStoreViewModel ViewModel => field ??= new( GetSeat, GetComputer );
+
+	GunStoreUiState UiState =>
+		Navi.IsViewer ? Navi.GetState<GunStoreUiState>() ?? GunStoreUiState.Empty : ViewModel.UiState;
+
+	Connection GetSeat() => GameAppSeat.UserOf( this );
+
+	NaviComputer GetComputer() => GameAppSeat.ComputerOf( this );
+
+	ScenePanel View { get; set; }
+
+	string BuyLabel( GunRow item )
+	{
+		if ( !UiState.Seated )
+			return "Sit down to buy";
+
+		if ( !item.CanBuy )
+			return UiState.Tab == GunItemKind.Weapon ? "Already carried" : "Reserve full";
+
+		return $"Buy for {item.Price}";
+	}
+
+	/// <summary>Degrees the item turns per pixel the mouse is dragged, across and up.</summary>
+	const float DragDegrees = 0.5f;
+
+	/// <summary>Seconds after this client last turned or zoomed the item during which its own view is drawn.</summary>
+	const float LocalHold = 0.5f;
+
+	/// <summary>How often this client's turning is sent to the host while it changes, in seconds.</summary>
+	const float ViewSendInterval = 0.06f;
+
+	/// <summary>How fast the picture eases to the shared view, per second.</summary>
+	const float Follow = 12f;
+
+	// This client's own copy of the 3D picture: the scene is view plumbing, rebuilt from the state, and holds no app state.
+	GunPreviewScene preview;
+
+	bool dragging;
+	Vector2 lastMouse;
+
+	// What this client is turning it to while someone here is doing it, and when that last changed.
+	float localYaw, localElevation, localZoom = 1f;
+	RealTimeSince sinceLocal = 1000;
+	RealTimeSince sinceViewSent = 1000;
+	bool localUnsent;
+
+	// What is drawn: it eases toward the shared view (the host's), so a screen that is a little late doesn't jump.
+	float shownYaw = 210f, shownElevation = 18f, shownZoom = 1f;
+	bool shownKnown;
+	GunStoreUiState lastState;
+	RealTimeSince sinceArrived;
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( !Navi.IsViewer )
+		{
+			ViewModel.Tick();
+			Navi.Publish( ViewModel.UiState );
+		}
+
+		UpdatePreview();
+	}
+
+	void UpdatePreview()
+	{
+		if ( View is not { IsValid: true } || !UiState.HasAccess )
+			return;
+
+		preview ??= new GunPreviewScene();
+
+		// A hot reload rebuilds the panel tree, which gives this panel a new, empty ScenePanel while the scene above
+		// survives in the field. Point the view at the scene again.
+		if ( View.RenderScene != preview.Scene )
+			View.RenderScene = preview.Scene;
+
+		preview.Show( GunCatalog.Find( UiState.Tab, UiState.SelectedId ) );
+		UpdateView();
+
+		preview.Yaw = shownYaw;
+		preview.Elevation = shownElevation;
+		preview.Zoom = shownZoom;
+		preview.Update();
+	}
+
+	/// <summary>
+	/// Work out how the picture is turned. The shared view is the host's (the item turns by itself there too); this
+	/// client's own turning is drawn at once while it is being done and sent to the host, and then the shared one takes
+	/// over again.
+	/// </summary>
+	void UpdateView()
+	{
+		UpdateDrag();
+
+		if ( sinceLocal < LocalHold )
+		{
+			shownYaw = localYaw;
+			shownElevation = localElevation;
+			shownZoom = localZoom;
+		}
+		else
+		{
+			var yaw = 0f;
+			CarView shared;
+
+			if ( Navi.IsViewer )
+			{
+				var state = UiState;
+
+				if ( !ReferenceEquals( state, lastState ) )
+				{
+					lastState = state;
+					sinceArrived = 0;
+				}
+
+				shared = state.View ?? CarView.Default;
+
+				// Between two updates the item carries on turning by itself, as it does on the host.
+				yaw = shared.Yaw + (shared.Spinning ? GunStoreViewModel.SpinSpeed * sinceArrived : 0f);
+			}
+			else
+			{
+				shared = ViewModel.LiveView;
+				yaw = shared.Yaw;
+			}
+
+			if ( !shownKnown || !Navi.IsViewer )
+			{
+				shownYaw = yaw;
+				shownElevation = shared.Elevation;
+				shownZoom = shared.Zoom;
+				shownKnown = true;
+			}
+			else
+			{
+				var t = 1f - System.MathF.Exp( -Follow * Time.Delta );
+
+				shownYaw += AngleDelta( shownYaw, yaw ) * t;
+				shownElevation += (shared.Elevation - shownElevation) * t;
+				shownZoom += (shared.Zoom - shownZoom) * t;
+			}
+
+			shownYaw %= 360f;
+		}
+
+		if ( localUnsent && sinceViewSent > ViewSendInterval )
+		{
+			localUnsent = false;
+			sinceViewSent = 0;
+			Navi.Act( GunStoreViewModel.ViewAction, Number( localYaw ), Number( localElevation ), Number( localZoom ) );
+		}
+	}
+
+	static string Number( float value ) => value.ToString( "0.###", System.Globalization.CultureInfo.InvariantCulture );
+
+	/// <summary>The way round, in degrees, from one angle to another.</summary>
+	static float AngleDelta( float from, float to )
+	{
+		var delta = (to - from) % 360f;
+
+		if ( delta > 180f )
+			delta -= 360f;
+		else if ( delta < -180f )
+			delta += 360f;
+
+		return delta;
+	}
+
+	/// <summary>This client starts turning it: from what is drawn, so nothing jumps.</summary>
+	void BeginLocal()
+	{
+		if ( sinceLocal < LocalHold )
+			return;
+
+		localYaw = shownYaw;
+		localElevation = shownElevation;
+		localZoom = shownZoom;
+	}
+
+	/// <summary>While the mouse is held on the 3D view, turn the item with it: across turns it, up and down tilts the view.</summary>
+	void UpdateDrag()
+	{
+		var pressed = View.HasActive;
+		var mouse = View.MousePosition * View.ScaleFromScreen;
+
+		if ( pressed && !dragging )
+		{
+			dragging = true;
+			lastMouse = mouse;
+			BeginLocal();
+		}
+		else if ( pressed )
+		{
+			var delta = mouse - lastMouse;
+			lastMouse = mouse;
+
+			localYaw += delta.x * DragDegrees;
+			localElevation = System.Math.Clamp( localElevation + delta.y * DragDegrees, CarPreviewScene.MinElevation,
+				CarPreviewScene.MaxElevation );
+			Touched();
+		}
+		else
+		{
+			dragging = false;
+		}
+	}
+
+	void Touched()
+	{
+		sinceLocal = 0;
+		localUnsent = true;
+	}
+
+	/// <summary>Zoom with the wheel while the mouse is over the 3D view. Anywhere else the wheel does what it did before.</summary>
+	public override void OnMouseWheel( Vector2 value )
+	{
+		if ( preview is null || View is not { IsValid: true, HasHovered: true } || value.y == 0 )
+		{
+			base.OnMouseWheel( value );
+			return;
+		}
+
+		// Scrolling down moves the camera away.
+		BeginLocal();
+		localZoom = System.Math.Clamp( localZoom * System.MathF.Pow( CarPreviewScene.WheelZoom, value.y ),
+			CarPreviewScene.MinZoom, CarPreviewScene.MaxZoom );
+		Touched();
+	}
+
+	public override void OnDeleted()
+	{
+		base.OnDeleted();
+
+		preview?.Destroy();
+		preview = null;
+	}
+
+	protected override void OnAction( string action, string[] args ) => ViewModel.Act( action, args );
+
+	protected override int BuildHash() => UiState.Revision;
+}
