@@ -159,8 +159,10 @@ public sealed class CarPreviewScene
 		shownId = null;
 		shownPaint = null;
 
+		// Right away: nothing ticks this scene (a ScenePanel only draws it), so a plain Destroy would leave the old car in
+		// it, drawn and found by the next car's paint lookup.
 		foreach ( var child in pivot.Children.ToList() )
-			child.Destroy();
+			child.DestroyImmediate();
 	}
 
 	/// <summary>Mount a sent's assets once; the next <see cref="Show"/> after it is done builds the car.</summary>
