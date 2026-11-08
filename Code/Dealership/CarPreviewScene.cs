@@ -78,7 +78,7 @@ public sealed class CarPreviewScene
 	/// Show this car (null shows nothing). Cheap when it is already shown. A sent's assets are mounted first; the car
 	/// appears when they are there.
 	/// </summary>
-	public void Show( CarModel car, Color? paint = null )
+	public void Show( CarModel car, CarLook? look = null )
 	{
 		if ( car is null )
 		{
@@ -94,7 +94,7 @@ public sealed class CarPreviewScene
 
 		if ( shownId == car.Id )
 		{
-			Paint( paint );
+			Paint( look );
 			return;
 		}
 
@@ -115,14 +115,14 @@ public sealed class CarPreviewScene
 		}
 
 		shownPaint = pivot.GetComponentInChildren<CarPaint>( true );
-		Paint( paint );
+		Paint( look );
 	}
 
-	/// <summary>Paint the car shown. Null leaves the colour its prefab gives it. Only sets it when it changed.</summary>
-	void Paint( Color? paint )
+	/// <summary>Paint the car shown. Null leaves the colours its prefab gives it. Only sets them when they changed.</summary>
+	void Paint( CarLook? look )
 	{
-		if ( paint is { } color && shownPaint.IsValid() && shownPaint.Paint != color )
-			shownPaint.SetPaint( color );
+		if ( look is { } colours && shownPaint.IsValid() && shownPaint.Look != colours )
+			shownPaint.SetLook( colours );
 	}
 
 	/// <summary>Zoom by wheel notches (positive is away).</summary>

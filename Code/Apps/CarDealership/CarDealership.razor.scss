@@ -114,6 +114,32 @@ CarDealership
 			border: 1px solid #222b37;
 		}
 
+		.picker-pop
+		{
+			position: absolute;
+			top: 0;
+			left: 0;
+			z-index: 10;
+			flex-direction: column;
+			gap: 6px;
+			padding: 8px;
+			border-radius: 8px;
+			background-color: #151b23;
+			border: 1px solid #2b6cb0;
+			pointer-events: all;
+
+			.button
+			{
+				align-self: flex-end;
+				padding: 4px 12px;
+				border-radius: 6px;
+				background-color: #2f8f5b;
+				color: white;
+				font-weight: 700;
+				cursor: pointer;
+			}
+		}
+
 		.view-hint
 		{
 			flex-shrink: 0;
@@ -189,6 +215,26 @@ CarDealership
 					&.selected
 					{
 						border-color: #dfe6ee;
+					}
+
+					&.big
+					{
+						width: 26px;
+						border-radius: 6px;
+					}
+				}
+
+				.link
+				{
+					flex-shrink: 0;
+					margin-left: 6px;
+					color: #7d8794;
+					font-size: 11px;
+					cursor: pointer;
+
+					&:hover
+					{
+						color: #dfe6ee;
 					}
 				}
 			}

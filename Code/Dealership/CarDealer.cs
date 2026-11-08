@@ -29,7 +29,7 @@ public static class CarDealer
 	/// have to be mounted already (<see cref="SentLocal.Mount"/>), which is asynchronous, so the caller does that first
 	/// and calls this in the same step it checks the world again.
 	/// </summary>
-	public static CarPurchase Buy( Connection buyer, CarModel car, Vector3 around, Scene scene = null, Color? paint = null )
+	public static CarPurchase Buy( Connection buyer, CarModel car, Vector3 around, Scene scene = null, CarLook? look = null )
 	{
 		if ( !Networking.IsHost || buyer is null || car is null )
 			return CarPurchase.Fail( "Nothing happens." );
@@ -56,7 +56,7 @@ public static class CarDealer
 			    TxKind.CarPurchase, $"Car dealership: {car.Name}", car.Id ).Ok )
 			return CarPurchase.Fail( "Not enough cash." );
 
-		var made = Make( car, prefab, point, steamId, scene, paint );
+		var made = Make( car, prefab, point, steamId, scene, look );
 
 		if ( made is null )
 		{
@@ -74,7 +74,7 @@ public static class CarDealer
 	/// <summary>
 	/// The car itself, at the point, with the buyer's title on it and the network told. Null if it could not be made.
 	/// </summary>
-	static GameObject Make( CarModel car, PrefabFile prefab, GameObject point, ulong buyer, Scene scene, Color? paint )
+	static GameObject Make( CarModel car, PrefabFile prefab, GameObject point, ulong buyer, Scene scene, CarLook? look )
 	{
 		try
 		{
@@ -92,10 +92,10 @@ public static class CarDealer
 
 			go.Name = car.Name;
 
-			// The buyer's colour, set before the car is spawned so it reaches everyone with the car. A car without a
+			// The buyer's colours, set before the car is spawned so they reach everyone with the car. A car without a
 			// CarPaint keeps its own look; none of this is trusted from a client (the host's app picked it).
-			if ( paint is { } color && go.Components.Get<CarPaint>( FindMode.EverythingInSelfAndDescendants ) is { } carPaint )
-				carPaint.Paint = color;
+			if ( look is { } colours && go.Components.Get<CarPaint>( FindMode.EverythingInSelfAndDescendants ) is { } carPaint )
+				carPaint.SetLook( colours );
 
 			// The buyer holds title from the moment the car exists (see docs/ownership.md): this only seeds the record.
 			go.Components.GetOrCreate<OwnershipComponent>().DefaultOwner = Ownership.Player( buyer );

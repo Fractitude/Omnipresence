@@ -38,6 +38,14 @@
 				<ScenePanel @ref="View" class="view"/>
 				<div class="view-hint">Drag to turn, scroll to zoom</div>
 
+				@if ( pickerPart != "" && UiState.CanPaint )
+				{
+					<div class="picker-pop">
+						<ColorPickerControl @ref="Picker"/>
+						<div class="button" @onclick=@( () => TogglePicker( pickerPart ) )>Done</div>
+					</div>
+				}
+
 				@if ( UiState.Selected is { } selected )
 				{
 					<div class="details">
@@ -50,20 +58,36 @@
 						@if ( UiState.CanPaint )
 						{
 							<div class="paint-row">
-								<div class="paint-label">Paint</div>
-								<div class="swatch @( UiState.Paint == UiState.StockPaint ? "selected" : "" )"
-								     style="background-color: @UiState.StockPaint"
-								     @onclick=@( () => Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.StockArg ) )>
+								<div class="paint-label">Body</div>
+								<div class="swatch big @( pickerPart == CarDealershipViewModel.BodyPart ? "selected" : "" )"
+								     style="background-color: @CssOf( UiState.Paint )"
+								     @onclick=@( () => TogglePicker( CarDealershipViewModel.BodyPart ) )>
 								</div>
 
-								@foreach ( var hex in PaintColors )
-								{
-									var color = hex;
+								<div class="paint-label">Trim</div>
+								<div class="swatch big @( pickerPart == CarDealershipViewModel.TrimPart ? "selected" : "" )"
+								     style="background-color: @CssOf( UiState.Secondary )"
+								     @onclick=@( () => TogglePicker( CarDealershipViewModel.TrimPart ) )>
+								</div>
 
-									<div @key=@color
-									     class="swatch @( string.Equals( UiState.Paint, color, System.StringComparison.OrdinalIgnoreCase ) ? "selected" : "" )"
-									     style="background-color: @color"
-									     @onclick=@( () => Navi.Act( CarDealershipViewModel.PaintAction, color ) )>
+								<div class="link" @onclick=@( () => ResetColours() )>Stock</div>
+							</div>
+
+							<div class="paint-row">
+								<div class="paint-label">Glass</div>
+								<div class="swatch @( UiState.Glass == UiState.StockGlass ? "selected" : "" )"
+								     style="@GlassStyle( UiState.StockGlass )"
+								     @onclick=@( () => Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.GlassPart, CarDealershipViewModel.StockArg ) )>
+								</div>
+
+								@foreach ( var tint in GlassTints )
+								{
+									var value = CarLook.Format( tint );
+
+									<div @key=@value
+									     class="swatch @( UiState.Glass == value ? "selected" : "" )"
+									     style="@GlassStyle( value )"
+									     @onclick=@( () => Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.GlassPart, value ) )>
 									</div>
 								}
 							</div>
@@ -105,12 +129,94 @@
 
 	ScenePanel View { get; set; }
 
-	/// <summary>The colours on offer besides the car's own, as <c>#rrggbb</c>.</summary>
-	static readonly string[] PaintColors =
+	/// <summary>
+	/// The glass tints on offer besides the car's own: the colour is the tint and the alpha is how strong it is, from
+	/// smoked glass to a blacked-out window, then colours.
+	/// </summary>
+	static readonly Color[] GlassTints =
 	[
-		"#d62d2d", "#e8742a", "#e6c229", "#3aa655", "#1fa6a0", "#2b6cb0", "#5b4bc4", "#c24bb0",
-		"#f2f2f2", "#8a929c", "#2a2e35", "#6b4a2f",
+		new( 0.55f, 0.55f, 0.55f, 0.35f ), // light smoke
+		new( 0.18f, 0.18f, 0.18f, 0.65f ), // dark smoke
+		new( 0f, 0f, 0f, 1f ), // blacked out
+		new( 0.23f, 0.51f, 0.96f, 0.45f ), // blue
+		new( 0.13f, 0.77f, 0.37f, 0.45f ), // green
+		new( 0.96f, 0.62f, 0.04f, 0.45f ), // amber
+		new( 0.94f, 0.27f, 0.27f, 0.45f ), // red
+		new( 0.66f, 0.33f, 0.97f, 0.45f ), // purple
 	];
+
+	// The part the engine's colour picker is open for, or "". Only this client's view, like the camera.
+	string pickerPart = "";
+	string boundPart = "";
+
+	ColorPickerControl Picker { get; set; }
+
+	// What the picker edits (it works on a serialized property), and what was last sent to the host from it.
+	readonly CarColorHolder holder = new();
+	SerializedObject holderObject;
+	Color lastSent;
+	RealTimeSince sinceSent;
+
+	/// <summary>How often a colour dragged in the picker is sent to the host, in seconds.</summary>
+	const float PickInterval = 0.08f;
+
+	static string CssOf( string colour ) => CarLook.Parse( colour ) is { } c ? c.WithAlpha( 1 ).Hex : "#000000";
+
+	/// <summary>The glass swatch: its tint, as strong as the glass is (a clear pane is a faint swatch).</summary>
+	static string GlassStyle( string colour ) =>
+		CarLook.Parse( colour ) is { } c
+			? $"background-color: {c.WithAlpha( 1 ).Hex}; opacity: {System.Math.Max( c.a, 0.3f ).ToString( "0.##", System.Globalization.CultureInfo.InvariantCulture )}"
+			: "";
+
+	void TogglePicker( string part )
+	{
+		pickerPart = pickerPart == part ? "" : part;
+		boundPart = "";
+		StateHasChanged();
+	}
+
+	void ResetColours()
+	{
+		Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.BodyPart, CarDealershipViewModel.StockArg );
+		Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.TrimPart, CarDealershipViewModel.StockArg );
+		Navi.Act( CarDealershipViewModel.PaintAction, CarDealershipViewModel.GlassPart, CarDealershipViewModel.StockArg );
+	}
+
+	/// <summary>The car's colours as the screen shows them, or null when the car can't be painted.</summary>
+	CarLook? ShownLook() =>
+		UiState.CanPaint
+		&& CarLook.Parse( UiState.Paint ) is { } body
+		&& CarLook.Parse( UiState.Secondary ) is { } trim
+		&& CarLook.Parse( UiState.Glass ) is { } glass
+			? new CarLook( body, trim, glass )
+			: null;
+
+	/// <summary>
+	/// Point the engine's colour picker at the part that was just opened, then send what is picked to the host while it
+	/// is dragged. The picker is the engine's control, so it only edits <see cref="holder"/>; the host decides.
+	/// </summary>
+	void UpdatePicker()
+	{
+		if ( pickerPart == "" || Picker is not { IsValid: true } )
+			return;
+
+		if ( boundPart != pickerPart )
+		{
+			boundPart = pickerPart;
+			holder.Value = CarLook.Parse( pickerPart == CarDealershipViewModel.BodyPart ? UiState.Paint : UiState.Secondary ) ?? Color.White;
+			lastSent = holder.Value;
+			holderObject = TypeLibrary.GetSerializedObject( holder );
+			Picker.Property = holderObject.GetProperty( nameof(CarColorHolder.Value) );
+			return;
+		}
+
+		if ( holder.Value != lastSent && sinceSent > PickInterval )
+		{
+			lastSent = holder.Value;
+			sinceSent = 0;
+			Navi.Act( CarDealershipViewModel.PaintAction, pickerPart, CarLook.Format( holder.Value ) );
+		}
+	}
 
 	/// <summary>Degrees the car turns per pixel the mouse is dragged, across and up.</summary>
 	const float DragDegrees = 0.5f;
@@ -137,6 +243,7 @@
 		}
 
 		UpdatePreview();
+		UpdatePicker();
 	}
 
 	void UpdatePreview()
@@ -151,7 +258,7 @@
 		if ( View.RenderScene != preview.Scene )
 			View.RenderScene = preview.Scene;
 
-		preview.Show( CarCatalog.Find( UiState.SelectedId ), UiState.CanPaint ? Color.Parse( UiState.Paint ) : null );
+		preview.Show( CarCatalog.Find( UiState.SelectedId ), ShownLook() );
 		UpdateDrag();
 
 		if ( !dragging && sinceTouched > IdleBeforeSpin )

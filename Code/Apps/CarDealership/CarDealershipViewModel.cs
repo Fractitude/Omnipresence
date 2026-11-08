@@ -17,8 +17,15 @@ public sealed class CarDealershipViewModel
 	public const string SelectAction = "select";
 	public const string BuyAction = "buy";
 
-	/// <summary>Pick a body colour: one argument, <c>#rrggbb</c>, or <see cref="StockArg"/> for the car's own.</summary>
+	/// <summary>
+	/// Pick a colour: two arguments, which part (<see cref="BodyPart"/>, <see cref="TrimPart"/> or <see cref="GlassPart"/>)
+	/// and the colour (<see cref="CarLook.Format"/>, or <see cref="StockArg"/> for the car's own).
+	/// </summary>
 	public const string PaintAction = "paint";
+
+	public const string BodyPart = "body";
+	public const string TrimPart = "trim";
+	public const string GlassPart = "glass";
 
 	public const string StockArg = "stock";
 
@@ -30,8 +37,10 @@ public sealed class CarDealershipViewModel
 
 	string selectedId = CarCatalog.All.FirstOrDefault()?.Id ?? "";
 
-	// The colour picked for the selected car; null is the car's own. Back to the car's own when another is selected.
+	// The colours picked for the selected car; null is the car's own. Back to the car's own when another is selected.
 	Color? paint;
+	Color? secondary;
+	Color? glass;
 	string notice = "";
 	bool noticeIsError;
 	bool busy;
@@ -82,16 +91,16 @@ public sealed class CarDealershipViewModel
 			{
 				case SelectAction when CarCatalog.Find( args[0] ) is { } car:
 					if ( selectedId != car.Id )
-						paint = null;
+						paint = secondary = glass = null;
 
 					selectedId = car.Id;
 					notice = "";
 					noticeIsError = false;
 					break;
 
-				// Typed by the seated player's click, so it is only ever parsed as a colour.
-				case PaintAction:
-					paint = args[0] == StockArg ? null : Color.Parse( args[0] ) is { } picked ? picked.WithAlpha( 1 ) : paint;
+				// Sent by the seated player's click, so it is only ever parsed as a colour (and the body and trim are opaque).
+				case PaintAction when args.Length > 1:
+					Pick( args[0], args[1] );
 					break;
 
 				case BuyAction:
@@ -101,6 +110,38 @@ public sealed class CarDealershipViewModel
 		}
 
 		UiState = Build();
+	}
+
+	void Pick( string part, string value )
+	{
+		var picked = value == StockArg ? null : CarLook.Parse( value );
+
+		if ( value != StockArg && picked is null )
+			return;
+
+		switch ( part )
+		{
+			case BodyPart:
+				paint = picked?.WithAlpha( 1 );
+				break;
+
+			case TrimPart:
+				secondary = picked?.WithAlpha( 1 );
+				break;
+
+			case GlassPart:
+				glass = picked;
+				break;
+		}
+	}
+
+	/// <summary>The selected car's colours: its own, and what has been picked over them. Null if it can't be painted.</summary>
+	CarLook? LookOf( string id )
+	{
+		if ( CarCatalog.StockLook( CarCatalog.Find( id ) ) is not { } stock )
+			return null;
+
+		return new CarLook( paint ?? stock.Paint, secondary ?? stock.Secondary, glass ?? stock.Glass );
 	}
 
 	/// <summary>
@@ -114,7 +155,7 @@ public sealed class CarDealershipViewModel
 		var computer = getComputer();
 
 		// The colour on the screen when the button was pressed, not whatever it is when the assets are done loading.
-		var chosen = selectedId == id ? paint : null;
+		var chosen = selectedId == id ? LookOf( id ) : null;
 
 		if ( busy || car is null || seat is null || !CarDealer.IsDealership( computer ) )
 			return;
@@ -131,7 +172,7 @@ public sealed class CarDealershipViewModel
 			if ( getSeat()?.Id != seat.Id || !computer.IsValid() )
 				return;
 
-			var result = CarDealer.Buy( seat, car, computer.WorldPosition, paint: chosen );
+			var result = CarDealer.Buy( seat, car, computer.WorldPosition, look: chosen );
 
 			notice = result.Message;
 			noticeIsError = !result.Ok;
@@ -157,7 +198,7 @@ public sealed class CarDealershipViewModel
 			PlayerWallet.For( seat )?.Version,
 			PlayerProgress.For( seat )?.Version,
 			CarDealer.IsDealership( getComputer() ),
-			(selectedId, paint),
+			(selectedId, paint, secondary, glass),
 			notice,
 			busy,
 			bays ).ToString();
@@ -194,13 +235,18 @@ public sealed class CarDealershipViewModel
 			return state with { Message = "Loading your account..." };
 
 		var cash = PlayerWallet.For( seat )?.Cash ?? 0;
-		var stock = CarCatalog.StockPaint( CarCatalog.Find( selectedId ) );
+		var stock = CarCatalog.StockLook( CarCatalog.Find( selectedId ) );
+		var look = LookOf( selectedId );
 
 		return state with
 		{
 			HasAccess = true,
-			StockPaint = stock is { } own ? own.Hex : "",
-			Paint = stock is null ? "" : (paint ?? stock.Value).Hex,
+			Paint = look is { } now ? CarLook.Format( now.Paint ) : "",
+			Secondary = look is { } now2 ? CarLook.Format( now2.Secondary ) : "",
+			Glass = look is { } now3 ? CarLook.Format( now3.Glass ) : "",
+			StockPaint = stock is { } own ? CarLook.Format( own.Paint ) : "",
+			StockSecondary = stock is { } own2 ? CarLook.Format( own2.Secondary ) : "",
+			StockGlass = stock is { } own3 ? CarLook.Format( own3.Glass ) : "",
 			Balance = $"${cash:N0}",
 			Bays = bays,
 			Cars = CarCatalog.All

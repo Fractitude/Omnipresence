@@ -70,24 +70,37 @@ before it exists (AGENTS.md, "UI pitfalls"). The car in it is a copy of the pref
 ## Paint
 
 `CarPaint` (`Code/Vehicles/CarPaint.cs`, "Car Paint" in the component list) is on every crosschainer car prefab, after
-`CuratedVehicle`. It copies the car's `primary` materials once, when the car starts, and sets their `g_vColorTint` to `Paint`;
-the `secondary` ones get `Secondary` (dark grey). It does it again only when `Paint` changes (a `[Change]` handler for a synced change, `SetPaint` for one made on this machine, since a local set does not reach the handler), never every
-frame, and it looks again for up to 3 seconds if the model was not loaded at start. It runs in the editor too, so a prefab shows its colour and the inspector edits it live (compared each frame there only). The
-overrides it makes are saved with the prefab as entries naming the stock materials: the same look, but a diff.
+`CuratedVehicle`. It has three synced colours, all editable in the prefab's inspector (they are the car's stock look):
 
-- **The stock colour is `Paint` on the prefab**, set in the inspector (`CarCatalog.StockPaint` reads it). A car whose prefab has
-  no `CarPaint` (the buggy) cannot be painted, and the app shows no swatches for it.
-- **The player picks in the app** (`paint` action, one `#rrggbb` argument or `stock`), kept by the host's view model per selected
-  car (picking another car goes back to its own colour) and published as `CarDealershipUiState.Paint`, so the preview and
-  everyone watching show it. The buy takes the colour on the screen when the button was pressed.
-- **A bought car gets it** through `CarDealer.Buy( …, paint )`, set on the cloned `CarPaint` before `NetworkSpawn`, so it is
-  synced (`Sync( FromHost )`) with the car.
-- **The windows are clear in the prefab**, not in code: each window slot of a car's body renderer has `vehicles/shared/clear_glass.vmat`
-  (the `drift_lens` shader, near transparent) as a material override. A new car needs the same on its window slots (the slots whose
-  material uses `drift_glass`, or is `dark_cabin.vmat`); copy it from an existing prefab.
+- `Paint` tints the car's `primary` materials and `Secondary` the `secondary` ones (`g_vColorTint`).
+- `GlassTint` tints the windows: its colour is the tint and its **alpha is how strong it is**, so the default (a pale grey at
+  alpha 0.05) is clear, and black at alpha 1 is a blacked-out window. Each window slot (a material on the `drift_glass`
+  shader, or `dark_cabin.vmat`) is put on one copy of `vehicles/shared/clear_glass.vmat` (the `drift_lens` shader), whose
+  `LensTint` and `LensOpacity` it sets. The prefab's own window slots also name that material, so a car without `CarPaint`
+  still has clear glass.
+
+`CarLook( Paint, Secondary, Glass )` is the three together (`CarPaint.Look`, `SetLook`), with `Format`/`Parse` for the
+`r,g,b,a` string the app sends. The tint is set once when the car starts and again when a colour changes, never every frame: a
+change from the host arrives through a `[Change]` handler, and one made on this machine goes through `SetLook` (a local set does
+not reach the handler). It looks again for up to 3 seconds if the model was not loaded at start. It runs in the editor too, so a
+prefab shows its colours and the inspector edits them live (compared each frame there only); the overrides it makes are saved
+with the prefab as entries naming the stock materials: the same look, but a diff.
+
+- **The stock look is the prefab's** (`CarCatalog.StockLook` reads it). A car whose prefab has no `CarPaint` (the buggy) cannot be
+  painted, and the app shows no colour controls for it.
+- **The player picks in the app** (`paint` action: the part, `body`, `trim` or `glass`, and a colour or `stock`), kept by the
+  host's view model per selected car (picking another car goes back to its own look) and published in `CarDealershipUiState`,
+  so the preview and everyone watching show it. Body and trim are made opaque on the host.
+  - **Body and trim use the engine's `ColorPickerControl`**: clicking a swatch opens it over the picture. It edits a
+    `CarColorHolder` (the control needs a serialized property), and the panel sends what is picked to the host while it is
+    dragged, at most every 0.08 s.
+  - **Glass uses fixed swatches** (`GlassTints` in the panel): the car's own, light and dark smoke, blacked out, then blue,
+    green, amber, red and purple. "Stock" puts all three back.
+- **A bought car gets the look** through `CarDealer.Buy( …, look )`, set on the cloned `CarPaint` before `NetworkSpawn`, so it is
+  synced with the car. The buy takes the colours on the screen when the button was pressed.
 - `CuratedVehicle` only does the lamps now (headlight and taillight emission, set when it changes).
 
 ## Security
 
-The panel sends only a car id (`select`, `buy`) and a colour (`paint`, parsed as a colour and made opaque). The price, the cash, the tag and the room are all checked on the host, and the
+The panel sends only a car id (`select`, `buy`) and colours (`paint`, parsed as `r,g,b,a` and clamped; body and trim are made opaque). The price, the cash, the tag and the room are all checked on the host, and the
 buyer is always the player in the computer's seat. No car, bay or price comes from a client.

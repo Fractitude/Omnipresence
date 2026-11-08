@@ -23,13 +23,22 @@ public sealed record CarDealershipUiState
 	public string SelectedId { get; init; } = "";
 
 	/// <summary>
-	/// The body colour picked for the selected car, as <c>#rrggbb</c>, shared like the selection so every viewer's
-	/// picture is painted the same. Empty when the car can't be painted.
+	/// The colours picked for the selected car (<see cref="CarLook.Format"/>), shared like the selection so every viewer's
+	/// picture is painted the same: the body, the trim and the glass (its alpha is the tint's strength). Empty when the car
+	/// can't be painted.
 	/// </summary>
 	public string Paint { get; init; } = "";
 
-	/// <summary>The selected car's own colour (<see cref="CarCatalog.StockPaint"/>), as <c>#rrggbb</c>. Empty when it can't be painted.</summary>
+	public string Secondary { get; init; } = "";
+
+	public string Glass { get; init; } = "";
+
+	/// <summary>The selected car's own colours (<see cref="CarCatalog.StockLook"/>). Empty when it can't be painted.</summary>
 	public string StockPaint { get; init; } = "";
+
+	public string StockSecondary { get; init; } = "";
+
+	public string StockGlass { get; init; } = "";
 
 	public bool CanPaint => Paint != "";
 
