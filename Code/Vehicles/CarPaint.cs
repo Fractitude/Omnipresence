@@ -172,6 +172,35 @@ public sealed class CarPaint : Component, Component.ExecuteInEditor
 	}
 
 	/// <summary>
+	/// Whether a car's models have any <c>secondary</c> paint material, so <see cref="Secondary"/> does something. Most of
+	/// crosschainer's cars have none (only the Takeda Ascend and Hachi 86 do), so the dealership offers no trim colour for
+	/// them. Null while the models are not loaded and it can't be told.
+	/// </summary>
+	public static bool? HasTrimIn( GameObject root )
+	{
+		var primary = 0;
+
+		foreach ( var renderer in root.GetComponentsInChildren<ModelRenderer>( true ) )
+		{
+			if ( renderer.Model is null || renderer.Model.IsError )
+				continue;
+
+			foreach ( var material in renderer.Model.Materials )
+			{
+				var name = (material.Name ?? "").ToLowerInvariant();
+
+				if ( name.Contains( "secondary" ) )
+					return true;
+
+				if ( name.Contains( "primary" ) )
+					primary++;
+			}
+		}
+
+		return primary > 0 ? false : null;
+	}
+
+	/// <summary>
 	/// Whether a material is a window: crosschainer's window glass uses the <c>drift_glass</c> shader, and three of the
 	/// cars also draw a rear window with a plain opaque material, <c>dark_cabin.vmat</c>.
 	/// </summary>

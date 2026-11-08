@@ -125,7 +125,7 @@ public sealed class CarDealershipViewModel
 				paint = picked?.WithAlpha( 1 );
 				break;
 
-			case TrimPart:
+			case TrimPart when CarCatalog.HasTrim( CarCatalog.Find( selectedId ) ):
 				secondary = picked?.WithAlpha( 1 );
 				break;
 
@@ -198,7 +198,7 @@ public sealed class CarDealershipViewModel
 			PlayerWallet.For( seat )?.Version,
 			PlayerProgress.For( seat )?.Version,
 			CarDealer.IsDealership( getComputer() ),
-			(selectedId, paint, secondary, glass),
+			(selectedId, paint, secondary, glass, CarCatalog.HasTrim( CarCatalog.Find( selectedId ) )),
 			notice,
 			busy,
 			bays ).ToString();
@@ -241,6 +241,7 @@ public sealed class CarDealershipViewModel
 		return state with
 		{
 			HasAccess = true,
+			CanTrim = CarCatalog.HasTrim( CarCatalog.Find( selectedId ) ),
 			Paint = look is { } now ? CarLook.Format( now.Paint ) : "",
 			Secondary = look is { } now2 ? CarLook.Format( now2.Secondary ) : "",
 			Glass = look is { } now3 ? CarLook.Format( now3.Glass ) : "",

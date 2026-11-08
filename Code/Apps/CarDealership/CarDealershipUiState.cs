@@ -42,6 +42,9 @@ public sealed record CarDealershipUiState
 
 	public bool CanPaint => Paint != "";
 
+	/// <summary>Whether the selected car has a trim to colour. Most cars don't (see <see cref="CarPaint.HasTrimIn"/>).</summary>
+	public bool CanTrim { get; init; }
+
 	public IReadOnlyList<CarRow> Cars { get; init; } = [];
 
 	/// <summary>The selected car, or null.</summary>

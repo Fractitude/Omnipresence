@@ -56,6 +56,31 @@ public static class CarCatalog
 		return look;
 	}
 
+	// Not readonly: filled at run time.
+	static Dictionary<string, bool> hasTrim = new();
+
+	/// <summary>
+	/// Whether the car has a trim to colour: its models have a <c>secondary</c> paint material (<see cref="CarPaint.HasTrimIn"/>).
+	/// False when it can't be painted, or while its models are not loaded and it can't be told yet.
+	/// </summary>
+	public static bool HasTrim( CarModel car )
+	{
+		if ( car is null || StockLook( car ) is null )
+			return false;
+
+		if ( hasTrim.TryGetValue( car.Id, out var known ) )
+			return known;
+
+		if ( !ResourceLibrary.TryGet<PrefabFile>( car.Prefab, out var prefab ) )
+			return false;
+
+		if ( CarPaint.HasTrimIn( SceneUtility.GetPrefabScene( prefab ) ) is not { } answer )
+			return false;
+
+		hasTrim[car.Id] = answer;
+		return answer;
+	}
+
 	/// <summary>
 	/// An integrated crosschainer sent (<c>Assets/sents/crosschainer/&lt;package&gt;/</c>, docs/sents.md).
 	/// </summary>

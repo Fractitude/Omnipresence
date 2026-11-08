@@ -64,11 +64,14 @@
 								     @onclick=@( () => TogglePicker( CarDealershipViewModel.BodyPart ) )>
 								</div>
 
-								<div class="paint-label">Trim</div>
-								<div class="swatch big @( pickerPart == CarDealershipViewModel.TrimPart ? "selected" : "" )"
-								     style="background-color: @CssOf( UiState.Secondary )"
-								     @onclick=@( () => TogglePicker( CarDealershipViewModel.TrimPart ) )>
-								</div>
+								@if ( UiState.CanTrim )
+								{
+									<div class="paint-label">Trim</div>
+									<div class="swatch big @( pickerPart == CarDealershipViewModel.TrimPart ? "selected" : "" )"
+									     style="background-color: @CssOf( UiState.Secondary )"
+									     @onclick=@( () => TogglePicker( CarDealershipViewModel.TrimPart ) )>
+									</div>
+								}
 
 								<div class="link" @onclick=@( () => ResetColours() )>Stock</div>
 							</div>
@@ -197,6 +200,10 @@
 	/// </summary>
 	void UpdatePicker()
 	{
+		// The car was changed to one with no trim while the trim picker was open.
+		if ( pickerPart == CarDealershipViewModel.TrimPart && !UiState.CanTrim )
+			pickerPart = "";
+
 		if ( pickerPart == "" || Picker is not { IsValid: true } )
 			return;
 

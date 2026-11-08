@@ -86,6 +86,9 @@ not reach the handler). It looks again for up to 3 seconds if the model was not 
 prefab shows its colours and the inspector edits them live (compared each frame there only); the overrides it makes are saved
 with the prefab as entries naming the stock materials: the same look, but a diff.
 
+- **Only some cars have a trim.** `Secondary` tints materials named `secondary`, and only the Takeda Ascend and the Takeda Hachi 86
+  have any (the other eight cars' models have none, so the colour would do nothing). `CarCatalog.HasTrim` reads it from the models
+  (`CarPaint.HasTrimIn`) and the app shows no Trim swatch for the rest; the host also ignores a trim pick for them.
 - **The stock look is the prefab's** (`CarCatalog.StockLook` reads it). A car whose prefab has no `CarPaint` (the buggy) cannot be
   painted, and the app shows no colour controls for it.
 - **The player picks in the app** (`paint` action: the part, `body`, `trim` or `glass`, and a colour or `stock`), kept by the
