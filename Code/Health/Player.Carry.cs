@@ -104,7 +104,11 @@ public sealed partial class Player
 				DropHeld();
 
 			IsRotating = false;
-			UpdateCarryControls();
+
+			// Their controls are theirs: only give back what the carry took, or a seat's lock is undone every frame.
+			if ( carryTookControls )
+				UpdateCarryControls();
+
 			return;
 		}
 
@@ -135,12 +139,19 @@ public sealed partial class Player
 	/// </summary>
 	void UpdateCarryControls()
 	{
+		// Not rotating and never took them: leave the controls to whoever else sets them (a seat, a menu).
+		if ( !IsRotating && !carryTookControls )
+			return;
+
 		Controller.UseLookControls = !IsRotating;
 		Controller.UseInputControls = !IsRotating;
+		carryTookControls = IsRotating;
 
 		if ( IsRotating )
 			Controller.WishVelocity = Vector3.Zero;
 	}
+
+	bool carryTookControls;
 
 	void ControlHeld()
 	{
