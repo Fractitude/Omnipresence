@@ -53,10 +53,6 @@
                 {
                   "_type": "gameobject",
                   "go": "b1dad608-e68d-4983-9bdb-0c17ba0ef5cc"
-                },
-                {
-                  "_type": "gameobject",
-                  "go": "de245894-60b2-4e83-98f6-e24d2033eeb3"
                 }
               ],
               "StartServer": true
@@ -88,24 +84,6 @@
               "Name": "Spawn point",
               "Position": "0.659179688,9.07861328,0",
               "Rotation": "0,0,0.707106769,0.707106769",
-              "Scale": "1,1,1",
-              "Tags": "",
-              "Enabled": true,
-              "NetworkMode": 2,
-              "NetworkFlags": 0,
-              "NetworkOrphaned": 0,
-              "NetworkTransmit": true,
-              "OwnerTransfer": 1,
-              "Components": [],
-              "Children": []
-            },
-            {
-              "__guid": "de245894-60b2-4e83-98f6-e24d2033eeb3",
-              "__version": 2,
-              "Flags": 0,
-              "Name": "Spawn point (1)",
-              "Position": "66.2070312,12.456543,0",
-              "Rotation": "0,0,0.707106829,0.707106769",
               "Scale": "1,1,1",
               "Tags": "",
               "Enabled": true,
@@ -197,11 +175,54 @@
               "__guid": "137b9024-ccdf-4b1e-a403-ab403a98859a",
               "__enabled": true,
               "Flags": 0,
+              "__version": 1,
+              "AnimationCurve": [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "in": 0,
+                  "out": 0,
+                  "mode": "Mirrored"
+                },
+                {
+                  "x": 0.5,
+                  "y": 1,
+                  "in": 0,
+                  "out": 0,
+                  "mode": "Mirrored"
+                },
+                {
+                  "x": 1,
+                  "y": 0,
+                  "in": 0,
+                  "out": 0,
+                  "mode": "Mirrored"
+                }
+              ],
+              "AnimationDuration": 2,
+              "AnimationEnabled": false,
+              "AnimationGradient": {
+                "blend": "Linear",
+                "color": [
+                  {
+                    "t": 0.5,
+                    "c": "1,1,1,1"
+                  }
+                ],
+                "alpha": []
+              },
+              "AnimationPattern": "Flicker",
+              "AnimationSpeed": 1,
+              "AnimationTimeOffset": 0,
+              "BakeLightIndex": -1,
               "ContactShadows": true,
               "Contribution": "Diffuse, Specular, Transmissive",
               "FogMode": "Enabled",
               "FogStrength": 1,
+              "IncludeStaticShadowCasters": false,
+              "Intensity": 1,
               "LightColor": "0.91373,0.98039,1,1",
+              "MixedShadows": false,
               "OnComponentDestroy": null,
               "OnComponentDisabled": null,
               "OnComponentEnabled": null,
@@ -214,6 +235,7 @@
               "ShadowHardness": 0,
               "Shadows": true,
               "SkyColor": "0,0,0,0",
+              "Temperature": 6500,
               "Visualizer": {}
             },
             {
@@ -988,7 +1010,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "b5433922-6993-4f1a-98aa-2dde84c0e1f1",
+                    "Id": "bb27cfda-7fcb-4974-9f70-341aa69d7833",
                     "Path": "super_computer.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -1015,7 +1037,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "b5433922-6993-4f1a-98aa-2dde84c0e1f1",
+                    "Id": "bb27cfda-7fcb-4974-9f70-341aa69d7833",
                     "Path": "super_computer.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -1043,7 +1065,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "b5433922-6993-4f1a-98aa-2dde84c0e1f1",
+                    "Id": "bb27cfda-7fcb-4974-9f70-341aa69d7833",
                     "Path": "super_computer.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -1135,13 +1157,13 @@
       "Components": [],
       "Children": [
         {
-          "__guid": "a62d27e4-8f8c-48d4-a84d-7f997126323e",
+          "__guid": "e028a50c-fddd-497b-8083-a639e30e997a",
           "__version": 2,
           "Flags": 0,
-          "Name": "Doors",
-          "Position": "-2078.71875,-2093.57739,-108",
-          "Rotation": "0,0,-1,-4.37113883E-08",
-          "Scale": "2,2,2",
+          "Name": "Sidewalk Colliders",
+          "Position": "11218.1338,-5951.55957,-116.360817",
+          "Rotation": "-0.19247894,8.41352144E-09,-0.981301129,-4.28940332E-08",
+          "Scale": "0.649944007,13.8464832,0.354882628",
           "Tags": "",
           "Enabled": true,
           "NetworkMode": 2,
@@ -1150,13 +1172,520 @@
           "NetworkTransmit": true,
           "OwnerTransfer": 1,
           "Components": [],
-          "Children": []
+          "Children": [
+            {
+              "__guid": "19643984-3911-4e6f-a332-f7ed621132b3",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider",
+              "Position": "0,0,0",
+              "Rotation": "0,0,0,1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "d58aa7a8-2605-4761-bf11-f1ecd5be5be8",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "ebb98f85-9768-4b16-8543-ec0220b51e16",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "2579.07422,399.972839,-1918.64465",
+              "Rotation": "0.236975878,0.0322522819,0.666215062,0.70637095",
+              "Scale": "1.00000238,4.91477728,1.00000179",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "89caee43-08ce-4a97-9844-7757ab4c904b",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "af9bcfb3-0b52-432f-8765-6cbd98ff5aff",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "266.625061,367.436737,-190.766968",
+              "Rotation": "-0.236975938,0.0322522819,-0.666215241,0.70637089",
+              "Scale": "1.00000405,1.72574162,1.00000322",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "d3dbdcff-411d-4bb8-937e-fed39879246b",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "6199abe9-d490-4355-9b10-ea6fcf92e43d",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "266.625061,349.057037,-190.766953",
+              "Rotation": "-0.236975908,-0.0322522968,-0.666215122,-0.706371248",
+              "Scale": "1.00000405,1.72574162,1.00000322",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "b2e181e1-b371-41f5-a57c-ffc911d8ba91",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "361d9200-d1d6-4dd9-a5cb-7f614498b95f",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "909.765015,311.977905,-671.325134",
+              "Rotation": "-0.236976013,0.0322522819,-0.66621542,0.706371069",
+              "Scale": "1.00000978,1.11198354,1.00000894",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "aa52f593-c1c2-44ed-9dce-a585c8317b03",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "9d8d8d87-c870-498d-9b91-227947d74349",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "4026.19092,324.663574,-2999.93896",
+              "Rotation": "-0.236976027,0.0322522894,-0.66621542,0.706371129",
+              "Scale": "1.00001407,0.797082007,1.00001276",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "58e13bed-09e4-4259-86da-9966fb50c27b",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "6ba37e9f-cf51-462a-a963-2770ee5d6d41",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "3190.78271,267.660889,-2375.71729",
+              "Rotation": "-4.22926334E-08,0.0456116199,-2.20746532E-08,0.99895972",
+              "Scale": "1.0000236,1.10464442,1.00002229",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "f0d4316e-839e-4598-b928-820612110b48",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "a3a52ebb-3555-4007-b5a1-e061127e3828",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "-2354.56348,164.074554,1767.80322",
+              "Rotation": "0.335134536,4.16137569E-09,0.942170501,5.99241829E-08",
+              "Scale": "1.00000334,4.60395956,1.00000274",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "3cb08603-929c-4c2e-92ba-0b1b34d9f91f",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "2c64b987-5637-4b4c-b686-001007dfc744",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "-592.868408,170.605652,451.454559",
+              "Rotation": "4.13470413E-09,-0.0456116199,1.58724411E-08,-0.998959541",
+              "Scale": "1.00000453,2.42513108,1.00000393",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "c11ce08b-8b68-420f-9668-61512675dd28",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "a1e150e3-5993-462b-a27c-a77c70e2d41e",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "-1709.94592,256.697418,1286.14258",
+              "Rotation": "4.13470413E-09,-0.0456116349,1.58724411E-08,-0.998959541",
+              "Scale": "1.00000811,1.94133532,1.00000751",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "5784bc4a-0bc3-49bd-bfa1-02709aa94ea3",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "9f8036a0-f588-4e74-b36e-55282efe0b85",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Sidewalk Collider (1)",
+              "Position": "-1347.01489,256.951447,1014.95819",
+              "Rotation": "0.335134566,4.16137746E-09,0.94217062,5.99241829E-08",
+              "Scale": "1.00000834,1.90449977,1.00000775",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.PlaneCollider",
+                  "__guid": "a98bc4a6-dfff-4636-9dca-6ba2a3e3b19c",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "Center": "0,0,0",
+                  "ColliderFlags": 0,
+                  "Elasticity": null,
+                  "Friction": null,
+                  "IsTrigger": false,
+                  "Normal": "0,0,1",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "OnObjectTriggerEnter": null,
+                  "OnObjectTriggerExit": null,
+                  "OnTriggerEnter": null,
+                  "OnTriggerExit": null,
+                  "RollingResistance": null,
+                  "Scale": "100,100",
+                  "Static": true,
+                  "Surface": null,
+                  "SurfaceVelocity": "0,0,0"
+                }
+              ],
+              "Children": []
+            }
+          ]
         },
         {
           "__guid": "056e04e7-28c1-4199-ab03-60de40a7dae7",
           "__version": 2,
           "Flags": 0,
-          "Name": "Depot Store",
+          "Name": "Hardware Store",
           "Position": "10729.0605,-5379.13037,-9.64082336",
           "Rotation": "0,0,0,1",
           "Scale": "1,1,1",
@@ -1170,10 +1699,90 @@
           "Components": [],
           "Children": [
             {
+              "__guid": "8f6bc2d9-cbc5-47c4-bf7f-dec3b747bfb6",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Hardware Store Title",
+              "Position": "253.897461,10.5868912,170.452286",
+              "Rotation": "0,0,0.99999994,-1.589326E-08",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.TextRenderer",
+                  "__guid": "36b13d29-18a3-41dd-a71f-32fdf9f04e29",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "__version": 2,
+                  "Billboard": "None",
+                  "BlendMode": "Normal",
+                  "FogStrength": 1,
+                  "HorizontalAlignment": "Center",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "Scale": 0.5845411,
+                  "TextScope": {
+                    "Text": "Hardware Store",
+                    "TextColor": "1,1,1,1",
+                    "FontName": "Poppins",
+                    "FontSize": 64,
+                    "FontWeight": 800,
+                    "FontItalic": false,
+                    "FontVariantNumeric": "Normal",
+                    "LineHeight": 1,
+                    "LetterSpacing": 0,
+                    "WordSpacing": 0,
+                    "FilterMode": "Bilinear",
+                    "FontSmooth": "Auto",
+                    "Outline": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,1,1"
+                    },
+                    "Shadow": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    },
+                    "OutlineUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,1,0,1"
+                    },
+                    "ShadowUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    }
+                  },
+                  "VerticalAlignment": "Center"
+                }
+              ],
+              "Children": []
+            },
+            {
               "__guid": "0af58608-2aa5-42a4-a041-e6c07bd1feeb",
               "__version": 2,
               "Flags": 0,
-              "Name": "Depot Computer",
+              "Name": "Hardware Computer",
               "Position": "0,0,0",
               "Rotation": "0,0,0,1",
               "Scale": "1,1,1",
@@ -1234,12 +1843,52 @@
                           "Type": "Component",
                           "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
                         },
-                        "Property": "InstalledApps",
+                        "Property": "ComputerTags",
                         "Value": [
-                          "navi/apps/files.napp",
-                          "navi/apps/filepicker.napp",
-                          "navi/game/depot.napp"
+                          "store"
                         ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "HideTaskbar",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "InstalledApps",
+                        "Value": []
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "KioskMode",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OnlyApps",
+                        "Value": [
+                          "navi/shop/hardwarestore.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OpenApp",
+                        "Value": "navi/shop/hardwarestore.napp"
                       },
                       {
                         "Target": {
@@ -1248,8 +1897,7 @@
                         },
                         "Property": "PinnedApps",
                         "Value": [
-                          "navi/apps/files.napp",
-                          "navi/game/depot.napp"
+                          ""
                         ]
                       },
                       {
@@ -1259,8 +1907,7 @@
                         },
                         "Property": "StartFavorites",
                         "Value": [
-                          "navi/apps/files.napp",
-                          "navi/game/depot.napp"
+                          ""
                         ]
                       },
                       {
@@ -1358,168 +2005,1268 @@
                   }
                 }
               ]
+            },
+            {
+              "__guid": "703534be-ccc5-489e-9616-122c8275af97",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Delivery Point 2",
+              "Position": "-128.931732,-1023.76807,-25.6493988",
+              "Rotation": "0,0,-1,-4.37113883E-08",
+              "Scale": "2,2,2",
+              "Tags": "delivery_point",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.TextRenderer",
+                  "__guid": "86969ace-275a-4b86-b620-53159143bc34",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "__version": 2,
+                  "Billboard": "None",
+                  "BlendMode": "Normal",
+                  "FogStrength": 1,
+                  "HorizontalAlignment": "Center",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "Scale": 0.3,
+                  "TextScope": {
+                    "Text": "Delivery Point\n#2",
+                    "TextColor": "1,1,1,1",
+                    "FontName": "Poppins",
+                    "FontSize": 50,
+                    "FontWeight": 800,
+                    "FontItalic": false,
+                    "FontVariantNumeric": "Normal",
+                    "LineHeight": 0.85,
+                    "LetterSpacing": 0,
+                    "WordSpacing": 0,
+                    "FilterMode": "Bilinear",
+                    "FontSmooth": "Auto",
+                    "Outline": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,1,1"
+                    },
+                    "Shadow": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    },
+                    "OutlineUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,1,0,1"
+                    },
+                    "ShadowUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    }
+                  },
+                  "VerticalAlignment": "Center"
+                }
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "57968069-fe26-41a4-875a-dd7e6d51d7f2",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Delivery Point 1",
+              "Position": "-128.931671,-517.360352,-25.6493988",
+              "Rotation": "0,0,-1,-4.37113883E-08",
+              "Scale": "2,2,2",
+              "Tags": "delivery_point",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.TextRenderer",
+                  "__guid": "9050c0a5-107a-474b-a90d-9e5e6661125b",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "__version": 2,
+                  "Billboard": "None",
+                  "BlendMode": "Normal",
+                  "FogStrength": 1,
+                  "HorizontalAlignment": "Center",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "Scale": 0.3,
+                  "TextScope": {
+                    "Text": "Delivery Point\n#1",
+                    "TextColor": "1,1,1,1",
+                    "FontName": "Poppins",
+                    "FontSize": 50,
+                    "FontWeight": 800,
+                    "FontItalic": false,
+                    "FontVariantNumeric": "Normal",
+                    "LineHeight": 0.85,
+                    "LetterSpacing": 0,
+                    "WordSpacing": 0,
+                    "FilterMode": "Bilinear",
+                    "FontSmooth": "Auto",
+                    "Outline": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,1,1"
+                    },
+                    "Shadow": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    },
+                    "OutlineUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,1,0,1"
+                    },
+                    "ShadowUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    }
+                  },
+                  "VerticalAlignment": "Center"
+                }
+              ],
+              "Children": []
             }
           ]
         },
         {
-          "__guid": "57968069-fe26-41a4-875a-dd7e6d51d7f2",
+          "__guid": "507f774b-06c5-484b-93be-5e9b39db4422",
           "__version": 2,
           "Flags": 0,
-          "Name": "Delivery Point 1",
-          "Position": "10600.1289,-5896.49072,-35.2902222",
-          "Rotation": "0,0,-1,-4.37113883E-08",
-          "Scale": "2,2,2",
-          "Tags": "delivery_point",
+          "Name": "Computer Shop",
+          "Position": "11102,-7167.85938,-9.64083099",
+          "Rotation": "0,0,1.589326E-08,0.99999994",
+          "Scale": "1,1,1",
+          "Tags": "",
           "Enabled": true,
           "NetworkMode": 2,
           "NetworkFlags": 0,
           "NetworkOrphaned": 0,
           "NetworkTransmit": true,
           "OwnerTransfer": 1,
-          "Components": [
+          "Components": [],
+          "Children": [
             {
-              "__type": "Sandbox.TextRenderer",
-              "__guid": "9050c0a5-107a-474b-a90d-9e5e6661125b",
-              "__enabled": true,
-              "Flags": 0,
+              "__guid": "d79ca37c-1a19-4733-90ef-4b2d7504dfe5",
               "__version": 2,
-              "Billboard": "None",
-              "BlendMode": "Normal",
-              "FogStrength": 1,
-              "HorizontalAlignment": "Center",
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "RenderOptions": {
-                "GameLayer": true,
-                "OverlayLayer": false,
-                "BloomLayer": false,
-                "AfterUILayer": false
-              },
-              "Scale": 0.3,
-              "TextScope": {
-                "Text": "Delivery Point\n#1",
-                "TextColor": "1,1,1,1",
-                "FontName": "Poppins",
-                "FontSize": 50,
-                "FontWeight": 800,
-                "FontItalic": false,
-                "FontVariantNumeric": "Normal",
-                "LineHeight": 0.85,
-                "LetterSpacing": 0,
-                "WordSpacing": 0,
-                "FilterMode": "Bilinear",
-                "FontSmooth": "Auto",
-                "Outline": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,1,1"
-                },
-                "Shadow": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
-                },
-                "OutlineUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,1,0,1"
-                },
-                "ShadowUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
+              "Flags": 0,
+              "Name": "Computer Shop Title",
+              "Position": "441.912231,-66.1426392,151.304474",
+              "Rotation": "0,0,0.99999994,-1.589326E-08",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.TextRenderer",
+                  "__guid": "373c6be4-c3b6-48a6-8a39-6fccc9456918",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "__version": 2,
+                  "Billboard": "None",
+                  "BlendMode": "Normal",
+                  "FogStrength": 1,
+                  "HorizontalAlignment": "Center",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "Scale": 0.5845411,
+                  "TextScope": {
+                    "Text": "Computer Shop",
+                    "TextColor": "1,1,1,1",
+                    "FontName": "Poppins",
+                    "FontSize": 64,
+                    "FontWeight": 800,
+                    "FontItalic": false,
+                    "FontVariantNumeric": "Normal",
+                    "LineHeight": 1,
+                    "LetterSpacing": 0,
+                    "WordSpacing": 0,
+                    "FilterMode": "Bilinear",
+                    "FontSmooth": "Auto",
+                    "Outline": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,1,1"
+                    },
+                    "Shadow": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    },
+                    "OutlineUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,1,0,1"
+                    },
+                    "ShadowUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    }
+                  },
+                  "VerticalAlignment": "Center"
                 }
-              },
-              "VerticalAlignment": "Center"
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "f2a0aa4c-73ba-424e-a52d-bb8ae058952e",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Computer Shop Computer",
+              "Position": "0,0,0",
+              "Rotation": "0,0,1.589326E-08,0.99999994",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": [
+                {
+                  "__guid": "2cd24fc5-4a88-475e-9eac-419319112261",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "9856d7ce-67e6-4db2-ba31-a0770ac38fb8",
+                    "Path": "navi computer.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Position",
+                        "Value": "0,0,14.8534164"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Rotation",
+                        "Value": "4.37113883E-08,-1.91068547E-15,3.55271368E-15,0.99999994"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Scale",
+                        "Value": "1,1,1"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ColorScheme",
+                        "Value": "Light"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ComputerTags",
+                        "Value": [
+                          "store"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "HideTaskbar",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "InstalledApps",
+                        "Value": []
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "KioskMode",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OnlyApps",
+                        "Value": [
+                          "navi/shop/computershop.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OpenApp",
+                        "Value": "navi/shop/computershop.napp"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "PinnedApps",
+                        "Value": [
+                          ""
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "StartFavorites",
+                        "Value": [
+                          ""
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Theme",
+                        "Value": "Paper"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Wallpaper",
+                        "Value": "Paper"
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "eef86c41-1240-43d4-84ca-692854649d7f": "2cd24fc5-4a88-475e-9eac-419319112261",
+                    "22de298f-c53d-4c01-8706-b687e2dcc093": "8878e2d9-9df3-4cf4-a071-918cd9a3b962",
+                    "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7": "307de674-616b-40cf-99ac-60028332a152",
+                    "6bbcbe3d-00e9-4609-80ab-5b2002d37b28": "14432d76-fec7-45b4-b82b-4443cf90bbc8",
+                    "126ea964-9559-4780-9b35-42a53d96448f": "ab8fed85-81d1-485c-b116-9a2e5df71c50"
+                  }
+                },
+                {
+                  "__guid": "dfd1453c-971c-420c-9281-361d13188db9",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "1085bf3b-2219-4b10-ae7e-c479ff32c31b",
+                    "Path": "computer desk.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Position",
+                        "Value": "-1.99121094,-0.07421875,-98.1326141"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0,0,1,-4.37113883E-08"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Scale",
+                        "Value": "0.299043775,2.77471232,2"
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "2842cd9b-8626-4ad4-8872-c92d6ca720be": "dfd1453c-971c-420c-9281-361d13188db9",
+                    "40016669-45aa-4ad3-8e4b-03b2f2c307db": "c50d09ab-b759-4dbd-93f7-d8bc5107a34a",
+                    "3bd1a00f-1893-4221-9858-b19efc056ff0": "ed33ef78-69cb-4431-945c-311e082f6397",
+                    "0ade6f79-455d-4e56-bb6f-8c075d047ac0": "81a7b2e4-b845-469e-82c0-fdcfaa77d472",
+                    "6feba249-e19d-4df8-b6f2-1db8b1fada7d": "3418f5ee-14e1-4bc0-943b-4ffaa723c6f4",
+                    "49b7a1cc-3a41-419f-8728-97e43b259901": "16b412e1-672a-4255-bb9f-c30409187376",
+                    "36d280eb-67d6-4260-9a11-9c8ae4f386ad": "58c9a2fe-79a0-4c38-829a-d8e0eb8bf593",
+                    "dbbc9b62-d002-45a7-9344-ffb3eb8a62a5": "0427b190-5d7a-4557-903d-3606886ae5f9",
+                    "f9b5acce-e865-4398-8b51-12a7e291544f": "5bc0bbca-5674-4b0e-b86f-ddbe523aff3f",
+                    "d0d72ff1-a04d-4bc4-8452-459192d24697": "a2ef0662-7471-40a5-bef2-2766198be367",
+                    "780e3191-82e2-4e66-9bce-0acc6497a846": "953656a5-d9bc-4cf7-8bfc-b0cad8ed57c0",
+                    "618febe9-8047-4853-8dde-f2642c76a211": "4376c8db-5f33-404e-9b89-36e0e68c0d72",
+                    "a9d11ac6-d984-4670-a316-2672922cfe6e": "eb540fde-8e57-4404-82e8-462cffc9e27e",
+                    "3a95563e-fac0-404f-aec8-fb684a20a51a": "6c49525d-7ba6-4479-94df-0e9bc48d8632",
+                    "422bb386-6881-492a-afe4-047d01dc6ea3": "0d5a3fb2-6be1-462d-8908-5fff4a8ec45c",
+                    "e1a357db-e74f-4482-adbd-64fbe0c0fde6": "78aaf75c-9474-4f18-a773-32fedcb1c3e4",
+                    "4b5836cc-b5e8-45d7-8064-f05169e4f338": "df52eff6-8334-4662-86ff-3df9cec4978c",
+                    "c16a22b6-9be5-431d-9711-09a2ef4cb415": "d81982a6-524f-406e-876e-0c2fca9af313",
+                    "f0f93a36-9737-4e8a-9f48-2614a1b929c0": "17b33157-9c0f-4c4b-bc03-b6b31d247848",
+                    "8e47d445-7026-4a27-9cce-400cbeb76d6a": "4268c607-acfd-4f98-919b-7c51875a4b77",
+                    "ffc63961-9390-4eba-923c-0ca366e89f54": "e951ef95-ab26-4a83-a3ad-f6ad9ce205a3",
+                    "ea183504-ff75-4b65-8b69-5dbca5f9e726": "abe179be-c942-4b92-93e0-3ed4bb78b8d2",
+                    "0c6da27e-0698-48dd-afab-a03f83b65d39": "83065bf4-0325-44aa-9335-6316d9fabadc",
+                    "a5ab76da-bb33-4dfd-a1b0-e881498f81ad": "415517ec-df2c-482e-a7e9-466bf50534b8",
+                    "f5b1e9b1-20b7-44eb-a237-203b8d294a7a": "174ee93a-ee34-453b-ab11-bbdc6bb98a25",
+                    "04f97b0f-19cb-4578-8bea-d18562a0b4a6": "e20e44d1-b911-4f94-85ac-7f8a4d486c5e"
+                  }
+                }
+              ]
             }
-          ],
-          "Children": []
+          ]
         },
         {
-          "__guid": "703534be-ccc5-489e-9616-122c8275af97",
+          "__guid": "d84655da-f023-4990-be05-729f9d3004b4",
           "__version": 2,
           "Flags": 0,
-          "Name": "Delivery Point 2",
-          "Position": "10600.1289,-6402.89844,-35.2902222",
-          "Rotation": "0,0,-1,-4.37113883E-08",
-          "Scale": "2,2,2",
-          "Tags": "delivery_point",
+          "Name": "Car Dealership",
+          "Position": "10994.1357,-2442.62402,-25.640831",
+          "Rotation": "0,0,0,1",
+          "Scale": "1,1,1",
+          "Tags": "",
           "Enabled": true,
           "NetworkMode": 2,
           "NetworkFlags": 0,
           "NetworkOrphaned": 0,
           "NetworkTransmit": true,
           "OwnerTransfer": 1,
-          "Components": [
+          "Components": [],
+          "Children": [
             {
-              "__type": "Sandbox.TextRenderer",
-              "__guid": "86969ace-275a-4b86-b620-53159143bc34",
-              "__enabled": true,
-              "Flags": 0,
+              "__guid": "28e07b8c-70fd-49a4-bf2c-02423b17d47c",
               "__version": 2,
-              "Billboard": "None",
-              "BlendMode": "Normal",
-              "FogStrength": 1,
-              "HorizontalAlignment": "Center",
-              "OnComponentDestroy": null,
-              "OnComponentDisabled": null,
-              "OnComponentEnabled": null,
-              "OnComponentFixedUpdate": null,
-              "OnComponentStart": null,
-              "OnComponentUpdate": null,
-              "RenderOptions": {
-                "GameLayer": true,
-                "OverlayLayer": false,
-                "BloomLayer": false,
-                "AfterUILayer": false
-              },
-              "Scale": 0.3,
-              "TextScope": {
-                "Text": "Delivery Point\n#2",
-                "TextColor": "1,1,1,1",
-                "FontName": "Poppins",
-                "FontSize": 50,
-                "FontWeight": 800,
-                "FontItalic": false,
-                "FontVariantNumeric": "Normal",
-                "LineHeight": 0.85,
-                "LetterSpacing": 0,
-                "WordSpacing": 0,
-                "FilterMode": "Bilinear",
-                "FontSmooth": "Auto",
-                "Outline": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,1,1"
-                },
-                "Shadow": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
-                },
-                "OutlineUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,1,0,1"
-                },
-                "ShadowUnder": {
-                  "Enabled": false,
-                  "Size": 4,
-                  "Color": "0,0,0,1",
-                  "Offset": "4,4"
+              "Flags": 0,
+              "Name": "Car Dealership Title",
+              "Position": "372.092712,-768.110596,297.951141",
+              "Rotation": "0,0,0.707106769,0.707106769",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [
+                {
+                  "__type": "Sandbox.TextRenderer",
+                  "__guid": "5a3bf8c0-077d-4fea-b4d6-2bc4effb6603",
+                  "__enabled": true,
+                  "Flags": 0,
+                  "__version": 2,
+                  "Billboard": "None",
+                  "BlendMode": "Normal",
+                  "FogStrength": 1,
+                  "HorizontalAlignment": "Center",
+                  "OnComponentDestroy": null,
+                  "OnComponentDisabled": null,
+                  "OnComponentEnabled": null,
+                  "OnComponentFixedUpdate": null,
+                  "OnComponentStart": null,
+                  "OnComponentUpdate": null,
+                  "RenderOptions": {
+                    "GameLayer": true,
+                    "OverlayLayer": false,
+                    "BloomLayer": false,
+                    "AfterUILayer": false
+                  },
+                  "Scale": 0.5845411,
+                  "TextScope": {
+                    "Text": "Car Dealership",
+                    "TextColor": "1,1,1,1",
+                    "FontName": "Poppins",
+                    "FontSize": 64,
+                    "FontWeight": 800,
+                    "FontItalic": false,
+                    "FontVariantNumeric": "Normal",
+                    "LineHeight": 1,
+                    "LetterSpacing": 0,
+                    "WordSpacing": 0,
+                    "FilterMode": "Bilinear",
+                    "FontSmooth": "Auto",
+                    "Outline": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,1,1"
+                    },
+                    "Shadow": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    },
+                    "OutlineUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,1,0,1"
+                    },
+                    "ShadowUnder": {
+                      "Enabled": false,
+                      "Size": 4,
+                      "Color": "0,0,0,1",
+                      "Offset": "4,4"
+                    }
+                  },
+                  "VerticalAlignment": "Center"
                 }
-              },
-              "VerticalAlignment": "Center"
+              ],
+              "Children": []
+            },
+            {
+              "__guid": "6e5cb661-2fff-49a0-ae08-b3d206e2c962",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Car Dealer Computer",
+              "Position": "-11.9707031,1.04651212E-06,0",
+              "Rotation": "0,0,0,1",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": [
+                {
+                  "__guid": "ab0d62eb-3977-4915-8afd-a7b2a0f46127",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "9856d7ce-67e6-4db2-ba31-a0770ac38fb8",
+                    "Path": "navi computer.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Position",
+                        "Value": "0,0,14.8534164"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Rotation",
+                        "Value": "4.37113883E-08,-1.91068547E-15,3.55271368E-15,0.99999994"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Scale",
+                        "Value": "1,1,1"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ColorScheme",
+                        "Value": "Light"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ComputerTags",
+                        "Value": [
+                          "store"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "HideTaskbar",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "InstalledApps",
+                        "Value": []
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "KioskMode",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OnlyApps",
+                        "Value": [
+                          "navi/shop/cardealership.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OpenApp",
+                        "Value": "navi/shop/cardealership.napp"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "PinnedApps",
+                        "Value": [
+                          ""
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "StartFavorites",
+                        "Value": [
+                          ""
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Theme",
+                        "Value": "Paper"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Wallpaper",
+                        "Value": "Paper"
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "eef86c41-1240-43d4-84ca-692854649d7f": "ab0d62eb-3977-4915-8afd-a7b2a0f46127",
+                    "22de298f-c53d-4c01-8706-b687e2dcc093": "7bfcf95d-5430-427d-af2b-42c1c8f6acda",
+                    "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7": "1fc45e17-6670-4c9d-83e4-593f22fd50a9",
+                    "6bbcbe3d-00e9-4609-80ab-5b2002d37b28": "85453115-8de5-4120-9c39-f35e6c3cf005",
+                    "126ea964-9559-4780-9b35-42a53d96448f": "1444d786-d74e-4940-b7c0-37391d7db2d9"
+                  }
+                },
+                {
+                  "__guid": "360dae3d-2b66-4987-bd21-df8f59cce84f",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "1085bf3b-2219-4b10-ae7e-c479ff32c31b",
+                    "Path": "computer desk.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Position",
+                        "Value": "-1.99121094,-0.07421875,-98.1326141"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0,0,1,-4.37113883E-08"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Scale",
+                        "Value": "0.299043775,2.77471232,2"
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "2842cd9b-8626-4ad4-8872-c92d6ca720be": "360dae3d-2b66-4987-bd21-df8f59cce84f",
+                    "40016669-45aa-4ad3-8e4b-03b2f2c307db": "0208d65d-65b5-4f66-a614-7f32c51bf5c8",
+                    "3bd1a00f-1893-4221-9858-b19efc056ff0": "5e10db77-71e0-4f27-8db2-f5d1556d7dd0",
+                    "0ade6f79-455d-4e56-bb6f-8c075d047ac0": "8a3d7339-04ec-4137-bb9c-da2e65f7b6ed",
+                    "6feba249-e19d-4df8-b6f2-1db8b1fada7d": "205b4bce-51d6-488d-8527-7eaa71de9789",
+                    "49b7a1cc-3a41-419f-8728-97e43b259901": "e832516d-b354-4a57-9659-d2040a9ad106",
+                    "36d280eb-67d6-4260-9a11-9c8ae4f386ad": "af9e20ec-7f65-460a-ad59-547b630c140c",
+                    "dbbc9b62-d002-45a7-9344-ffb3eb8a62a5": "2cd7c278-8c42-4b26-ad4d-d7c1505f9d78",
+                    "f9b5acce-e865-4398-8b51-12a7e291544f": "67b16f47-c1a1-4e34-9833-86be3766073e",
+                    "d0d72ff1-a04d-4bc4-8452-459192d24697": "248cf6d1-c39b-40c4-9af1-03cba4dc1589",
+                    "780e3191-82e2-4e66-9bce-0acc6497a846": "c5478365-d3f5-4e3d-a682-ce0e9cecd1fb",
+                    "618febe9-8047-4853-8dde-f2642c76a211": "7a04d3d8-21ff-461c-ae3e-b0e86bd0f534",
+                    "a9d11ac6-d984-4670-a316-2672922cfe6e": "a980ef2f-27f0-4683-9d10-5b4a900e9ab8",
+                    "3a95563e-fac0-404f-aec8-fb684a20a51a": "61662505-5723-4101-a198-7188357d243a",
+                    "422bb386-6881-492a-afe4-047d01dc6ea3": "2851d2e2-6352-4a6e-ac05-06cbc967224d",
+                    "e1a357db-e74f-4482-adbd-64fbe0c0fde6": "607a4e71-78f7-4f4c-96a5-76fee358993b",
+                    "4b5836cc-b5e8-45d7-8064-f05169e4f338": "d14cb898-d7c8-4aa4-b4a7-56ef5788931e",
+                    "c16a22b6-9be5-431d-9711-09a2ef4cb415": "57bae08f-1a06-46c2-ba00-4f0f9cfd675a",
+                    "f0f93a36-9737-4e8a-9f48-2614a1b929c0": "dbc9b35b-ead6-4574-8c72-91aac661b6a9",
+                    "8e47d445-7026-4a27-9cce-400cbeb76d6a": "202c15c7-dd24-4867-a277-b1752c15bf0a",
+                    "ffc63961-9390-4eba-923c-0ca366e89f54": "72500edf-b0ec-4385-a797-e62c3c5a09e8",
+                    "ea183504-ff75-4b65-8b69-5dbca5f9e726": "2f34406c-51ea-4609-b061-83c0e56b0522",
+                    "0c6da27e-0698-48dd-afab-a03f83b65d39": "1a4c54b2-1a63-4164-86ed-d68324668a57",
+                    "a5ab76da-bb33-4dfd-a1b0-e881498f81ad": "f7143fa2-2998-4e9f-9a5d-749ec9f6e145",
+                    "f5b1e9b1-20b7-44eb-a237-203b8d294a7a": "c8b7f69b-d44e-4568-b326-bb14fdeb411c",
+                    "04f97b0f-19cb-4578-8bea-d18562a0b4a6": "b86552af-6449-4c71-ba48-03386bff170d"
+                  }
+                }
+              ]
+            },
+            {
+              "__guid": "7425adc3-6c95-4363-b5d7-eb9b19531d00",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Car Delivery Points",
+              "Position": "-268.712891,95.8078918,-48.359169",
+              "Rotation": "0,0,-1,-4.37113883E-08",
+              "Scale": "4.87050343,8.43290329,2",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": [
+                {
+                  "__guid": "28efa29a-a3a4-4076-801c-71b1d1061b29",
+                  "__version": 2,
+                  "Flags": 0,
+                  "Name": "Car Delivery Point",
+                  "Position": "0,0,0",
+                  "Rotation": "0,0,0.707106769,0.707106769",
+                  "Scale": "2,0.75,0.999999762",
+                  "Tags": "delivery_point",
+                  "Enabled": true,
+                  "NetworkMode": 2,
+                  "NetworkFlags": 0,
+                  "NetworkOrphaned": 0,
+                  "NetworkTransmit": true,
+                  "OwnerTransfer": 1,
+                  "Components": [
+                    {
+                      "__type": "Sandbox.BoxCollider",
+                      "__guid": "111ee430-705a-4721-adad-8a58874fdd3f",
+                      "__enabled": true,
+                      "Flags": 0,
+                      "Center": "0,0,0",
+                      "ColliderFlags": "IgnoreTraces, IgnoreMass",
+                      "Elasticity": null,
+                      "Friction": null,
+                      "IsTrigger": true,
+                      "OnComponentDestroy": null,
+                      "OnComponentDisabled": null,
+                      "OnComponentEnabled": null,
+                      "OnComponentFixedUpdate": null,
+                      "OnComponentStart": null,
+                      "OnComponentUpdate": null,
+                      "OnObjectTriggerEnter": null,
+                      "OnObjectTriggerExit": null,
+                      "OnTriggerEnter": null,
+                      "OnTriggerExit": null,
+                      "RollingResistance": null,
+                      "Scale": "50,50,50",
+                      "Static": true,
+                      "Surface": null,
+                      "SurfaceVelocity": "0,0,0"
+                    }
+                  ],
+                  "Children": []
+                },
+                {
+                  "__guid": "57f91f68-eb45-433a-8e26-a3d30d9daf02",
+                  "__version": 2,
+                  "Flags": 0,
+                  "Name": "Car Delivery Point",
+                  "Position": "0,60.4884529,0",
+                  "Rotation": "0,0,0.707106769,0.707106769",
+                  "Scale": "2,0.75,1",
+                  "Tags": "delivery_point",
+                  "Enabled": true,
+                  "NetworkMode": 2,
+                  "NetworkFlags": 0,
+                  "NetworkOrphaned": 0,
+                  "NetworkTransmit": true,
+                  "OwnerTransfer": 1,
+                  "Components": [
+                    {
+                      "__type": "Sandbox.BoxCollider",
+                      "__guid": "785cfb6e-36ae-4567-851b-ad7153bd9470",
+                      "__enabled": true,
+                      "Flags": 0,
+                      "Center": "0,0,0",
+                      "ColliderFlags": "IgnoreTraces, IgnoreMass",
+                      "Elasticity": null,
+                      "Friction": null,
+                      "IsTrigger": true,
+                      "OnComponentDestroy": null,
+                      "OnComponentDisabled": null,
+                      "OnComponentEnabled": null,
+                      "OnComponentFixedUpdate": null,
+                      "OnComponentStart": null,
+                      "OnComponentUpdate": null,
+                      "OnObjectTriggerEnter": null,
+                      "OnObjectTriggerExit": null,
+                      "OnTriggerEnter": null,
+                      "OnTriggerExit": null,
+                      "RollingResistance": null,
+                      "Scale": "50,50,50",
+                      "Static": true,
+                      "Surface": null,
+                      "SurfaceVelocity": "0,0,0"
+                    }
+                  ],
+                  "Children": []
+                },
+                {
+                  "__guid": "2fdfd8db-a144-4ac4-8dec-a208dda79e45",
+                  "__version": 2,
+                  "Flags": 0,
+                  "Name": "Car Delivery Point",
+                  "Position": "-129.898468,0,0",
+                  "Rotation": "0,0,0.707106769,0.707106769",
+                  "Scale": "2,0.75,1",
+                  "Tags": "delivery_point",
+                  "Enabled": true,
+                  "NetworkMode": 2,
+                  "NetworkFlags": 0,
+                  "NetworkOrphaned": 0,
+                  "NetworkTransmit": true,
+                  "OwnerTransfer": 1,
+                  "Components": [
+                    {
+                      "__type": "Sandbox.BoxCollider",
+                      "__guid": "66b8aaea-66ea-4ccd-89e5-0284032fa3d0",
+                      "__enabled": true,
+                      "Flags": 0,
+                      "Center": "0,0,0",
+                      "ColliderFlags": "IgnoreTraces, IgnoreMass",
+                      "Elasticity": null,
+                      "Friction": null,
+                      "IsTrigger": true,
+                      "OnComponentDestroy": null,
+                      "OnComponentDisabled": null,
+                      "OnComponentEnabled": null,
+                      "OnComponentFixedUpdate": null,
+                      "OnComponentStart": null,
+                      "OnComponentUpdate": null,
+                      "OnObjectTriggerEnter": null,
+                      "OnObjectTriggerExit": null,
+                      "OnTriggerEnter": null,
+                      "OnTriggerExit": null,
+                      "RollingResistance": null,
+                      "Scale": "50,50,50",
+                      "Static": true,
+                      "Surface": null,
+                      "SurfaceVelocity": "0,0,0"
+                    }
+                  ],
+                  "Children": []
+                },
+                {
+                  "__guid": "00bd64b8-b4bb-43ce-8dd7-7eb0e3ba5d18",
+                  "__version": 2,
+                  "Flags": 0,
+                  "Name": "Car Delivery Point",
+                  "Position": "-129.898468,60.4884529,0",
+                  "Rotation": "0,0,0.707106769,0.707106769",
+                  "Scale": "2,0.75,1",
+                  "Tags": "delivery_point",
+                  "Enabled": true,
+                  "NetworkMode": 2,
+                  "NetworkFlags": 0,
+                  "NetworkOrphaned": 0,
+                  "NetworkTransmit": true,
+                  "OwnerTransfer": 1,
+                  "Components": [
+                    {
+                      "__type": "Sandbox.BoxCollider",
+                      "__guid": "45ecb494-0734-4ac5-98ac-0e6e12cc254f",
+                      "__enabled": true,
+                      "Flags": 0,
+                      "Center": "0,0,0",
+                      "ColliderFlags": "IgnoreTraces, IgnoreMass",
+                      "Elasticity": null,
+                      "Friction": null,
+                      "IsTrigger": true,
+                      "OnComponentDestroy": null,
+                      "OnComponentDisabled": null,
+                      "OnComponentEnabled": null,
+                      "OnComponentFixedUpdate": null,
+                      "OnComponentStart": null,
+                      "OnComponentUpdate": null,
+                      "OnObjectTriggerEnter": null,
+                      "OnObjectTriggerExit": null,
+                      "OnTriggerEnter": null,
+                      "OnTriggerExit": null,
+                      "RollingResistance": null,
+                      "Scale": "50,50,50",
+                      "Static": true,
+                      "Surface": null,
+                      "SurfaceVelocity": "0,0,0"
+                    }
+                  ],
+                  "Children": []
+                }
+              ]
             }
-          ],
-          "Children": []
+          ]
+        },
+        {
+          "__guid": "954bbf86-809b-4f0b-aa26-147d4d965bb6",
+          "__version": 2,
+          "Flags": 0,
+          "Name": "Gun Shop",
+          "Position": "7719.27246,-5382.9502,-9.64083099",
+          "Rotation": "0,0,-1,-4.37113883E-08",
+          "Scale": "1,1,1",
+          "Tags": "",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "NetworkFlags": 0,
+          "NetworkOrphaned": 0,
+          "NetworkTransmit": true,
+          "OwnerTransfer": 1,
+          "Components": [],
+          "Children": [
+            {
+              "__guid": "eeb7f6b9-54a9-4e26-8c20-b84436ea5236",
+              "__version": 2,
+              "Flags": 0,
+              "Name": "Gun Shop Computer",
+              "Position": "0,0,0",
+              "Rotation": "0,0,-8.74227766E-08,-1.00000012",
+              "Scale": "1,1,1",
+              "Tags": "",
+              "Enabled": true,
+              "NetworkMode": 2,
+              "NetworkFlags": 0,
+              "NetworkOrphaned": 0,
+              "NetworkTransmit": true,
+              "OwnerTransfer": 1,
+              "Components": [],
+              "Children": [
+                {
+                  "__guid": "eace5952-9d7c-4c26-8217-ed93e29b0eac",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "9856d7ce-67e6-4db2-ba31-a0770ac38fb8",
+                    "Path": "navi computer.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Position",
+                        "Value": "0,0,14.8534164"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Rotation",
+                        "Value": "4.37113883E-08,-1.91068547E-15,3.55271368E-15,0.99999994"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "eef86c41-1240-43d4-84ca-692854649d7f"
+                        },
+                        "Property": "Scale",
+                        "Value": "1,1,1"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ColorScheme",
+                        "Value": "Light"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "ComputerTags",
+                        "Value": [
+                          "store"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "HideTaskbar",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "InstalledApps",
+                        "Value": []
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "KioskMode",
+                        "Value": true
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OnlyApps",
+                        "Value": [
+                          "navi/shop/gunshop.napp"
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "OpenApp",
+                        "Value": "navi/shop/gunshop.napp"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "PinnedApps",
+                        "Value": [
+                          ""
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "StartFavorites",
+                        "Value": [
+                          ""
+                        ]
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Theme",
+                        "Value": "Paper"
+                      },
+                      {
+                        "Target": {
+                          "Type": "Component",
+                          "IdValue": "22de298f-c53d-4c01-8706-b687e2dcc093"
+                        },
+                        "Property": "Wallpaper",
+                        "Value": "Paper"
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "eef86c41-1240-43d4-84ca-692854649d7f": "eace5952-9d7c-4c26-8217-ed93e29b0eac",
+                    "22de298f-c53d-4c01-8706-b687e2dcc093": "131f7a61-7afe-40ec-815c-92d25fbac70c",
+                    "ae7d3939-71e7-42b8-b22d-6cdd90eff9c7": "4b752a08-cab1-4fee-bee3-003fe3362933",
+                    "6bbcbe3d-00e9-4609-80ab-5b2002d37b28": "a52a5b8f-7648-4843-8ec8-159ad5b4d54a",
+                    "126ea964-9559-4780-9b35-42a53d96448f": "f660b6c4-7413-483e-a8e3-2b864a1820bf"
+                  }
+                },
+                {
+                  "__guid": "17ec97a6-a123-4ce0-bba6-5abd0e5992ca",
+                  "__version": 2,
+                  "__Prefab": {
+                    "Id": "1085bf3b-2219-4b10-ae7e-c479ff32c31b",
+                    "Path": "computer desk.prefab"
+                  },
+                  "__PrefabInstancePatch": {
+                    "AddedObjects": [],
+                    "RemovedObjects": [],
+                    "PropertyOverrides": [
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Position",
+                        "Value": "-1.99121094,-0.07421875,-98.1326141"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Rotation",
+                        "Value": "0,0,1,-4.37113883E-08"
+                      },
+                      {
+                        "Target": {
+                          "Type": "GameObject",
+                          "IdValue": "2842cd9b-8626-4ad4-8872-c92d6ca720be"
+                        },
+                        "Property": "Scale",
+                        "Value": "0.299043775,2.77471232,2"
+                      }
+                    ],
+                    "MovedObjects": []
+                  },
+                  "__PrefabIdToInstanceId": {
+                    "2842cd9b-8626-4ad4-8872-c92d6ca720be": "17ec97a6-a123-4ce0-bba6-5abd0e5992ca",
+                    "40016669-45aa-4ad3-8e4b-03b2f2c307db": "b8ea6ae2-ff6c-4b74-87e3-09ab9f9eb474",
+                    "3bd1a00f-1893-4221-9858-b19efc056ff0": "aa2e5e38-3858-48a2-8561-a88fb804c3d9",
+                    "0ade6f79-455d-4e56-bb6f-8c075d047ac0": "7d1dfe41-3a4f-4e06-b2a2-8fa23b2dd934",
+                    "6feba249-e19d-4df8-b6f2-1db8b1fada7d": "db6dbbf2-f3b5-456e-95e5-ef2b00c3dd18",
+                    "49b7a1cc-3a41-419f-8728-97e43b259901": "f01f97ba-d508-4663-9202-a5f59efd5641",
+                    "36d280eb-67d6-4260-9a11-9c8ae4f386ad": "328d0357-7a45-402d-8a65-5d426f2b6f51",
+                    "dbbc9b62-d002-45a7-9344-ffb3eb8a62a5": "74c6dc27-3dcb-43d9-88b0-c731ad57da30",
+                    "f9b5acce-e865-4398-8b51-12a7e291544f": "5d048163-85cb-4e5f-aeb1-12f596b8fffb",
+                    "d0d72ff1-a04d-4bc4-8452-459192d24697": "91bdf756-1531-49ba-8f6f-843e4bc8a493",
+                    "780e3191-82e2-4e66-9bce-0acc6497a846": "406072e1-c309-4998-bb7f-b50181f11026",
+                    "618febe9-8047-4853-8dde-f2642c76a211": "60382446-5d59-4fa1-9703-9523cef2a0d0",
+                    "a9d11ac6-d984-4670-a316-2672922cfe6e": "1a4259a7-130b-46c6-b053-c018e38bd71c",
+                    "3a95563e-fac0-404f-aec8-fb684a20a51a": "f9d38feb-3458-4caf-b19d-f5af441e1f9a",
+                    "422bb386-6881-492a-afe4-047d01dc6ea3": "acdcb920-25d9-4111-a501-9ba11fc01c09",
+                    "e1a357db-e74f-4482-adbd-64fbe0c0fde6": "20663e97-184d-44d0-9c56-f9097ad4cfff",
+                    "4b5836cc-b5e8-45d7-8064-f05169e4f338": "982fce62-90b3-475e-8909-31d34c2a62f0",
+                    "c16a22b6-9be5-431d-9711-09a2ef4cb415": "813f28c2-2c1a-4a48-8c67-7ffd0d9e831b",
+                    "f0f93a36-9737-4e8a-9f48-2614a1b929c0": "05b01732-ba04-42ff-84c8-a9a4f1d289e2",
+                    "8e47d445-7026-4a27-9cce-400cbeb76d6a": "f1e8cb7b-18d3-4b2a-ab21-66b332c9a1ed",
+                    "ffc63961-9390-4eba-923c-0ca366e89f54": "87d87047-5e12-46b6-934c-1670aaa1847c",
+                    "ea183504-ff75-4b65-8b69-5dbca5f9e726": "1cf8e26b-5fb8-4b0a-8895-6f146f144ed2",
+                    "0c6da27e-0698-48dd-afab-a03f83b65d39": "219373de-3afe-4e7f-ac6d-ef0b4903f427",
+                    "a5ab76da-bb33-4dfd-a1b0-e881498f81ad": "83f32099-384e-40ae-92a1-619f3790e599",
+                    "f5b1e9b1-20b7-44eb-a237-203b8d294a7a": "af019c32-efaf-4250-890e-d325fbda084d",
+                    "04f97b0f-19cb-4578-8bea-d18562a0b4a6": "ede1c5a9-af04-462c-839c-b937754e9b7b"
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "__guid": "dc8ecfae-3c83-40b9-9fa5-53c80f0ca3d1",
@@ -2392,7 +4139,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2475,7 +4222,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2503,7 +4250,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2550,7 +4297,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "ffad2df2-9c51-4ee6-beb6-587daeaca043",
+                    "Id": "0d71c71b-ecb6-42a1-bad3-4cf9479ddbeb",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2638,7 +4385,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "ffad2df2-9c51-4ee6-beb6-587daeaca043",
+                    "Id": "0d71c71b-ecb6-42a1-bad3-4cf9479ddbeb",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2666,7 +4413,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "ffad2df2-9c51-4ee6-beb6-587daeaca043",
+                    "Id": "0d71c71b-ecb6-42a1-bad3-4cf9479ddbeb",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2713,7 +4460,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "ffad2df2-9c51-4ee6-beb6-587daeaca043",
+                    "Id": "0d71c71b-ecb6-42a1-bad3-4cf9479ddbeb",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2801,7 +4548,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "ffad2df2-9c51-4ee6-beb6-587daeaca043",
+                    "Id": "0d71c71b-ecb6-42a1-bad3-4cf9479ddbeb",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2829,7 +4576,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "ffad2df2-9c51-4ee6-beb6-587daeaca043",
+                    "Id": "0d71c71b-ecb6-42a1-bad3-4cf9479ddbeb",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01a.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2876,7 +4623,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2959,7 +4706,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -2987,7 +4734,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -3034,7 +4781,7 @@
                   "IsStatic": true,
                   "MaterialGroup": null,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -3117,7 +4864,7 @@
                   "MaterialOverride": null,
                   "Materials": null,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -3145,7 +4892,7 @@
                   "Friction": null,
                   "IsTrigger": false,
                   "Model": {
-                    "Id": "c92e82e5-f2fb-4d40-81c1-05e933fce4b2",
+                    "Id": "0e69d3a8-813b-4667-a4a4-7df4e657afb9",
                     "Path": "models/props/trim_sheets/doors/wooden_doors/wooden_door_01d.vmdl"
                   },
                   "OnComponentDestroy": null,
@@ -3204,6 +4951,29 @@
             },
             "Property": "Rotation",
             "Value": "0,0,0,1"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "e22466d4-71b4-5caf-8b3b-595909133728"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "6": "vehicles/shared/clear_glass.vmat",
+                "0": "drift_district/project/nissan_datsun_240z/primary_001.vmat",
+                "1": "drift_district/project/nissan_datsun_240z/primary_013.vmat",
+                "2": "drift_district/project/nissan_datsun_240z/primary_014.vmat",
+                "3": "drift_district/project/nissan_datsun_240z/primary_015.vmat",
+                "4": "drift_district/project/nissan_datsun_240z/primary_016.vmat",
+                "5": "drift_district/project/nissan_datsun_240z/primary_006.vmat",
+                "7": "drift_district/project/nissan_datsun_240z/primary_009.vmat",
+                "8": "drift_district/project/nissan_datsun_240z/primary_003.vmat",
+                "9": "drift_district/project/nissan_datsun_240z/primary_004.vmat",
+                "10": "drift_district/project/nissan_datsun_240z/primary_002.vmat",
+                "13": "drift_district/project/nissan_datsun_240z/primary.vmat"
+              }
+            }
           }
         ],
         "MovedObjects": []
@@ -3223,23 +4993,14 @@
         "e77cf2b7-ef5b-5db6-9d18-351edf7b9d90": "f139dd57-35b2-44ec-bc8d-399ef4adfd90",
         "93c4c49f-bf53-5f86-930e-88cbecf22153": "a134ce30-bb3d-48eb-ace9-6c4a0294bfd8",
         "3e745718-f361-5dfc-b9c9-ee60de14a397": "9a3f0fa5-2ca6-44b1-91f1-ca59ed1b94d2",
-        "efa881e4-d50a-515a-ba44-d41a1a2237ba": "4f854af4-a522-4a7d-bb9e-d646d1f50ab7",
-        "03a213a8-0e30-42b6-86f2-93e44d204d33": "45b17082-c15c-4264-9b19-397b6f30efc6",
-        "9611ff87-e9ba-4728-8856-c433b930ddfa": "6c3144e7-9434-487f-b7f9-73166ae2b9ef",
-        "fccdc330-d2cc-452f-b10d-cd6e063646e0": "f92b9d63-f2e3-41e3-8622-6e6b3033b181",
-        "e22466d4-71b4-5caf-8b3b-595909133728": "e383ae1f-3011-4170-bc1a-1ad37c3361a6",
-        "f7a7259e-4fdc-54a2-ab78-eed8dd48e220": "33a03400-5c26-43e8-879c-3b1401446673",
-        "57e0db3b-fe33-59b1-848e-6616832aef0e": "1718ee19-006c-4d08-94a2-ff811c26a2c3",
-        "e660e580-d4d3-5e4b-ab19-ec86a7a89969": "a32d1e8e-866f-423b-a428-61cb2cfce9cd",
-        "7878ee01-e1da-5814-8098-a4ffbc70b3e6": "b837d688-bd6b-455e-b75c-5ce6007118de",
-        "78048934-9a4b-5d5d-94d0-fa5b28758b67": "4da7013b-7162-4e67-adfd-642ece232de6",
-        "5a84708e-8514-5c89-81b8-68bd7e08c4ca": "4ee2a485-bd65-4ead-a6c1-08369a1440d0",
-        "b4f77446-d003-5bcd-8bec-819b4c09c876": "58903687-1c16-4a12-9309-fc3daa274dc2",
         "34cc5102-4f6f-5c0a-9b8f-8d144fc56f5e": "8dd00f1d-1caa-4a4e-a6ef-e40c05fd321a",
+        "7c2162f3-2b6d-518a-a167-27a56b633760": "e198206a-1578-8de5-8764-38c20999a0be",
         "c14074d7-7626-54f3-80c4-6e99e16f6c7d": "5ef33904-b4fd-4d85-9f50-e01f1c1766ff",
         "0ec536ad-6433-5496-bf9d-9fa5143e806e": "a9a7ad12-0479-4743-8213-ace7d9e4294c",
         "930c1a3e-590c-5e3e-8ba2-d5cf6dcde578": "48ac98cf-a1ed-406a-af42-9f3b3777f550",
         "bd1aa938-65a8-5415-8122-9c1c55aa851f": "3a63a5b4-6132-40a3-8aee-792700fc722b",
+        "6ed1a648-d544-5c42-a955-248ca2706163": "64755949-ebac-4d4f-952a-22ec41c10432",
+        "7092e1a1-6785-55a2-8880-55c3f8a2c69a": "2a2380e6-b07b-47fa-94f0-8550271713a1",
         "993d0959-d61a-5fee-9051-a9d1b3d62704": "9030223b-05d8-49e4-866b-610b966b67fe",
         "7808da51-6ee6-5618-bf14-2f9159353cc3": "a46f307f-7f18-4a88-9c91-2b3d4018d3d2",
         "8b2d4be3-0416-5b37-8eb3-e5668cbfdd37": "4f669e56-c35f-4762-9150-cc35f0be3d32",
@@ -3251,8 +5012,18 @@
         "711fc5f2-eafb-5053-8197-897f44782449": "955438ae-223b-4bf9-9478-478f7b0dbcda",
         "6f43332e-75e3-5dde-9570-e6a262d9c955": "4099a386-9596-4a57-8b91-248c66f1401a",
         "48515b24-57dd-5aa2-b5c9-c297152af522": "1e084329-502c-4f36-ab96-f239fc4ee2f4",
-        "6ed1a648-d544-5c42-a955-248ca2706163": "64755949-ebac-4d4f-952a-22ec41c10432",
-        "7092e1a1-6785-55a2-8880-55c3f8a2c69a": "2a2380e6-b07b-47fa-94f0-8550271713a1"
+        "efa881e4-d50a-515a-ba44-d41a1a2237ba": "4f854af4-a522-4a7d-bb9e-d646d1f50ab7",
+        "03a213a8-0e30-42b6-86f2-93e44d204d33": "45b17082-c15c-4264-9b19-397b6f30efc6",
+        "9611ff87-e9ba-4728-8856-c433b930ddfa": "6c3144e7-9434-487f-b7f9-73166ae2b9ef",
+        "fccdc330-d2cc-452f-b10d-cd6e063646e0": "f92b9d63-f2e3-41e3-8622-6e6b3033b181",
+        "e22466d4-71b4-5caf-8b3b-595909133728": "e383ae1f-3011-4170-bc1a-1ad37c3361a6",
+        "f7a7259e-4fdc-54a2-ab78-eed8dd48e220": "33a03400-5c26-43e8-879c-3b1401446673",
+        "57e0db3b-fe33-59b1-848e-6616832aef0e": "1718ee19-006c-4d08-94a2-ff811c26a2c3",
+        "e660e580-d4d3-5e4b-ab19-ec86a7a89969": "a32d1e8e-866f-423b-a428-61cb2cfce9cd",
+        "7878ee01-e1da-5814-8098-a4ffbc70b3e6": "b837d688-bd6b-455e-b75c-5ce6007118de",
+        "78048934-9a4b-5d5d-94d0-fa5b28758b67": "4da7013b-7162-4e67-adfd-642ece232de6",
+        "5a84708e-8514-5c89-81b8-68bd7e08c4ca": "4ee2a485-bd65-4ead-a6c1-08369a1440d0",
+        "b4f77446-d003-5bcd-8bec-819b4c09c876": "58903687-1c16-4a12-9309-fc3daa274dc2"
       }
     },
     {
@@ -3289,6 +5060,83 @@
             },
             "Property": "Rotation",
             "Value": "0,0,0,1"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "313d3a96-2a5e-5e3c-a84c-be16d79d0834"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "22": "vehicles/shared/clear_glass.vmat",
+                "25": "vehicles/shared/clear_glass.vmat",
+                "23": "drift_district/project/mazda_rx7_fc/primary.vmat",
+                "24": "drift_district/project/mazda_rx7_fc/primary_005.vmat",
+                "27": "drift_district/project/mazda_rx7_fc/primary_001.vmat",
+                "28": "drift_district/project/mazda_rx7_fc/primary_002.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "4857ce86-395e-5fae-b7ea-8db6654135a5"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "0": "drift_district/project/mazda_rx7_fc/primary_020.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "7a92dc20-065a-56dd-8999-daebce7b9228"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "1": "drift_district/project/mazda_rx7_fc/primary_026.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "aad22196-c98e-5713-9450-b033ccff604c"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "1": "drift_district/project/mazda_rx7_fc/primary_028.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "ce926e14-57cd-5044-bba9-d9754b6ddce1"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "0": "drift_district/project/mazda_rx7_fc/primary_017.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "38bac566-a784-5aa2-b29d-0ec517b5181a"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "0": "drift_district/project/mazda_rx7_fc/primary_004.vmat"
+              }
+            }
           }
         ],
         "MovedObjects": []
@@ -3313,6 +5161,13 @@
         "2e0bda7a-01e0-5d9e-9ca6-bf9208b7aa8b": "19f8d62e-fe0a-4549-bf73-d1cf08d2b5b9",
         "7941c6d6-001c-51b7-be20-ff5b933e6ea4": "e8ac302d-9313-43f8-8b4f-4702a7615bfd",
         "e02f78dd-e651-5244-a82a-bb6be805369d": "1a424a19-70da-4464-91bf-020fb7a40c35",
+        "e3afecfc-331b-5d2b-8ea9-e9337f419a47": "6990a092-4c92-48d8-9124-1bf35737d9ac",
+        "e24aaf3d-cfa6-5557-b38a-8daa79fbf381": "3737415c-df03-8422-ad23-b99ec8974b93",
+        "97fde860-ee32-59a1-84aa-e823841c8e79": "c3e8627a-442b-4143-b25c-173e232c7090",
+        "7b1d6725-8120-58a8-9eaf-56ff7e7db7d0": "1b545ae5-e9b9-4810-aed3-384d01e81404",
+        "c3e6bb1c-3565-5096-9f79-8e39afc3e5ff": "d735dcdb-b7be-41ab-9d8b-dc777859561e",
+        "eec88775-2e1a-5e4f-af6b-e23b3661b9c9": "07f646c2-42c7-472d-ba0a-5df90e9b349d",
+        "f8a5b9e9-995b-5ae6-b2a0-e220984e121c": "9a6e57a0-41b0-4a82-a054-d42ed3a6d828",
         "255ec1a0-dde8-582b-99c2-d31d3907f0bd": "2a3d67bf-907b-4a03-b642-1507ff5f77f1",
         "c9ecc716-4092-5fee-ac58-7f50528b4451": "6f2deb0c-e03f-457c-bc7d-7468e0473cfb",
         "9ce08413-8104-5f56-b3b9-98b75abc30d1": "d3e811b4-e1bc-4b92-83fa-41a003252351",
@@ -3336,6 +5191,8 @@
         "313d3a96-2a5e-5e3c-a84c-be16d79d0834": "ed2d8fb7-fbb5-4a72-bad6-e959ba2e4840",
         "4857ce86-395e-5fae-b7ea-8db6654135a5": "2a0a359b-0796-4b45-963b-907073fcc992",
         "7a92dc20-065a-56dd-8999-daebce7b9228": "b99cfea8-b2c5-4142-95a0-0807f7e0fe29",
+        "aad22196-c98e-5713-9450-b033ccff604c": "43d5017c-c133-41da-b62d-4204dfbad173",
+        "ce926e14-57cd-5044-bba9-d9754b6ddce1": "44a7f105-035d-47a7-9974-26a21162a1a2",
         "aa7b1c61-9011-5405-9d32-9ce53419d17b": "b051c79d-f556-4518-9326-26960d8f744a",
         "06b33ecf-f46f-5972-81b5-6f2291afc530": "e4443102-1071-4dde-b77e-f544ebdc7b6d",
         "8f274719-c45f-5791-aad8-dcf112d42258": "e2fa8d65-8b77-4414-85a5-d3f1bf3845a7",
@@ -3343,15 +5200,7 @@
         "0b6ae691-3c10-53e6-aa55-6fb5bad8bb9d": "6232ca5a-19a7-483a-9501-2b6da60470d9",
         "ae8de0ec-cf7d-5876-8aac-4e1fdc148b97": "48780316-4546-4b99-a0cf-cf63d2e03353",
         "e73a5172-f3d0-577f-87e2-0f916438c9d3": "2d5969b4-cc69-410f-9fa0-c2752850f4c8",
-        "38bac566-a784-5aa2-b29d-0ec517b5181a": "b834de3f-ca05-4db9-b9c6-8ee78dc5dca4",
-        "e3afecfc-331b-5d2b-8ea9-e9337f419a47": "6990a092-4c92-48d8-9124-1bf35737d9ac",
-        "97fde860-ee32-59a1-84aa-e823841c8e79": "c3e8627a-442b-4143-b25c-173e232c7090",
-        "7b1d6725-8120-58a8-9eaf-56ff7e7db7d0": "1b545ae5-e9b9-4810-aed3-384d01e81404",
-        "c3e6bb1c-3565-5096-9f79-8e39afc3e5ff": "d735dcdb-b7be-41ab-9d8b-dc777859561e",
-        "eec88775-2e1a-5e4f-af6b-e23b3661b9c9": "07f646c2-42c7-472d-ba0a-5df90e9b349d",
-        "f8a5b9e9-995b-5ae6-b2a0-e220984e121c": "9a6e57a0-41b0-4a82-a054-d42ed3a6d828",
-        "aad22196-c98e-5713-9450-b033ccff604c": "43d5017c-c133-41da-b62d-4204dfbad173",
-        "ce926e14-57cd-5044-bba9-d9754b6ddce1": "44a7f105-035d-47a7-9974-26a21162a1a2"
+        "38bac566-a784-5aa2-b29d-0ec517b5181a": "b834de3f-ca05-4db9-b9c6-8ee78dc5dca4"
       }
     },
     {
@@ -3388,6 +5237,54 @@
             },
             "Property": "Rotation",
             "Value": "0,0,0,1"
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "4ea7243b-3e97-5b81-9839-9c96078d69d3"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "31": "vehicles/shared/clear_glass.vmat",
+                "43": "vehicles/shared/clear_glass.vmat",
+                "34": "drift_district/project/subaru_impreza/primary_014.vmat",
+                "35": "drift_district/project/subaru_impreza/primary_009.vmat",
+                "36": "drift_district/project/subaru_impreza/primary_010.vmat",
+                "37": "drift_district/project/subaru_impreza/primary_011.vmat",
+                "38": "drift_district/project/subaru_impreza/primary_012.vmat",
+                "39": "drift_district/project/subaru_impreza/primary_013.vmat",
+                "42": "drift_district/project/subaru_impreza/primary_016.vmat",
+                "44": "drift_district/project/subaru_impreza/primary_018.vmat",
+                "45": "drift_district/project/subaru_impreza/primary_017.vmat",
+                "46": "drift_district/project/subaru_impreza/primary_019.vmat",
+                "47": "drift_district/project/subaru_impreza/primary_015.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "57f61704-6257-5970-ae0f-d0bdb3652bcf"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "1": "drift_district/project/subaru_impreza/primary.vmat"
+              }
+            }
+          },
+          {
+            "Target": {
+              "Type": "Component",
+              "IdValue": "4d663a5a-375d-5583-8cc0-f81d8b2a6f91"
+            },
+            "Property": "Materials",
+            "Value": {
+              "indexed": {
+                "1": "drift_district/project/subaru_impreza/primary_003.vmat"
+              }
+            }
           }
         ],
         "MovedObjects": []
@@ -3407,6 +5304,12 @@
         "ef402c0f-c5db-5aac-97df-c225d9d7b094": "1b112a86-26da-4d8c-a250-d4b0872fd0ec",
         "46c2b40b-9f16-5f90-a721-a3e08bdfadb5": "30dc5055-b049-4e04-ab1c-42b917b6d428",
         "92f79cd7-5f88-5491-b4ff-09f5186e505e": "1cf0c37d-5f9b-4525-b221-b4ff70625cce",
+        "d837bb1c-4479-509d-a2df-8b72292f872a": "8ab20843-f5e8-4922-b904-49bf4be6ac1a",
+        "20cfa3ba-5cd8-5d45-bdb4-a11d41189a8a": "bf2efa00-ad28-8519-9c34-312645078c1e",
+        "d84af508-386e-5157-8a05-d2336ef4bdad": "93c0badf-f987-4482-b9e4-5fb1efe3c487",
+        "107f5bda-eb98-5425-b896-f2498c403176": "44dcb2e0-9e81-4b45-91af-1be7548bfbb3",
+        "6bb55d89-a38a-5452-9185-1e36c2ea9aa3": "adc66356-b002-4993-a6a7-019dab20d6e2",
+        "185d41ca-8a7e-5e68-a825-83f38c1c4d60": "dfdb0a16-4519-4d4a-9b5e-4b4378a3879a",
         "1506131b-b3dd-56eb-a4ba-3e0a631b627c": "956cd108-d40a-47ed-bfcb-4005a8219e03",
         "510c81ee-1277-59dd-8df6-1961a2f92973": "1598b139-7533-4ce8-80c4-4f0aea6c6224",
         "d5cbdb6b-c52e-5a64-a588-de95381bb552": "5deaf49a-9a47-4f30-899f-c8d21c9ffc5c",
@@ -3434,20 +5337,15 @@
         "55319e1a-5cf9-5e22-b924-98cb070d4cb5": "18a81a0f-01cb-4c36-8608-cf1983098635",
         "2d014317-8f4c-4f68-8e3b-e59b5aa18e74": "a83a4597-ad89-4a9a-bc62-9c68c0077dbe",
         "0e49b7fd-8d41-426c-a42c-fedd5a0c95f1": "72c60fa4-55c7-4dd9-af1e-2158177219d5",
+        "e89ef0d3-d1c8-4172-8825-40cb67b3f0b1": "401343c9-ba11-497d-bc6f-e5538875b74b",
+        "4ea7243b-3e97-5b81-9839-9c96078d69d3": "ce0cb5a2-794d-416f-9306-58863d98d752",
         "57f61704-6257-5970-ae0f-d0bdb3652bcf": "852c5d2f-c155-4e07-b81e-a8d17ec7c605",
         "4d663a5a-375d-5583-8cc0-f81d8b2a6f91": "dea976d2-1adf-410f-9b7a-06132dca1758",
         "46524a25-1253-50cc-9a7b-9f8d21d1001a": "e4748217-bf21-4eba-bf37-d583b828d448",
         "d20f643c-9002-574f-a1e3-a1f908e5018e": "43a9c639-6686-4151-975e-b9ca7d071fb4",
         "4a44c9e8-098f-5477-875f-d0173757ad6e": "b116e43d-8b04-4f8c-98cc-f2fc261490c9",
         "1f043509-896f-5cf1-97ef-cfd81e81f6b7": "e6d9ec58-b1fc-4fbc-929b-4cf466e2bca1",
-        "d1846d47-fe5f-507f-92de-f63ef46cd6d6": "8ea2c8e5-9b6f-4b44-98a8-dc38da41d674",
-        "d837bb1c-4479-509d-a2df-8b72292f872a": "8ab20843-f5e8-4922-b904-49bf4be6ac1a",
-        "107f5bda-eb98-5425-b896-f2498c403176": "44dcb2e0-9e81-4b45-91af-1be7548bfbb3",
-        "6bb55d89-a38a-5452-9185-1e36c2ea9aa3": "adc66356-b002-4993-a6a7-019dab20d6e2",
-        "185d41ca-8a7e-5e68-a825-83f38c1c4d60": "dfdb0a16-4519-4d4a-9b5e-4b4378a3879a",
-        "e89ef0d3-d1c8-4172-8825-40cb67b3f0b1": "401343c9-ba11-497d-bc6f-e5538875b74b",
-        "4ea7243b-3e97-5b81-9839-9c96078d69d3": "ce0cb5a2-794d-416f-9306-58863d98d752",
-        "d84af508-386e-5157-8a05-d2336ef4bdad": "93c0badf-f987-4482-b9e4-5fb1efe3c487"
+        "d1846d47-fe5f-507f-92de-f63ef46cd6d6": "8ea2c8e5-9b6f-4b44-98a8-dc38da41d674"
       }
     }
   ],
